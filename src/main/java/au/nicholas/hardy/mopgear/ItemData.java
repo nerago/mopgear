@@ -2,12 +2,12 @@ package au.nicholas.hardy.mopgear;
 
 public class ItemData {
     String name;
-    Integer str;
-    Integer mastery;
-    Integer crit;
-    Integer hit;
-    Integer haste;
-    Integer expertise;
+    int str;
+    int mastery;
+    int crit;
+    int hit;
+    int haste;
+    int expertise;
 
     ItemData copy() {
         ItemData copy = new ItemData();
@@ -22,38 +22,15 @@ public class ItemData {
     }
 
     void increment(ItemData other) {
-        if (str != null && other.str != null)
-            str += other.str;
-        else if (other.str != null)
-            str = other.str;
-
-        if (mastery != null && other.mastery != null)
-            mastery += other.mastery;
-        else if (other.mastery != null)
-            mastery = other.mastery;
-
-        if (crit != null && other.crit != null)
-            crit += other.crit;
-        else if (other.crit != null)
-            crit = other.crit;
-
-        if (hit != null && other.hit != null)
-            hit += other.hit;
-        else if (other.hit != null)
-            hit = other.hit;
-
-        if (haste != null && other.haste != null)
-            haste += other.haste;
-        else if (other.haste != null)
-            haste = other.haste;
-
-        if (expertise != null && other.expertise != null)
-            expertise += other.expertise;
-        else if (other.expertise != null)
-            expertise = other.expertise;
+        str += other.str;
+        mastery += other.mastery;
+        crit += other.crit;
+        hit += other.hit;
+        haste += other.haste;
+        expertise += other.expertise;
     }
 
-    Integer get(Main.Secondary stat) {
+    int get(Main.Secondary stat) {
         switch (stat) {
             case Mastery -> {
                 return mastery;
@@ -71,21 +48,19 @@ public class ItemData {
                 return expertise;
             }
             default -> {
-                return null;
+                throw new IllegalArgumentException();
             }
         }
     }
 
-    void set(Main.Secondary stat, Integer value) {
+    void set(Main.Secondary stat, int value) {
         switch (stat) {
             case Mastery -> mastery = value;
             case Crit -> crit = value;
             case Hit -> hit = value;
             case Haste -> haste = value;
             case Expertise -> expertise = value;
-            default -> {
-                throw new IllegalArgumentException();
-            }
+            default -> throw new IllegalArgumentException();
         }
     }
 

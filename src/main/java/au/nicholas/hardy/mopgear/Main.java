@@ -48,13 +48,14 @@ public class Main {
 
         List<List<ItemData>> reforgedItems = items.stream().map(Main::reforgeItem).toList();
 
+        System.out.println("total items " + reforgedItems.size());
         reforgedItems = new ArrayList<>(reforgedItems);
         while (reforgedItems.size() >= 13) reforgedItems.removeLast();
 
-        //       initial     summary
+        //       initial     summary   no-nullable  avoid-lowest
         // 11 == 0.969s      14s
-        // 12 == T8.05s
-        // 13 == 1M2
+        // 12 == 8.05s       1M30      27s          4.9s
+        // 13 == 1M2                                28s
 
         Stream<CurryQueue<ItemData>> initialSets = generateItemCombinations(reforgedItems);
 //        System.out.println(initialSets.count());
@@ -209,6 +210,7 @@ public class Main {
     }
 
     static final Secondary[] priority = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Mastery, Secondary.Crit, Secondary.Haste};
+    static final Secondary priorityLowest = priority[priority.length - 1];
 
     static final int TARGET_HIT = 961, TARGET_EXPERTISE = 481, PERMITTED_EXCEED = 80;
 
@@ -216,15 +218,15 @@ public class Main {
         List<ItemData> outputItems = new ArrayList<>();
         outputItems.add(baseItem);
 
-        for (Secondary reforgeStat : Secondary.values()) {
-            Integer originalValue = baseItem.get(reforgeStat);
-            if (originalValue != null) {
+        for (Secondary originalStat : Secondary.values()) {
+            int originalValue = baseItem.get(originalStat);
+            if (originalValue != 0) {
                 int reforgeQuantity = (originalValue * 4) / 10;
                 int remainQuantity = originalValue - reforgeQuantity;
                 for (Secondary targetStat : Secondary.values()) {
-                    if (baseItem.get(targetStat) == null) {
+                    if (targetStat != priorityLowest && baseItem.get(targetStat) == 0) {
                         ItemData modified = baseItem.copy();
-                        modified.set(reforgeStat, remainQuantity);
+                        modified.set(originalStat, remainQuantity);
                         modified.set(targetStat, reforgeQuantity);
                         outputItems.add(modified);
                     }
@@ -257,10 +259,10 @@ public class Main {
             return null;
     }
 
-    private static Integer objectGetInt(JsonObject object, String field) {
+    private static int objectGetInt(JsonObject object, String field) {
         if (object.has(field))
             return object.get(field).getAsInt();
         else
-            return null;
+            return 0;
     }
 }
