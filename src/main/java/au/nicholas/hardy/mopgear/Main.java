@@ -1,3 +1,6 @@
+package au.nicholas.hardy.mopgear;
+
+import au.nicholas.hardy.mopgear.util.CurryQueue;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -6,6 +9,8 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,17 +23,76 @@ public class Main {
     static Map<Integer, ItemData> itemCache;
 
     public static void main(String[] arg) throws IOException {
-//        fetchItem(248749);
-
         cacheLoad();
-//        System.out.println(itemCache.get())
 
-        List<ItemData> items = new ArrayList<>();
+        Instant startTime = Instant.now();
+
+        runSolver();
+
+        // 15 items
+        // 4,747,561,509,943 total combinations
+
+        printElapsed(startTime);
+
+        cacheSave();
+    }
+
+    private static void printElapsed(Instant startTime) {
+        Duration duration = Duration.between(startTime, Instant.now());
+        System.out.println("elapsed = " + duration.toString());
+    }
+
+    private static void runSolver() throws IOException {
         List<Integer> itemIds = readInput();
-        for (int id : itemIds) {
-//            if (id == 248749)
-//                continue;
+        List<ItemData> items = loadItems(itemIds);
 
+        List<List<ItemData>> reforgedItems = items.stream().map(Main::reforgeItem).toList();
+
+        reforgedItems = new ArrayList<>(reforgedItems);
+        while (reforgedItems.size() >= 13) reforgedItems.removeLast();
+
+        //       initial     summary
+        // 11 == 0.969s      14s
+        // 12 == T8.05s
+        // 13 == 1M2
+
+        Stream<CurryQueue<ItemData>> initialSets = generateItemCombinations(reforgedItems);
+//        System.out.println(initialSets.count());
+        Stream<ItemSet> summarySets = makeSummarySets(initialSets);
+        System.out.println(summarySets.count());
+    }
+
+    private static Stream<ItemSet> makeSummarySets(Stream<CurryQueue<ItemData>> initialSets) {
+        return initialSets.map(ItemSet::new);
+    }
+
+    private static Stream<CurryQueue<ItemData>> generateItemCombinations(List<List<ItemData>> itemsBySlot) {
+        Stream<CurryQueue<ItemData>> stream = null;
+        for (List<ItemData> slotItems : itemsBySlot) {
+            if (stream == null) {
+                stream = newCombinationStream(slotItems);
+            } else {
+                stream = applyItemsToCombination(stream, slotItems);
+            }
+        }
+        return stream;
+    }
+
+    private static Stream<CurryQueue<ItemData>> newCombinationStream(List<ItemData> slotItems) {
+        return slotItems.parallelStream().unordered().map(CurryQueue::single);
+    }
+
+    private static Stream<CurryQueue<ItemData>> applyItemsToCombination(Stream<CurryQueue<ItemData>> stream, List<ItemData> slotItems) {
+        return stream.mapMulti((set, sink) -> {
+            for (ItemData add : slotItems) {
+                sink.accept(set.prepend(add));
+            }
+        });
+    }
+
+    private static List<ItemData> loadItems(List<Integer> itemIds) throws IOException {
+        List<ItemData> items = new ArrayList<>();
+        for (int id : itemIds) {
             ItemData item = itemCache.get(id);
             if (item != null) {
                 items.add(item);
@@ -37,18 +101,12 @@ public class Main {
                 if (item != null) {
                     items.add(item);
                     itemCache.put(id, item);
+                } else {
+                    throw new RuntimeException("missing item");
                 }
             }
         }
-
-//        ItemData baseItem = itemCache.get(78788);
-//        permuteItem(baseItem).forEach(System.out::println);
-        items.forEach(System.out::println);
-
-        // 15 items
-        // 4,747,561,509,943 total combinations
-
-        cacheSave();
+        return items;
     }
 
     private static List<Integer> readInput() throws IOException {
@@ -152,9 +210,9 @@ public class Main {
 
     static final Secondary[] priority = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Mastery, Secondary.Crit, Secondary.Haste};
 
-    static final int TARGET_HIT = 961, TARGET_EXPERTISE = 481;
+    static final int TARGET_HIT = 961, TARGET_EXPERTISE = 481, PERMITTED_EXCEED = 80;
 
-    static Stream<ItemData> permuteItem(ItemData baseItem) {
+    static List<ItemData> reforgeItem(ItemData baseItem) {
         List<ItemData> outputItems = new ArrayList<>();
         outputItems.add(baseItem);
 
@@ -174,78 +232,7 @@ public class Main {
             }
         }
 
-        return outputItems.stream();
-    }
-
-    public static class ItemData {
-        String name;
-        Integer str;
-        Integer mastery;
-        Integer crit;
-        Integer hit;
-        Integer haste;
-        Integer expertise;
-
-        ItemData copy() {
-            ItemData copy = new ItemData();
-            copy.name = name;
-            copy.str = str;
-            copy.mastery = mastery;
-            copy.crit = crit;
-            copy.hit = hit;
-            copy.haste = haste;
-            copy.expertise = expertise;
-            return copy;
-        }
-
-        Integer get(Secondary stat) {
-            switch (stat) {
-                case Mastery -> {
-                    return mastery;
-                }
-                case Crit -> {
-                    return crit;
-                }
-                case Hit -> {
-                    return hit;
-                }
-                case Haste -> {
-                    return haste;
-                }
-                case Expertise -> {
-                    return expertise;
-                }
-                default -> {
-                    return null;
-                }
-            }
-        }
-
-        void set(Secondary stat, Integer value) {
-            switch (stat) {
-                case Mastery -> mastery = value;
-                case Crit -> crit = value;
-                case Hit -> hit = value;
-                case Haste -> haste = value;
-                case Expertise -> expertise = value;
-                default -> {
-                    throw new IllegalArgumentException();
-                }
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "ItemData{" +
-                    "name='" + name + '\'' +
-                    ", str=" + str +
-                    ", mastery=" + mastery +
-                    ", crit=" + crit +
-                    ", hit=" + hit +
-                    ", haste=" + haste +
-                    ", expertise=" + expertise +
-                    '}';
-        }
+        return outputItems;
     }
 
     private static ItemData buildItem(JsonObject itemObject) {
