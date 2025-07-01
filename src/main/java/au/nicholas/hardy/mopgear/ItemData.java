@@ -30,7 +30,7 @@ public class ItemData {
         expertise += other.expertise;
     }
 
-    int get(Main.Secondary stat) {
+    int get(Secondary stat) {
         switch (stat) {
             case Mastery -> {
                 return mastery;
@@ -53,7 +53,7 @@ public class ItemData {
         }
     }
 
-    void set(Main.Secondary stat, int value) {
+    void set(Secondary stat, int value) {
         switch (stat) {
             case Mastery -> mastery = value;
             case Crit -> crit = value;
@@ -66,7 +66,7 @@ public class ItemData {
 
     @Override
     public String toString() {
-        return "ItemData{" +
+        return "{" +
                 "name='" + name + '\'' +
                 ", str=" + str +
                 ", mastery=" + mastery +
