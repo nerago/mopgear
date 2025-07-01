@@ -1,73 +1,90 @@
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
-import com.google.gson.stream.MalformedJsonException;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.http.HttpClient;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Main {
-    static Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing\\src\\main\\java");
+    static Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
+    static Path cacheFile = directory.resolve("cache.json");
+    static Path inputFile = directory.resolve("input.json");
+    static Map<Integer, ItemData> itemCache;
 
     public static void main(String[] arg) throws IOException {
-        ItemData item = new ItemData();
-        item.name = "abcd";
-        item.str=200;
-        item.mastery=443;
-
-        Map<Integer, ItemData> cache = new HashMap<>();
-        cache.put(123, item);
-
-        try (Writer writer = Files.newBufferedWriter(directory.resolve("cache.json"))) {
-            new Gson().toJson(cache, writer);
+        cacheLoad();
+        List<Integer> itemIds = readInput();
+        for (int id : itemIds) {
+            ItemData item = itemCache.get(id);
+            if (item == null) {
+                item = fetchItem(id);
+                itemCache.put(id, item);
+            }
         }
 
+        cacheSave();
+    }
 
-//        int[] gear = new int[] {
-//                78788, 70107, 78837, 248749, 78822, 77317, 78770, 77185
-//        };
-//
-//        for (int id : gear) {
-//            readItem(id);
-//        }
+    private static List<Integer> readInput() throws IOException {
+        List<Integer> itemIds = new ArrayList<>();
+        try (BufferedReader reader = Files.newBufferedReader(inputFile)) {
+            JsonObject inputObject = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonObject gear = inputObject.getAsJsonObject("gear");
+            JsonArray items = gear.getAsJsonArray("items");
+            for (JsonElement element : items) {
+                if (element.isJsonObject()) {
+                    int id = element.getAsJsonObject().get("id").getAsInt();
+                    itemIds.add(id);
+                }
+            }
+        }
+        return itemIds;
+    }
+
+    private static void cacheSave() throws IOException {
+        try (BufferedWriter writer = Files.newBufferedWriter(cacheFile)) {
+            new Gson().toJson(itemCache, writer);
+        }
+    }
+
+    private static void cacheLoad() throws IOException {
+        try (BufferedReader reader = Files.newBufferedReader(cacheFile)) {
+            TypeToken<Map<Integer, ItemData>> typeToken = new TypeToken<>() {
+            };
+            itemCache = new Gson().fromJson(reader, typeToken);
+        }
     }
 
     public static JsonElement parseJson(String str) throws JsonIOException, JsonSyntaxException {
-            StringReader reader = new StringReader(str);
-            JsonReader jsonReader = new JsonReader(reader);
-            JsonElement element = JsonParser.parseReader(jsonReader);
-//            if (!element.isJsonNull() && jsonReader.peek() != JsonToken.END_DOCUMENT) {
-//                throw new JsonSyntaxException("Did not consume the entire document.");
-//            }
-            return element;
+        StringReader reader = new StringReader(str);
+        JsonReader jsonReader = new JsonReader(reader);
+        return JsonParser.parseReader(jsonReader);
     }
 
-    private static ItemData readItem(int itemId) throws IOException {
-        String url = "https://www.wowhead.com/cata/item="+itemId;
-        String htmlContent = new String(new URL(url).openStream().readAllBytes());
+    private static ItemData fetchItem(int itemId) throws IOException {
+        String url = "https://www.wowhead.com/cata/item=" + itemId;
+        String htmlContent = fetchHTML(url);
         int startDataSection = htmlContent.indexOf("WH.Gatherer.addData");
         int startJson = htmlContent.indexOf('{', startDataSection);
         String jsonOnwards = htmlContent.substring(startJson);
-//        System.out.println(val);
-
 
         JsonObject json = parseJson(jsonOnwards).getAsJsonObject();
-        if (!json.has(String.valueOf(itemId))) {
-            System.out.println("Failed "+itemId);
+        if (json.has(String.valueOf(itemId))) {
+            System.out.println("Fetched " + itemId);
+        } else {
+            System.out.println("Failed " + itemId);
             return null;
         }
         JsonObject itemObject = json.get(String.valueOf(itemId)).getAsJsonObject();
 
         ItemData item = buildItem(itemObject);
-        System.out.println(itemObject);
-        System.out.println(item);
+//        System.out.println(itemObject);
+//        System.out.println(item);
         return item;
 
         /*
@@ -80,9 +97,16 @@ public class Main {
 
         <table><tr><td><!--nstart--><!--nend--><!--ndstart--><!--ndend--><span class="q"><br>Item Level <!--ilvl-->397</span><!--bo--><br>Binds when picked up<!--ue--><table width="100%"><tr><td>Waist</td><th><!--scstart4:4--><span class="q1">Plate</span><!--scend--></th></tr></table><!--rf--><span><!--amr-->2154 Armor</span><br><span><!--stat4-->+321 Strength</span><br><span><!--stat7-->+542 Stamina</span><!--ebstats--><br><span class="q2">+<!--rtg49-->221 Mastery</span><!--egstats--><!--eistats--><!--nameDescStats--><!--rs--><!--e--><br /><br><a href="/cata/items/gems?filter=81;2;0" class="socket-red q0">Red Socket</a><br><a href="/cata/items/gems?filter=81;4;0" class="socket-blue q0">Blue Socket</a><!--ps--><br><!--sb--><span class="q0">Socket Bonus: +20 Strength</span><br /><br />Durability 60 / 60</td></tr></table><table><tr><td>Requires Level <!--rlvl-->85<br><!--rr--><span class="q2">Equip: Improves critical strike rating by <!--rtg32-->221.</span><!--itemEffects:1--><br><!--pvpEquip--><!--pvpEquip--><div class="whtt-sellprice">Sell Price: <span class="moneygold">75</span></div></td></tr></table><!--i?77185:1:85:85--></noscript>
 
-
         Correct stats are 221 Mastery, 221 Crit
          */
+    }
+
+    private static String fetchHTML(String url) throws IOException {
+        String htmlContent;
+        try (InputStream stream = URI.create(url).toURL().openStream()) {
+            htmlContent = new String(stream.readAllBytes());
+        }
+        return htmlContent;
     }
 
 
