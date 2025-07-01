@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class Main {
     static Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
@@ -17,15 +18,35 @@ public class Main {
     static Map<Integer, ItemData> itemCache;
 
     public static void main(String[] arg) throws IOException {
+//        fetchItem(248749);
+
         cacheLoad();
+//        System.out.println(itemCache.get())
+
+        List<ItemData> items = new ArrayList<>();
         List<Integer> itemIds = readInput();
         for (int id : itemIds) {
+//            if (id == 248749)
+//                continue;
+
             ItemData item = itemCache.get(id);
-            if (item == null) {
+            if (item != null) {
+                items.add(item);
+            } else {
                 item = fetchItem(id);
-                itemCache.put(id, item);
+                if (item != null) {
+                    items.add(item);
+                    itemCache.put(id, item);
+                }
             }
         }
+
+//        ItemData baseItem = itemCache.get(78788);
+//        permuteItem(baseItem).forEach(System.out::println);
+        items.forEach(System.out::println);
+
+        // 15 items
+        // 4,747,561,509,943 total combinations
 
         cacheSave();
     }
@@ -69,23 +90,35 @@ public class Main {
     private static ItemData fetchItem(int itemId) throws IOException {
         String url = "https://www.wowhead.com/cata/item=" + itemId;
         String htmlContent = fetchHTML(url);
-        int startDataSection = htmlContent.indexOf("WH.Gatherer.addData");
-        int startJson = htmlContent.indexOf('{', startDataSection);
-        String jsonOnwards = htmlContent.substring(startJson);
 
-        JsonObject json = parseJson(jsonOnwards).getAsJsonObject();
-        if (json.has(String.valueOf(itemId))) {
-            System.out.println("Fetched " + itemId);
-        } else {
-            System.out.println("Failed " + itemId);
-            return null;
+        System.out.println(htmlContent);
+
+        int startIndex = 0;
+
+        while (true) {
+            int startDataSection = htmlContent.indexOf("WH.Gatherer.addData", startIndex);
+            if (startDataSection == -1)
+                break;
+            int startJson = htmlContent.indexOf('{', startDataSection);
+            String jsonOnwards = htmlContent.substring(startJson);
+
+            JsonObject json = parseJson(jsonOnwards).getAsJsonObject();
+            if (json.has(String.valueOf(itemId))) {
+                System.out.println("Fetched " + itemId);
+            } else {
+                startIndex = startDataSection + 1;
+                continue;
+            }
+            JsonObject itemObject = json.get(String.valueOf(itemId)).getAsJsonObject();
+
+            ItemData item = buildItem(itemObject);
+            System.out.println(itemObject);
+            System.out.println(item);
+            return item;
         }
-        JsonObject itemObject = json.get(String.valueOf(itemId)).getAsJsonObject();
 
-        ItemData item = buildItem(itemObject);
-//        System.out.println(itemObject);
-//        System.out.println(item);
-        return item;
+        System.out.println("Failed " + itemId);
+        return null;
 
         /*
         WH.Gatherer.addData(3, 11, {"77185":
@@ -109,6 +142,40 @@ public class Main {
         return htmlContent;
     }
 
+    enum Secondary {
+        Mastery,
+        Crit,
+        Hit,
+        Haste,
+        Expertise
+    }
+
+    static final Secondary[] priority = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Mastery, Secondary.Crit, Secondary.Haste};
+
+    static final int TARGET_HIT = 961, TARGET_EXPERTISE = 481;
+
+    static Stream<ItemData> permuteItem(ItemData baseItem) {
+        List<ItemData> outputItems = new ArrayList<>();
+        outputItems.add(baseItem);
+
+        for (Secondary reforgeStat : Secondary.values()) {
+            Integer originalValue = baseItem.get(reforgeStat);
+            if (originalValue != null) {
+                int reforgeQuantity = (originalValue * 4) / 10;
+                int remainQuantity = originalValue - reforgeQuantity;
+                for (Secondary targetStat : Secondary.values()) {
+                    if (baseItem.get(targetStat) == null) {
+                        ItemData modified = baseItem.copy();
+                        modified.set(reforgeStat, remainQuantity);
+                        modified.set(targetStat, reforgeQuantity);
+                        outputItems.add(modified);
+                    }
+                }
+            }
+        }
+
+        return outputItems.stream();
+    }
 
     public static class ItemData {
         String name;
@@ -118,6 +185,54 @@ public class Main {
         Integer hit;
         Integer haste;
         Integer expertise;
+
+        ItemData copy() {
+            ItemData copy = new ItemData();
+            copy.name = name;
+            copy.str = str;
+            copy.mastery = mastery;
+            copy.crit = crit;
+            copy.hit = hit;
+            copy.haste = haste;
+            copy.expertise = expertise;
+            return copy;
+        }
+
+        Integer get(Secondary stat) {
+            switch (stat) {
+                case Mastery -> {
+                    return mastery;
+                }
+                case Crit -> {
+                    return crit;
+                }
+                case Hit -> {
+                    return hit;
+                }
+                case Haste -> {
+                    return haste;
+                }
+                case Expertise -> {
+                    return expertise;
+                }
+                default -> {
+                    return null;
+                }
+            }
+        }
+
+        void set(Secondary stat, Integer value) {
+            switch (stat) {
+                case Mastery -> mastery = value;
+                case Crit -> crit = value;
+                case Hit -> hit = value;
+                case Haste -> haste = value;
+                case Expertise -> expertise = value;
+                default -> {
+                    throw new IllegalArgumentException();
+                }
+            }
+        }
 
         @Override
         public String toString() {
