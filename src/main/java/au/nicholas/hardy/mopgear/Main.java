@@ -29,7 +29,8 @@ public class Main {
 
         List<Integer> itemIds = Main.readInput();
         List<ItemData> items = Main.loadItems(itemIds);
-        Collection<ItemSet> bestSets = Engine.runSolver(items);
+        Collection<ItemSet> bestSets = Engine.runSolver(items, startTime);
+        bestSets.forEach(s -> System.out.println(s.totals));
         bestSets.forEach(s -> {
             System.out.println("#######################################");
             System.out.println(s.totals);

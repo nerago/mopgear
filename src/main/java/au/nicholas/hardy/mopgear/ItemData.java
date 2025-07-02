@@ -66,14 +66,24 @@ public class ItemData {
 
     @Override
     public String toString() {
-        return "{" +
-                "name='" + name + '\'' +
-                ", str=" + str +
-                ", mastery=" + mastery +
-                ", crit=" + crit +
-                ", hit=" + hit +
-                ", haste=" + haste +
-                ", expertise=" + expertise +
-                '}';
+        final StringBuilder sb = new StringBuilder("{");
+        if (name != null)
+            sb.append('"').append(name).append('"');
+        else
+            sb.append("TOTAL");
+        if (str != 0)
+            sb.append(", str=").append(str);
+        if (mastery != 0)
+            sb.append(", mastery=").append(mastery);
+        if (crit != 0)
+            sb.append(", crit=").append(crit);
+        if (hit != 0)
+            sb.append(", hit=").append(hit);
+        if (haste != 0)
+            sb.append(", haste=").append(haste);
+        if (expertise != 0)
+            sb.append(", expertise=").append(expertise);
+        sb.append('}');
+        return sb.toString();
     }
 }
