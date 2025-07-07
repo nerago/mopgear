@@ -27,7 +27,7 @@ public class Main {
 
         Instant startTime = Instant.now();
 
-        List<Integer> itemIds = Main.readInput();
+        List<EquippedItem> itemIds = Main.readInput();
         List<ItemData> items = Main.loadItems(itemIds);
         Collection<ItemSet> bestSets = Engine.runSolver(items, startTime);
         bestSets.forEach(s -> System.out.println(s.totals));
@@ -49,12 +49,14 @@ public class Main {
         System.out.println("elapsed = " + duration.toString());
     }
 
-    private static List<ItemData> loadItems(List<Integer> itemIds) throws IOException {
+    private static List<ItemData> loadItems(List<EquippedItem> itemIds) throws IOException {
         List<ItemData> items = new ArrayList<>();
-        for (int id : itemIds) {
+        for (EquippedItem equippedItem : itemIds) {
+            int id = equippedItem.id;
             ItemData item = itemCache.get(id);
             if (item != null) {
                 items.add(item);
+                System.out.println(id + ": " + item + " with " + equippedItem.enchant);
             } else {
                 item = fetchItem(id);
                 if (item != null) {
@@ -68,20 +70,26 @@ public class Main {
         return items;
     }
 
-    private static List<Integer> readInput() throws IOException {
-        List<Integer> itemIds = new ArrayList<>();
+    private static List<EquippedItem> readInput() throws IOException {
+        List<EquippedItem> result = new ArrayList<>();
         try (BufferedReader reader = Files.newBufferedReader(inputFile)) {
             JsonObject inputObject = JsonParser.parseReader(reader).getAsJsonObject();
             JsonObject gear = inputObject.getAsJsonObject("gear");
             JsonArray items = gear.getAsJsonArray("items");
             for (JsonElement element : items) {
                 if (element.isJsonObject()) {
-                    int id = element.getAsJsonObject().get("id").getAsInt();
-                    itemIds.add(id);
+                    EquippedItem item = new EquippedItem();
+                    item.id = element.getAsJsonObject().get("id").getAsInt();
+                    if (element.getAsJsonObject().has("enchant")) {
+                        item.enchant = element.getAsJsonObject().get("enchant").getAsString();
+                    } else {
+                        item.enchant = "MISSING ENCHANT";
+                    }
+                    result.add(item);
                 }
             }
         }
-        return itemIds;
+        return result;
     }
 
     private static void cacheSave() throws IOException {

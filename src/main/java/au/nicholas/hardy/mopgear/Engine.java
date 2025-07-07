@@ -111,6 +111,7 @@ public class Engine {
                 for (Secondary targetStat : ModelParams.reforgeTargets) {
                     if (baseItem.get(targetStat) == 0) {
                         ItemData modified = baseItem.copy();
+                        modified.name += " (" + originalStat + "->" + targetStat + ")";
                         modified.set(originalStat, remainQuantity);
                         modified.set(targetStat, reforgeQuantity);
                         outputItems.add(modified);
