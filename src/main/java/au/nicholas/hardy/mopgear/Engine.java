@@ -1,13 +1,12 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.BigStreamUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 import au.nicholas.hardy.mopgear.util.TopCollector1;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class Engine {
@@ -16,7 +15,7 @@ public class Engine {
 
         long estimate = estimateSets(reforgedItems);
         Stream<CurryQueue<ItemData>> initialSets = generateItemCombinations(reforgedItems);
-        initialSets = countProgress(estimate, startTime, initialSets);
+        initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
 
         Stream<ItemSet> summarySets = makeSummarySets(initialSets);
         Stream<ItemSet> filteredSets = filterSets(summarySets);
@@ -25,36 +24,6 @@ public class Engine {
 
     private static long estimateSets(List<List<ItemData>> reforgedItems) {
         return reforgedItems.stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
-    }
-
-    static <T> Stream<T> countProgress(final long estimate, Instant startTime, Stream<T> sets) {
-        final double estimateFloat = estimate / 100.0;
-        AtomicLong count = new AtomicLong();
-        return sets.peek(set -> {
-            long curr = count.incrementAndGet();
-            if (curr % 5000000 == 0) {
-                double percent = ((double) curr) / estimateFloat;
-                synchronized (System.out) {
-                    System.out.print(curr);
-                    System.out.print(" ");
-                    System.out.printf("%.2f", percent);
-                    Duration estimateRemain = estimateRemain(startTime, percent);
-                    System.out.print(" ");
-                    System.out.print(estimateRemain);
-                    System.out.println();
-                }
-            }
-        });
-    }
-
-    public static Duration estimateRemain(Instant startTime, double percent) {
-        final int factor = 100;
-
-        long multiply = (long) (factor * 100 / percent);
-
-        Duration timeTaken = Duration.between(startTime, Instant.now());
-        Duration totalEstimate = timeTaken.multipliedBy(multiply).dividedBy(factor);
-        return totalEstimate.minus(timeTaken);
     }
 
     private static Stream<ItemSet> filterSets(Stream<ItemSet> sets) {

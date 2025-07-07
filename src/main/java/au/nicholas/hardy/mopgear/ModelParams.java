@@ -4,7 +4,8 @@ import java.util.EnumMap;
 
 public class ModelParams {
     static final Secondary[] priority = new Secondary[]{Secondary.Haste, Secondary.Mastery, Secondary.Crit};
-    static final Secondary[] reforgeTargets = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Haste, Secondary.Mastery};
+//    static final Secondary[] reforgeTargets = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Haste, Secondary.Mastery};
+    static final Secondary[] reforgeTargets = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Haste};
 
     static final double RATING_PER_PERCENT = 102.46;
     static final double TARGET_PERCENT = 7.5;
