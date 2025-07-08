@@ -7,13 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URI;
+import au.nicholas.hardy.mopgear.util.Slot;
 
 public class WowHead {
     static ItemData fetchItem(int itemId) throws IOException {
         String url = "https://www.wowhead.com/cata/item=" + itemId;
         String htmlContent = fetchHTML(url);
 
-        System.out.println(htmlContent);
+//        System.out.println(htmlContent);
 
         int startIndex = 0;
 
@@ -32,10 +33,11 @@ public class WowHead {
                 continue;
             }
             JsonObject itemObject = json.get(String.valueOf(itemId)).getAsJsonObject();
+            System.out.println(itemObject);
 
             ItemData item = buildItem(itemObject);
-            System.out.println(itemObject);
             System.out.println(item);
+//            throw  new RuntimeException("todo");
             return item;
         }
 
@@ -51,11 +53,16 @@ public class WowHead {
         return htmlContent;
     }
 
+//    {"name_enus":"Helmet of Radiant Glory","quality":4,"icon":"inv_helm_plate_raidpaladin_k_01","screenshot":{},
+//    "jsonequip":{"appearances":{"0":[104069,""]},"armor":2995,"buyprice":946846,"classes":2,"displayid":104069,"dura":100,"exprtng":277,"hitrtng":237,"itemset":1064,"nsockets":2,"races":2099199,"reqlevel":85,"sellprice":189369,"slotbak":1,"socket1":1,"socket2":2,"socketbonus":4158,"sta":646,"str":371},
+//    "attainable":0,"flags2":134242304,"displayName":"","qualityTier":0}
+
     private static ItemData buildItem(JsonObject itemObject) {
         ItemData item = new ItemData();
         item.name = objectGetString(itemObject, "name_enus");
 
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
+        item.slot = Slot.withNum(objectGetInt(equipObject, "slotbak"));
         item.str = objectGetInt(equipObject, "str");
         item.mastery = objectGetInt(equipObject, "mastrtng");
         item.crit = objectGetInt(equipObject, "critstrkrtng");

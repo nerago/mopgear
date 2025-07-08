@@ -2,6 +2,7 @@ package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.util.BigStreamUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
+import au.nicholas.hardy.mopgear.util.Slot;
 import au.nicholas.hardy.mopgear.util.TopCollector1;
 
 import java.io.IOException;
@@ -10,11 +11,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class Engine {
-    static Collection<ItemSet> runSolver(List<ItemData> items, Instant startTime) throws IOException {
-        List<List<ItemData>> reforgedItems = items.stream().map(Reforge::reforgeItem).toList();
-
-        long estimate = estimateSets(reforgedItems);
-        Stream<CurryQueue<ItemData>> initialSets = generateItemCombinations(reforgedItems);
+    static Collection<ItemSet> runSolver(Map<Slot, List<ItemData>> items, Instant startTime) throws IOException {
+        long estimate = estimateSets(items);
+        Stream<CurryQueue<ItemData>> initialSets = generateItemCombinations(items);
         initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
 
         Stream<ItemSet> summarySets = makeSummarySets(initialSets);
@@ -22,8 +21,8 @@ public class Engine {
         return filteredSets.collect(new TopCollector1<>(20, s -> s.statRating));
     }
 
-    private static long estimateSets(List<List<ItemData>> reforgedItems) {
-        return reforgedItems.stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
+    private static long estimateSets(Map<Slot, List<ItemData>> reforgedItems) {
+        return reforgedItems.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
     }
 
     private static Stream<ItemSet> filterSets(Stream<ItemSet> sets) {
@@ -44,9 +43,9 @@ public class Engine {
         return initialSets.map(ItemSet::new);
     }
 
-    private static Stream<CurryQueue<ItemData>> generateItemCombinations(List<List<ItemData>> itemsBySlot) {
+    private static Stream<CurryQueue<ItemData>> generateItemCombinations(Map<Slot, List<ItemData>> itemsBySlot) {
         Stream<CurryQueue<ItemData>> stream = null;
-        for (List<ItemData> slotItems : itemsBySlot) {
+        for (List<ItemData> slotItems : itemsBySlot.values()) {
             if (stream == null) {
                 stream = newCombinationStream(slotItems);
             } else {

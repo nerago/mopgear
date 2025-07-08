@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.Slot;
 import com.google.gson.*;
 
 import java.io.*;
@@ -7,9 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -39,7 +39,26 @@ public class Main {
     private void reforgeProcess(Instant startTime) throws IOException {
         List<EquippedItem> itemIds = Main.readInput();
         List<ItemData> items = loadItems(itemIds);
-        Collection<ItemSet> bestSets = Engine.runSolver(items, startTime);
+        Map<Slot, List<ItemData>> reforgedItems = items.stream().collect(Collectors.toMap(item -> item.slot, Reforge::reforgeItem));
+        Collection<ItemSet> bestSets = Engine.runSolver(reforgedItems, startTime);
+        outputResult(bestSets);
+    }
+
+//    private void findUpgrade(Instant startTime) throws IOException {
+//        List<EquippedItem> baseItemIds = Main.readInput();
+//        List<ItemData> baseItems = loadItems(baseItemIds);
+//        Collection<ItemSet> bestSets = Engine.runSolver(items, startTime);
+//        bestSets.forEach(s -> System.out.println(s.totals));
+//        bestSets.forEach(s -> {
+//            System.out.println("#######################################");
+//            System.out.println(s.totals);
+//            for (ItemData it : s.items.toArrayReverse(ItemData[]::new)) {
+//                System.out.println(it);
+//            }
+//        });
+//    }
+
+    private static void outputResult(Collection<ItemSet> bestSets) {
         bestSets.forEach(s -> System.out.println(s.totals));
         bestSets.forEach(s -> {
             System.out.println("#######################################");

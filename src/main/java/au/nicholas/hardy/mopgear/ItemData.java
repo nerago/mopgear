@@ -1,6 +1,9 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.Slot;
+
 public class ItemData {
+    Slot slot;
     String name;
     int str;
     int mastery;
@@ -11,6 +14,7 @@ public class ItemData {
 
     ItemData copy() {
         ItemData copy = new ItemData();
+        copy.slot = slot;
         copy.name = name;
         copy.str = str;
         copy.mastery = mastery;
@@ -67,6 +71,8 @@ public class ItemData {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
+        if (slot != null)
+            sb.append(slot).append(' ');
         if (name != null)
             sb.append('"').append(name).append('"');
         else
