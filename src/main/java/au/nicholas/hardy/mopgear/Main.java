@@ -25,6 +25,7 @@ public class Main {
 
     private void run() throws IOException {
         itemCache = new ItemCache(cacheFile);
+        ModelParams.validate();
 
         Instant startTime = Instant.now();
 

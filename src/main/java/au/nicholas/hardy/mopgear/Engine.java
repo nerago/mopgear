@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 public class Engine {
     static Collection<ItemSet> runSolver(List<ItemData> items, Instant startTime) throws IOException {
-        List<List<ItemData>> reforgedItems = items.stream().map(Engine::reforgeItem).toList();
+        List<List<ItemData>> reforgedItems = items.stream().map(Reforge::reforgeItem).toList();
 
         long estimate = estimateSets(reforgedItems);
         Stream<CurryQueue<ItemData>> initialSets = generateItemCombinations(reforgedItems);
@@ -34,7 +34,7 @@ public class Engine {
         EnumMap<Secondary, Integer> targets = ModelParams.requiredAmounts;
         for (Map.Entry<Secondary, Integer> entry : targets.entrySet()) {
             int val = totals.get(entry.getKey()), cap = entry.getValue();
-            if (val < cap || val > cap + ModelParams.PERMITTED_EXCEED)
+            if (val < cap || val > cap + ModelParams.RATING_CAP_ALLOW_EXCEED)
                 return false;
         }
         return true;
@@ -66,29 +66,5 @@ public class Engine {
                 sink.accept(set.prepend(add));
             }
         });
-    }
-
-    static List<ItemData> reforgeItem(ItemData baseItem) {
-        List<ItemData> outputItems = new ArrayList<>();
-        outputItems.add(baseItem);
-
-        for (Secondary originalStat : Secondary.values()) {
-            int originalValue = baseItem.get(originalStat);
-            if (originalValue != 0) {
-                int reforgeQuantity = (originalValue * 4) / 10;
-                int remainQuantity = originalValue - reforgeQuantity;
-                for (Secondary targetStat : ModelParams.reforgeTargets) {
-                    if (baseItem.get(targetStat) == 0) {
-                        ItemData modified = baseItem.copy();
-                        modified.name += " (" + originalStat + "->" + targetStat + ")";
-                        modified.set(originalStat, remainQuantity);
-                        modified.set(targetStat, reforgeQuantity);
-                        outputItems.add(modified);
-                    }
-                }
-            }
-        }
-
-        return outputItems;
     }
 }

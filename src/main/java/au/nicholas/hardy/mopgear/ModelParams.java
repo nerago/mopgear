@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 
 public class ModelParams {
@@ -11,7 +12,7 @@ public class ModelParams {
     static final double TARGET_PERCENT = 7.5;
     static final int TARGET_RATING = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT); // 768.485373827269
 
-    static final int PERMITTED_EXCEED = 100;
+    static final int RATING_CAP_ALLOW_EXCEED = 100;
 
     static final EnumMap<Secondary, Integer> requiredAmounts = buildRequired();
     private static EnumMap<Secondary, Integer> buildRequired() {
@@ -19,5 +20,17 @@ public class ModelParams {
         map.put(Secondary.Hit, TARGET_RATING);
         map.put(Secondary.Expertise, TARGET_RATING);
         return map;
+    }
+
+    @SuppressWarnings("ConstantValue")
+    public static void validate() {
+        if (priority.length > 3)
+            throw new IllegalStateException("can't use current number ranking");
+        if (Arrays.stream(priority).distinct().count() != priority.length)
+            throw new IllegalStateException("priorities not distinct");
+        if (Arrays.stream(reforgeTargets).distinct().count() != reforgeTargets.length)
+            throw new IllegalStateException("reforgeTargets not distinct");
+        if (!Arrays.asList(reforgeTargets).containsAll(requiredAmounts.keySet()))
+            throw new IllegalStateException("todo");
     }
 }
