@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URI;
-import au.nicholas.hardy.mopgear.util.Slot;
 
 public class WowHead {
     static ItemData fetchItem(int itemId) throws IOException {
@@ -62,7 +61,7 @@ public class WowHead {
         item.name = objectGetString(itemObject, "name_enus");
 
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
-        item.slot = Slot.withNum(objectGetInt(equipObject, "slotbak"));
+        item.slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
         item.str = objectGetInt(equipObject, "str");
         item.mastery = objectGetInt(equipObject, "mastrtng");
         item.crit = objectGetInt(equipObject, "critstrkrtng");
@@ -73,6 +72,7 @@ public class WowHead {
         return item;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static String objectGetString(JsonObject object, String field) {
         if (object.has(field))
             return object.get(field).getAsString();

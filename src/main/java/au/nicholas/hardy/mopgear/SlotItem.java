@@ -1,6 +1,6 @@
-package au.nicholas.hardy.mopgear.util;
+package au.nicholas.hardy.mopgear;
 
-public enum Slot {
+public enum SlotItem {
     Head(1),
     Neck(2),
     Shoulder(3),
@@ -18,12 +18,12 @@ public enum Slot {
 
     private final int wowHeadSlotNum;
 
-    Slot(int wowHeadSlotNum) {
+    SlotItem(int wowHeadSlotNum) {
         this.wowHeadSlotNum = wowHeadSlotNum;
     }
 
-    public static Slot withNum(int wowHeadSlotNum) {
-        for (Slot slot : values()) {
+    public static SlotItem withNum(int wowHeadSlotNum) {
+        for (SlotItem slot : values()) {
             if (slot.wowHeadSlotNum == wowHeadSlotNum)
                 return slot;
         }

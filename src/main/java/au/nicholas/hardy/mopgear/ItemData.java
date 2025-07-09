@@ -1,9 +1,7 @@
 package au.nicholas.hardy.mopgear;
 
-import au.nicholas.hardy.mopgear.util.Slot;
-
 public class ItemData {
-    Slot slot;
+    SlotItem slot;
     String name;
     int str;
     int mastery;
@@ -51,9 +49,7 @@ public class ItemData {
             case Expertise -> {
                 return expertise;
             }
-            default -> {
-                throw new IllegalArgumentException();
-            }
+            default -> throw new IllegalArgumentException();
         }
     }
 

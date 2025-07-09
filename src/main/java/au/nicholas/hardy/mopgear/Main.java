@@ -1,6 +1,5 @@
 package au.nicholas.hardy.mopgear;
 
-import au.nicholas.hardy.mopgear.util.Slot;
 import com.google.gson.*;
 
 import java.io.*;
@@ -39,7 +38,7 @@ public class Main {
     private void reforgeProcess(Instant startTime) throws IOException {
         List<EquippedItem> itemIds = Main.readInput();
         List<ItemData> items = loadItems(itemIds);
-        Map<Slot, List<ItemData>> reforgedItems = items.stream().collect(Collectors.toMap(item -> item.slot, Reforge::reforgeItem));
+        Map<SlotItem, List<ItemData>> reforgedItems = items.stream().collect(Collectors.toMap(item -> item.slot, Reforge::reforgeItem));
         Collection<ItemSet> bestSets = Engine.runSolver(reforgedItems, startTime);
         outputResult(bestSets);
     }
