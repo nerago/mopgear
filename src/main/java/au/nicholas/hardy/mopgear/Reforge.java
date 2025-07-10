@@ -15,10 +15,9 @@ public class Reforge {
                 int remainQuantity = originalValue - reforgeQuantity;
                 for (Secondary targetStat : ModelParams.reforgeTargets) {
                     if (baseItem.stat.get(targetStat) == 0) {
-                        ItemData modified = baseItem.copy();
-                        modified.name += " (" + originalStat + "->" + targetStat + ")";
-                        modified.stat.set(originalStat, remainQuantity);
-                        modified.stat.set(targetStat, reforgeQuantity);
+                        String name = baseItem.name + " (" + originalStat + "->" + targetStat + ")";
+                        StatBlock changedStats = baseItem.stat.withChange(originalStat, remainQuantity, targetStat, reforgeQuantity);
+                        ItemData modified = new ItemData(baseItem.slot, name, changedStats);
                         outputItems.add(modified);
                     }
                 }

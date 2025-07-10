@@ -116,15 +116,15 @@ public class Main {
             JsonObject gear = inputObject.getAsJsonObject("gear");
             JsonArray items = gear.getAsJsonArray("items");
             for (JsonElement element : items) {
-                if (element.isJsonObject()) {
-                    EquippedItem item = new EquippedItem();
-                    item.id = element.getAsJsonObject().get("id").getAsInt();
+                if (element.isJsonObject()) {;
+                    int id = element.getAsJsonObject().get("id").getAsInt();
+                    String enchant;
                     if (element.getAsJsonObject().has("enchant")) {
-                        item.enchant = element.getAsJsonObject().get("enchant").getAsString();
+                        enchant = element.getAsJsonObject().get("enchant").getAsString();
                     } else {
-                        item.enchant = "MISSING ENCHANT";
+                        enchant = "MISSING ENCHANT";
                     }
-                    result.add(item);
+                    result.add(new EquippedItem(id, enchant));
                 }
             }
         }

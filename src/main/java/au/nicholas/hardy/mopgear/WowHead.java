@@ -62,15 +62,15 @@ public class WowHead {
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
         SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
 
-        ItemData item = new ItemData(slot, name);
-        item.stat.str = objectGetInt(equipObject, "str");
-        item.stat.mastery = objectGetInt(equipObject, "mastrtng");
-        item.stat.crit = objectGetInt(equipObject, "critstrkrtng");
-        item.stat.expertise = objectGetInt(equipObject, "exprtng");
-        item.stat.hit = objectGetInt(equipObject, "hitrtng");
-        item.stat.haste = objectGetInt(equipObject, "hastertng");
+        StatBlock statBlock = new StatBlock(
+         objectGetInt(equipObject, "str"),
+         objectGetInt(equipObject, "mastrtng"),
+         objectGetInt(equipObject, "critstrkrtng"),
+         objectGetInt(equipObject, "exprtng"),
+         objectGetInt(equipObject, "hitrtng"),
+         objectGetInt(equipObject, "hastertng"));
 
-        return item;
+        return new ItemData(slot, name, statBlock);
     }
 
     @SuppressWarnings("SameParameterValue")

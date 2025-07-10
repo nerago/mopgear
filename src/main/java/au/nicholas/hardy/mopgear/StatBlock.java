@@ -1,42 +1,35 @@
 package au.nicholas.hardy.mopgear;
 
-public class StatBlock {
-    int str;
-    int mastery;
-    int crit;
-    int hit;
-    int haste;
-    int expertise;
+public final class StatBlock {
+    public final int str;
+    public final int mastery;
+    public final int crit;
+    public final int hit;
+    public final int haste;
+    public final int expertise;
 
-    StatBlock copy() {
-        StatBlock copy = new StatBlock();
-        copy.str = str;
-        copy.mastery = mastery;
-        copy.crit = crit;
-        copy.hit = hit;
-        copy.haste = haste;
-        copy.expertise = expertise;
-        return copy;
+    public StatBlock(int str, int mastery, int crit, int hit, int haste, int expertise) {
+        this.str = str;
+        this.mastery = mastery;
+        this.crit = crit;
+        this.hit = hit;
+        this.haste = haste;
+        this.expertise = expertise;
     }
 
-    void increment(StatBlock other) {
-        str += other.str;
-        mastery += other.mastery;
-        crit += other.crit;
-        hit += other.hit;
-        haste += other.haste;
-        expertise += other.expertise;
+    StatBlock copy() {
+        return new StatBlock(str, mastery, crit, hit, haste, expertise);
     }
 
     public StatBlock plus(StatBlock other) {
-        StatBlock sum = new StatBlock();
-        sum.str = str + other.str;
-        sum.mastery = mastery + other.mastery;
-        sum.crit = crit + other.crit;
-        sum.hit = hit + other.hit;
-        sum.haste = haste + other.haste;
-        sum.expertise = expertise + other.expertise;
-        return sum;
+        return new StatBlock(
+                str + other.str,
+                mastery + other.mastery,
+                crit + other.crit,
+                hit + other.hit,
+                haste + other.haste,
+                expertise + other.expertise
+        );
     }
 
     int get(Secondary stat) {
@@ -60,15 +53,27 @@ public class StatBlock {
         }
     }
 
-    void set(Secondary stat, int value) {
-        switch (stat) {
-            case Mastery -> mastery = value;
-            case Crit -> crit = value;
-            case Hit -> hit = value;
-            case Haste -> haste = value;
-            case Expertise -> expertise = value;
-            default -> throw new IllegalArgumentException();
+    StatBlock withChange(Secondary a_stat, int a_value, Secondary b_stat, int b_value) {
+        int mastery = this.mastery;
+        int crit = this.crit;
+        int hit = this.hit;
+        int haste = this.haste;
+        int expertise = this.expertise;
+        switch (a_stat) {
+            case Mastery -> mastery = a_value;
+            case Crit -> crit = a_value;
+            case Hit -> hit = a_value;
+            case Haste -> haste = a_value;
+            case Expertise -> expertise = a_value;
         }
+        switch (b_stat) {
+            case Mastery -> mastery = b_value;
+            case Crit -> crit = b_value;
+            case Hit -> hit = b_value;
+            case Haste -> haste = b_value;
+            case Expertise -> expertise = b_value;
+        }
+        return new StatBlock(str, mastery, crit, hit, haste, expertise);
     }
 
     public void append(StringBuilder sb) {

@@ -6,9 +6,14 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class CurryQueue<T> {
-    private T item;
-    private CurryQueue<T> right;
+public final class CurryQueue<T> {
+    private final T item;
+    private final CurryQueue<T> right;
+
+    private CurryQueue(T item, CurryQueue<T> right) {
+        this.item = item;
+        this.right = right;
+    }
 
     public T item() {
         return item;
@@ -19,13 +24,10 @@ public class CurryQueue<T> {
     }
 
     public CurryQueue<T> prepend(T v) {
-        CurryQueue<T> result = new CurryQueue<>();
-        result.item = v;
-        result.right = this;
-        return result;
+        return new CurryQueue<>(v, this);
     }
 
-//    @Deprecated
+    @Deprecated
     public static <R> CurryQueue<R> prepend(R v, CurryQueue<R> queue) {
         if (queue != null) {
             return queue.prepend(v);
@@ -35,96 +37,94 @@ public class CurryQueue<T> {
     }
 
     public static <R> CurryQueue<R> single(R v) {
-        CurryQueue<R> result = new CurryQueue<>();
-        result.item = v;
-        return result;
+        return new CurryQueue<>(v, null);
     }
 
-    @Deprecated
-    public static <T> CurryQueue<T> build(Collection<T> coll) {
-        Iterator<T> iterator = coll.iterator();
-        if (!iterator.hasNext()) {
-            return null;
-        }
+//    @Deprecated
+//    public static <T> CurryQueue<T> build(Collection<T> coll) {
+//        Iterator<T> iterator = coll.iterator();
+//        if (!iterator.hasNext()) {
+//            return null;
+//        }
+//
+//        CurryQueue<T> first = new CurryQueue<>();
+//        first.item = iterator.next();
+//
+//        CurryQueue<T> prev = first;
+//        while (iterator.hasNext()) {
+//            CurryQueue<T> entry = new CurryQueue<>();
+//            entry.item = iterator.next();
+//            prev.right = entry;
+//            prev = entry;
+//        }
+//
+//        return first;
+//    }
 
-        CurryQueue<T> first = new CurryQueue<>();
-        first.item = iterator.next();
+//    @Deprecated
+//    public static <T> CurryQueue<T> build(Stream<T> stream) {
+//        return stream.collect(new CurryCollector<>());
+//    }
 
-        CurryQueue<T> prev = first;
-        while (iterator.hasNext()) {
-            CurryQueue<T> entry = new CurryQueue<>();
-            entry.item = iterator.next();
-            prev.right = entry;
-            prev = entry;
-        }
-
-        return first;
-    }
-
-    @Deprecated
-    public static <T> CurryQueue<T> build(Stream<T> stream) {
-        return stream.collect(new CurryCollector<>());
-    }
-
-    @Deprecated
-    private static class CurryCollector<T> implements Collector<T, CurryCollector.CollectState<T>, CurryQueue<T>> {
-        public static class CollectState<T> {
-            CurryQueue<T> first, prev;
-
-            public CurryQueue<T> finish() {
-                return first;
-            }
-
-            public void accumulate(T val) {
-                if (prev == null) {
-                    first = new CurryQueue<>();
-                    first.item = val;
-                    prev = first;
-                } else {
-                    CurryQueue<T> entry = new CurryQueue<>();
-                    entry.item = val;
-                    prev.right = entry;
-                    prev = entry;
-                }
-            }
-
-            public static <T> CollectState<T> combine(CollectState<T> a, CollectState<T> b) {
-                if (a.prev == null) {
-                    return b;
-                } else if (b.prev == null) {
-                    return a;
-                } else {
-                    a.prev = b.first;
-                    return a;
-                }
-            }
-        }
-
-        @Override
-        public Supplier<CollectState<T>> supplier() {
-            return CollectState::new;
-        }
-
-        @Override
-        public BiConsumer<CollectState<T>, T> accumulator() {
-            return CollectState::accumulate;
-        }
-
-        @Override
-        public BinaryOperator<CollectState<T>> combiner() {
-            return CollectState::combine;
-        }
-
-        @Override
-        public Function<CollectState<T>, CurryQueue<T>> finisher() {
-            return CollectState::finish;
-        }
-
-        @Override
-        public Set<Characteristics> characteristics() {
-            return Collections.emptySet();
-        }
-    }
+//    @Deprecated
+//    private static class CurryCollector<T> implements Collector<T, CurryCollector.CollectState<T>, CurryQueue<T>> {
+//        public static class CollectState<T> {
+//            CurryQueue<T> first, prev;
+//
+//            public CurryQueue<T> finish() {
+//                return first;
+//            }
+//
+//            public void accumulate(T val) {
+//                if (prev == null) {
+//                    first = new CurryQueue<>();
+//                    first.item = val;
+//                    prev = first;
+//                } else {
+//                    CurryQueue<T> entry = new CurryQueue<>();
+//                    entry.item = val;
+//                    prev.right = entry;
+//                    prev = entry;
+//                }
+//            }
+//
+//            public static <T> CollectState<T> combine(CollectState<T> a, CollectState<T> b) {
+//                if (a.prev == null) {
+//                    return b;
+//                } else if (b.prev == null) {
+//                    return a;
+//                } else {
+//                    a.prev = b.first;
+//                    return a;
+//                }
+//            }
+//        }
+//
+//        @Override
+//        public Supplier<CollectState<T>> supplier() {
+//            return CollectState::new;
+//        }
+//
+//        @Override
+//        public BiConsumer<CollectState<T>, T> accumulator() {
+//            return CollectState::accumulate;
+//        }
+//
+//        @Override
+//        public BinaryOperator<CollectState<T>> combiner() {
+//            return CollectState::combine;
+//        }
+//
+//        @Override
+//        public Function<CollectState<T>, CurryQueue<T>> finisher() {
+//            return CollectState::finish;
+//        }
+//
+//        @Override
+//        public Set<Characteristics> characteristics() {
+//            return Collections.emptySet();
+//        }
+//    }
 
     @Deprecated
     public Iterator<T> iterator() {

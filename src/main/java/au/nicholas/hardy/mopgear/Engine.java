@@ -13,9 +13,9 @@ public class Engine {
         Stream<ItemSet> initialSets = generateItemCombinations(items);
         initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
 
-        Stream<ItemSet> summarySets = makeFinalisedSets(initialSets);
-        Stream<ItemSet> filteredSets = filterSets(summarySets);
-        return filteredSets.collect(new TopCollector1<>(20, ItemSet::getStatRating));
+        Stream<ItemSet> filteredSets = filterSets(initialSets);
+        Stream<ItemSet> finalSets = makeFinalisedSets(filteredSets);
+        return finalSets.collect(new TopCollector1<>(20, ItemSet::getStatRating));
     }
 
     private static long estimateSets(Map<SlotEquip, List<ItemData>> reforgedItems) {

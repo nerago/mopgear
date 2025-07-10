@@ -1,17 +1,11 @@
 package au.nicholas.hardy.mopgear;
 
 public final class ItemData {
-    SlotItem slot;
-    String name;
-    StatBlock stat;
+    public final SlotItem slot;
+    public final String name;
+    public final StatBlock stat;
 
-    public ItemData(SlotItem slot, String name) {
-        this.slot = slot;
-        this.name = name;
-        this.stat = new StatBlock();
-    }
-
-    private ItemData(SlotItem slot, String name, StatBlock stat) {
+    public ItemData(SlotItem slot, String name, StatBlock stat) {
         this.slot = slot;
         this.name = name;
         this.stat = stat;

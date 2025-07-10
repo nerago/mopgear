@@ -2,13 +2,10 @@ package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 
-class ItemSet {
-    private CurryQueue<ItemData> items;
-    private StatBlock totals;
-    private long statRating;
-
-    private ItemSet() {
-    }
+public final class ItemSet {
+    public final CurryQueue<ItemData> items;
+    public final StatBlock totals;
+    public long statRating;
 
     private ItemSet(CurryQueue<ItemData> items, StatBlock totals) {
         this.items = items;
@@ -21,11 +18,6 @@ class ItemSet {
 
     public ItemSet copyWithAddedItem(ItemData item) {
         return new ItemSet(items.prepend(item), totals.plus(item.stat));
-    }
-
-    public void addItem(ItemData item) {
-        items = CurryQueue.prepend(item, items);
-        totals.increment(item.stat);
     }
 
     public ItemSet finished() {
