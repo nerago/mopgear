@@ -48,11 +48,11 @@ public class Main {
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
-                map.put(SlotEquip.Ring2, Collections.singletonList(item));
+                map.put(SlotEquip.Ring2, Reforge.reforgeItem(item));
             } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
-                map.put(SlotEquip.Trinket2, Collections.singletonList(item));
+                map.put(SlotEquip.Trinket2, Reforge.reforgeItem(item));
             } else {
-                map.put(slot, Collections.singletonList(item));
+                map.put(slot, Reforge.reforgeItem(item));
             }
         }
         return map;
