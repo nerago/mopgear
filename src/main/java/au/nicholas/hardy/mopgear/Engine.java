@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class Engine {
-    static Collection<ItemSet> runSolver(Map<SlotItem, List<ItemData>> items, Instant startTime) {
+    static Collection<ItemSet> runSolver(Map<SlotEquip, List<ItemData>> items, Instant startTime) {
         long estimate = estimateSets(items);
         Stream<CurryQueue<ItemData>> initialSets = generateItemCombinations(items);
         initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
@@ -19,7 +19,7 @@ public class Engine {
         return filteredSets.collect(new TopCollector1<>(20, s -> s.statRating));
     }
 
-    private static long estimateSets(Map<SlotItem, List<ItemData>> reforgedItems) {
+    private static long estimateSets(Map<SlotEquip, List<ItemData>> reforgedItems) {
         return reforgedItems.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
     }
 
@@ -41,7 +41,7 @@ public class Engine {
         return initialSets.map(ItemSet::new);
     }
 
-    private static Stream<CurryQueue<ItemData>> generateItemCombinations(Map<SlotItem, List<ItemData>> itemsBySlot) {
+    private static Stream<CurryQueue<ItemData>> generateItemCombinations(Map<SlotEquip, List<ItemData>> itemsBySlot) {
         Stream<CurryQueue<ItemData>> stream = null;
         for (List<ItemData> slotItems : itemsBySlot.values()) {
             if (stream == null) {

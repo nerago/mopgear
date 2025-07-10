@@ -38,9 +38,24 @@ public class Main {
     private void reforgeProcess(Instant startTime) throws IOException {
         List<EquippedItem> itemIds = Main.readInput();
         List<ItemData> items = loadItems(itemIds);
-        Map<SlotItem, List<ItemData>> reforgedItems = items.stream().collect(Collectors.toMap(item -> item.slot, Reforge::reforgeItem));
+        Map<SlotEquip, List<ItemData>> reforgedItems = standardItemsToMap(items);
         Collection<ItemSet> bestSets = Engine.runSolver(reforgedItems, startTime);
         outputResult(bestSets);
+    }
+
+    private Map<SlotEquip, List<ItemData>> standardItemsToMap(List<ItemData> items) {
+        Map<SlotEquip, List<ItemData>> map = new EnumMap<>(SlotEquip.class);
+        for (ItemData item : items) {
+            SlotEquip slot = item.slot.toSlotEquip();
+            if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
+                map.put(SlotEquip.Ring2, Collections.singletonList(item));
+            } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
+                map.put(SlotEquip.Trinket2, Collections.singletonList(item));
+            } else {
+                map.put(slot, Collections.singletonList(item));
+            }
+        }
+        return map;
     }
 
 //    private void findUpgrade(Instant startTime) throws IOException {
