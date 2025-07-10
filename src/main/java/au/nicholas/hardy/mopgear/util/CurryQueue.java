@@ -25,7 +25,7 @@ public class CurryQueue<T> {
         return result;
     }
 
-    @Deprecated
+//    @Deprecated
     public static <R> CurryQueue<R> prepend(R v, CurryQueue<R> queue) {
         if (queue != null) {
             return queue.prepend(v);

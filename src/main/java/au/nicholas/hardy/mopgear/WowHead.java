@@ -57,17 +57,18 @@ public class WowHead {
 //    "attainable":0,"flags2":134242304,"displayName":"","qualityTier":0}
 
     private static ItemData buildItem(JsonObject itemObject) {
-        ItemData item = new ItemData();
-        item.name = objectGetString(itemObject, "name_enus");
+        String name = objectGetString(itemObject, "name_enus");
 
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
-        item.slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
-        item.str = objectGetInt(equipObject, "str");
-        item.mastery = objectGetInt(equipObject, "mastrtng");
-        item.crit = objectGetInt(equipObject, "critstrkrtng");
-        item.expertise = objectGetInt(equipObject, "exprtng");
-        item.hit = objectGetInt(equipObject, "hitrtng");
-        item.haste = objectGetInt(equipObject, "hastertng");
+        SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
+
+        ItemData item = new ItemData(slot, name);
+        item.stat.str = objectGetInt(equipObject, "str");
+        item.stat.mastery = objectGetInt(equipObject, "mastrtng");
+        item.stat.crit = objectGetInt(equipObject, "critstrkrtng");
+        item.stat.expertise = objectGetInt(equipObject, "exprtng");
+        item.stat.hit = objectGetInt(equipObject, "hitrtng");
+        item.stat.haste = objectGetInt(equipObject, "hastertng");
 
         return item;
     }

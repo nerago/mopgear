@@ -73,11 +73,11 @@ public class Main {
 //    }
 
     private static void outputResult(Collection<ItemSet> bestSets) {
-        bestSets.forEach(s -> System.out.println(s.totals));
+        bestSets.forEach(s -> System.out.println(s.getTotals()));
         bestSets.forEach(s -> {
             System.out.println("#######################################");
-            System.out.println(s.totals);
-            for (ItemData it : s.items.toArrayReverse(ItemData[]::new)) {
+            System.out.println(s.getTotals());
+            for (ItemData it : s.getItems().toArrayReverse(ItemData[]::new)) {
                 System.out.println(it);
             }
         });

@@ -9,16 +9,16 @@ public class Reforge {
         outputItems.add(baseItem);
 
         for (Secondary originalStat : Secondary.values()) {
-            int originalValue = baseItem.get(originalStat);
+            int originalValue = baseItem.stat.get(originalStat);
             if (originalValue != 0) {
                 int reforgeQuantity = (originalValue * 4) / 10;
                 int remainQuantity = originalValue - reforgeQuantity;
                 for (Secondary targetStat : ModelParams.reforgeTargets) {
-                    if (baseItem.get(targetStat) == 0) {
+                    if (baseItem.stat.get(targetStat) == 0) {
                         ItemData modified = baseItem.copy();
                         modified.name += " (" + originalStat + "->" + targetStat + ")";
-                        modified.set(originalStat, remainQuantity);
-                        modified.set(targetStat, reforgeQuantity);
+                        modified.stat.set(originalStat, remainQuantity);
+                        modified.stat.set(targetStat, reforgeQuantity);
                         outputItems.add(modified);
                     }
                 }

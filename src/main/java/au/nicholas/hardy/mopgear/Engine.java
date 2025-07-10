@@ -1,7 +1,6 @@
 package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.util.BigStreamUtil;
-import au.nicholas.hardy.mopgear.util.CurryQueue;
 import au.nicholas.hardy.mopgear.util.TopCollector1;
 
 import java.time.Instant;
@@ -11,12 +10,12 @@ import java.util.stream.Stream;
 public class Engine {
     static Collection<ItemSet> runSolver(Map<SlotEquip, List<ItemData>> items, Instant startTime) {
         long estimate = estimateSets(items);
-        Stream<CurryQueue<ItemData>> initialSets = generateItemCombinations(items);
+        Stream<ItemSet> initialSets = generateItemCombinations(items);
         initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
 
-        Stream<ItemSet> summarySets = makeSummarySets(initialSets);
+        Stream<ItemSet> summarySets = makeFinalisedSets(initialSets);
         Stream<ItemSet> filteredSets = filterSets(summarySets);
-        return filteredSets.collect(new TopCollector1<>(20, s -> s.statRating));
+        return filteredSets.collect(new TopCollector1<>(20, ItemSet::getStatRating));
     }
 
     private static long estimateSets(Map<SlotEquip, List<ItemData>> reforgedItems) {
@@ -24,10 +23,10 @@ public class Engine {
     }
 
     private static Stream<ItemSet> filterSets(Stream<ItemSet> sets) {
-        return sets.filter(set -> inRange2(set.totals));
+        return sets.filter(set -> inRange2(set.getTotals()));
     }
 
-    private static boolean inRange2(ItemData totals) {
+    private static boolean inRange2(StatBlock totals) {
         EnumMap<Secondary, Integer> targets = ModelParams.requiredAmounts;
         for (Map.Entry<Secondary, Integer> entry : targets.entrySet()) {
             int val = totals.get(entry.getKey()), cap = entry.getValue();
@@ -37,12 +36,12 @@ public class Engine {
         return true;
     }
 
-    private static Stream<ItemSet> makeSummarySets(Stream<CurryQueue<ItemData>> initialSets) {
-        return initialSets.map(ItemSet::new);
+    private static Stream<ItemSet> makeFinalisedSets(Stream<ItemSet> initialSets) {
+        return initialSets.map(ItemSet::finished);
     }
 
-    private static Stream<CurryQueue<ItemData>> generateItemCombinations(Map<SlotEquip, List<ItemData>> itemsBySlot) {
-        Stream<CurryQueue<ItemData>> stream = null;
+    private static Stream<ItemSet> generateItemCombinations(Map<SlotEquip, List<ItemData>> itemsBySlot) {
+        Stream<ItemSet> stream = null;
         for (List<ItemData> slotItems : itemsBySlot.values()) {
             if (stream == null) {
                 stream = newCombinationStream(slotItems);
@@ -53,14 +52,14 @@ public class Engine {
         return stream;
     }
 
-    private static Stream<CurryQueue<ItemData>> newCombinationStream(List<ItemData> slotItems) {
-        return slotItems.parallelStream().unordered().map(CurryQueue::single);
+    private static Stream<ItemSet> newCombinationStream(List<ItemData> slotItems) {
+        return slotItems.parallelStream().unordered().map(ItemSet::singleItem);
     }
 
-    private static Stream<CurryQueue<ItemData>> applyItemsToCombination(Stream<CurryQueue<ItemData>> stream, List<ItemData> slotItems) {
+    private static Stream<ItemSet> applyItemsToCombination(Stream<ItemSet> stream, List<ItemData> slotItems) {
         return stream.mapMulti((set, sink) -> {
             for (ItemData add : slotItems) {
-                sink.accept(set.prepend(add));
+                sink.accept(set.copyWithAddedItem(add));
             }
         });
     }
