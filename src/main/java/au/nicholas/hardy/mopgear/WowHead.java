@@ -66,9 +66,9 @@ public class WowHead {
          objectGetInt(equipObject, "str"),
          objectGetInt(equipObject, "mastrtng"),
          objectGetInt(equipObject, "critstrkrtng"),
-         objectGetInt(equipObject, "exprtng"),
          objectGetInt(equipObject, "hitrtng"),
-         objectGetInt(equipObject, "hastertng"));
+         objectGetInt(equipObject, "hastertng"),
+         objectGetInt(equipObject, "exprtng"));
 
         return new ItemData(slot, name, statBlock);
     }
