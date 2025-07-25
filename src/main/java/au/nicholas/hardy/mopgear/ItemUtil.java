@@ -10,26 +10,36 @@ public class ItemUtil {
     public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds) throws IOException {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
-            int id = equippedItem.id();
-            ItemData item = itemCache.get(id);
-            if (item == null) {
-                item = WowHead.fetchItem(id);
-                if (item != null) {
-                    itemCache.put(id, item);
-                } else {
-                    throw new RuntimeException("missing item");
-                }
-            }
-
-            if (equippedItem.gems().length > 0) {
-                StatBlock gemStat = GemData.process(equippedItem.gems());
-                item = new ItemData(item.slot, item.name, item.stat, gemStat);
-            }
-
-            System.out.println(id + ": " + item + " with " + equippedItem.enchant());
+            ItemData item = loadItem(itemCache, equippedItem);
             items.add(item);
         }
         return items;
+    }
+
+    public static ItemData loadItem(ItemCache itemCache, EquippedItem equippedItem) throws IOException {
+        int id = equippedItem.id();
+        ItemData item = loadItemBasic(itemCache, id);
+
+        if (equippedItem.gems().length > 0) {
+            StatBlock gemStat = GemData.process(equippedItem.gems());
+            item = new ItemData(item.slot, item.name, item.stat, gemStat);
+        }
+
+        System.out.println(id + ": " + item + " with " + equippedItem.enchant());
+        return item;
+    }
+
+    public static ItemData loadItemBasic(ItemCache itemCache, int id) throws IOException {
+        ItemData item = itemCache.get(id);
+        if (item == null) {
+            item = WowHead.fetchItem(id);
+            if (item != null) {
+                itemCache.put(id, item);
+            } else {
+                throw new RuntimeException("missing item");
+            }
+        }
+        return item;
     }
 
     public static Map<SlotEquip, List<ItemData>> standardItemsToMap(List<ItemData> items) {

@@ -24,13 +24,16 @@ public class Main {
 
         Instant startTime = Instant.now();
 
-        reforgeProcess(startTime);
+//        reforgeProcess(startTime);
+        reforgeProcessPlus(startTime, 84036);
 //        WowHead.fetchItem(81687);
 
         printElapsed(startTime);
 
         itemCache.cacheSave();
     }
+
+
 
     private void reforgeProcess(Instant startTime) throws IOException {
         List<EquippedItem> itemIds = InputParser.readInput(inputFile);
@@ -41,6 +44,19 @@ public class Main {
         outputResult(bestSets);
     }
 
+    private void reforgeProcessPlus(Instant startTime, int extraItemId) throws IOException {
+        List<EquippedItem> itemIds = InputParser.readInput(inputFile);
+        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds);
+        Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
+
+        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+        reforgedItems.get(extraItem.slot.toSlotEquip()).clear(); // replace
+        reforgedItems.get(extraItem.slot.toSlotEquip()).addAll(Reforge.reforgeItem(extraItem));
+        System.out.println("EXTRA " + extraItem);
+
+        Collection<ItemSet> bestSets = EngineStream.runSolver(reforgedItems, startTime);
+        outputResult(bestSets);
+    }
 
 //    private void findUpgrade(Instant startTime) throws IOException {
 //        List<EquippedItem> baseItemIds = Main.readInput();
