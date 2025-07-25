@@ -7,18 +7,22 @@ public final class StatBlock {
     public final int hit;
     public final int haste;
     public final int expertise;
+    public final int dodge;
+    public final int parry;
 
-    public StatBlock(int str, int mastery, int crit, int hit, int haste, int expertise) {
+    public StatBlock(int str, int mastery, int crit, int hit, int haste, int expertise, int dodge, int parry) {
         this.str = str;
         this.mastery = mastery;
         this.crit = crit;
         this.hit = hit;
         this.haste = haste;
         this.expertise = expertise;
+        this.dodge = dodge;
+        this.parry = parry;
     }
 
     StatBlock copy() {
-        return new StatBlock(str, mastery, crit, hit, haste, expertise);
+        return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
     public StatBlock plus(StatBlock other) {
@@ -28,7 +32,9 @@ public final class StatBlock {
                 crit + other.crit,
                 hit + other.hit,
                 haste + other.haste,
-                expertise + other.expertise
+                expertise + other.expertise,
+                dodge + other.dodge,
+                parry + other.parry
         );
     }
 
@@ -49,6 +55,12 @@ public final class StatBlock {
             case Expertise -> {
                 return expertise;
             }
+            case Dodge -> {
+                return dodge;
+            }
+            case Parry -> {
+                return parry;
+            }
             default -> throw new IllegalArgumentException();
         }
     }
@@ -59,12 +71,16 @@ public final class StatBlock {
         int hit = this.hit;
         int haste = this.haste;
         int expertise = this.expertise;
+        int dodge = this.dodge;
+        int parry = this.parry;
         switch (a_stat) {
             case Mastery -> mastery = a_value;
             case Crit -> crit = a_value;
             case Hit -> hit = a_value;
             case Haste -> haste = a_value;
             case Expertise -> expertise = a_value;
+            case Dodge -> dodge = a_value;
+            case Parry -> parry = a_value;
         }
         switch (b_stat) {
             case Mastery -> mastery = b_value;
@@ -72,8 +88,10 @@ public final class StatBlock {
             case Hit -> hit = b_value;
             case Haste -> haste = b_value;
             case Expertise -> expertise = b_value;
+            case Dodge -> dodge = b_value;
+            case Parry -> parry = b_value;
         }
-        return new StatBlock(str, mastery, crit, hit, haste, expertise);
+        return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
     public void append(StringBuilder sb) {
@@ -89,6 +107,16 @@ public final class StatBlock {
             sb.append("haste=").append(haste).append(' ');
         if (expertise != 0)
             sb.append("expertise=").append(expertise).append(' ');
+        if (dodge != 0)
+            sb.append("dodge=").append(dodge).append(' ');
+        if (parry != 0)
+            sb.append("parry=").append(parry).append(' ');
+    }
+
+    public final static StatBlock empty = new StatBlock(0, 0, 0, 0, 0, 0, 0, 0);
+
+    public boolean isEmpty() {
+        return str == 0 && mastery == 0 && crit == 0 && hit == 0 && haste == 0 && expertise == 0 && dodge == 0 && parry == 0;
     }
 
     @Override

@@ -33,14 +33,23 @@ public class InputParser {
         JsonArray items = gear.getAsJsonArray("items");
         for (JsonElement element : items) {
             if (element.isJsonObject()) {;
-                int id = element.getAsJsonObject().get("id").getAsInt();
+                JsonObject elementObject = element.getAsJsonObject();
+                int id = elementObject.get("id").getAsInt();
+
                 String enchant;
-                if (element.getAsJsonObject().has("enchant")) {
-                    enchant = element.getAsJsonObject().get("enchant").getAsString();
+                if (elementObject.has("enchant")) {
+                    enchant = elementObject.get("enchant").getAsString();
                 } else {
                     enchant = "MISSING ENCHANT";
                 }
-                result.add(new EquippedItem(id, enchant));
+
+                int[] gems = null;
+                if (elementObject.has("gems")) {
+                    JsonArray array = elementObject.get("gems").getAsJsonArray();
+                    gems = array.asList().stream().mapToInt(JsonElement::getAsInt).toArray();
+                }
+
+                result.add(new EquippedItem(id, enchant, gems));
             }
         }
         return result;

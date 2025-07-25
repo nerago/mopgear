@@ -24,7 +24,8 @@ public class Main {
 
         Instant startTime = Instant.now();
 
-        reforgeProcess(startTime);
+//        reforgeProcess(startTime);
+        WowHead.fetchItem(81687);
 
         printElapsed(startTime);
 
@@ -35,8 +36,8 @@ public class Main {
         List<EquippedItem> itemIds = InputParser.readInput(inputFile);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds);
         Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
-        Collection<ItemSet> bestSets = new EngineStack(reforgedItems).runSolver();
-//        Collection<ItemSet> bestSets = EngineStream.runSolver(reforgedItems, startTime);
+//        Collection<ItemSet> bestSets = new EngineStack(reforgedItems).runSolver();
+        Collection<ItemSet> bestSets = EngineStream.runSolver(reforgedItems, startTime);
         outputResult(bestSets);
     }
 
@@ -56,6 +57,7 @@ public class Main {
 //    }
 
     private static void outputResult(Collection<ItemSet> bestSets) {
+        System.out.println("@@@@@@@@@ Set count " + bestSets.size() + " @@@@@@@@@");
         bestSets.forEach(s -> System.out.println(s.getTotals()));
         bestSets.forEach(s -> {
             System.out.println("#######################################");

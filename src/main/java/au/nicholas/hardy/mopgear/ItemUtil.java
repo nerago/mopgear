@@ -10,11 +10,11 @@ public class ItemUtil {
     public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds) throws IOException {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
-            int id = equippedItem.id;
+            int id = equippedItem.id();
             ItemData item = itemCache.get(id);
             if (item != null) {
                 items.add(item);
-                System.out.println(id + ": " + item + " with " + equippedItem.enchant);
+                System.out.println(id + ": " + item + " with " + equippedItem.enchant());
             } else {
                 item = WowHead.fetchItem(id);
                 if (item != null) {

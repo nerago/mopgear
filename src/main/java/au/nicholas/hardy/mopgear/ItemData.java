@@ -4,15 +4,17 @@ public final class ItemData {
     public final SlotItem slot;
     public final String name;
     public final StatBlock stat;
+    public final StatBlock statFixed;
 
-    public ItemData(SlotItem slot, String name, StatBlock stat) {
+    public ItemData(SlotItem slot, String name, StatBlock stat, StatBlock statFixed) {
         this.slot = slot;
         this.name = name;
         this.stat = stat;
+        this.statFixed = statFixed;
     }
 
     public ItemData copy() {
-        return new ItemData(slot, name, stat.copy());
+        return new ItemData(slot, name, stat.copy(), statFixed);
     }
 
     @Override
@@ -25,6 +27,10 @@ public final class ItemData {
         else
             sb.append("TOTAL ");
         stat.append(sb);
+        if (!statFixed.isEmpty()) {
+            sb.append("GEMS ");
+            statFixed.append(sb);
+        }
         sb.append('}');
         return sb.toString();
     }

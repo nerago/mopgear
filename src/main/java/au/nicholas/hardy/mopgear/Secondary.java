@@ -5,5 +5,7 @@ enum Secondary {
     Crit,
     Hit,
     Haste,
-    Expertise
+    Expertise,
+    Dodge,
+    Parry
 }

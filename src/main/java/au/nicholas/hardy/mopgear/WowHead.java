@@ -10,7 +10,7 @@ import java.net.URI;
 
 public class WowHead {
     static ItemData fetchItem(int itemId) throws IOException {
-        String url = "https://www.wowhead.com/cata/item=" + itemId;
+        String url = "https://www.wowhead.com/mop-classic/item=" + itemId;
         String htmlContent = fetchHTML(url);
 
 //        System.out.println(htmlContent);
@@ -68,9 +68,11 @@ public class WowHead {
          objectGetInt(equipObject, "critstrkrtng"),
          objectGetInt(equipObject, "hitrtng"),
          objectGetInt(equipObject, "hastertng"),
-         objectGetInt(equipObject, "exprtng"));
+         objectGetInt(equipObject, "exprtng"),
+                objectGetInt(equipObject, "dodgertng"),
+                objectGetInt(equipObject, "parryrtng"));
 
-        return new ItemData(slot, name, statBlock);
+        return new ItemData(slot, name, statBlock, StatBlock.empty);
     }
 
     @SuppressWarnings("SameParameterValue")

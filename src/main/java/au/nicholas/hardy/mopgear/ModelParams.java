@@ -8,11 +8,12 @@ public class ModelParams {
 //    static final Secondary[] reforgeTargets = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Haste, Secondary.Mastery};
     static final Secondary[] reforgeTargets = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Haste};
 
-    static final double RATING_PER_PERCENT = 102.46;
-    static final double TARGET_PERCENT = 7.5;
-    static final int TARGET_RATING = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT); // 768.485373827269
+    static final double RATING_PER_PERCENT = 339.9534;
+//    static final double TARGET_PERCENT = 7.5; // for bosses
+    static final double TARGET_PERCENT = 6.5; // for heroics
+    static final int TARGET_RATING = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT); // 2040 / 2550
 
-    static final int RATING_CAP_ALLOW_EXCEED = 100;
+    static final int RATING_CAP_ALLOW_EXCEED = 300;
 
     static final EnumMap<Secondary, Integer> requiredAmounts = buildRequired();
     private static EnumMap<Secondary, Integer> buildRequired() {
