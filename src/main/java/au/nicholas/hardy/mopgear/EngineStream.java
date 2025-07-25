@@ -7,14 +7,14 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class EngineStream {
-    static Collection<ItemSet> runSolver(Map<SlotEquip, List<ItemData>> items, Instant startTime) {
+    static Collection<ItemSet> runSolver(Model model, Map<SlotEquip, List<ItemData>> items, Instant startTime) {
         long estimate = estimateSets(items);
         Stream<ItemSet> initialSets = generateItemCombinations(items);
 //        if (startTime != null)
 //            initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
 
-        Stream<ItemSet> filteredSets = EngineUtil.filterSets(initialSets);
-        Stream<ItemSet> finalSets = makeFinalisedSets(filteredSets);
+        Stream<ItemSet> filteredSets = ModelCommon.filterSets(initialSets);
+        Stream<ItemSet> finalSets = makeFinalisedSets(model, filteredSets);
         return finalSets.collect(new TopCollector1<>(20, ItemSet::getStatRating));
     }
 
@@ -22,8 +22,8 @@ public class EngineStream {
         return reforgedItems.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
     }
 
-    private static Stream<ItemSet> makeFinalisedSets(Stream<ItemSet> initialSets) {
-        return initialSets.map(ItemSet::finished);
+    private static Stream<ItemSet> makeFinalisedSets(Model model, Stream<ItemSet> initialSets) {
+        return initialSets.map(x -> x.finished(model::calcRating));
     }
 
     private static Stream<ItemSet> generateItemCombinations(Map<SlotEquip, List<ItemData>> itemsBySlot) {

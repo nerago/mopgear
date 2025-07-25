@@ -1,11 +1,12 @@
 package au.nicholas.hardy.mopgear;
 
-enum Secondary {
+public enum StatType {
     Mastery,
     Crit,
     Hit,
     Haste,
     Expertise,
     Dodge,
-    Parry
+    Parry,
+    Strength,
 }

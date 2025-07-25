@@ -2,6 +2,8 @@ package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 
+import java.util.function.ToLongFunction;
+
 public final class ItemSet {
     public final CurryQueue<ItemData> items;
     public final StatBlock totals;
@@ -20,22 +22,9 @@ public final class ItemSet {
         return new ItemSet(items.prepend(item), totals.plus(item.totalStatCopy()));
     }
 
-    public ItemSet finished() {
-        statRating = makeRating(totals);
+    public ItemSet finished(ToLongFunction<StatBlock> func) {
+        statRating = func.applyAsLong(totals);
         return this;
-    }
-
-    /***
-     * @see ModelParams#priority
-     * Secondary.Haste, Secondary.Mastery, Secondary.Crit
-     * Maxes on armor around 1349, weapon 1021
-     */
-    private static long makeRating(StatBlock totals) {
-        long value = 0;
-        for (Secondary stat : ModelParams.priority) {
-            value = (value << 16) | totals.get(stat);
-        }
-        return value;
     }
 
     public long getStatRating() {

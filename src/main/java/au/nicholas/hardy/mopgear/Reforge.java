@@ -8,12 +8,12 @@ public class Reforge {
         List<ItemData> outputItems = new ArrayList<>();
         outputItems.add(baseItem);
 
-        for (Secondary originalStat : Secondary.values()) {
+        for (StatType originalStat : ModelCommon.reforgeSource) {
             int originalValue = baseItem.stat.get(originalStat);
             if (originalValue != 0) {
                 int reforgeQuantity = (originalValue * 4) / 10;
                 int remainQuantity = originalValue - reforgeQuantity;
-                for (Secondary targetStat : ModelParams.reforgeTargets) {
+                for (StatType targetStat : ModelCommon.reforgeTargets) {
                     if (baseItem.stat.get(targetStat) == 0) {
                         String name = baseItem.name + " (" + originalStat + "->" + targetStat + ")";
                         StatBlock changedStats = baseItem.stat.withChange(originalStat, remainQuantity, targetStat, reforgeQuantity);

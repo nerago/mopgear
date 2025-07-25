@@ -9,9 +9,11 @@ import static au.nicholas.hardy.mopgear.Main.cacheFile;
 
 public class ServiceEntry {
     private final ItemCache itemCache;
+    private final ModelWeights model;
 
     public ServiceEntry() throws IOException {
         itemCache = new ItemCache(cacheFile);
+        model = new ModelWeights();
     }
 
     public Collection<ItemSet> run(String jsonString) throws IOException {
@@ -25,6 +27,6 @@ public class ServiceEntry {
             items = ItemUtil.loadItems(itemCache, itemIds);
         }
         Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
-        return EngineStream.runSolver(reforgedItems, null);
+        return EngineStream.runSolver(model, reforgedItems, null);
     }
 }

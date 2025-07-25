@@ -38,7 +38,7 @@ public final class StatBlock {
         );
     }
 
-    int get(Secondary stat) {
+    int get(StatType stat) {
         switch (stat) {
             case Mastery -> {
                 return mastery;
@@ -65,7 +65,7 @@ public final class StatBlock {
         }
     }
 
-    StatBlock withChange(Secondary a_stat, int a_value) {
+    StatBlock withChange(StatType a_stat, int a_value) {
         int mastery = this.mastery;
         int crit = this.crit;
         int hit = this.hit;
@@ -85,7 +85,7 @@ public final class StatBlock {
         return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
-    StatBlock withChange(Secondary a_stat, int a_value, Secondary b_stat, int b_value) {
+    StatBlock withChange(StatType a_stat, int a_value, StatType b_stat, int b_value) {
         int mastery = this.mastery;
         int crit = this.crit;
         int hit = this.hit;

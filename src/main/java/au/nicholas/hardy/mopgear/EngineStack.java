@@ -6,6 +6,7 @@ public class EngineStack {
     private final List<List<ItemData>> slotItems;
     private final ArrayDeque<Step> queue;
     private ItemSet best;
+    private Model model;
 
     public EngineStack(Map<SlotEquip, List<ItemData>> items) {
         slotItems = items.values().stream().toList();
@@ -41,7 +42,7 @@ public class EngineStack {
                     queue.addLast(new Step(nextIndex, prevSet.copyWithAddedItem(item)));
                 }
             } else {
-                prevSet.finished();
+                prevSet.finished(model::calcRating);
                 if (best == null || best.statRating < prevSet.statRating) {
                     best = prevSet;
                 }

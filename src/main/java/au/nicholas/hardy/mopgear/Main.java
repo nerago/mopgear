@@ -13,6 +13,7 @@ public class Main {
     private static final Path inputFile = directory.resolve("input.json");
 
     ItemCache itemCache;
+    Model model;
 
     public static void main(String[] arg) throws IOException {
         new Main().run();
@@ -20,7 +21,8 @@ public class Main {
 
     private void run() throws IOException {
         itemCache = new ItemCache(cacheFile);
-        ModelParams.validate();
+        ModelCommon.validate();
+        model = new ModelWeights();
 
         Instant startTime = Instant.now();
 
@@ -40,10 +42,11 @@ public class Main {
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds);
         Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
 //        Collection<ItemSet> bestSets = new EngineStack(reforgedItems).runSolver();
-        Collection<ItemSet> bestSets = EngineStream.runSolver(reforgedItems, startTime);
+        Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime);
         outputResult(bestSets);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void reforgeProcessPlus(Instant startTime, int extraItemId) throws IOException {
         List<EquippedItem> itemIds = InputParser.readInput(inputFile);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds);
@@ -54,7 +57,7 @@ public class Main {
         reforgedItems.get(extraItem.slot.toSlotEquip()).addAll(Reforge.reforgeItem(extraItem));
         System.out.println("EXTRA " + extraItem);
 
-        Collection<ItemSet> bestSets = EngineStream.runSolver(reforgedItems, startTime);
+        Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime);
         outputResult(bestSets);
     }
 
