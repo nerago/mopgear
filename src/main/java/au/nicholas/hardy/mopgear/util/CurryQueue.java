@@ -8,7 +8,7 @@ import java.util.stream.StreamSupport;
 
 public final class CurryQueue<T> {
     private final T item;
-    private final CurryQueue<T> right;
+    private CurryQueue<T> right;
 
     private CurryQueue(T item, CurryQueue<T> right) {
         this.item = item;
@@ -41,25 +41,23 @@ public final class CurryQueue<T> {
     }
 
 //    @Deprecated
-//    public static <T> CurryQueue<T> build(Collection<T> coll) {
-//        Iterator<T> iterator = coll.iterator();
-//        if (!iterator.hasNext()) {
-//            return null;
-//        }
-//
-//        CurryQueue<T> first = new CurryQueue<>();
-//        first.item = iterator.next();
-//
-//        CurryQueue<T> prev = first;
-//        while (iterator.hasNext()) {
-//            CurryQueue<T> entry = new CurryQueue<>();
-//            entry.item = iterator.next();
-//            prev.right = entry;
-//            prev = entry;
-//        }
-//
-//        return first;
-//    }
+    public static <T> CurryQueue<T> build(Collection<T> coll) {
+        Iterator<T> iterator = coll.iterator();
+        if (!iterator.hasNext()) {
+            return null;
+        }
+
+        CurryQueue<T> first = new CurryQueue<>(iterator.next(), null);
+
+        CurryQueue<T> prev = first;
+        while (iterator.hasNext()) {
+            CurryQueue<T> entry = new CurryQueue<>(iterator.next(), null);
+            prev.right = entry;
+            prev = entry;
+        }
+
+        return first;
+    }
 
 //    @Deprecated
 //    public static <T> CurryQueue<T> build(Stream<T> stream) {

@@ -16,5 +16,5 @@ public enum SlotEquip {
     Trinket1,
     Trinket2,
     Weapon,
-    Offhand;
+    Offhand
 }

@@ -1,19 +1,15 @@
 package au.nicholas.hardy.mopgear;
 
-import com.google.gson.*;
-
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Main {
 
     private static final Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
-    private static final Path cacheFile = directory.resolve("cache.json");
+    static final Path cacheFile = directory.resolve("cache.json");
     private static final Path inputFile = directory.resolve("input.json");
 
     ItemCache itemCache;
@@ -36,27 +32,14 @@ public class Main {
     }
 
     private void reforgeProcess(Instant startTime) throws IOException {
-        List<EquippedItem> itemIds = Main.readInput();
-        List<ItemData> items = loadItems(itemIds);
-        Map<SlotEquip, List<ItemData>> reforgedItems = standardItemsToMap(items);
-        Collection<ItemSet> bestSets = Engine.runSolver(reforgedItems, startTime);
+        List<EquippedItem> itemIds = InputParser.readInput(inputFile);
+        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds);
+        Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
+        Collection<ItemSet> bestSets = new EngineStack(reforgedItems).runSolver();
+//        Collection<ItemSet> bestSets = EngineStream.runSolver(reforgedItems, startTime);
         outputResult(bestSets);
     }
 
-    private Map<SlotEquip, List<ItemData>> standardItemsToMap(List<ItemData> items) {
-        Map<SlotEquip, List<ItemData>> map = new EnumMap<>(SlotEquip.class);
-        for (ItemData item : items) {
-            SlotEquip slot = item.slot.toSlotEquip();
-            if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
-                map.put(SlotEquip.Ring2, Reforge.reforgeItem(item));
-            } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
-                map.put(SlotEquip.Trinket2, Reforge.reforgeItem(item));
-            } else {
-                map.put(slot, Reforge.reforgeItem(item));
-            }
-        }
-        return map;
-    }
 
 //    private void findUpgrade(Instant startTime) throws IOException {
 //        List<EquippedItem> baseItemIds = Main.readInput();
@@ -87,48 +70,4 @@ public class Main {
         Duration duration = Duration.between(startTime, Instant.now());
         System.out.println("elapsed = " + duration.toString());
     }
-
-    private List<ItemData> loadItems(List<EquippedItem> itemIds) throws IOException {
-        List<ItemData> items = new ArrayList<>();
-        for (EquippedItem equippedItem : itemIds) {
-            int id = equippedItem.id;
-            ItemData item = itemCache.get(id);
-            if (item != null) {
-                items.add(item);
-                System.out.println(id + ": " + item + " with " + equippedItem.enchant);
-            } else {
-                item = WowHead.fetchItem(id);
-                if (item != null) {
-                    items.add(item);
-                    itemCache.put(id, item);
-                } else {
-                    throw new RuntimeException("missing item");
-                }
-            }
-        }
-        return items;
-    }
-
-    private static List<EquippedItem> readInput() throws IOException {
-        List<EquippedItem> result = new ArrayList<>();
-        try (BufferedReader reader = Files.newBufferedReader(inputFile)) {
-            JsonObject inputObject = JsonParser.parseReader(reader).getAsJsonObject();
-            JsonObject gear = inputObject.getAsJsonObject("gear");
-            JsonArray items = gear.getAsJsonArray("items");
-            for (JsonElement element : items) {
-                if (element.isJsonObject()) {;
-                    int id = element.getAsJsonObject().get("id").getAsInt();
-                    String enchant;
-                    if (element.getAsJsonObject().has("enchant")) {
-                        enchant = element.getAsJsonObject().get("enchant").getAsString();
-                    } else {
-                        enchant = "MISSING ENCHANT";
-                    }
-                    result.add(new EquippedItem(id, enchant));
-                }
-            }
-        }
-        return result;
-    }
-
 }
