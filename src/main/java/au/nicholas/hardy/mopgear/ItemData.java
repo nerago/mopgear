@@ -17,6 +17,13 @@ public final class ItemData {
         return new ItemData(slot, name, stat.copy(), statFixed);
     }
 
+    public StatBlock totalStatCopy() {
+        if (statFixed.isEmpty())
+            return stat.copy();
+        else
+            return stat.plus(statFixed);
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{ ");

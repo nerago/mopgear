@@ -12,18 +12,22 @@ public class ItemUtil {
         for (EquippedItem equippedItem : itemIds) {
             int id = equippedItem.id();
             ItemData item = itemCache.get(id);
-            if (item != null) {
-                items.add(item);
-                System.out.println(id + ": " + item + " with " + equippedItem.enchant());
-            } else {
+            if (item == null) {
                 item = WowHead.fetchItem(id);
                 if (item != null) {
-                    items.add(item);
                     itemCache.put(id, item);
                 } else {
                     throw new RuntimeException("missing item");
                 }
             }
+
+            if (equippedItem.gems().length > 0) {
+                StatBlock gemStat = GemData.process(equippedItem.gems());
+                item = new ItemData(item.slot, item.name, item.stat, gemStat);
+            }
+
+            System.out.println(id + ": " + item + " with " + equippedItem.enchant());
+            items.add(item);
         }
         return items;
     }

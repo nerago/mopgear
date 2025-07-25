@@ -13,11 +13,11 @@ public final class ItemSet {
     }
 
     public static ItemSet singleItem(ItemData item) {
-        return new ItemSet(CurryQueue.single(item), item.stat.copy());
+        return new ItemSet(CurryQueue.single(item), item.totalStatCopy());
     }
 
     public ItemSet copyWithAddedItem(ItemData item) {
-        return new ItemSet(items.prepend(item), totals.plus(item.stat));
+        return new ItemSet(items.prepend(item), totals.plus(item.totalStatCopy()));
     }
 
     public ItemSet finished() {

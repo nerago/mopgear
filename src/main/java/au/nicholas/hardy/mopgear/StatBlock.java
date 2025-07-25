@@ -65,6 +65,26 @@ public final class StatBlock {
         }
     }
 
+    StatBlock withChange(Secondary a_stat, int a_value) {
+        int mastery = this.mastery;
+        int crit = this.crit;
+        int hit = this.hit;
+        int haste = this.haste;
+        int expertise = this.expertise;
+        int dodge = this.dodge;
+        int parry = this.parry;
+        switch (a_stat) {
+            case Mastery -> mastery = a_value;
+            case Crit -> crit = a_value;
+            case Hit -> hit = a_value;
+            case Haste -> haste = a_value;
+            case Expertise -> expertise = a_value;
+            case Dodge -> dodge = a_value;
+            case Parry -> parry = a_value;
+        }
+        return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
+    }
+
     StatBlock withChange(Secondary a_stat, int a_value, Secondary b_stat, int b_value) {
         int mastery = this.mastery;
         int crit = this.crit;

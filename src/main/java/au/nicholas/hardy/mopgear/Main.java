@@ -24,8 +24,8 @@ public class Main {
 
         Instant startTime = Instant.now();
 
-//        reforgeProcess(startTime);
-        WowHead.fetchItem(81687);
+        reforgeProcess(startTime);
+//        WowHead.fetchItem(81687);
 
         printElapsed(startTime);
 
