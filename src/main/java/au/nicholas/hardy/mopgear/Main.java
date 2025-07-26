@@ -11,6 +11,7 @@ public class Main {
     private static final Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
     static final Path cacheFile = directory.resolve("cache.json");
     private static final Path inputFile = directory.resolve("input.json");
+    private static final Path weightFile = directory.resolve("weight.json");
 
     ItemCache itemCache;
     Model model;
@@ -22,12 +23,13 @@ public class Main {
     private void run() throws IOException {
         itemCache = new ItemCache(cacheFile);
         ModelCommon.validate();
-        model = new ModelWeights();
+        model = new ModelWeights(weightFile);
 
         Instant startTime = Instant.now();
 
 //        reforgeProcess(startTime);
-        reforgeProcessPlus(startTime, 84036);
+//        reforgeProcessPlus(startTime, 84036);
+        reforgeProcessPlus(startTime, 84027);
 //        WowHead.fetchItem(81687);
 
         printElapsed(startTime);
@@ -53,7 +55,7 @@ public class Main {
         Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
 
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        reforgedItems.get(extraItem.slot.toSlotEquip()).clear(); // replace
+//        reforgedItems.get(extraItem.slot.toSlotEquip()).clear(); // replace
         reforgedItems.get(extraItem.slot.toSlotEquip()).addAll(Reforge.reforgeItem(extraItem));
         System.out.println("EXTRA " + extraItem);
 

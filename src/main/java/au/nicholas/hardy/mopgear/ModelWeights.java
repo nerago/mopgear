@@ -8,15 +8,15 @@ import java.nio.file.Path;
 public class ModelWeights implements Model {
     // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.513,CritRating=0.256,HasteRating=0.448,ExpertiseRating=0.426,MasteryRating=0.260,Ap=0.437,MeleeDps=1.633 )
 
-    public StatBlock weight;
+    private final StatBlock weight;
 
-    public void load(Path file) throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(file)) {
-            parseReader(reader);
+    public ModelWeights(Path weightFile) throws IOException {
+        try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
+            weight = parseReader(reader);
         }
     }
 
-    private static void parseReader(BufferedReader reader) throws IOException {
+    private static StatBlock parseReader(BufferedReader reader) throws IOException {
         StringBuilder build = new StringBuilder();
         while (true) {
             String line = reader.readLine();
@@ -39,6 +39,7 @@ public class ModelWeights implements Model {
                 default -> stat;
             };
         }
+        return stat;
     }
 
     private static StatBlock addNum(StatBlock block, StatType type, String text) {
@@ -53,10 +54,10 @@ public class ModelWeights implements Model {
         total += value.str * weight.str;
         total += value.mastery * weight.mastery;
         total += value.crit * weight.crit;
-        total += value.hit * weight.hit;
+//        total += value.hit * weight.hit;
         total += value.parry * weight.parry;
         total += value.haste * weight.haste;
-        total += value.expertise * weight.expertise;
+//        total += value.expertise * weight.expertise;
         total += value.dodge * weight.dodge;
         return total;
     }

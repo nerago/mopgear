@@ -13,7 +13,7 @@ public class ServiceEntry {
 
     public ServiceEntry() throws IOException {
         itemCache = new ItemCache(cacheFile);
-        model = new ModelWeights();
+        model = new ModelWeights(null);
     }
 
     public Collection<ItemSet> run(String jsonString) throws IOException {
