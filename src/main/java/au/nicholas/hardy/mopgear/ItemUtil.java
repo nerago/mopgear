@@ -21,7 +21,7 @@ public class ItemUtil {
         ItemData item = loadItemBasic(itemCache, id);
 
         if (equippedItem.gems().length > 0) {
-            StatBlock gemStat = GemData.process(equippedItem.gems());
+            StatBlock gemStat = GemData.process(equippedItem.gems(), item.slot);
             item = new ItemData(item.slot, item.name, item.stat, gemStat);
         }
 

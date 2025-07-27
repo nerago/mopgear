@@ -23,12 +23,14 @@ public class ModelCommon {
 
     private static final double RATING_PER_PERCENT = 339.9534;
     //    static final double TARGET_PERCENT = 7.5; // for bosses
-    private static final double TARGET_PERCENT = 6.5; // for heroics
+    private static final double TARGET_PERCENT = 6; // for heroics
     private static final int TARGET_RATING = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT); // 2040 / 2550
 
     private static final int RATING_CAP_ALLOW_EXCEED = 300;
 
     public static final EnumMap<StatType, Integer> requiredAmounts = buildRequired();
+
+    public static boolean blacksmith = true;
 
     private static EnumMap<StatType, Integer> buildRequired() {
         EnumMap<StatType, Integer> map = new EnumMap<>(StatType.class);

@@ -29,7 +29,7 @@ public class Main {
 
 //        reforgeProcess(startTime);
 //        reforgeProcessPlus(startTime, 84036);
-        reforgeProcessPlus(startTime, 84027);
+        reforgeProcessPlus(startTime, 81694, false);
 //        WowHead.fetchItem(81687);
 
         printElapsed(startTime);
@@ -49,13 +49,14 @@ public class Main {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void reforgeProcessPlus(Instant startTime, int extraItemId) throws IOException {
+    private void reforgeProcessPlus(Instant startTime, int extraItemId, boolean replace) throws IOException {
         List<EquippedItem> itemIds = InputParser.readInput(inputFile);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds);
         Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
 
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-//        reforgedItems.get(extraItem.slot.toSlotEquip()).clear(); // replace
+        if (replace)
+            reforgedItems.get(extraItem.slot.toSlotEquip()).clear();
         reforgedItems.get(extraItem.slot.toSlotEquip()).addAll(Reforge.reforgeItem(extraItem));
         System.out.println("EXTRA " + extraItem);
 
