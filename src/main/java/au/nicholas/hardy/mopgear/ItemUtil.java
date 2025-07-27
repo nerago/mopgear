@@ -16,7 +16,7 @@ public class ItemUtil {
         return items;
     }
 
-    public static ItemData loadItem(ItemCache itemCache, EquippedItem equippedItem) throws IOException {
+    public static ItemData loadItem(ItemCache itemCache, EquippedItem equippedItem) {
         int id = equippedItem.id();
         ItemData item = loadItemBasic(itemCache, id);
 
@@ -29,7 +29,7 @@ public class ItemUtil {
         return item;
     }
 
-    public static ItemData loadItemBasic(ItemCache itemCache, int id) throws IOException {
+    public static ItemData loadItemBasic(ItemCache itemCache, int id) {
         ItemData item = itemCache.get(id);
         if (item == null) {
             item = WowHead.fetchItem(id);

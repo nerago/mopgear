@@ -9,7 +9,7 @@ import java.io.StringReader;
 import java.net.URI;
 
 public class WowHead {
-    static ItemData fetchItem(int itemId) throws IOException {
+    static ItemData fetchItem(int itemId) {
         String url = "https://www.wowhead.com/mop-classic/item=" + itemId;
         String htmlContent = fetchHTML(url);
 
@@ -44,10 +44,12 @@ public class WowHead {
         return null;
     }
 
-    private static String fetchHTML(String url) throws IOException {
+    private static String fetchHTML(String url) {
         String htmlContent;
         try (InputStream stream = URI.create(url).toURL().openStream()) {
             htmlContent = new String(stream.readAllBytes());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
         return htmlContent;
     }
@@ -63,12 +65,12 @@ public class WowHead {
         SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
 
         StatBlock statBlock = new StatBlock(
-         objectGetInt(equipObject, "str"),
-         objectGetInt(equipObject, "mastrtng"),
-         objectGetInt(equipObject, "critstrkrtng"),
-         objectGetInt(equipObject, "hitrtng"),
-         objectGetInt(equipObject, "hastertng"),
-         objectGetInt(equipObject, "exprtng"),
+                objectGetInt(equipObject, "str"),
+                objectGetInt(equipObject, "mastrtng"),
+                objectGetInt(equipObject, "critstrkrtng"),
+                objectGetInt(equipObject, "hitrtng"),
+                objectGetInt(equipObject, "hastertng"),
+                objectGetInt(equipObject, "exprtng"),
                 objectGetInt(equipObject, "dodgertng"),
                 objectGetInt(equipObject, "parryrtng"));
 

@@ -24,20 +24,31 @@ public class Main {
         itemCache = new ItemCache(cacheFile);
         ModelCommon.validate();
         model = new ModelWeights(weightFile);
+//        model = new ModelPriority();
 
         Instant startTime = Instant.now();
 
 //        reforgeProcess(startTime);
-//        reforgeProcessPlus(startTime, 84036);
         reforgeProcessPlus(startTime, 81694, false);
 //        WowHead.fetchItem(81687);
+//        rankAlternatives(new int [] {89649,81694});
 
         printElapsed(startTime);
 
         itemCache.cacheSave();
     }
 
-
+    private void rankAlternatives(int[] itemIds) {
+        List<ItemData> reforgedItems = Arrays.stream(itemIds)
+                .mapToObj(x -> new EquippedItem(x, null, new int [0]))
+                .map(x -> ItemUtil.loadItem(itemCache, x))
+                .flatMap(x -> Reforge.reforgeItem(x).stream())
+                .sorted(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))
+                .toList();
+        for (ItemData item : reforgedItems) {
+            System.out.println(item + " " + model.calcRating(item.totalStatCopy()));
+        }
+    }
 
     private void reforgeProcess(Instant startTime) throws IOException {
         List<EquippedItem> itemIds = InputParser.readInput(inputFile);
@@ -78,14 +89,14 @@ public class Main {
 //        });
 //    }
 
-    private static void outputResult(Collection<ItemSet> bestSets) {
+    private void outputResult(Collection<ItemSet> bestSets) {
         System.out.println("@@@@@@@@@ Set count " + bestSets.size() + " @@@@@@@@@");
         bestSets.forEach(s -> System.out.println(s.getTotals()));
         bestSets.forEach(s -> {
             System.out.println("#######################################");
-            System.out.println(s.getTotals());
+            System.out.println(s.getTotals() + " " + model.calcRating(s.getTotals()));
             for (ItemData it : s.getItems().toArrayReverse(ItemData[]::new)) {
-                System.out.println(it);
+                System.out.println(it + " " + model.calcRating(it.totalStatCopy()));
             }
         });
     }
