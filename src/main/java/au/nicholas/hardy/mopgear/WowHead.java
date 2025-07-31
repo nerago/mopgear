@@ -34,7 +34,7 @@ public class WowHead {
             JsonObject itemObject = json.get(String.valueOf(itemId)).getAsJsonObject();
             System.out.println(itemObject);
 
-            ItemData item = buildItem(itemObject);
+            ItemData item = buildItem(itemObject, itemId);
             System.out.println(item);
 //            throw  new RuntimeException("todo");
             return item;
@@ -58,7 +58,7 @@ public class WowHead {
 //    "jsonequip":{"appearances":{"0":[104069,""]},"armor":2995,"buyprice":946846,"classes":2,"displayid":104069,"dura":100,"exprtng":277,"hitrtng":237,"itemset":1064,"nsockets":2,"races":2099199,"reqlevel":85,"sellprice":189369,"slotbak":1,"socket1":1,"socket2":2,"socketbonus":4158,"sta":646,"str":371},
 //    "attainable":0,"flags2":134242304,"displayName":"","qualityTier":0}
 
-    private static ItemData buildItem(JsonObject itemObject) {
+    private static ItemData buildItem(JsonObject itemObject, int itemId) {
         String name = objectGetString(itemObject, "name_enus");
 
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
@@ -74,7 +74,7 @@ public class WowHead {
                 objectGetInt(equipObject, "dodgertng"),
                 objectGetInt(equipObject, "parryrtng"));
 
-        return new ItemData(slot, name, statBlock, StatBlock.empty);
+        return new ItemData(slot, name, statBlock, StatBlock.empty, itemId);
     }
 
     @SuppressWarnings("SameParameterValue")

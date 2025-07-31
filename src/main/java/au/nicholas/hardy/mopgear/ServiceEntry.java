@@ -13,7 +13,7 @@ public class ServiceEntry {
 
     public ServiceEntry() throws IOException {
         itemCache = new ItemCache(cacheFile);
-        model = new ModelWeights(null);
+        model = new ModelWeights(null, true);
     }
 
     public Collection<ItemSet> run(String jsonString) throws IOException {
@@ -24,7 +24,7 @@ public class ServiceEntry {
         List<EquippedItem> itemIds = InputParser.readString(jsonString);
         List<ItemData> items;
         synchronized (itemCache) {
-            items = ItemUtil.loadItems(itemCache, itemIds);
+            items = ItemUtil.loadItems(itemCache, itemIds, false);
         }
         Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
         return EngineStream.runSolver(model, reforgedItems, null);

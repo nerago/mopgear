@@ -5,16 +5,18 @@ public final class ItemData {
     public final String name;
     public final StatBlock stat;
     public final StatBlock statFixed;
+    public final int id;
 
-    public ItemData(SlotItem slot, String name, StatBlock stat, StatBlock statFixed) {
+    public ItemData(SlotItem slot, String name, StatBlock stat, StatBlock statFixed, int id) {
         this.slot = slot;
         this.name = name;
         this.stat = stat;
         this.statFixed = statFixed;
+        this.id = id;
     }
 
     public ItemData copy() {
-        return new ItemData(slot, name, stat.copy(), statFixed);
+        return new ItemData(slot, name, stat.copy(), statFixed, id);
     }
 
     public StatBlock totalStatCopy() {

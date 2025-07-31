@@ -9,11 +9,13 @@ public class ModelWeights implements Model {
     // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.513,CritRating=0.256,HasteRating=0.448,ExpertiseRating=0.426,MasteryRating=0.260,Ap=0.437,MeleeDps=1.633 )
 
     private final StatBlock weight;
+    private final boolean includeHit;
 
-    public ModelWeights(Path weightFile) throws IOException {
+    public ModelWeights(Path weightFile, boolean includeHit) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
             weight = parseReader(reader);
         }
+        this.includeHit = includeHit;
     }
 
     private static StatBlock parseReader(BufferedReader reader) throws IOException {
@@ -54,11 +56,13 @@ public class ModelWeights implements Model {
         total += value.str * weight.str;
         total += value.mastery * weight.mastery;
         total += value.crit * weight.crit;
-//        total += value.hit * weight.hit;
         total += value.parry * weight.parry;
         total += value.haste * weight.haste;
-//        total += value.expertise * weight.expertise;
         total += value.dodge * weight.dodge;
+        if (includeHit) {
+            total += value.hit * weight.hit;
+            total += value.expertise * weight.expertise;
+        }
         return total;
     }
 }

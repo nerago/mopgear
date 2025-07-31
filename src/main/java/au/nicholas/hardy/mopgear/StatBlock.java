@@ -40,6 +40,9 @@ public final class StatBlock {
 
     int get(StatType stat) {
         switch (stat) {
+            case Strength -> {
+                return str;
+            }
             case Mastery -> {
                 return mastery;
             }
@@ -66,6 +69,7 @@ public final class StatBlock {
     }
 
     StatBlock withChange(StatType a_stat, int a_value) {
+        int str = this.str;
         int mastery = this.mastery;
         int crit = this.crit;
         int hit = this.hit;
@@ -74,6 +78,7 @@ public final class StatBlock {
         int dodge = this.dodge;
         int parry = this.parry;
         switch (a_stat) {
+            case Strength -> str = a_value;
             case Mastery -> mastery = a_value;
             case Crit -> crit = a_value;
             case Hit -> hit = a_value;
@@ -81,6 +86,7 @@ public final class StatBlock {
             case Expertise -> expertise = a_value;
             case Dodge -> dodge = a_value;
             case Parry -> parry = a_value;
+            default -> throw new IllegalArgumentException();
         }
         return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
     }
@@ -101,6 +107,7 @@ public final class StatBlock {
             case Expertise -> expertise = a_value;
             case Dodge -> dodge = a_value;
             case Parry -> parry = a_value;
+            default -> throw new IllegalArgumentException();
         }
         switch (b_stat) {
             case Mastery -> mastery = b_value;
@@ -110,6 +117,7 @@ public final class StatBlock {
             case Expertise -> expertise = b_value;
             case Dodge -> dodge = b_value;
             case Parry -> parry = b_value;
+            default -> throw new IllegalArgumentException();
         }
         return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
     }

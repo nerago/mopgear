@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.BigStreamUtil;
 import au.nicholas.hardy.mopgear.util.TopCollector1;
 
 import java.time.Instant;
@@ -10,8 +11,8 @@ public class EngineStream {
     static Collection<ItemSet> runSolver(Model model, Map<SlotEquip, List<ItemData>> items, Instant startTime) {
         long estimate = estimateSets(items);
         Stream<ItemSet> initialSets = generateItemCombinations(items);
-//        if (startTime != null)
-//            initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
+        if (startTime != null)
+            initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
 
         Stream<ItemSet> filteredSets = ModelCommon.filterSets(initialSets);
         Stream<ItemSet> finalSets = makeFinalisedSets(model, filteredSets);

@@ -7,22 +7,22 @@ import java.util.List;
 import java.util.Map;
 
 public class ItemUtil {
-    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds) throws IOException {
+    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) throws IOException {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
-            ItemData item = loadItem(itemCache, equippedItem);
+            ItemData item = loadItem(itemCache, equippedItem, detailedOutput);
             items.add(item);
         }
         return items;
     }
 
-    public static ItemData loadItem(ItemCache itemCache, EquippedItem equippedItem) {
+    public static ItemData loadItem(ItemCache itemCache, EquippedItem equippedItem, boolean detailedOutput) {
         int id = equippedItem.id();
         ItemData item = loadItemBasic(itemCache, id);
 
         if (equippedItem.gems().length > 0) {
             StatBlock gemStat = GemData.process(equippedItem.gems(), item.slot);
-            item = new ItemData(item.slot, item.name, item.stat, gemStat);
+            item = new ItemData(item.slot, item.name, item.stat, gemStat, id);
         }
 
         System.out.println(id + ": " + item + " with " + equippedItem.enchant());

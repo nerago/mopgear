@@ -17,13 +17,17 @@ public class GemData {
         map.put(77543, new StatBlock(0, 0, 0, 0, 0, 600, 0, 0));
         map.put(76537, new StatBlock(60, 0, 0, 0, 120, 0, 0, 0));
         map.put(76633, new StatBlock(0, 0, 0, 0, 320, 0, 0, 0));
+        map.put(76699, new StatBlock(0, 0, 0, 0, 320, 0, 0, 0));
+        map.put(76618, new StatBlock(80, 0, 0, 160, 0, 0, 0, 0));
+        map.put(76642, new StatBlock(0, 0, 0, 160, 160, 0, 0, 0));
+        map.put(76636, new StatBlock(0, 0, 0, 320, 0, 0, 0, 0));
         return map;
     }
 
     public static StatBlock process(int[] gemIds, SlotItem slot) {
-        if (ModelCommon.blacksmith && (slot == SlotItem.Wrist || slot == SlotItem.Hand) && gemIds.length > 0) {
-            gemIds = Arrays.copyOf(gemIds, gemIds.length - 1);
-        }
+//        if (ModelCommon.blacksmith && (slot == SlotItem.Wrist || slot == SlotItem.Hand) && gemIds.length > 0) {
+//            gemIds = Arrays.copyOf(gemIds, gemIds.length - 1);
+//        }
 
         StatBlock result = StatBlock.empty;
         for (int id : gemIds) {

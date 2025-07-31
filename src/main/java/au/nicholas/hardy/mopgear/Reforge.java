@@ -17,7 +17,7 @@ public class Reforge {
                     if (baseItem.stat.get(targetStat) == 0) {
                         String name = baseItem.name + " (" + originalStat + "->" + targetStat + ")";
                         StatBlock changedStats = baseItem.stat.withChange(originalStat, remainQuantity, targetStat, reforgeQuantity);
-                        ItemData modified = new ItemData(baseItem.slot, name, changedStats, baseItem.statFixed);
+                        ItemData modified = new ItemData(baseItem.slot, name, changedStats, baseItem.statFixed, baseItem.id);
                         outputItems.add(modified);
                     }
                 }
