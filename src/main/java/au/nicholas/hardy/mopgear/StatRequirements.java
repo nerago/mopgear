@@ -7,11 +7,12 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ModelCommon {
-    public static StatType[] reforgeSource = new StatType[]{StatType.Mastery, StatType.Crit, StatType.Hit, StatType.Haste, StatType.Expertise, StatType.Dodge, StatType.Parry};
-
-    //    static final Secondary[] reforgeTargets = new Secondary[]{Secondary.Hit, Secondary.Expertise, Secondary.Haste, Secondary.Mastery};
-    public static final StatType[] reforgeTargets = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Haste};
+public class StatRequirements {
+    public StatRequirements(boolean blacksmith, boolean parryExpertise) {
+        this.blacksmith = blacksmith;
+        this.parryExpertise = parryExpertise;
+        this.requiredAmounts = buildRequired(parryExpertise);
+    }
 
     private static final double RATING_PER_PERCENT = 339.9534;
         static final double TARGET_PERCENT = 7.5; // for bosses
@@ -20,27 +21,32 @@ public class ModelCommon {
 
     private static final int RATING_CAP_ALLOW_EXCEED = 300;
 
-    public static final EnumMap<StatType, Integer> requiredAmounts = buildRequired();
+    public final EnumMap<StatType, Integer> requiredAmounts;
+    public final boolean blacksmith;
+    public final boolean parryExpertise;
 
-    public static boolean blacksmith = true;
-
-    private static EnumMap<StatType, Integer> buildRequired() {
+    private static EnumMap<StatType, Integer> buildRequired(boolean parryExpertise) {
         EnumMap<StatType, Integer> map = new EnumMap<>(StatType.class);
         map.put(StatType.Hit, TARGET_RATING);
-        map.put(StatType.Expertise, TARGET_RATING);
+//        if (parryExpertise)
+//            map.put(StatType.Expertise, TARGET_RATING * 2);
+//        else
+//            map.put(StatType.Expertise, TARGET_RATING);
+        if (!parryExpertise)
+            map.put(StatType.Expertise, TARGET_RATING);
         return map;
     }
 
-    public static void validate() {
-        if (Arrays.stream(reforgeTargets).distinct().count() != reforgeTargets.length)
-            throw new IllegalStateException("reforgeTargets not distinct");
-        if (!Arrays.asList(reforgeTargets).containsAll(requiredAmounts.keySet()))
-            throw new IllegalStateException("todo");
-    }
+//    public void validate() {
+//        if (Arrays.stream(reforgeTargets).distinct().count() != reforgeTargets.length)
+//            throw new IllegalStateException("reforgeTargets not distinct");
+//        if (!Arrays.asList(reforgeTargets).containsAll(requiredAmounts.keySet()))
+//            throw new IllegalStateException("todo");
+//    }
 
-    public static Stream<ItemSet> filterSets(Stream<ItemSet> sets) {
+    public Stream<ItemSet> filterSets(Stream<ItemSet> sets) {
 //        return sets.filter(set -> hasNoDuplicate(set.items) && inRange2(set.getTotals()));
-        return sets.filter(set -> inRange2(set.getTotals()));
+        return sets.filter(set -> inRange(set.getTotals()));
     }
 
     private static boolean hasNoDuplicate(CurryQueue<ItemData> items) {
@@ -66,7 +72,7 @@ public class ModelCommon {
         return true;
     }
 
-    public static boolean inRange2(StatBlock totals) {
+    public boolean inRange(StatBlock totals) {
         for (Map.Entry<StatType, Integer> entry : requiredAmounts.entrySet()) {
             int val = totals.get(entry.getKey()), cap = entry.getValue();
             if (val < cap || val > cap + RATING_CAP_ALLOW_EXCEED)

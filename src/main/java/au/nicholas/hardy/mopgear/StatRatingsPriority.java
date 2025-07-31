@@ -2,14 +2,21 @@ package au.nicholas.hardy.mopgear;
 
 import java.util.Arrays;
 
-public class ModelPriority implements Model {
-    private static final StatType[] priority = new StatType[]{StatType.Haste, StatType.Mastery, StatType.Crit};
+public class StatRatingsPriority implements StatRatings {
+    private final StatType[] priority;
 
-    @SuppressWarnings("ConstantValue")
-    public static void validate() {
+//    public ModelPriority() {
+//        priority = new StatType[]{StatType.Haste, StatType.Mastery, StatType.Crit};
+//    }
+
+    public StatRatingsPriority(StatType[] priority) {
+        this.priority = priority;
+    }
+
+    public void validate() {
         if (priority.length > 3)
             throw new IllegalStateException("can't use current number ranking");
-        if (Arrays.stream(priority).distinct().count() != ModelPriority.priority.length)
+        if (Arrays.stream(priority).distinct().count() != priority.length)
             throw new IllegalStateException("priorities not distinct");
     }
 

@@ -13,7 +13,8 @@ public enum SlotItem {
     Foot(8, SlotEquip.Foot),
     Ring(11, SlotEquip.Ring1),
     Trinket(12, SlotEquip.Trinket1),
-    Weapon(17, SlotEquip.Weapon),
+//    Weapon(17, SlotEquip.Weapon), // 2H
+    Weapon(13, SlotEquip.Weapon), // 1H
     Offhand(14, SlotEquip.Offhand);
 
     private final int wowHeadSlotNum;

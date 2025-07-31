@@ -7,7 +7,7 @@ import java.util.function.ToLongFunction;
 public final class ItemSet {
     public final CurryQueue<ItemData> items;
     public final StatBlock totals;
-    public long statRating;
+//    public long statRating;
 
     private ItemSet(CurryQueue<ItemData> items, StatBlock totals) {
         this.items = items;
@@ -22,14 +22,14 @@ public final class ItemSet {
         return new ItemSet(items.prepend(item), totals.plus(item.totalStatCopy()));
     }
 
-    public ItemSet finished(ToLongFunction<StatBlock> func) {
-        statRating = func.applyAsLong(totals);
-        return this;
-    }
-
-    public long getStatRating() {
-        return statRating;
-    }
+//    public ItemSet finished(ToLongFunction<StatBlock> func) {
+//        statRating = func.applyAsLong(totals);
+//        return this;
+//    }
+//
+//    public long getStatRating() {
+//        return statRating;
+//    }
 
     public StatBlock getTotals() {
         return totals;

@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ModelWeights implements Model {
+public class StatRatingsWeights implements StatRatings {
     // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.513,CritRating=0.256,HasteRating=0.448,ExpertiseRating=0.426,MasteryRating=0.260,Ap=0.437,MeleeDps=1.633 )
 
     private final StatBlock weight;
     private final boolean includeHit;
 
-    public ModelWeights(Path weightFile, boolean includeHit) throws IOException {
+    public StatRatingsWeights(Path weightFile, boolean includeHit) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
             weight = parseReader(reader);
         }

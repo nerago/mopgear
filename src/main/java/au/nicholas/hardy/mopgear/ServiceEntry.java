@@ -9,11 +9,13 @@ import static au.nicholas.hardy.mopgear.Main.cacheFile;
 
 public class ServiceEntry {
     private final ItemCache itemCache;
-    private final ModelWeights model;
+    private final ModelCombined model;
 
     public ServiceEntry() throws IOException {
         itemCache = new ItemCache(cacheFile);
-        model = new ModelWeights(null, true);
+        StatRatingsWeights ratings = new StatRatingsWeights(null, true);
+        StatRequirements requirements = new StatRequirements(true, false);
+        model = new ModelCombined(ratings, requirements, new ReforgeRules());
     }
 
     public Collection<ItemSet> run(String jsonString) throws IOException {
@@ -26,7 +28,7 @@ public class ServiceEntry {
         synchronized (itemCache) {
             items = ItemUtil.loadItems(itemCache, itemIds, false);
         }
-        Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsToMap(items);
+        Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
         return EngineStream.runSolver(model, reforgedItems, null);
     }
 }

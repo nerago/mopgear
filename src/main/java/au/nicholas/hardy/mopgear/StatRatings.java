@@ -1,5 +1,5 @@
 package au.nicholas.hardy.mopgear;
 
-public interface Model {
+public interface StatRatings {
     long calcRating(StatBlock totals);
 }

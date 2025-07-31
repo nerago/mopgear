@@ -42,16 +42,16 @@ public class ItemUtil {
         return item;
     }
 
-    public static Map<SlotEquip, List<ItemData>> standardItemsToMap(List<ItemData> items) {
+    public static Map<SlotEquip, List<ItemData>> standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
         Map<SlotEquip, List<ItemData>> map = new EnumMap<>(SlotEquip.class);
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
-                map.put(SlotEquip.Ring2, Reforge.reforgeItem(item));
+                map.put(SlotEquip.Ring2, Reforger.reforgeItem(rules, item));
             } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
-                map.put(SlotEquip.Trinket2, Reforge.reforgeItem(item));
+                map.put(SlotEquip.Trinket2, Reforger.reforgeItem(rules, item));
             } else {
-                map.put(slot, Reforge.reforgeItem(item));
+                map.put(slot, Reforger.reforgeItem(rules, item));
             }
         }
         return map;
