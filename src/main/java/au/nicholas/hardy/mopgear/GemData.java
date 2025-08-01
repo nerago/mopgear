@@ -24,6 +24,15 @@ public class GemData {
         map.put(76570, new StatBlock(0, 0, 0, 320, 0, 0, 0, 0));
         map.put(76693, new StatBlock(0, 0, 0, 0, 0, 320, 0, 0));
         map.put(76576, new StatBlock(0, 0, 0, 160, 160, 0, 0, 0));
+        map.put(4419, new StatBlock(80, 0, 0, 0, 0, 0, 0, 0)); // chest stats
+        map.put(4411, new StatBlock(0, 170, 0, 0, 0, 0, 0, 0)); // bracer
+        map.put(4432, new StatBlock(170, 0, 0, 0, 0, 0, 0, 0)); // glove
+        map.put(4426, new StatBlock(0, 0, 0, 0, 175, 0, 0, 0)); // foot
+        map.put(4099, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0)); // weap
+        map.put(4441, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0)); // weap
+        map.put(5001, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0)); // shield spike
+        map.put(4412, new StatBlock(0, 0, 0, 0, 0, 0, 170, 0)); // bracer
+        map.put(4427, new StatBlock(0, 0, 0, 175, 0, 0, 170, 0)); // foot
         return map;
     }
 

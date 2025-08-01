@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -45,9 +46,9 @@ public class Main {
 
     private void exceptionalCheck(Instant startTime) {
         try {
-//            multiSpecSequential(startTime);
+            multiSpecSequential(startTime);
 //            multiSpecReforge(startTime);
-        reforgeRet(startTime);
+//        reforgeRet(startTime);
 //            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -74,10 +75,10 @@ public class Main {
         StatRequirements statRequirements = new StatRequirements(false, false);
         ModelCombined model = new ModelCombined(statRatings, statRequirements, new ReforgeRules());
 
-        reforgeProcess(model, startTime, true);
+//        reforgeProcess(model, startTime, true);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 //        reforgeProcessPlus(model, startTime, 89345, true); // shoulder
-//        reforgeProcessPlus(model, startTime, 81113, false);
+        reforgeProcessPlus(model, startTime, 90910, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
     }
 
@@ -94,7 +95,7 @@ public class Main {
 
     private void rankAlternatives(ModelCombined model, int[] itemIds) {
         List<ItemData> reforgedItems = Arrays.stream(itemIds)
-                .mapToObj(x -> new EquippedItem(x, null, new int[0]))
+                .mapToObj(x -> new EquippedItem(x, new int[0]))
                 .map(x -> ItemUtil.loadItem(itemCache, x, true))
                 .flatMap(x -> Reforger.reforgeItem(model.getReforgeRules(), x).stream())
                 .sorted(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))
@@ -150,6 +151,7 @@ public class Main {
 
     private void reportBetter(ItemSet itemSet, ModelCombined modelRet, ModelCombined modelProt) {
         long rating = modelProt.calcRating(itemSet) + modelRet.calcRating(itemSet.otherSet);
+        System.out.println(LocalDateTime.now());
         System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         itemSet.otherSet.outputSet(modelRet);
         System.out.println("--------------------------------------- " + rating);

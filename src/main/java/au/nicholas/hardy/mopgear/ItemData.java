@@ -15,10 +15,6 @@ public final class ItemData {
         this.id = id;
     }
 
-    public ItemData copy() {
-        return new ItemData(slot, name, stat.copy(), statFixed, id);
-    }
-
     public StatBlock totalStatCopy() {
         if (statFixed.isEmpty())
             return stat.copy();

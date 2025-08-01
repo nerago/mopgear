@@ -30,6 +30,8 @@ public enum SlotItem {
             if (slot.wowHeadSlotNum == wowHeadSlotNum)
                 return slot;
         }
+        if (wowHeadSlotNum == 17)
+            return SlotItem.Weapon;
         throw new IllegalArgumentException("unknown slot " + wowHeadSlotNum);
     }
 

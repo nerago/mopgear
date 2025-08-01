@@ -24,7 +24,7 @@ public class ItemUtil {
             item = new ItemData(item.slot, item.name, item.stat, gemStat, id);
         }
 
-        System.out.println(id + ": " + item + " with " + equippedItem.enchant());
+        System.out.println(id + ": " + item);
         return item;
     }
 

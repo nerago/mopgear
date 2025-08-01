@@ -58,7 +58,7 @@ public class EngineStream {
     }
 
     private static Stream<ItemSet> newCombinationStream(SlotEquip slot, List<ItemData> slotItems, ItemSet otherSet) {
-        shuffle(slotItems);
+//        shuffle(slotItems);
         final ItemSet[] initialSets = new ItemSet[slotItems.size()];
         for (int i = 0; i < slotItems.size(); ++i) {
             initialSets[i] = ItemSet.singleItem(slot, slotItems.get(i), otherSet);
@@ -68,7 +68,7 @@ public class EngineStream {
     }
 
     private static Stream<ItemSet> applyItemsToCombination(Stream<ItemSet> stream, SlotEquip slot, List<ItemData> slotItems) {
-        shuffle(slotItems);
+//        shuffle(slotItems);
         Stream<ItemSet> n = stream.mapMulti((set, sink) -> {
             for (ItemData add : slotItems) {
                 sink.accept(set.copyWithAddedItem(slot, add));

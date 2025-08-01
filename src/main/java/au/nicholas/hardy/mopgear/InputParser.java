@@ -12,6 +12,7 @@ import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class InputParser {
@@ -36,20 +37,25 @@ public class InputParser {
                 JsonObject elementObject = element.getAsJsonObject();
                 int id = elementObject.get("id").getAsInt();
 
-                String enchant;
-                if (elementObject.has("enchant")) {
-                    enchant = elementObject.get("enchant").getAsString();
-                } else {
-                    enchant = "MISSING ENCHANT";
-                }
-
                 int[] gems = null;
                 if (elementObject.has("gems")) {
                     JsonArray array = elementObject.get("gems").getAsJsonArray();
                     gems = array.asList().stream().mapToInt(JsonElement::getAsInt).toArray();
                 }
 
-                result.add(new EquippedItem(id, enchant, gems));
+                if (elementObject.has("enchant")) {
+                    int enchantId = elementObject.get("enchant").getAsInt();
+                    if (gems == null) {
+                        gems = new int[]{enchantId};
+                    } else {
+                        gems = Arrays.copyOf(gems, gems.length + 1);
+                        gems[gems.length - 1] = enchantId;
+                    }
+                }
+
+                // TODO new version of missing enchant warning
+
+                result.add(new EquippedItem(id, gems));
             }
         }
         return result;
