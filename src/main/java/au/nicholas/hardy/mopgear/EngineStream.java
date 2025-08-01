@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.Collections.shuffle;
 import static java.util.Spliterator.*;
 import static java.util.Spliterator.IMMUTABLE;
 
@@ -20,7 +21,7 @@ public class EngineStream {
 
     public static Stream<ItemSet> runSolverPartial(ModelCombined model, Map<SlotEquip, List<ItemData>> items, Instant startTime, ItemSet otherSet) {
         long estimate = estimateSets(items);
-        Stream<ItemSet> initialSets = generateItemCombinations(items, otherSet);
+        Stream<ItemSet> initialSets = generateItemCombinations(items, model, otherSet);
 
         if (startTime != null)
             initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
@@ -38,11 +39,9 @@ public class EngineStream {
 //        return initialSets.map(x -> x.finished(model::calcRating));
 //    }
 
-    private static Stream<ItemSet> generateItemCombinations(Map<SlotEquip, List<ItemData>> itemsBySlot, ItemSet otherSet) {
+    private static Stream<ItemSet> generateItemCombinations(Map<SlotEquip, List<ItemData>> itemsBySlot, ModelCombined model, ItemSet otherSet) {
         Stream<ItemSet> stream = null;
 
-//        ArrayList<List<ItemData>> listList = new ArrayList<>(itemsBySlot.values());
-//        listList.sort(Comparator.comparing(x -> x.size()));
         List<Map.Entry<SlotEquip, List<ItemData>>> sortedEntries =
                 itemsBySlot.entrySet()
                         .stream()
@@ -53,14 +52,13 @@ public class EngineStream {
             } else {
                 stream = applyItemsToCombination(stream, slotEntry.getKey(), slotEntry.getValue());
             }
+            stream = model.filterSetsMax(stream);
         }
         return stream;
     }
 
     private static Stream<ItemSet> newCombinationStream(SlotEquip slot, List<ItemData> slotItems, ItemSet otherSet) {
-//        return slotItems.parallelStream().unordered().map(ItemSet::singleItem);
-//        return slotItems.parallelStream().map(ItemSet::singleItem);
-
+        shuffle(slotItems);
         final ItemSet[] initialSets = new ItemSet[slotItems.size()];
         for (int i = 0; i < slotItems.size(); ++i) {
             initialSets[i] = ItemSet.singleItem(slot, slotItems.get(i), otherSet);
@@ -70,6 +68,7 @@ public class EngineStream {
     }
 
     private static Stream<ItemSet> applyItemsToCombination(Stream<ItemSet> stream, SlotEquip slot, List<ItemData> slotItems) {
+        shuffle(slotItems);
         Stream<ItemSet> n = stream.mapMulti((set, sink) -> {
             for (ItemData add : slotItems) {
                 sink.accept(set.copyWithAddedItem(slot, add));
@@ -77,10 +76,4 @@ public class EngineStream {
         });
         return n.parallel();
     }
-
-//    static Stream<ItemSet> listStream(final List<ItemData> addItems) {
-//        final ItemData[] array = addItems.toArray(new ItemData[0]);
-//        final Spliterator<ItemData> split = Spliterators.spliterator(array, SIZED | SUBSIZED | ORDERED | DISTINCT | NONNULL | IMMUTABLE);
-//        return StreamSupport.stream(split, true);
-//    }
 }

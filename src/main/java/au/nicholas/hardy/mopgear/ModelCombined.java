@@ -22,10 +22,13 @@ public class ModelCombined implements StatRatings {
         return statRatings.calcRating(totals);
     }
 
-    public Stream<ItemSet> filterSets(Stream<ItemSet> sets) {
-        return statRequirements.filterSets(sets);
+    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
+        return statRequirements.filterSets(stream);
     }
 
+    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
+        return statRequirements.filterSetsMax(stream);
+    }
     public StatRatings getStatRatings() {
         return statRatings;
     }

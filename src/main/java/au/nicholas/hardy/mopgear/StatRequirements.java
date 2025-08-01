@@ -8,45 +8,38 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class StatRequirements {
-    public StatRequirements(boolean blacksmith, boolean parryExpertise) {
+    public StatRequirements(boolean blacksmith, boolean tankExpertise) {
         this.blacksmith = blacksmith;
-        this.parryExpertise = parryExpertise;
-        this.requiredAmounts = buildRequired(parryExpertise);
+        this.tankExpertise = tankExpertise;
+
+        requiredHit = TARGET_RATING_REGULAR;
+        if (tankExpertise)
+//            requiredExpertise = TARGET_RATING_TANK;
+            requiredExpertise = 0;
+        else
+            requiredExpertise = TARGET_RATING_REGULAR;
     }
 
     private static final double RATING_PER_PERCENT = 339.9534;
-        static final double TARGET_PERCENT = 7.5; // for bosses
-//    private static final double TARGET_PERCENT = 6; // for heroics
-    private static final int TARGET_RATING = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT); // 2040 / 2550
+    static final double TARGET_PERCENT_REGULAR = 7.5;
+    static final double TARGET_PERCENT_TANK = 15;
+    private static final int TARGET_RATING_REGULAR = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_REGULAR); // 2550
+    private static final int TARGET_RATING_TANK = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_TANK); // 5100
 
-    private static final int RATING_CAP_ALLOW_EXCEED = 100;
+    private static final int RATING_CAP_ALLOW_EXCEED = 50;
 
-    public final EnumMap<StatType, Integer> requiredAmounts;
-    public final boolean blacksmith;
-    public final boolean parryExpertise;
+    private final int requiredHit;
+    private final int requiredExpertise;
+    private final boolean blacksmith;
+    private final boolean tankExpertise;
 
-    private static EnumMap<StatType, Integer> buildRequired(boolean parryExpertise) {
-        EnumMap<StatType, Integer> map = new EnumMap<>(StatType.class);
-        map.put(StatType.Hit, TARGET_RATING);
-//        if (parryExpertise)
-//            map.put(StatType.Expertise, TARGET_RATING * 2);
-//        else
-//            map.put(StatType.Expertise, TARGET_RATING);
-        if (!parryExpertise)
-            map.put(StatType.Expertise, TARGET_RATING);
-        return map;
+    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
+//        return sets.filter(set -> hasNoDuplicate(set.items) && inRange2(set.getTotals()));
+        return stream.filter(set -> inRange(set.getTotals()));
     }
 
-//    public void validate() {
-//        if (Arrays.stream(reforgeTargets).distinct().count() != reforgeTargets.length)
-//            throw new IllegalStateException("reforgeTargets not distinct");
-//        if (!Arrays.asList(reforgeTargets).containsAll(requiredAmounts.keySet()))
-//            throw new IllegalStateException("todo");
-//    }
-
-    public Stream<ItemSet> filterSets(Stream<ItemSet> sets) {
-//        return sets.filter(set -> hasNoDuplicate(set.items) && inRange2(set.getTotals()));
-        return sets.filter(set -> inRange(set.getTotals()));
+    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
+        return stream.filter(set -> inRangeMax(set.getTotals()));
     }
 
     private static boolean hasNoDuplicate(CurryQueue<ItemData> items) {
@@ -72,10 +65,27 @@ public class StatRequirements {
         return true;
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     public boolean inRange(StatBlock totals) {
-        for (Map.Entry<StatType, Integer> entry : requiredAmounts.entrySet()) {
-            int val = totals.get(entry.getKey()), cap = entry.getValue();
-            if (val < cap || val > cap + RATING_CAP_ALLOW_EXCEED)
+        if (requiredHit != 0) {
+            if (totals.hit < requiredHit || totals.hit > requiredHit + RATING_CAP_ALLOW_EXCEED)
+                return false;
+        }
+        if (requiredExpertise != 0) {
+            if (totals.expertise < requiredExpertise || totals.expertise > requiredExpertise + RATING_CAP_ALLOW_EXCEED)
+                return false;
+        }
+        return true;
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean inRangeMax(StatBlock totals) {
+        if (requiredHit != 0) {
+            if (totals.hit > requiredHit + RATING_CAP_ALLOW_EXCEED)
+                return false;
+        }
+        if (requiredExpertise != 0) {
+            if (totals.expertise > requiredExpertise + RATING_CAP_ALLOW_EXCEED)
                 return false;
         }
         return true;

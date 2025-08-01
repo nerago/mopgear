@@ -45,9 +45,9 @@ public class Main {
 
     private void exceptionalCheck(Instant startTime) {
         try {
-            multiSpecSequential(startTime);
+//            multiSpecSequential(startTime);
 //            multiSpecReforge(startTime);
-//        reforgeRet(startTime);
+        reforgeRet(startTime);
 //            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -119,6 +119,7 @@ public class Main {
         EnumMap<SlotEquip, List<ItemData>> retMap = readAndLoad2(true, inputFile, reforgeRules);
         System.out.println("PROT GEAR CURRENT");
         EnumMap<SlotEquip, List<ItemData>> protMap = readAndLoad2(true, inputProtFile, reforgeRules);
+        validateDualSets(retMap, protMap);
 
         Stream<ItemSet> retStream = EngineStream.runSolverPartial(modelRet, retMap, startTime, null);
 
@@ -134,10 +135,24 @@ public class Main {
         outputResult(best, modelProt, true);
     }
 
+    private void validateDualSets(EnumMap<SlotEquip, List<ItemData>> retMap, EnumMap<SlotEquip, List<ItemData>> protMap) {
+        if (protMap.get(SlotEquip.Offhand) == null || protMap.get(SlotEquip.Offhand).isEmpty())
+            throw new IllegalArgumentException("no shield");
+        if (protMap.get(SlotEquip.Ring1).getFirst().id == retMap.get(SlotEquip.Ring2).getFirst().id)
+            throw new IllegalArgumentException("duplicate in non matching slot");
+        if (protMap.get(SlotEquip.Ring2).getFirst().id == retMap.get(SlotEquip.Ring1).getFirst().id)
+            throw new IllegalArgumentException("duplicate in non matching slot");
+        if (protMap.get(SlotEquip.Trinket1).getFirst().id == retMap.get(SlotEquip.Trinket2).getFirst().id)
+            throw new IllegalArgumentException("duplicate in non matching slot");
+        if (protMap.get(SlotEquip.Trinket2).getFirst().id == retMap.get(SlotEquip.Trinket1).getFirst().id)
+            throw new IllegalArgumentException("duplicate in non matching slot");
+    }
+
     private void reportBetter(ItemSet itemSet, ModelCombined modelRet, ModelCombined modelProt) {
+        long rating = modelProt.calcRating(itemSet) + modelRet.calcRating(itemSet.otherSet);
         System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         itemSet.otherSet.outputSet(modelRet);
-        System.out.println("---------------------------------------");
+        System.out.println("--------------------------------------- " + rating);
         itemSet.outputSet(modelProt);
         System.out.println("#######################################");
     }

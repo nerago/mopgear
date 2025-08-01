@@ -11,10 +11,11 @@ public class StatRatingsPriority implements StatRatings {
 
     public StatRatingsPriority(StatType[] priority) {
         this.priority = priority;
+        validate();
     }
 
     public void validate() {
-        if (priority.length > 3)
+        if (priority.length != 4)
             throw new IllegalStateException("can't use current number ranking");
         if (Arrays.stream(priority).distinct().count() != priority.length)
             throw new IllegalStateException("priorities not distinct");
@@ -29,9 +30,11 @@ public class StatRatingsPriority implements StatRatings {
     @Override
     public long calcRating(StatBlock totals) {
         long value = 0;
+        long multiply = 1000;
         for (StatType stat : priority) {
-            value = (value << 16) | totals.get(stat);
+            value += totals.get(stat) * multiply;
+            multiply /= 10;
         }
-        return value;
+        return value * 3; // scale to similar rates
     }
 }
