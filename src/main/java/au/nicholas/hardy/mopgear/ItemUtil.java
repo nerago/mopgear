@@ -1,10 +1,9 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.Tuple;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ItemUtil {
     public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) throws IOException {
@@ -50,6 +49,25 @@ public class ItemUtil {
                 map.put(SlotEquip.Ring2, Reforger.reforgeItem(rules, item));
             } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
                 map.put(SlotEquip.Trinket2, Reforger.reforgeItem(rules, item));
+            } else {
+                map.put(slot, Reforger.reforgeItem(rules, item));
+            }
+        }
+        return map;
+    }
+
+    public static Map<SlotEquip, List<ItemData>> limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
+                                                                           Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetForge) {
+        Map<SlotEquip, List<ItemData>> map = new EnumMap<>(SlotEquip.class);
+        for (ItemData item : items) {
+            SlotEquip slot = item.slot.toSlotEquip();
+            if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
+                slot = SlotEquip.Ring2;
+            } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
+                slot = SlotEquip.Trinket2;
+            }
+            if (presetForge.containsKey(slot)) {
+                map.put(slot, Reforger.presetReforge(item, presetForge.get(slot)));
             } else {
                 map.put(slot, Reforger.reforgeItem(rules, item));
             }

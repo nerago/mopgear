@@ -1,5 +1,7 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.Tuple;
+
 import java.io.*;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -41,7 +43,8 @@ public class Main {
     private void exceptionalCheck(Instant startTime) {
         try {
 //            multiSpecReforge(startTime);
-        reforgeSomething(startTime);
+//        reforgeRet(startTime);
+            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -62,17 +65,27 @@ public class Main {
         rankAlternatives(model, new int[]{84027, 81284, 81073, 81113, 82852}); // feet
     }
 
-    private void reforgeSomething(Instant startTime) throws IOException {
-//        model = new ModelPriority();
+    private void reforgeRet(Instant startTime) throws IOException {
         StatRatings statRatings = new StatRatingsWeights(weightFileMine, false);
         StatRequirements statRequirements = new StatRequirements(false, false);
         ModelCombined model = new ModelCombined(statRatings, statRequirements, new ReforgeRules());
 
-//        reforgeProcess(model, startTime, false);
+        reforgeProcess(model, startTime, true);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 //        reforgeProcessPlus(model, startTime, 89345, true); // shoulder
-        reforgeProcessPlus(model, startTime, 81113, false);
+//        reforgeProcessPlus(model, startTime, 81113, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
+    }
+
+    private void reforgeProt(Instant startTime) throws IOException {
+//        StatRatings statRatings = new StatRatingsWeights(weightFileMine, false);
+        StatRatings statRatings = new StatRatingsPriority(new StatType[]{StatType.Expertise, StatType.Haste, StatType.Mastery, StatType.Crit});
+        StatRequirements statRequirements = new StatRequirements(false, true);
+        ModelCombined model = new ModelCombined(statRatings, statRequirements, new ReforgeRules());
+
+        reforgeProcessProt(model, startTime, true);
+
+        // so we could get a conclusive result from the ret, then set the common slots to fixed
     }
 
     private void rankAlternatives(ModelCombined model, int[] itemIds) {
@@ -118,8 +131,26 @@ public class Main {
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcess(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
         Map<SlotEquip, List<ItemData>> reforgedItems = readAndLoad2(detailedOutput, inputFile, model.getReforgeRules());
-//        Collection<ItemSet> bestSets = new EngineStack(reforgedItems).runSolver();
         Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime);
+        outputResult(bestSets, model, detailedOutput);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void reforgeProcessProt(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
+        List<EquippedItem> itemIds = InputParser.readInput(inputProtFile);
+        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
+
+        Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
+        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
+        presetReforge.put(SlotEquip.Neck, Tuple.create(StatType.Hit, StatType.Haste));
+        presetReforge.put(SlotEquip.Shoulder, Tuple.create(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Mastery, StatType.Haste));
+        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Mastery, StatType.Haste));
+        presetReforge.put(SlotEquip.Ring1, Tuple.create(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Trinket1, Tuple.create(StatType.Expertise, StatType.Haste));
+
+        Map<SlotEquip, List<ItemData>> map = ItemUtil.limitedItemsReforgedToMap(model.getReforgeRules(), items, presetReforge);
+        Collection<ItemSet> bestSets = EngineStream.runSolver(model, map, startTime);
         outputResult(bestSets, model, detailedOutput);
     }
 
@@ -137,6 +168,7 @@ public class Main {
         if (replace)
             reforgedItems.get(slot).clear();
         reforgedItems.get(slot).addAll(Reforger.reforgeItem(model.getReforgeRules(), extraItem));
+        reforgedItems.computeIfPresent(slot, (x,lst) -> lst.stream().map(t -> new ItemData(t.slot, t.name, t.stat, StatBlock.empty, t.id)).toList());
         System.out.println("EXTRA " + extraItem);
 
         Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime);
