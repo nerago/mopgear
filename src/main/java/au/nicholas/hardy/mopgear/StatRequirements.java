@@ -19,7 +19,7 @@ public class StatRequirements {
 //    private static final double TARGET_PERCENT = 6; // for heroics
     private static final int TARGET_RATING = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT); // 2040 / 2550
 
-    private static final int RATING_CAP_ALLOW_EXCEED = 300;
+    private static final int RATING_CAP_ALLOW_EXCEED = 100;
 
     public final EnumMap<StatType, Integer> requiredAmounts;
     public final boolean blacksmith;

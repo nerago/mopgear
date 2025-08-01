@@ -29,6 +29,6 @@ public class ServiceEntry {
             items = ItemUtil.loadItems(itemCache, itemIds, false);
         }
         Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
-        return EngineStream.runSolver(model, reforgedItems, null);
+        return EngineStream.runSolver(model, reforgedItems, null, null);
     }
 }

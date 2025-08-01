@@ -1,41 +1,42 @@
 package au.nicholas.hardy.mopgear;
 
-import au.nicholas.hardy.mopgear.util.CurryQueue;
-
-import java.util.function.ToLongFunction;
+import java.util.EnumMap;
 
 public final class ItemSet {
-    public final CurryQueue<ItemData> items;
+    public final EnumMap<SlotEquip, ItemData> items;
     public final StatBlock totals;
-//    public long statRating;
+    public final ItemSet otherSet;
 
-    private ItemSet(CurryQueue<ItemData> items, StatBlock totals) {
+    private ItemSet(EnumMap<SlotEquip, ItemData> items, StatBlock totals, ItemSet otherSet) {
         this.items = items;
         this.totals = totals;
+        this.otherSet = otherSet;
     }
 
-    public static ItemSet singleItem(ItemData item) {
-        return new ItemSet(CurryQueue.single(item), item.totalStatCopy());
+    public static ItemSet singleItem(SlotEquip slot, ItemData item, ItemSet otherSet) {
+        EnumMap<SlotEquip, ItemData> itemMap = new EnumMap<>(SlotEquip.class);
+        itemMap.put(slot, item);
+        return new ItemSet(itemMap, item.totalStatCopy(), otherSet);
     }
 
-    public ItemSet copyWithAddedItem(ItemData item) {
-        return new ItemSet(items.prepend(item), totals.plus(item.totalStatCopy()));
+    public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {
+        EnumMap<SlotEquip, ItemData> itemMap = items.clone();
+        itemMap.put(slot, item);
+        return new ItemSet(itemMap, totals.plus(item.totalStatCopy()), otherSet);
     }
-
-//    public ItemSet finished(ToLongFunction<StatBlock> func) {
-//        statRating = func.applyAsLong(totals);
-//        return this;
-//    }
-//
-//    public long getStatRating() {
-//        return statRating;
-//    }
 
     public StatBlock getTotals() {
         return totals;
     }
 
-    public CurryQueue<ItemData> getItems() {
+    public EnumMap<SlotEquip, ItemData> getItems() {
         return items;
+    }
+
+    void outputSet(StatRatings statRatings) {
+        System.out.println(getTotals() + " " + statRatings.calcRating(getTotals()));
+        for (ItemData it : getItems().values()) {
+            System.out.println(it + " " + statRatings.calcRating(it.totalStatCopy()));
+        }
     }
 }

@@ -13,6 +13,10 @@ public class ModelCombined implements StatRatings {
         this.reforgeRules = reforgeRules;
     }
 
+    public long calcRating(ItemSet set) {
+        return calcRating(set.getTotals());
+    }
+
     @Override
     public long calcRating(StatBlock totals) {
         return statRatings.calcRating(totals);

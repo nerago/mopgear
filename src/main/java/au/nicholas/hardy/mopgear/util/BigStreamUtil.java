@@ -11,7 +11,7 @@ public class BigStreamUtil {
         AtomicLong count = new AtomicLong();
         return sets.peek(set -> {
             long curr = count.incrementAndGet();
-            if (curr % 5000000 == 0) {
+            if (curr % 500 == 0) {
                 double percent = ((double) curr) / estimateFloat;
                 synchronized (System.out) {
                     System.out.print(curr);

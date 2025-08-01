@@ -3,14 +3,14 @@ package au.nicholas.hardy.mopgear;
 import java.util.*;
 
 public class EngineStack {
-    private final List<List<ItemData>> slotItems;
+    private final List<Map.Entry<SlotEquip, List<ItemData>>> slotItems;
     private final ArrayDeque<Step> queue;
     private ItemSet best;
     private long bestRating;
     private StatRatings statRatings;
 
     public EngineStack(Map<SlotEquip, List<ItemData>> items) {
-        slotItems = items.values().stream().toList();
+        slotItems = items.entrySet().stream().toList();
         queue = new ArrayDeque<>();
     }
 
@@ -25,8 +25,9 @@ public class EngineStack {
     }
 
     private void addFirstItem() {
-        for (ItemData item : slotItems.getFirst()) {
-            queue.addLast(new Step(1, ItemSet.singleItem(item)));
+        Map.Entry<SlotEquip, List<ItemData>> first = slotItems.getFirst();
+        for (ItemData item : first.getValue()) {
+            queue.addLast(new Step(1, ItemSet.singleItem(first.getKey(), item, null)));
         }
     }
 
@@ -37,10 +38,10 @@ public class EngineStack {
             ItemSet prevSet = prev.set;
             int index = prev.nextIndex();
             if (index < itemsSize) {
-                List<ItemData> nextItems = slotItems.get(index);
+                Map.Entry<SlotEquip, List<ItemData>> nextItems = slotItems.get(index);
                 int nextIndex = index + 1;
-                for (ItemData item : nextItems) {
-                    queue.addLast(new Step(nextIndex, prevSet.copyWithAddedItem(item)));
+                for (ItemData item : nextItems.getValue()) {
+                    queue.addLast(new Step(nextIndex, prevSet.copyWithAddedItem(nextItems.getKey(), item)));
                 }
             } else {
                 long rating = statRatings.calcRating(prevSet.totals);

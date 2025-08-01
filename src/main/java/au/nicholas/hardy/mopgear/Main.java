@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.TopCollectorReporting;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.io.*;
@@ -10,7 +11,9 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
+@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut"})
 public class Main {
 
     private static final Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
@@ -42,9 +45,10 @@ public class Main {
 
     private void exceptionalCheck(Instant startTime) {
         try {
+            multiSpecSequential(startTime);
 //            multiSpecReforge(startTime);
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -100,8 +104,87 @@ public class Main {
         }
     }
 
+    private void multiSpecSequential(Instant startTime) throws IOException {
+        ReforgeRules reforgeRules = new ReforgeRules();
+
+        StatRatings statRatingsRet = new StatRatingsWeights(weightFileMine, false);
+        StatRequirements statRet = new StatRequirements(false, false);
+        ModelCombined modelRet = new ModelCombined(statRatingsRet, statRet, reforgeRules);
+
+        StatRequirements statProt = new StatRequirements(false, true);
+        StatRatings protStatRatings = new StatRatingsPriority(new StatType[]{StatType.Expertise, StatType.Haste, StatType.Mastery, StatType.Crit});
+        ModelCombined modelProt = new ModelCombined(protStatRatings, statProt, reforgeRules);
+
+        System.out.println("RET GEAR CURRENT");
+        EnumMap<SlotEquip, List<ItemData>> retMap = readAndLoad2(true, inputFile, reforgeRules);
+        System.out.println("PROT GEAR CURRENT");
+        EnumMap<SlotEquip, List<ItemData>> protMap = readAndLoad2(true, inputProtFile, reforgeRules);
+
+        Stream<ItemSet> retStream = EngineStream.runSolverPartial(modelRet, retMap, startTime, null);
+
+//        retStream = retStream.peek(System.out::println);
+
+        Stream<ItemSet> protStream = retStream.flatMap(r -> subSolveProt(r, protMap, modelProt));
+
+//        protStream = protStream.peek(x -> System.out.println(x.getTotals() + " " + x.otherSet.getTotals()));
+
+        Collection<ItemSet> best = protStream.collect(
+                new TopCollectorReporting<>(s -> dualRating(s, modelRet, modelProt),
+                        s -> reportBetter(s, modelRet, modelProt)));
+        outputResult(best, modelProt, true);
+    }
+
+    private void reportBetter(ItemSet itemSet, ModelCombined modelRet, ModelCombined modelProt) {
+        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        itemSet.otherSet.outputSet(modelRet);
+        System.out.println("---------------------------------------");
+        itemSet.outputSet(modelProt);
+        System.out.println("#######################################");
+    }
+
+    private long dualRating(ItemSet set, ModelCombined modelRet, ModelCombined modelProt) {
+        return modelRet.calcRating(set.otherSet) + modelProt.calcRating(set);
+    }
+
+    private Stream<? extends ItemSet> subSolveProt(ItemSet retSet, EnumMap<SlotEquip, List<ItemData>> protMap, ModelCombined modelProt) {
+        EnumMap<SlotEquip, ItemData> retMap = retSet.items;
+        EnumMap<SlotEquip, List<ItemData>> submitMap = protMap.clone();
+
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData retItem = retMap.get(slot);
+            List<ItemData> protItemList = submitMap.get(slot);
+            if (retItem == null || protItemList == null || protItemList.isEmpty())
+                continue;
+
+            ItemData protItem = protItemList.getFirst();
+            if (protItem.id == retItem.id) {
+                submitMap.put(slot, Collections.singletonList(retItem));
+            }
+        }
+
+        return EngineStream.runSolverPartial(modelProt, submitMap, null, retSet);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void reforgeProcessProt(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
+        List<EquippedItem> itemIds = InputParser.readInput(inputProtFile);
+        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
+
+        Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
+        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
+        presetReforge.put(SlotEquip.Neck, Tuple.create(StatType.Hit, StatType.Haste));
+        presetReforge.put(SlotEquip.Shoulder, Tuple.create(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Mastery, StatType.Haste));
+        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Mastery, StatType.Haste));
+        presetReforge.put(SlotEquip.Ring1, Tuple.create(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Trinket1, Tuple.create(StatType.Expertise, StatType.Haste));
+
+        Map<SlotEquip, List<ItemData>> map = ItemUtil.limitedItemsReforgedToMap(model.getReforgeRules(), items, presetReforge);
+        Collection<ItemSet> bestSets = EngineStream.runSolver(model, map, startTime, null);
+        outputResult(bestSets, model, detailedOutput);
+    }
+
     private void multiSpecReforge(Instant startTime) throws IOException {
-//        model = new ModelWeights(weightFileMine, false);
         StatRatings statRatings = new StatRatingsPriority(new StatType[]{StatType.Expertise, StatType.Haste, StatType.Mastery, StatType.Crit});
         ReforgeRules reforgeRules = new ReforgeRules();
 
@@ -122,7 +205,7 @@ public class Main {
 //        outputResult(bestSets, true);
     }
 
-    private Map<SlotEquip, List<ItemData>> readAndLoad2(boolean detailedOutput, Path file, ReforgeRules rules) throws IOException {
+    private EnumMap<SlotEquip, List<ItemData>> readAndLoad2(boolean detailedOutput, Path file, ReforgeRules rules) throws IOException {
         List<EquippedItem> itemIds = InputParser.readInput(file);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
         return ItemUtil.standardItemsReforgedToMap(rules, items);
@@ -131,26 +214,7 @@ public class Main {
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcess(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
         Map<SlotEquip, List<ItemData>> reforgedItems = readAndLoad2(detailedOutput, inputFile, model.getReforgeRules());
-        Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime);
-        outputResult(bestSets, model, detailedOutput);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private void reforgeProcessProt(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        List<EquippedItem> itemIds = InputParser.readInput(inputProtFile);
-        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
-
-        Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
-        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
-        presetReforge.put(SlotEquip.Neck, Tuple.create(StatType.Hit, StatType.Haste));
-        presetReforge.put(SlotEquip.Shoulder, Tuple.create(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Mastery, StatType.Haste));
-        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Mastery, StatType.Haste));
-        presetReforge.put(SlotEquip.Ring1, Tuple.create(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Trinket1, Tuple.create(StatType.Expertise, StatType.Haste));
-
-        Map<SlotEquip, List<ItemData>> map = ItemUtil.limitedItemsReforgedToMap(model.getReforgeRules(), items, presetReforge);
-        Collection<ItemSet> bestSets = EngineStream.runSolver(model, map, startTime);
+        Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSets, model, detailedOutput);
     }
 
@@ -171,7 +235,7 @@ public class Main {
         reforgedItems.computeIfPresent(slot, (x,lst) -> lst.stream().map(t -> new ItemData(t.slot, t.name, t.stat, StatBlock.empty, t.id)).toList());
         System.out.println("EXTRA " + extraItem);
 
-        Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime);
+        Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSets, model, true);
     }
 
@@ -183,7 +247,7 @@ public class Main {
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             Map<SlotEquip, List<ItemData>> itemMap = new EnumMap<>(reforgedItems);
             itemMap.put(extraItem.slot.toSlotEquip(), Collections.singletonList(extraItem));
-            Collection<ItemSet> bestSets = EngineStream.runSolver(model, itemMap, null);
+            Collection<ItemSet> bestSets = EngineStream.runSolver(model, itemMap, null, null);
             outputResult(bestSets, model, false);
         }
     }
@@ -201,7 +265,7 @@ public class Main {
         reforgedItems.get(extraItem2.slot.toSlotEquip()).addAll(Reforger.reforgeItem(rules, extraItem2));
         System.out.println("EXTRA " + extraItem2);
 
-        Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime);
+        Collection<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSets, model, true);
     }
 
@@ -211,19 +275,11 @@ public class Main {
             bestSets.forEach(s -> System.out.println(s.getTotals()));
             bestSets.forEach(s -> {
                 System.out.println("#######################################");
-                outputSet(statRatings, s);
+                s.outputSet(statRatings);
             });
         } else {
             Optional<ItemSet> last = bestSets.stream().reduce((a, b) -> b);
-            ;
-            outputSet(statRatings, last.orElseThrow());
-        }
-    }
-
-    private void outputSet(StatRatings statRatings, ItemSet s) {
-        System.out.println(s.getTotals() + " " + statRatings.calcRating(s.getTotals()));
-        for (ItemData it : s.getItems().toArrayReverse(ItemData[]::new)) {
-            System.out.println(it + " " + statRatings.calcRating(it.totalStatCopy()));
+            last.orElseThrow().outputSet(statRatings);
         }
     }
 
