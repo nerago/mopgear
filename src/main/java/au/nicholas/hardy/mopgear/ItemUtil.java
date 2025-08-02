@@ -41,8 +41,8 @@ public class ItemUtil {
         return item;
     }
 
-    public static EnumMap<SlotEquip, List<ItemData>> standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
-        EnumMap<SlotEquip, List<ItemData>> map = new EnumMap<>(SlotEquip.class);
+    public static EnumMap<SlotEquip, ItemData[]> standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
+        EnumMap<SlotEquip, ItemData[]> map = new EnumMap<>(SlotEquip.class);
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
@@ -56,9 +56,9 @@ public class ItemUtil {
         return map;
     }
 
-    public static Map<SlotEquip, List<ItemData>> limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
-                                                                           Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetForge) {
-        Map<SlotEquip, List<ItemData>> map = new EnumMap<>(SlotEquip.class);
+    public static Map<SlotEquip, ItemData[]> limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
+                                                                       Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetForge) {
+        Map<SlotEquip, ItemData[]> map = new EnumMap<>(SlotEquip.class);
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {

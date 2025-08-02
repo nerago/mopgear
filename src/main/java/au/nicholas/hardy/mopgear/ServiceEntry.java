@@ -2,6 +2,7 @@ package au.nicholas.hardy.mopgear;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class ServiceEntry {
         synchronized (itemCache) {
             items = ItemUtil.loadItems(itemCache, itemIds, false);
         }
-        Map<SlotEquip, List<ItemData>> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
         return EngineStream.runSolver(model, reforgedItems, null, null);
     }
 }

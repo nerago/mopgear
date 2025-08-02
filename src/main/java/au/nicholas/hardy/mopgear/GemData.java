@@ -32,7 +32,7 @@ public class GemData {
         map.put(4441, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0)); // weap
         map.put(5001, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0)); // shield spike
         map.put(4412, new StatBlock(0, 0, 0, 0, 0, 0, 170, 0)); // bracer
-        map.put(4427, new StatBlock(0, 0, 0, 175, 0, 0, 170, 0)); // foot
+        map.put(4427, new StatBlock(0, 0, 0, 175, 0, 0, 0, 0)); // foot
         return map;
     }
 

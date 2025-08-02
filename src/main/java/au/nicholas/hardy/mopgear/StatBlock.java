@@ -21,10 +21,6 @@ public final class StatBlock {
         this.parry = parry;
     }
 
-    StatBlock copy() {
-        return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
-    }
-
     public StatBlock plus(StatBlock other) {
         return new StatBlock(
                 str + other.str,
@@ -35,6 +31,19 @@ public final class StatBlock {
                 expertise + other.expertise,
                 dodge + other.dodge,
                 parry + other.parry
+        );
+    }
+
+    public StatBlock plus(StatBlock first, StatBlock second) {
+        return new StatBlock(
+                str + first.str + second.str,
+                mastery + first.mastery + first.mastery,
+                crit + first.crit + second.crit,
+                hit + first.hit + second.hit,
+                haste + first.haste + second.haste,
+                expertise + first.expertise + second.expertise,
+                dodge + first.dodge + second.dodge,
+                parry + first.parry + second.parry
         );
     }
 

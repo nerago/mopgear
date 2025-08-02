@@ -17,9 +17,13 @@ public final class ItemData {
 
     public StatBlock totalStatCopy() {
         if (statFixed.isEmpty())
-            return stat.copy();
+            return stat;
         else
             return stat.plus(statFixed);
+    }
+
+    public ItemData disenchant() {
+        return new ItemData(slot, name, stat, StatBlock.empty, id);
     }
 
     @Override

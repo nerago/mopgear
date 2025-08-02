@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Reforger {
-    static List<ItemData> reforgeItem(ReforgeRules rules, ItemData baseItem) {
+    static ItemData[] reforgeItem(ReforgeRules rules, ItemData baseItem) {
         List<ItemData> outputItems = new ArrayList<>();
         outputItems.add(baseItem);
 
@@ -26,14 +26,14 @@ public class Reforger {
             }
         }
 
-        return outputItems;
+        return outputItems.toArray(ItemData[]::new);
     }
 
-    public static List<ItemData> presetReforge(ItemData baseItem, Tuple.Tuple2<StatType, StatType> statChange) {
+    public static ItemData[] presetReforge(ItemData baseItem, Tuple.Tuple2<StatType, StatType> statChange) {
         StatType sourceStat = statChange.a();
         StatType targetStat = statChange.b();
         if (sourceStat == null && targetStat == null) {
-            return Collections.singletonList(baseItem);
+            return new ItemData[] { baseItem };
         } else if (sourceStat != null && targetStat != null)  {
             int originalValue = baseItem.stat.get(sourceStat);
             if (originalValue == 0 || baseItem.stat.get(targetStat) != 0)
@@ -41,7 +41,7 @@ public class Reforger {
             int reforgeQuantity = (originalValue * 4) / 10;
             int remainQuantity = originalValue - reforgeQuantity;
             ItemData modified = makeModified(baseItem, sourceStat, targetStat, remainQuantity, reforgeQuantity);
-            return Collections.singletonList(modified);
+            return new ItemData[] { modified };
         } else {
             throw new IllegalStateException();
         }

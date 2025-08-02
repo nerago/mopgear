@@ -22,7 +22,7 @@ public final class ItemSet {
     public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {
         EnumMap<SlotEquip, ItemData> itemMap = items.clone();
         itemMap.put(slot, item);
-        return new ItemSet(itemMap, totals.plus(item.totalStatCopy()), otherSet);
+        return new ItemSet(itemMap, totals.plus(item.stat, item.statFixed), otherSet);
     }
 
     public StatBlock getTotals() {
