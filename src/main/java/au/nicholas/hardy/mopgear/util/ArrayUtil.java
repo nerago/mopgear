@@ -4,6 +4,8 @@ import au.nicholas.hardy.mopgear.ItemData;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 public class ArrayUtil {
@@ -20,5 +22,9 @@ public class ArrayUtil {
         System.arraycopy(first, 0, result, 0, first.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;
+    }
+
+    public static ItemData rand(ItemData[] itemList, Random random) {
+        return itemList[random.nextInt(itemList.length)];
     }
 }

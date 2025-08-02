@@ -14,8 +14,8 @@ public class StatRequirements {
 
         requiredHit = TARGET_RATING_REGULAR;
         if (tankExpertise)
-//            requiredExpertise = TARGET_RATING_TANK;
-            requiredExpertise = 0;
+            requiredExpertise = TARGET_RATING_TANK;
+//            requiredExpertise = 0;
         else
             requiredExpertise = TARGET_RATING_REGULAR;
     }

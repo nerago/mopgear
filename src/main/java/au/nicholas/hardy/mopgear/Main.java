@@ -15,7 +15,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut"})
+@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue"})
 public class Main {
 
     private static final Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
@@ -48,10 +48,10 @@ public class Main {
     private void exceptionalCheck(Instant startTime) {
         try {
 //            multiSpecSequential(startTime);
-        reforgeRet(startTime);
+//        reforgeRet(startTime);
 
 //            multiSpecReforge(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -80,7 +80,7 @@ public class Main {
 //        reforgeProcess(model, startTime, true);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 //        reforgeProcessPlus(model, startTime, 89345, true); // shoulder
-        reforgeProcessPlus(model, startTime, 90910, false);
+        reforgeProcessPlus(model, startTime, 82980, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
     }
 
@@ -176,7 +176,7 @@ public class Main {
                 continue;
 
             ItemData protItem = protItemList[0];
-            if (protItem.id == retItem.id) {
+            if (protItem.id == retItem.id && protItem.statFixed.equalsStats(retItem.statFixed)) {
                 submitMap.put(slot, new ItemData[] { retItem });
             }
         }
@@ -189,17 +189,19 @@ public class Main {
         List<EquippedItem> itemIds = InputParser.readInput(inputProtFile);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
 
-        Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
-        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
-        presetReforge.put(SlotEquip.Neck, Tuple.create(StatType.Hit, StatType.Haste));
-        presetReforge.put(SlotEquip.Shoulder, Tuple.create(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Mastery, StatType.Haste));
-        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Mastery, StatType.Haste));
-        presetReforge.put(SlotEquip.Ring1, Tuple.create(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Trinket1, Tuple.create(StatType.Expertise, StatType.Haste));
+//        Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
+//        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
+//        presetReforge.put(SlotEquip.Neck, Tuple.create(StatType.Hit, StatType.Haste));
+//        presetReforge.put(SlotEquip.Shoulder, Tuple.create(StatType.Crit, StatType.Haste));
+//        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Mastery, StatType.Haste));
+//        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Mastery, StatType.Haste));
+//        presetReforge.put(SlotEquip.Ring1, Tuple.create(StatType.Crit, StatType.Haste));
+//        presetReforge.put(SlotEquip.Trinket1, Tuple.create(StatType.Expertise, StatType.Haste));
 
-        Map<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.getReforgeRules(), items, presetReforge);
-        Collection<ItemSet> bestSets = EngineStream.runSolver(model, map, startTime, null);
+//        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.getReforgeRules(), items, presetReforge);
+        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
+//        Collection<ItemSet> bestSets = EngineStream.runSolver(model, map, startTime, null);
+        Collection<ItemSet> bestSets = EngineRandom.runSolver(model, map, null);
         outputResult(bestSets, model, detailedOutput);
     }
 

@@ -33,6 +33,10 @@ public class GemData {
         map.put(5001, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0)); // shield spike
         map.put(4412, new StatBlock(0, 0, 0, 0, 0, 0, 170, 0)); // bracer
         map.put(4427, new StatBlock(0, 0, 0, 175, 0, 0, 0, 0)); // foot
+        map.put(4431, new StatBlock(0, 0, 0, 0, 0, 170, 0, 0)); // hand
+        map.put(76895, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0)); // tank meta, stam
+        map.put(76667, new StatBlock(0, 0, 0, 0, 160, 160, 0, 0));
+        map.put(76615, new StatBlock(0, 0, 0, 160, 0, 160, 0, 0));
         return map;
     }
 

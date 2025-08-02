@@ -1,5 +1,8 @@
 package au.nicholas.hardy.mopgear;
 
+import java.util.EnumMap;
+import java.util.Objects;
+
 public final class StatBlock {
     public final int str;
     public final int mastery;
@@ -45,6 +48,41 @@ public final class StatBlock {
                 dodge + first.dodge + second.dodge,
                 parry + first.parry + second.parry
         );
+    }
+
+    public static StatBlock sum(EnumMap<SlotEquip, ItemData> items) {
+        int str = 0;
+        int mastery = 0;
+        int crit = 0;
+        int hit = 0;
+        int haste = 0;
+        int expertise = 0;
+        int dodge = 0;
+        int parry = 0;
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData item = items.get(slot);
+            if (item != null) {
+                StatBlock stat = item.stat;
+                str += stat.str;
+                mastery += stat.mastery;
+                crit += stat.crit;
+                hit += stat.hit;
+                haste += stat.haste;
+                expertise += stat.expertise;
+                dodge += stat.dodge;
+                parry += stat.parry;
+                StatBlock fixed = item.statFixed;
+                str += fixed.str;
+                mastery += fixed.mastery;
+                crit += fixed.crit;
+                hit += fixed.hit;
+                haste += fixed.haste;
+                expertise += fixed.expertise;
+                dodge += fixed.dodge;
+                parry += fixed.parry;
+            }
+        }
+        return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
     int get(StatType stat) {
@@ -154,6 +192,23 @@ public final class StatBlock {
 
     public boolean isEmpty() {
         return str == 0 && mastery == 0 && crit == 0 && hit == 0 && haste == 0 && expertise == 0 && dodge == 0 && parry == 0;
+    }
+
+    public boolean equalsStats(StatBlock stats) {
+        return str == stats.str && mastery == stats.mastery && crit == stats.crit && hit == stats.hit &&
+                haste == stats.haste && expertise == stats.expertise && dodge == stats.dodge && parry == stats.parry;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        return equalsStats((StatBlock) o);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(str, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
     @Override

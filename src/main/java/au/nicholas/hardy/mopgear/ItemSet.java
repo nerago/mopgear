@@ -13,6 +13,12 @@ public final class ItemSet {
         this.otherSet = otherSet;
     }
 
+    public static ItemSet manyItems(EnumMap<SlotEquip, ItemData> items, ItemSet otherSet) {
+        // trust caller is creating unique maps
+        StatBlock totals = StatBlock.sum(items);
+        return new ItemSet(items, totals, otherSet);
+    }
+
     public static ItemSet singleItem(SlotEquip slot, ItemData item, ItemSet otherSet) {
         EnumMap<SlotEquip, ItemData> itemMap = new EnumMap<>(SlotEquip.class);
         itemMap.put(slot, item);
