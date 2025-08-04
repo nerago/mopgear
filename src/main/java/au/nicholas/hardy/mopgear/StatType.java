@@ -9,4 +9,5 @@ public enum StatType {
     Dodge,
     Parry,
     Strength,
+    Stam,
 }

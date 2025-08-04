@@ -10,13 +10,13 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
 public class EngineRandom {
-    public static Collection<ItemSet> runSolver(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, ItemSet otherSet, long count, Instant startTime) {
-        Stream<ItemSet> finalSets = runSolverPartial(model, items, otherSet, count, startTime);
+    public static ItemSet runSolver(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet, long count) {
+        Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, otherSet, count);
         Optional<ItemSet> opt = finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
-        return opt.isPresent() ? Collections.singleton(opt.get()) : Collections.emptyList();
+        return opt.orElseThrow();
     }
 
-    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, ItemSet otherSet, long count, Instant startTime) {
+    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet, long count) {
         Stream<Long> dumbStream = generateDumbStream(count);
         Stream<ItemSet> setStream = dumbStream.parallel()
                                               .map(x -> makeSet(items, otherSet));

@@ -20,9 +20,9 @@ public class Main {
 
     private static final Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
     static final Path cacheFile = directory.resolve("cache.json");
-    private static final Path inputFile = directory.resolve("input.json");
-    private static final Path inputProtFile = directory.resolve("input-prot.json");
-    private static final Path weightFileMine = directory.resolve("weight-mysim.json");
+    private static final Path gearRetFile = directory.resolve("gear-ret.json");
+    private static final Path gearProtFile = directory.resolve("gear-prot.json");
+    private static final Path weightFileRetMine = directory.resolve("weight-mysim.json");
     private static final Path weightFileStandard = directory.resolve("weight-standard.json");
     private static final Path weightFileProtMine = directory.resolve("weight-prot-sim.json");
 
@@ -48,8 +48,8 @@ public class Main {
 
     private void exceptionalCheck(Instant startTime) {
         try {
-            multiSpecSpecifiedRating();
-//            multiSpecSequential(startTime);
+//            multiSpecSpecifiedRating();
+            multiSpecSequential(startTime);
 
 //        reforgeRet(startTime);
 //            reforgeProt(startTime);
@@ -63,7 +63,7 @@ public class Main {
 
     private void rankSomething() throws IOException {
 //        model = new ModelWeights(weightFileMine, true);
-        StatRatings statRatings = new StatRatingsWeights(weightFileStandard, true);
+        StatRatings statRatings = new StatRatingsWeights(weightFileStandard, true, 1, 1);
         StatRequirements statRequirements = new StatRequirements(false, false);
         ModelCombined model = new ModelCombined(statRatings, statRequirements, ReforgeRules.ret());
 
@@ -74,28 +74,28 @@ public class Main {
     }
 
     private void reforgeRet(Instant startTime) throws IOException {
-        StatRatings statRatings = new StatRatingsWeights(weightFileMine, false);
+        StatRatings statRatings = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
         StatRequirements statRequirements = new StatRequirements(false, false);
         ModelCombined model = new ModelCombined(statRatings, statRequirements, ReforgeRules.ret());
 
 //        reforgeProcess(model, startTime, true);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 //        reforgeProcessPlus(model, startTime, 89345, true); // shoulder
-//        reforgeProcessPlus(model, startTime, 82980, false);
+        reforgeProcessPlus(model, startTime, 82824, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
-        reforgeProcessRetFixed(model, startTime, true);
+//        reforgeProcessRetFixed(model, startTime, true);
     }
 
     private void reforgeProt(Instant startTime) throws IOException {
-//        StatRatings statRatings = new StatRatingsWeights(weightFileProtMine, false);
-        StatRatings statRatings = StatRatingsWeights.protHardcode();
-
+        StatRatings statRatings = new StatRatingsWeights(weightFileProtMine, false, 1, 1);
+//        StatRatings statRatings = StatRatingsWeights.protHardcode();
 //        StatRatings statRatings = new StatRatingsPriority(new StatType[]{StatType.Expertise, StatType.Haste, StatType.Mastery, StatType.Crit});
 //        StatRatings statRatings = new StatRatingsPriority(new StatType[]{StatType.Mastery, StatType.Haste, StatType.Parry, StatType.Dodge});
         StatRequirements statRequirements = new StatRequirements(false, true);
         ModelCombined model = new ModelCombined(statRatings, statRequirements, ReforgeRules.prot());
 
-        reforgeProcessProtFixed(model, startTime, true);
+//        reforgeProcessProtFixed(model, startTime, true);
+        reforgeProcessProtPlus2(model, startTime, 81696, 89823);
 
         // so we could get a conclusive result from the ret, then set the common slots to fixed
     }
@@ -113,22 +113,23 @@ public class Main {
     }
 
     private void multiSpecSequential(Instant startTime) throws IOException {
-        StatRatings statRatingsRet = new StatRatingsWeights(weightFileMine, false);
+        StatRatings statRatingsRet = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
         StatRequirements statRet = new StatRequirements(false, false);
         ModelCombined modelRet = new ModelCombined(statRatingsRet, statRet, ReforgeRules.ret());
 
+        StatRatings protStatRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULT, 1);
         StatRequirements statProt = new StatRequirements(false, true);
-        StatRatings protStatRatings = StatRatingsWeights.protHardcode();
+//        StatRatings protStatRatings = StatRatingsWeights.protHardcode();
         ModelCombined modelProt = new ModelCombined(protStatRatings, statProt, ReforgeRules.prot());
 
         System.out.println("RET GEAR CURRENT");
-        EnumMap<SlotEquip, ItemData[]> retMap = readAndLoad2(true, inputFile, modelRet.getReforgeRules());
+        EnumMap<SlotEquip, ItemData[]> retMap = readAndLoad2(true, gearRetFile, modelRet.getReforgeRules());
         System.out.println("PROT GEAR CURRENT");
-        EnumMap<SlotEquip, ItemData[]> protMap = readAndLoad2(true, inputProtFile, modelProt.getReforgeRules());
+        EnumMap<SlotEquip, ItemData[]> protMap = readAndLoad2(true, gearProtFile, modelProt.getReforgeRules());
         validateDualSets(retMap, protMap);
 
         long randomCount = 1000L * 1000L * 1000L;
-        Stream<ItemSet> retStream = EngineRandom.runSolverPartial(modelRet, retMap, null, randomCount, startTime);
+        Stream<ItemSet> retStream = EngineRandom.runSolverPartial(modelRet, retMap, startTime, null, randomCount);
 
 //        Stream<ItemSet> protStream = retStream.flatMap(r -> subSolveProt(r, protMap, modelProt));
         Stream<ItemSet> protStream = retStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt));
@@ -200,7 +201,7 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessProtFixed(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        List<EquippedItem> itemIds = InputParser.readInput(inputProtFile);
+        List<EquippedItem> itemIds = InputParser.readInput(gearProtFile);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
 
         Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
@@ -226,7 +227,7 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessRetFixed(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        List<EquippedItem> itemIds = InputParser.readInput(inputFile);
+        List<EquippedItem> itemIds = InputParser.readInput(gearRetFile);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
 
         Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
@@ -251,18 +252,19 @@ public class Main {
     }
 
     private void multiSpecSpecifiedRating() throws IOException {
-        StatRatings statRatingsRet = new StatRatingsWeights(weightFileMine, false);
+        StatRatings statRatingsRet = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
         StatRequirements statRet = new StatRequirements(false, false);
         ModelCombined modelRet = new ModelCombined(statRatingsRet, statRet, ReforgeRules.ret());
 
         StatRequirements statProt = new StatRequirements(false, true);
-        StatRatings protStatRatings = StatRatingsWeights.protHardcode();
+//        StatRatings protStatRatings = StatRatingsWeights.protHardcode();
+        StatRatings protStatRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULT, 1);
         ModelCombined modelProt = new ModelCombined(protStatRatings, statProt, ReforgeRules.prot());
 
         System.out.println("RET GEAR CURRENT");
-        List<ItemData> retItems = ItemUtil.loadItems(itemCache, InputParser.readInput(inputFile), true);
+        List<ItemData> retItems = ItemUtil.loadItems(itemCache, InputParser.readInput(gearRetFile), true);
         System.out.println("PROT GEAR CURRENT");
-        List<ItemData> protItems = ItemUtil.loadItems(itemCache, InputParser.readInput(inputProtFile), true);
+        List<ItemData> protItems = ItemUtil.loadItems(itemCache, InputParser.readInput(gearProtFile), true);
 
         Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> reforgeRet = new EnumMap<>(SlotEquip.class);
         reforgeRet.put(SlotEquip.Head, Tuple.create(null, null));
@@ -339,7 +341,7 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcess(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(detailedOutput, inputFile, model.getReforgeRules());
+        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(detailedOutput, gearRetFile, model.getReforgeRules());
         ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSets, model, detailedOutput);
     }
@@ -352,7 +354,7 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessPlus(ModelCombined model, Instant startTime, int extraItemId, SlotEquip slot, boolean replace) throws IOException {
-        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(false, inputFile, model.getReforgeRules());
+        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(false, gearRetFile, model.getReforgeRules());
 
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
         ItemData[] extraForged = Reforger.reforgeItem(model.getReforgeRules(), extraItem);
@@ -371,9 +373,47 @@ public class Main {
         outputResult(bestSets, model, true);
     }
 
+    private void reforgeProcessProtPlus(ModelCombined model, Instant startTime, int extraItemId, SlotEquip slot, boolean replace) throws IOException {
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(false, gearProtFile, model.getReforgeRules());
+
+        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+        System.out.println("EXTRA " + extraItem);
+        ItemData[] extraForged = Reforger.reforgeItem(model.getReforgeRules(), extraItem);
+        if (replace) {
+            reforgedItems.put(slot, extraForged);
+        } else {
+            ArrayUtil.map(reforgedItems.get(slot), ItemData::disenchant);
+            reforgedItems.put(slot, ArrayUtil.concat(reforgedItems.get(slot), extraForged));
+        }
+
+//        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
+        ItemSet bestSets = EngineRandom.runSolver(model, reforgedItems, null, null, 1000L * 1000L * 1000L);
+        outputResult(bestSets, model, true);
+    }
+
+    private void reforgeProcessProtPlus2(ModelCombined model, Instant startTime, int extraItemId, int extraItemIdTwo) throws IOException {
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(false, gearProtFile, model.getReforgeRules());
+
+        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+        ItemData extraItemTwo = ItemUtil.loadItemBasic(itemCache, extraItemIdTwo);
+        System.out.println("EXTRA " + extraItem);
+        System.out.println("EXTRA " + extraItemTwo);
+        ItemData[] extraForged = Reforger.reforgeItem(model.getReforgeRules(), extraItem);
+        ArrayUtil.map(reforgedItems.get(extraItem.slot.toSlotEquip()), ItemData::disenchant);
+        reforgedItems.put(extraItem.slot.toSlotEquip(), ArrayUtil.concat(reforgedItems.get(extraItem.slot.toSlotEquip()), extraForged));
+
+        ItemData[] extraForgedTwo = Reforger.reforgeItem(model.getReforgeRules(), extraItemTwo);
+        ArrayUtil.map(reforgedItems.get(extraItemTwo.slot.toSlotEquip()), ItemData::disenchant);
+        reforgedItems.put(extraItemTwo.slot.toSlotEquip(), ArrayUtil.concat(reforgedItems.get(extraItemTwo.slot.toSlotEquip()), extraForgedTwo));
+
+//        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
+        ItemSet bestSets = EngineRandom.runSolver(model, reforgedItems, null, null, 1000L * 1000L * 1000L);
+        outputResult(bestSets, model, true);
+    }
+
     @SuppressWarnings("SameParameterValue")
     private void reforgeAlternatives(ModelCombined model, Instant startTime, int[] alternateItems) throws IOException {
-        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(false, inputFile, model.getReforgeRules());
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(false, gearRetFile, model.getReforgeRules());
 
         for (int extraItemId : alternateItems) {
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
@@ -387,7 +427,7 @@ public class Main {
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessPlusPlus(ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2) throws IOException {
         ReforgeRules rules = model.getReforgeRules();
-        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(false, inputFile, rules);
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(false, gearRetFile, rules);
 
         ItemData extraItem1 = ItemUtil.loadItemBasic(itemCache, extraItemId1);
         reforgedItems.computeIfPresent(extraItem1.slot.toSlotEquip(), (k,v) -> ArrayUtil.concat(v, Reforger.reforgeItem(rules, extraItem1)));

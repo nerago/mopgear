@@ -66,6 +66,7 @@ public class WowHead {
 
         StatBlock statBlock = new StatBlock(
                 objectGetInt(equipObject, "str"),
+                objectGetInt(equipObject, "sta"),
                 objectGetInt(equipObject, "mastrtng"),
                 objectGetInt(equipObject, "critstrkrtng"),
                 objectGetInt(equipObject, "hitrtng"),

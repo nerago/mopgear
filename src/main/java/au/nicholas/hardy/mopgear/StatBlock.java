@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public final class StatBlock {
     public final int str;
+    public final int stam;
     public final int mastery;
     public final int crit;
     public final int hit;
@@ -13,8 +14,9 @@ public final class StatBlock {
     public final int dodge;
     public final int parry;
 
-    public StatBlock(int str, int mastery, int crit, int hit, int haste, int expertise, int dodge, int parry) {
+    public StatBlock(int str, int stam, int mastery, int crit, int hit, int haste, int expertise, int dodge, int parry) {
         this.str = str;
+        this.stam = stam;
         this.mastery = mastery;
         this.crit = crit;
         this.hit = hit;
@@ -27,31 +29,32 @@ public final class StatBlock {
     public StatBlock plus(StatBlock other) {
         return new StatBlock(
                 str + other.str,
+                stam + other.stam,
                 mastery + other.mastery,
                 crit + other.crit,
                 hit + other.hit,
                 haste + other.haste,
                 expertise + other.expertise,
                 dodge + other.dodge,
-                parry + other.parry
-        );
+                parry + other.parry);
     }
 
     public StatBlock plus(StatBlock first, StatBlock second) {
         return new StatBlock(
                 str + first.str + second.str,
+                stam + first.stam + second.stam,
                 mastery + first.mastery + second.mastery,
                 crit + first.crit + second.crit,
                 hit + first.hit + second.hit,
                 haste + first.haste + second.haste,
                 expertise + first.expertise + second.expertise,
                 dodge + first.dodge + second.dodge,
-                parry + first.parry + second.parry
-        );
+                parry + first.parry + second.parry);
     }
 
     public static StatBlock sum(EnumMap<SlotEquip, ItemData> items) {
         int str = 0;
+        int stam = 0;
         int mastery = 0;
         int crit = 0;
         int hit = 0;
@@ -64,6 +67,7 @@ public final class StatBlock {
             if (item != null) {
                 StatBlock stat = item.stat;
                 str += stat.str;
+                stam += stat.stam;
                 mastery += stat.mastery;
                 crit += stat.crit;
                 hit += stat.hit;
@@ -73,6 +77,7 @@ public final class StatBlock {
                 parry += stat.parry;
                 StatBlock fixed = item.statFixed;
                 str += fixed.str;
+                stam += fixed.stam;
                 mastery += fixed.mastery;
                 crit += fixed.crit;
                 hit += fixed.hit;
@@ -82,13 +87,16 @@ public final class StatBlock {
                 parry += fixed.parry;
             }
         }
-        return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
+        return new StatBlock(str, stam, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
     int get(StatType stat) {
         switch (stat) {
             case Strength -> {
                 return str;
+            }
+            case Stam -> {
+                return stam;
             }
             case Mastery -> {
                 return mastery;
@@ -117,6 +125,7 @@ public final class StatBlock {
 
     StatBlock withChange(StatType a_stat, int a_value) {
         int str = this.str;
+        int stam = this.stam;
         int mastery = this.mastery;
         int crit = this.crit;
         int hit = this.hit;
@@ -126,6 +135,7 @@ public final class StatBlock {
         int parry = this.parry;
         switch (a_stat) {
             case Strength -> str = a_value;
+            case Stam -> stam = a_value;
             case Mastery -> mastery = a_value;
             case Crit -> crit = a_value;
             case Hit -> hit = a_value;
@@ -135,10 +145,12 @@ public final class StatBlock {
             case Parry -> parry = a_value;
             default -> throw new IllegalArgumentException();
         }
-        return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
+        return new StatBlock(str, stam, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
     StatBlock withChange(StatType a_stat, int a_value, StatType b_stat, int b_value) {
+        int str = this.str;
+        int stam = this.stam;
         int mastery = this.mastery;
         int crit = this.crit;
         int hit = this.hit;
@@ -146,7 +158,11 @@ public final class StatBlock {
         int expertise = this.expertise;
         int dodge = this.dodge;
         int parry = this.parry;
+        if (a_stat == b_stat)
+            throw new IllegalArgumentException();
         switch (a_stat) {
+            case Strength -> str = a_value;
+            case Stam -> stam = a_value;
             case Mastery -> mastery = a_value;
             case Crit -> crit = a_value;
             case Hit -> hit = a_value;
@@ -157,6 +173,8 @@ public final class StatBlock {
             default -> throw new IllegalArgumentException();
         }
         switch (b_stat) {
+            case Strength -> str = b_value;
+            case Stam -> stam = b_value;
             case Mastery -> mastery = b_value;
             case Crit -> crit = b_value;
             case Hit -> hit = b_value;
@@ -166,12 +184,14 @@ public final class StatBlock {
             case Parry -> parry = b_value;
             default -> throw new IllegalArgumentException();
         }
-        return new StatBlock(str, mastery, crit, hit, haste, expertise, dodge, parry);
+        return new StatBlock(str, stam, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
     public void append(StringBuilder sb) {
         if (str != 0)
             sb.append("str=").append(str).append(' ');
+        if (stam != 0)
+            sb.append("stam=").append(stam).append(' ');
         if (mastery != 0)
             sb.append("mastery=").append(mastery).append(' ');
         if (crit != 0)
@@ -188,14 +208,14 @@ public final class StatBlock {
             sb.append("parry=").append(parry).append(' ');
     }
 
-    public final static StatBlock empty = new StatBlock(0, 0, 0, 0, 0, 0, 0, 0);
+    public final static StatBlock empty = new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public boolean isEmpty() {
-        return str == 0 && mastery == 0 && crit == 0 && hit == 0 && haste == 0 && expertise == 0 && dodge == 0 && parry == 0;
+        return str == 0 && stam == 0 && mastery == 0 && crit == 0 && hit == 0 && haste == 0 && expertise == 0 && dodge == 0 && parry == 0;
     }
 
     public boolean equalsStats(StatBlock stats) {
-        return str == stats.str && mastery == stats.mastery && crit == stats.crit && hit == stats.hit &&
+        return str == stats.str && stam == stats.stam && mastery == stats.mastery && crit == stats.crit && hit == stats.hit &&
                 haste == stats.haste && expertise == stats.expertise && dodge == stats.dodge && parry == stats.parry;
     }
 
@@ -208,7 +228,7 @@ public final class StatBlock {
 
     @Override
     public int hashCode() {
-        return Objects.hash(str, mastery, crit, hit, haste, expertise, dodge, parry);
+        return Objects.hash(str, stam, mastery, crit, hit, haste, expertise, dodge, parry);
     }
 
     @Override
