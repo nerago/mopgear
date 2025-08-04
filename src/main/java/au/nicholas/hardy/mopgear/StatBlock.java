@@ -40,7 +40,7 @@ public final class StatBlock {
     public StatBlock plus(StatBlock first, StatBlock second) {
         return new StatBlock(
                 str + first.str + second.str,
-                mastery + first.mastery + first.mastery,
+                mastery + first.mastery + second.mastery,
                 crit + first.crit + second.crit,
                 hit + first.hit + second.hit,
                 haste + first.haste + second.haste,

@@ -1,10 +1,8 @@
 package au.nicholas.hardy.mopgear;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import static au.nicholas.hardy.mopgear.Main.cacheFile;
 
@@ -16,14 +14,14 @@ public class ServiceEntry {
         itemCache = new ItemCache(cacheFile);
         StatRatingsWeights ratings = new StatRatingsWeights(null, true);
         StatRequirements requirements = new StatRequirements(true, false);
-        model = new ModelCombined(ratings, requirements, new ReforgeRules());
+        model = new ModelCombined(ratings, requirements, ReforgeRules.ret());
     }
 
-    public Collection<ItemSet> run(String jsonString) throws IOException {
+    public ItemSet run(String jsonString) throws IOException {
         return reforgeProcess(jsonString);
     }
 
-    private Collection<ItemSet> reforgeProcess(String jsonString) throws IOException {
+    private ItemSet reforgeProcess(String jsonString) throws IOException {
         List<EquippedItem> itemIds = InputParser.readString(jsonString);
         List<ItemData> items;
         synchronized (itemCache) {

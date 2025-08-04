@@ -1,23 +1,27 @@
 package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
+import au.nicholas.hardy.mopgear.util.BigStreamUtil;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
 public class EngineRandom {
-    public static Collection<ItemSet> runSolver(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, ItemSet otherSet) {
-        Stream<ItemSet> finalSets = runSolverPartial(model, items, otherSet);
+    public static Collection<ItemSet> runSolver(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, ItemSet otherSet, long count, Instant startTime) {
+        Stream<ItemSet> finalSets = runSolverPartial(model, items, otherSet, count, startTime);
         Optional<ItemSet> opt = finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
         return opt.isPresent() ? Collections.singleton(opt.get()) : Collections.emptyList();
     }
 
-    private static Stream<ItemSet> runSolverPartial(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, ItemSet otherSet) {
-        Stream<Long> dumbStream = generateDumbStream(1000L * 1000L);
+    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, ItemSet otherSet, long count, Instant startTime) {
+        Stream<Long> dumbStream = generateDumbStream(count);
         Stream<ItemSet> setStream = dumbStream.parallel()
                                               .map(x -> makeSet(items, otherSet));
+        if (startTime != null)
+            setStream = BigStreamUtil.countProgress(count, startTime, setStream);
         return model.filterSets(setStream);
     }
 

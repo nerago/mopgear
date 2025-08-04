@@ -29,19 +29,18 @@ public class Reforger {
         return outputItems.toArray(ItemData[]::new);
     }
 
-    public static ItemData[] presetReforge(ItemData baseItem, Tuple.Tuple2<StatType, StatType> statChange) {
+    public static ItemData presetReforge(ItemData baseItem, Tuple.Tuple2<StatType, StatType> statChange) {
         StatType sourceStat = statChange.a();
         StatType targetStat = statChange.b();
         if (sourceStat == null && targetStat == null) {
-            return new ItemData[] { baseItem };
+            return baseItem;
         } else if (sourceStat != null && targetStat != null)  {
             int originalValue = baseItem.stat.get(sourceStat);
             if (originalValue == 0 || baseItem.stat.get(targetStat) != 0)
                 throw new RuntimeException("expected non-zero and zero");
             int reforgeQuantity = (originalValue * 4) / 10;
             int remainQuantity = originalValue - reforgeQuantity;
-            ItemData modified = makeModified(baseItem, sourceStat, targetStat, remainQuantity, reforgeQuantity);
-            return new ItemData[] { modified };
+            return makeModified(baseItem, sourceStat, targetStat, remainQuantity, reforgeQuantity);
         } else {
             throw new IllegalStateException();
         }

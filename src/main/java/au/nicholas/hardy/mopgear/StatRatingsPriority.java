@@ -4,10 +4,7 @@ import java.util.Arrays;
 
 public class StatRatingsPriority implements StatRatings {
     private final StatType[] priority;
-
-//    public ModelPriority() {
-//        priority = new StatType[]{StatType.Haste, StatType.Mastery, StatType.Crit};
-//    }
+    private final static int DEFAULT_MULTIPLY = 4; // scale to similar rates as weighting
 
     public StatRatingsPriority(StatType[] priority) {
         this.priority = priority;
@@ -35,6 +32,6 @@ public class StatRatingsPriority implements StatRatings {
             value += totals.get(stat) * multiply;
             multiply /= 10;
         }
-        return value * 3; // scale to similar rates
+        return value * DEFAULT_MULTIPLY;
     }
 }

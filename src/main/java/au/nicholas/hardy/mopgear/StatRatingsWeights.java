@@ -18,6 +18,16 @@ public class StatRatingsWeights implements StatRatings {
         this.includeHit = includeHit;
     }
 
+    private StatRatingsWeights(StatBlock weight) {
+        this.weight = weight;
+        this.includeHit = false;
+    }
+
+    public static StatRatingsWeights protHardcode() {
+        // artifically inflated mastery, hit/exp. rest from sim
+        return new StatRatingsWeights(new StatBlock(953, 1200, 1, 3000, 637, 3000, 997, 990));
+    }
+
     private static StatBlock parseReader(BufferedReader reader) throws IOException {
         StringBuilder build = new StringBuilder();
         while (true) {
@@ -38,6 +48,8 @@ public class StatRatingsWeights implements StatRatings {
                 case "HasteRating" -> addNum(stat, StatType.Haste, pair[1]);
                 case "ExpertiseRating" -> addNum(stat, StatType.Expertise, pair[1]);
                 case "MasteryRating" -> addNum(stat, StatType.Mastery, pair[1]);
+                case "DodgeRating" -> addNum(stat, StatType.Dodge, pair[1]);
+                case "ParryRating" -> addNum(stat, StatType.Parry, pair[1]);
                 default -> stat;
             };
         }

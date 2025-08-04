@@ -12,10 +12,10 @@ import static java.util.Spliterator.*;
 import static java.util.Spliterator.IMMUTABLE;
 
 public class EngineStream {
-    public static Collection<ItemSet> runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {
+    public static ItemSet runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {
         Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, otherSet);
         Optional<ItemSet> opt = finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
-        return opt.isPresent() ? Collections.singleton(opt.get()) : Collections.emptyList();
+        return opt.orElseThrow();
 //        return finalSets.collect(new TopCollector1<>(20, ItemSet::getStatRating));
     }
 

@@ -25,6 +25,9 @@ public class ArrayUtil {
     }
 
     public static ItemData rand(ItemData[] itemList, Random random) {
-        return itemList[random.nextInt(itemList.length)];
+        if (itemList.length > 1)
+            return itemList[random.nextInt(itemList.length)];
+        else
+            return itemList[0];
     }
 }

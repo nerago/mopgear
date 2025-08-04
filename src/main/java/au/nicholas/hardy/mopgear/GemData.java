@@ -37,6 +37,7 @@ public class GemData {
         map.put(76895, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0)); // tank meta, stam
         map.put(76667, new StatBlock(0, 0, 0, 0, 160, 160, 0, 0));
         map.put(76615, new StatBlock(0, 0, 0, 160, 0, 160, 0, 0));
+        map.put(76700, new StatBlock(0, 320, 0, 0, 0, 0, 0, 0));
         return map;
     }
 
