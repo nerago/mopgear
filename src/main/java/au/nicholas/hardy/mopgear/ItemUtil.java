@@ -107,4 +107,17 @@ public class ItemUtil {
             }
         }
     }
+
+    static void validateDualSets(Map<SlotEquip, ItemData[]> retMap, Map<SlotEquip, ItemData[]> protMap) {
+        if (protMap.get(SlotEquip.Offhand) == null || protMap.get(SlotEquip.Offhand).length == 0)
+            throw new IllegalArgumentException("no shield");
+        if (protMap.get(SlotEquip.Ring1)[0].id == retMap.get(SlotEquip.Ring2)[0].id)
+            throw new IllegalArgumentException("duplicate in non matching slot");
+        if (protMap.get(SlotEquip.Ring2)[0].id == retMap.get(SlotEquip.Ring1)[0].id)
+            throw new IllegalArgumentException("duplicate in non matching slot");
+        if (protMap.get(SlotEquip.Trinket1)[0].id == retMap.get(SlotEquip.Trinket2)[0].id)
+            throw new IllegalArgumentException("duplicate in non matching slot");
+        if (protMap.get(SlotEquip.Trinket2)[0].id == retMap.get(SlotEquip.Trinket1)[0].id)
+            throw new IllegalArgumentException("duplicate in non matching slot");
+    }
 }
