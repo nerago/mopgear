@@ -49,10 +49,10 @@ public class Main {
     private void exceptionalCheck(Instant startTime) {
         try {
 //            multiSpecSpecifiedRating();
-            multiSpecSequential(startTime);
+//            multiSpecSequential(startTime);
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -95,7 +95,8 @@ public class Main {
         ModelCombined model = new ModelCombined(statRatings, statRequirements, ReforgeRules.prot());
 
 //        reforgeProcessProtFixed(model, startTime, true);
-        reforgeProcessProtPlus2(model, startTime, 81696, 89823);
+//        reforgeProcessProtPlus2(model, startTime, 81696, 89823);
+        reforgeProcess(gearProtFile, model, startTime, true);
 
         // so we could get a conclusive result from the ret, then set the common slots to fixed
     }
@@ -117,7 +118,7 @@ public class Main {
         StatRequirements statRet = new StatRequirements(false, false);
         ModelCombined modelRet = new ModelCombined(statRatingsRet, statRet, ReforgeRules.ret());
 
-        StatRatings protStatRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULT, 1);
+        StatRatings protStatRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULTIPLY, 1);
         StatRequirements statProt = new StatRequirements(false, true);
 //        StatRatings protStatRatings = StatRatingsWeights.protHardcode();
         ModelCombined modelProt = new ModelCombined(protStatRatings, statProt, ReforgeRules.prot());
@@ -187,7 +188,7 @@ public class Main {
 
         EnumMap<SlotEquip, ItemData[]> submitProtMap = protMap.clone();
         ItemUtil.buildJobWithCommonItemsFixed(chosenMap, submitProtMap);
-        return EngineStream.runSolver(modelRet, submitRetMap, null, optimisedRet);
+        return EngineStream.runSolver(modelProt, submitProtMap, null, optimisedRet);
     }
 
     private Stream<? extends ItemSet> subSolveProt(ItemSet retSet, EnumMap<SlotEquip, ItemData[]> protMap, ModelCombined modelProt) {
@@ -258,7 +259,7 @@ public class Main {
 
         StatRequirements statProt = new StatRequirements(false, true);
 //        StatRatings protStatRatings = StatRatingsWeights.protHardcode();
-        StatRatings protStatRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULT, 1);
+        StatRatings protStatRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULTIPLY, 1);
         ModelCombined modelProt = new ModelCombined(protStatRatings, statProt, ReforgeRules.prot());
 
         System.out.println("RET GEAR CURRENT");
@@ -340,8 +341,8 @@ public class Main {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void reforgeProcess(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(detailedOutput, gearRetFile, model.getReforgeRules());
+    private void reforgeProcess(Path file, ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
+        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad2(detailedOutput, file, model.getReforgeRules());
         ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSets, model, detailedOutput);
     }

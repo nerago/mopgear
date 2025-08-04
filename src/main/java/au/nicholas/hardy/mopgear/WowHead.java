@@ -26,11 +26,19 @@ public class WowHead {
 
             JsonObject json = parseJson(jsonOnwards).getAsJsonObject();
             if (json.has(String.valueOf(itemId))) {
-                System.out.println("Fetched " + itemId);
+                JsonObject io = json.get(String.valueOf(itemId)).getAsJsonObject();
+                JsonObject je = io.get("jsonequip").getAsJsonObject();
+                int level = je.get("reqlevel").getAsInt();
+                if (level < 90) {
+                    System.out.println("Skipping " + itemId + " version for level " + level);
+                    startIndex = startDataSection + 1;
+                    continue;
+                }
             } else {
                 startIndex = startDataSection + 1;
                 continue;
             }
+            System.out.println("Fetched " + itemId);
             JsonObject itemObject = json.get(String.valueOf(itemId)).getAsJsonObject();
             System.out.println(itemObject);
 

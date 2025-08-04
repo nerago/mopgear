@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class StatRatingsWeights implements StatRatings {
-    public static final int PROT_MULT = 12;
+    public static final int PROT_MULTIPLY = 15;
     // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.513,CritRating=0.256,HasteRating=0.448,ExpertiseRating=0.426,MasteryRating=0.260,Ap=0.437,MeleeDps=1.633 )
 
     private final StatBlock weight;
