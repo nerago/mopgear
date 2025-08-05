@@ -15,7 +15,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused"})
+@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "ExtractMethodRecommender"})
 public class Main {
 
     private static final Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
@@ -50,10 +50,10 @@ public class Main {
     private void exceptionalCheck(Instant startTime) {
         try {
 //            multiSpecSpecifiedRating();
-            multiSpecSequential(startTime);
+//            multiSpecSequential(startTime);
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -80,7 +80,7 @@ public class Main {
 //        rankAlternatives(new int [] {89530,81239,81567,81180,81568}); // necks
 //        rankAlternatives(new int [] {81129,81234,82850,81571}); // cloak
 //        rankAlternatives(new int [] {84036,81190,81687,81130,81086}); // belt
-        rankAlternatives(model, new int[]{84027, 81284, 81073, 81113, 82852}); // feet
+        rankAlternativesAsSingleItems(model, new int[]{84027, 81284, 81073, 81113, 82852}); // feet
     }
 
     private void reforgeRet(Instant startTime) throws IOException {
@@ -99,12 +99,49 @@ public class Main {
 
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtPlus2(model, startTime, 81696, 89823);
-        reforgeProcess(gearProtFile, model, startTime, true);
+//        reforgeProcess(gearProtFile, model, startTime, true);
+        findUpgradeSetup(gearProtFile, model);
 
         // so we could get a conclusive result from the ret, then set the common slots to fixed
     }
 
-    private void rankAlternatives(ModelCombined model, int[] itemIds) {
+    private void findUpgradeSetup(Path gearProtFile, ModelCombined model) throws IOException {
+        int neckParagonPale = 89066; // 1250
+        int beltKlaxxiConsumer = 89056; // 1750
+        int legKovokRiven = 89093; // 2500
+        int backYiCloakCourage = 89075; // 1250
+        int headYiLeastFavorite = 89216; // 2500
+        int headVoiceAmpGreathelm = 89280; // 2500
+        int chestDawnblade = 89420; // 2500
+        int chestCuirassTwin = 89421; // 2500
+        int gloveOverwhelmSwarm = 88746; // 1750
+        int wristBattleShadow = 88880; // 1250
+        int wristBraidedBlackWhite = 88879; // 1250
+        int bootYulonGuardian = 88864; // 1750
+        int bootTankissWarstomp = 88862; // 1750
+
+        int[] extraItemArray = new int[] { neckParagonPale, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage,headYiLeastFavorite,headVoiceAmpGreathelm, chestDawnblade,
+        chestCuirassTwin,gloveOverwhelmSwarm,wristBattleShadow,wristBraidedBlackWhite,bootYulonGuardian,bootTankissWarstomp};
+
+//        int runSize = 100000000; // 2 min total runs
+        int runSize = 1000000000; // 20 min runs
+
+        ItemSet baseSet = reforgeProcessQuiet(gearProtFile, model, runSize);
+        double baseRating = model.calcRating(baseSet);
+        System.out.printf("BASE RATING    = %.0f\n", baseRating);
+
+        for (int extraItemId : extraItemArray) {
+            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+            System.out.println(extraItem);
+
+            ItemSet extraSet = reforgeProcessPlusCore(gearProtFile, model, null, false, extraItemId, extraItem.slot.toSlotEquip(), true, runSize);
+            double extraRating = model.calcRating(extraSet);
+            double factor = extraRating / baseRating;
+            System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
+        }
+    }
+
+    private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds) {
         List<ItemData> reforgedItems = Arrays.stream(itemIds)
                 .mapToObj(x -> new EquippedItem(x, new int[0], null))
                 .map(x -> ItemUtil.loadItem(itemCache, x, true))
@@ -313,20 +350,27 @@ public class Main {
         outputResult(bestSet, model, detailedOutput);
         ItemSet tweakSet = Tweaker.tweak(bestSet, model, reforgedItems);
         if (bestSet != tweakSet) {
-            System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
+            if (detailedOutput)
+                System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
             outputResult(tweakSet, model, detailedOutput);
         }
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private void reforgeProcessPlus(Path file, ModelCombined model, Instant startTime, int extraItemId, boolean replace) throws IOException {
-        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        reforgeProcessPlus(file, model, startTime, extraItemId, extraItem.slot.toSlotEquip(), replace);
+    private ItemSet reforgeProcessQuiet(Path file, ModelCombined model, long runSize) throws IOException {
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, model.reforgeRules());
+        ItemSet bestSet = EngineRandom.runSolver(model, reforgedItems, null, null, runSize);
+        return Tweaker.tweak(bestSet, model, reforgedItems);
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void reforgeProcessPlus(Path file, ModelCombined model, Instant startTime, int extraItemId, SlotEquip slot, boolean replace) throws IOException {
-        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, model.reforgeRules());
+    private void reforgeProcessPlus(Path file, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace) throws IOException {
+        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+        ItemSet bestSet = reforgeProcessPlusCore(file, model, startTime, detailedOutput, extraItemId, extraItem.slot.toSlotEquip(), replace, null);
+        outputResult(bestSet, model, detailedOutput);
+    }
+
+    private ItemSet reforgeProcessPlusCore(Path file, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, SlotEquip slot, boolean replace, Integer runSize) throws IOException {
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(detailedOutput, file, model.reforgeRules());
 
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
         ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
@@ -337,10 +381,16 @@ public class Main {
             reforgedItems.put(slot, ArrayUtil.concat(reforgedItems.get(slot), extraForged));
         }
 
-        System.out.println("EXTRA " + extraItem);
+        if (detailedOutput) {
+            System.out.println("EXTRA " + extraItem);
+        }
 
-        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
-        outputResult(bestSets, model, true);
+        if (runSize != null) {
+            ItemSet proposed = EngineRandom.runSolver(model, reforgedItems, startTime, null, runSize);
+            return Tweaker.tweak(proposed, model, reforgedItems);
+        } else {
+            return EngineStream.runSolver(model, reforgedItems, startTime, null);
+        }
     }
 
     @SuppressWarnings("SameParameterValue")
