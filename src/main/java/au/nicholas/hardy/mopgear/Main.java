@@ -373,17 +373,17 @@ public class Main {
         outputResult(bestSets, model, true);
     }
 
-    private void outputResult(Collection<ItemSet> bestSets, StatRatings statRatings, boolean detailedOutput) {
+    private void outputResult(Collection<ItemSet> bestSets, ModelCombined model, boolean detailedOutput) {
         if (detailedOutput) {
             System.out.println("@@@@@@@@@ Set count " + bestSets.size() + " @@@@@@@@@");
             bestSets.forEach(s -> System.out.println(s.getTotals()));
             bestSets.forEach(s -> {
                 System.out.println("#######################################");
-                s.outputSet(statRatings);
+                s.outputSet(model);
             });
         } else {
             Optional<ItemSet> last = bestSets.stream().reduce((a, b) -> b);
-            last.orElseThrow().outputSet(statRatings);
+            last.orElseThrow().outputSet(model);
         }
     }
 

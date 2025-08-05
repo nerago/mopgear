@@ -39,10 +39,10 @@ public final class ItemSet {
         return items;
     }
 
-    void outputSet(StatRatings statRatings) {
-        System.out.println(getTotals() + " " + statRatings.calcRating(getTotals()));
+    void outputSet(ModelCombined model) {
+        System.out.println(getTotals() + " " + model.calcRating(getTotals()));
         for (ItemData it : getItems().values()) {
-            System.out.println(it + " " + statRatings.calcRating(it.totalStatCopy()));
+            System.out.println(it + " " + model.calcRating(it.totalStatCopy()));
         }
     }
 }
