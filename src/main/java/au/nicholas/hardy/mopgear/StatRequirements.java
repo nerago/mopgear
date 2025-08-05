@@ -1,17 +1,9 @@
 package au.nicholas.hardy.mopgear;
 
-import au.nicholas.hardy.mopgear.util.CurryQueue;
-
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
 public class StatRequirements {
-    public StatRequirements(boolean blacksmith, boolean tankExpertise) {
-        this.blacksmith = blacksmith;
-        this.tankExpertise = tankExpertise;
-
+    public StatRequirements(boolean tankExpertise) {
         requiredHit = TARGET_RATING_REGULAR;
         if (tankExpertise)
             requiredExpertise = TARGET_RATING_TANK;
@@ -30,8 +22,6 @@ public class StatRequirements {
 
     private final int requiredHit;
     private final int requiredExpertise;
-    private final boolean blacksmith;
-    private final boolean tankExpertise;
 
     public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
 //        return sets.filter(set -> hasNoDuplicate(set.items) && inRange2(set.getTotals()));
@@ -40,29 +30,6 @@ public class StatRequirements {
 
     public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
         return stream.filter(set -> inRangeMax(set.getTotals()));
-    }
-
-    private static boolean hasNoDuplicate(CurryQueue<ItemData> items) {
-        ItemData ring = null, trink = null;
-        do {
-            ItemData item = items.item();
-            switch (item.slot) {
-                case Ring -> {
-                    if (ring == null)
-                        ring = item;
-                    else if (ring.id == item.id)
-                        return false;
-                }
-                case Trinket -> {
-                    if (trink == null)
-                        trink = item;
-                    else if (trink.id == item.id)
-                        return false;
-                }
-            }
-            items = items.tail();
-        } while (items != null);
-        return true;
     }
 
     @SuppressWarnings("RedundantIfStatement")

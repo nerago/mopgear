@@ -4,7 +4,9 @@ public class ReforgeRules {
     private static final StatType[] reforgeSource = new StatType[]{StatType.Mastery, StatType.Crit, StatType.Hit, StatType.Haste, StatType.Expertise, StatType.Dodge, StatType.Parry};
 
     private static final StatType[] reforgeTargetsRet = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Haste}; // StatType.Mastery
-    private static final StatType[] reforgeTargetsProt = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Mastery}; // StatType.Haste
+//    private static final StatType[] reforgeTargetsProt = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Mastery};
+    private static final StatType[] reforgeTargetsProt = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Mastery, StatType.Haste};
+
     private final StatType[] reforgeTargets;
 
     private ReforgeRules(StatType[] reforgeTargets) {

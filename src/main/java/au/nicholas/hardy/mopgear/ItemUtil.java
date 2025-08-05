@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.CurryQueue;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.io.IOException;
@@ -102,15 +103,21 @@ public class ItemUtil {
                 continue;
 
             ItemData example = slotOptions[0];
-            if (example.id == chosenItem.id && example.statFixed.equalsStats(chosenItem.statFixed)) {
+            if (isSameItem(example, chosenItem)) {
                 submitMap.put(slot, new ItemData[] { chosenItem });
             }
         }
     }
 
+    private static boolean isSameItem(ItemData a, ItemData b) {
+        return a.id == b.id && a.statFixed.equalsStats(b.statFixed);
+    }
+
     static void validateDualSets(Map<SlotEquip, ItemData[]> retMap, Map<SlotEquip, ItemData[]> protMap) {
         if (protMap.get(SlotEquip.Offhand) == null || protMap.get(SlotEquip.Offhand).length == 0)
             throw new IllegalArgumentException("no shield");
+        if (retMap.get(SlotEquip.Offhand) != null)
+            throw new IllegalArgumentException("unexpected shield");
         if (protMap.get(SlotEquip.Ring1)[0].id == retMap.get(SlotEquip.Ring2)[0].id)
             throw new IllegalArgumentException("duplicate in non matching slot");
         if (protMap.get(SlotEquip.Ring2)[0].id == retMap.get(SlotEquip.Ring1)[0].id)
@@ -119,5 +126,39 @@ public class ItemUtil {
             throw new IllegalArgumentException("duplicate in non matching slot");
         if (protMap.get(SlotEquip.Trinket2)[0].id == retMap.get(SlotEquip.Trinket1)[0].id)
             throw new IllegalArgumentException("duplicate in non matching slot");
+
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData[] aaa = retMap.get(slot);
+            ItemData[] bbb = protMap.get(slot);
+            if (aaa == null || bbb == null || aaa.length == 0 || bbb.length == 0)
+                continue;
+
+            if (isSameItem(aaa[0], bbb[0])) {
+                System.out.println("COMMON " + aaa[0].name);
+            }
+        }
+    }
+
+    private static boolean hasNoDuplicate(CurryQueue<ItemData> items) {
+        ItemData ring = null, trink = null;
+        do {
+            ItemData item = items.item();
+            switch (item.slot) {
+                case Ring -> {
+                    if (ring == null)
+                        ring = item;
+                    else if (ring.id == item.id)
+                        return false;
+                }
+                case Trinket -> {
+                    if (trink == null)
+                        trink = item;
+                    else if (trink.id == item.id)
+                        return false;
+                }
+            }
+            items = items.tail();
+        } while (items != null);
+        return true;
     }
 }

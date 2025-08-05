@@ -15,7 +15,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "ExtractMethodRecommender"})
+@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused"})
 public class Main {
 
     private static final Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
@@ -25,7 +25,7 @@ public class Main {
     private static final Path weightFileRetMine = directory.resolve("weight-mysim.json");
 //    private static final Path weightFileStandard = directory.resolve("weight-standard.json");
     private static final Path weightFileProtMine = directory.resolve("weight-prot-sim.json");
-    public static final int BILLION = 1000 * 1000 * 1000;
+    public static final long BILLION = 1000 * 1000 * 1000;
 
     ItemCache itemCache;
 
@@ -62,11 +62,20 @@ public class Main {
         }
     }
 
+    private static ModelCombined standardRetModel() throws IOException {
+        StatRatings statRatings = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
+        StatRequirements statRequirements = new StatRequirements(false);
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret());
+    }
+
+    private static ModelCombined standardProtModel() throws IOException {
+        StatRatings statRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULTIPLY, 1);
+        StatRequirements statRequirements = new StatRequirements(true);
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.prot());
+    }
+
     private void rankSomething() throws IOException {
-//        model = new ModelWeights(weightFileMine, true);
-        StatRatings statRatings = new StatRatingsWeights(weightFileRetMine, true, 1, 1);
-        StatRequirements statRequirements = new StatRequirements(false, false);
-        ModelCombined model = new ModelCombined(statRatings, statRequirements, ReforgeRules.ret());
+        ModelCombined model = standardRetModel();
 
 //        rankAlternatives(new int [] {89530,81239,81567,81180,81568}); // necks
 //        rankAlternatives(new int [] {81129,81234,82850,81571}); // cloak
@@ -75,9 +84,7 @@ public class Main {
     }
 
     private void reforgeRet(Instant startTime) throws IOException {
-        StatRatings statRatings = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
-        StatRequirements statRequirements = new StatRequirements(false, false);
-        ModelCombined model = new ModelCombined(statRatings, statRequirements, ReforgeRules.ret());
+        ModelCombined model = standardRetModel();
 
         reforgeProcess(gearRetFile, model, startTime, true);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
@@ -88,12 +95,7 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) throws IOException {
-        StatRatings statRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULTIPLY, 1);
-//        StatRatings statRatings = StatRatingsWeights.protHardcode();
-//        StatRatings statRatings = new StatRatingsPriority(new StatType[]{StatType.Expertise, StatType.Haste, StatType.Mastery, StatType.Crit});
-//        StatRatings statRatings = new StatRatingsPriority(new StatType[]{StatType.Mastery, StatType.Haste, StatType.Parry, StatType.Dodge});
-        StatRequirements statRequirements = new StatRequirements(false, true);
-        ModelCombined model = new ModelCombined(statRatings, statRequirements, ReforgeRules.prot());
+        ModelCombined model = standardProtModel();
 
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtPlus2(model, startTime, 81696, 89823);
@@ -115,14 +117,8 @@ public class Main {
     }
 
     private void multiSpecSequential(Instant startTime) throws IOException {
-        StatRatings statRatingsRet = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
-        StatRequirements statRet = new StatRequirements(false, false);
-        ModelCombined modelRet = new ModelCombined(statRatingsRet, statRet, ReforgeRules.ret());
-
-        StatRatings protStatRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULTIPLY, 1);
-        StatRequirements statProt = new StatRequirements(false, true);
-//        StatRatings protStatRatings = StatRatingsWeights.protHardcode();
-        ModelCombined modelProt = new ModelCombined(protStatRatings, statProt, ReforgeRules.prot());
+        ModelCombined modelRet = standardRetModel();
+        ModelCombined modelProt = standardProtModel();
 
         System.out.println("RET GEAR CURRENT");
         EnumMap<SlotEquip, ItemData[]> retMap = readAndLoad(true, gearRetFile, modelRet.getReforgeRules());
@@ -130,8 +126,7 @@ public class Main {
         EnumMap<SlotEquip, ItemData[]> protMap = readAndLoad(true, gearProtFile, modelProt.getReforgeRules());
         ItemUtil.validateDualSets(retMap, protMap);
 
-        long randomCount = 1000L * 1000L * 1000L;
-        Stream<ItemSet> retStream = EngineRandom.runSolverPartial(modelRet, retMap, startTime, null, randomCount);
+        Stream<ItemSet> retStream = EngineRandom.runSolverPartial(modelRet, retMap, startTime, null, BILLION);
 
 //        Stream<ItemSet> protStream = retStream.flatMap(r -> subSolveProt(r, protMap, modelProt));
         Stream<ItemSet> protStream = retStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt));
@@ -241,14 +236,8 @@ public class Main {
     }
 
     private void multiSpecSpecifiedRating() throws IOException {
-        StatRatings statRatingsRet = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
-        StatRequirements statRet = new StatRequirements(false, false);
-        ModelCombined modelRet = new ModelCombined(statRatingsRet, statRet, ReforgeRules.ret());
-
-        StatRequirements statProt = new StatRequirements(false, true);
-//        StatRatings protStatRatings = StatRatingsWeights.protHardcode();
-        StatRatings protStatRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULTIPLY, 1);
-        ModelCombined modelProt = new ModelCombined(protStatRatings, statProt, ReforgeRules.prot());
+        ModelCombined modelRet = standardRetModel();
+        ModelCombined modelProt = standardProtModel();
 
         System.out.println("RET GEAR CURRENT");
         List<ItemData> retItems = ItemUtil.loadItems(itemCache, InputParser.readInput(gearRetFile), true);
