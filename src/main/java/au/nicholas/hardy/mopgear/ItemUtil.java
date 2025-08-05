@@ -3,11 +3,10 @@ package au.nicholas.hardy.mopgear;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
-import java.io.IOException;
 import java.util.*;
 
 public class ItemUtil {
-    static Set<SlotItem> expectedEnchant = buildExpectedEnchant();
+    private static final Set<SlotItem> expectedEnchant = buildExpectedEnchant();
 
     private static Set<SlotItem> buildExpectedEnchant() {
         EnumSet<SlotItem> set = EnumSet.noneOf(SlotItem.class);
@@ -24,7 +23,7 @@ public class ItemUtil {
         return set;
     }
 
-    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) throws IOException {
+    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
             ItemData item = loadItem(itemCache, equippedItem, detailedOutput);
@@ -38,7 +37,7 @@ public class ItemUtil {
         ItemData item = loadItemBasic(itemCache, id);
 
         if (equippedItem.gems().length > 0) {
-            StatBlock gemStat = GemData.process(equippedItem.gems(), item.slot);
+            StatBlock gemStat = GemData.process(equippedItem.gems());
             item = new ItemData(item.slot, item.name, item.stat, gemStat, id);
         }
 
@@ -100,7 +99,7 @@ public class ItemUtil {
         return map;
     }
 
-    public static EnumMap<SlotEquip, ItemData> chosenItemsReforgedToMap(ModelCombined modelRet, List<ItemData> items, Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetForge) {
+    public static EnumMap<SlotEquip, ItemData> chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetForge) {
         EnumMap<SlotEquip, ItemData> map = new EnumMap<>(SlotEquip.class);
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();

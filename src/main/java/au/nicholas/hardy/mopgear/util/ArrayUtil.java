@@ -3,9 +3,7 @@ package au.nicholas.hardy.mopgear.util;
 import au.nicholas.hardy.mopgear.ItemData;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 public class ArrayUtil {

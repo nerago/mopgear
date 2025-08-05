@@ -3,7 +3,6 @@ package au.nicholas.hardy.mopgear;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Reforger {

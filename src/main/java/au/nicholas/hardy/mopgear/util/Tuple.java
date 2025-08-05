@@ -8,7 +8,7 @@ public interface Tuple {
     }
 
     static <A, B> Tuple2<A, B> create(A a, B b) {
-        return new Tuple2<A, B>(a, b);
+        return new Tuple2<>(a, b);
     }
 
     static <A, B, C> Tuple3<A, B, C> create(A a, B b, C c) {

@@ -63,7 +63,6 @@ public class TopCollector1<T> implements Collector<T, TopCollector1.State<T>, Co
                 isFull = sortedSet.size() == size;
             } else if (addValue > worstValue || !isFull) {
                 sortedSet.add(add);
-//                System.out.println("better " + add);
                 trim();
             }
         }

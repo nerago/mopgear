@@ -7,9 +7,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.Collections.shuffle;
 import static java.util.Spliterator.*;
-import static java.util.Spliterator.IMMUTABLE;
 
 public class EngineStream {
     public static ItemSet runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {

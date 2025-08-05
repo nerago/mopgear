@@ -33,7 +33,7 @@ public class InputParser {
         JsonObject gear = inputObject.getAsJsonObject("gear");
         JsonArray items = gear.getAsJsonArray("items");
         for (JsonElement element : items) {
-            if (element.isJsonObject()) {;
+            if (element.isJsonObject()) {
                 JsonObject elementObject = element.getAsJsonObject();
                 int id = elementObject.get("id").getAsInt();
 

@@ -108,7 +108,7 @@ public class Main {
         List<ItemData> reforgedItems = Arrays.stream(itemIds)
                 .mapToObj(x -> new EquippedItem(x, new int[0], null))
                 .map(x -> ItemUtil.loadItem(itemCache, x, true))
-                .flatMap(x -> Arrays.stream(Reforger.reforgeItem(model.getReforgeRules(), x)))
+                .flatMap(x -> Arrays.stream(Reforger.reforgeItem(model.reforgeRules(), x)))
                 .sorted(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))
                 .toList();
         for (ItemData item : reforgedItems) {
@@ -121,9 +121,9 @@ public class Main {
         ModelCombined modelProt = standardProtModel();
 
         System.out.println("RET GEAR CURRENT");
-        EnumMap<SlotEquip, ItemData[]> retMap = readAndLoad(true, gearRetFile, modelRet.getReforgeRules());
+        EnumMap<SlotEquip, ItemData[]> retMap = readAndLoad(true, gearRetFile, modelRet.reforgeRules());
         System.out.println("PROT GEAR CURRENT");
-        EnumMap<SlotEquip, ItemData[]> protMap = readAndLoad(true, gearProtFile, modelProt.getReforgeRules());
+        EnumMap<SlotEquip, ItemData[]> protMap = readAndLoad(true, gearProtFile, modelProt.reforgeRules());
         ItemUtil.validateDualSets(retMap, protMap);
 
         Stream<ItemSet> retStream = EngineRandom.runSolverPartial(modelRet, retMap, startTime, null, BILLION);
@@ -209,7 +209,7 @@ public class Main {
 //        presetReforge.put(SlotEquip.Weapon, Tuple.create(null, null));
 //        presetReforge.put(SlotEquip.Offhand, Tuple.create(StatType.Parry, StatType.Hit));
 
-        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.getReforgeRules(), items, presetReforge);
+        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 //        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
         ItemSet bestSet = EngineStream.runSolver(model, map, startTime, null);
 
@@ -235,7 +235,7 @@ public class Main {
 //        presetReforge.put(SlotEquip.Weapon, Tuple.create(null, null));
 //        presetReforge.put(SlotEquip.Offhand, Tuple.create(StatType.Parry, StatType.Hit));
 
-        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.getReforgeRules(), items, presetReforge);
+        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 //        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
         ItemSet bestSets = EngineStream.runSolver(model, map, startTime, null);
 
@@ -288,10 +288,10 @@ public class Main {
         reforgeProt.put(SlotEquip.Weapon, Tuple.create(null, null));
         reforgeProt.put(SlotEquip.Offhand, Tuple.create(StatType.Parry, StatType.Hit));
 
-        EnumMap<SlotEquip, ItemData> retForgedItems = ItemUtil.chosenItemsReforgedToMap(modelRet, retItems, reforgeRet);
+        EnumMap<SlotEquip, ItemData> retForgedItems = ItemUtil.chosenItemsReforgedToMap(retItems, reforgeRet);
         ItemSet retSet = ItemSet.manyItems(retForgedItems, null);
 
-        EnumMap<SlotEquip, ItemData> protForgedItems = ItemUtil.chosenItemsReforgedToMap(modelProt, protItems, reforgeProt);
+        EnumMap<SlotEquip, ItemData> protForgedItems = ItemUtil.chosenItemsReforgedToMap(protItems, reforgeProt);
         ItemSet protSet = ItemSet.manyItems(protForgedItems, null);
 
         retSet.outputSet(modelRet);
@@ -307,7 +307,7 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcess(Path file, ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(detailedOutput, file, model.getReforgeRules());
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(detailedOutput, file, model.reforgeRules());
         ItemSet bestSet = EngineRandom.runSolver(model, reforgedItems, startTime, null, BILLION);
 //        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSet, model, detailedOutput);
@@ -326,10 +326,10 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessPlus(Path file, ModelCombined model, Instant startTime, int extraItemId, SlotEquip slot, boolean replace) throws IOException {
-        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, model.getReforgeRules());
+        Map<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, model.reforgeRules());
 
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        ItemData[] extraForged = Reforger.reforgeItem(model.getReforgeRules(), extraItem);
+        ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
         if (replace) {
             reforgedItems.put(slot, extraForged);
         } else {
@@ -345,7 +345,7 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeAlternatives(Path file, ModelCombined model, Instant startTime, int[] alternateItems) throws IOException {
-        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, model.getReforgeRules());
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, model.reforgeRules());
 
         for (int extraItemId : alternateItems) {
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
@@ -358,7 +358,7 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessPlusPlus(Path file, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2) throws IOException {
-        ReforgeRules rules = model.getReforgeRules();
+        ReforgeRules rules = model.reforgeRules();
         EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, rules);
 
         ItemData extraItem1 = ItemUtil.loadItemBasic(itemCache, extraItemId1);

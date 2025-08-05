@@ -1,14 +1,5 @@
 package au.nicholas.hardy.mopgear;
 
-import au.nicholas.hardy.mopgear.util.BigStreamUtil;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import static java.util.Spliterator.*;
-
 public class EngineStreamDual {
 
 //    public static Collection<ItemSet> runSolver(ModelCombined modelRet, Map<SlotEquip, List<ItemData>> retMap, ModelCombined modelProt, Map<SlotEquip, List<ItemData>> protMap, Object o) {

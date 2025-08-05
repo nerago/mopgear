@@ -17,17 +17,17 @@ public class ServiceEntry {
         model = new ModelCombined(ratings, requirements, ReforgeRules.ret());
     }
 
-    public ItemSet run(String jsonString) throws IOException {
+    public ItemSet run(String jsonString) {
         return reforgeProcess(jsonString);
     }
 
-    private ItemSet reforgeProcess(String jsonString) throws IOException {
+    private ItemSet reforgeProcess(String jsonString) {
         List<EquippedItem> itemIds = InputParser.readString(jsonString);
         List<ItemData> items;
         synchronized (itemCache) {
             items = ItemUtil.loadItems(itemCache, itemIds, false);
         }
-        EnumMap<SlotEquip, ItemData[]> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.reforgeRules(), items);
         return EngineStream.runSolver(model, reforgedItems, null, null);
     }
 }

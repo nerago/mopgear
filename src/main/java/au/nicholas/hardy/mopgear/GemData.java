@@ -47,11 +47,7 @@ public class GemData {
         return map;
     }
 
-    public static StatBlock process(int[] gemIds, SlotItem slot) {
-//        if (ModelCommon.blacksmith && (slot == SlotItem.Wrist || slot == SlotItem.Hand) && gemIds.length > 0) {
-//            gemIds = Arrays.copyOf(gemIds, gemIds.length - 1);
-//        }
-
+    public static StatBlock process(int[] gemIds) {
         StatBlock result = StatBlock.empty;
         for (int id : gemIds) {
             StatBlock stats = known.get(id);

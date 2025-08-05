@@ -7,7 +7,6 @@ import java.nio.file.Path;
 
 public class StatRatingsWeights implements StatRatings {
     public static final int PROT_MULTIPLY = 15;
-    // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.513,CritRating=0.256,HasteRating=0.448,ExpertiseRating=0.426,MasteryRating=0.260,Ap=0.437,MeleeDps=1.633 )
 
     private final StatBlock weight;
     private final boolean includeHit;
@@ -29,11 +28,6 @@ public class StatRatingsWeights implements StatRatings {
         this.numerator = 1;
         this.denominator = 1;
     }
-
-//    public static StatRatingsWeights protHardcode() {
-//        // artifically inflated mastery, hit/exp. rest from sim
-//        return new StatRatingsWeights(new StatBlock(953, 1200, 1, 3000, 637, 3000, 997, 990));
-//    }
 
     private static StatBlock parseReader(BufferedReader reader) throws IOException {
         StringBuilder build = new StringBuilder();
