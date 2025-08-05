@@ -106,7 +106,7 @@ public class Main {
 
     private void rankAlternatives(ModelCombined model, int[] itemIds) {
         List<ItemData> reforgedItems = Arrays.stream(itemIds)
-                .mapToObj(x -> new EquippedItem(x, new int[0]))
+                .mapToObj(x -> new EquippedItem(x, new int[0], null))
                 .map(x -> ItemUtil.loadItem(itemCache, x, true))
                 .flatMap(x -> Arrays.stream(Reforger.reforgeItem(model.getReforgeRules(), x)))
                 .sorted(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))
@@ -131,23 +131,32 @@ public class Main {
 //        Stream<ItemSet> protStream = retStream.flatMap(r -> subSolveProt(r, protMap, modelProt));
         Stream<ItemSet> protStream = retStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt));
 
-//        protStream = protStream.peek(x -> System.out.println(x.getTotals() + " " + x.otherSet.getTotals()));
-
         Collection<ItemSet> best = protStream.collect(
                 new TopCollectorReporting<>(s -> dualRating(s, modelRet, modelProt),
-                        s -> reportBetter(s, modelRet, modelProt)));
+                        s -> reportBetter(s, modelRet, modelProt, retMap, protMap)));
         outputResult(best, modelProt, true);
     }
 
-    private void reportBetter(ItemSet itemSet, ModelCombined modelRet, ModelCombined modelProt) {
+    private void reportBetter(ItemSet itemSet, ModelCombined modelRet, ModelCombined modelProt, EnumMap<SlotEquip, ItemData[]> itemsRet, EnumMap<SlotEquip, ItemData[]> itemsProt) {
         long rating = modelProt.calcRating(itemSet) + modelRet.calcRating(itemSet.otherSet);
         synchronized (System.out) {
             System.out.println(LocalDateTime.now());
             System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
             itemSet.otherSet.outputSet(modelRet);
+            ItemSet tweakRet = Tweaker.tweak(itemSet.otherSet, modelRet, itemsRet);
+            if (tweakRet != itemSet.otherSet) {
+                System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
+                tweakRet.outputSet(modelRet);
+            }
             System.out.println("--------------------------------------- " + rating);
             itemSet.outputSet(modelProt);
+            ItemSet tweakProt = Tweaker.tweak(itemSet, modelProt, itemsProt);
+            if (tweakProt != itemSet) {
+                System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
+                tweakProt.outputSet(modelProt);
+            }
             System.out.println("#######################################");
+
         }
     }
 
@@ -299,9 +308,14 @@ public class Main {
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcess(Path file, ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
         EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(detailedOutput, file, model.getReforgeRules());
-        ItemSet bestSets = EngineRandom.runSolver(model, reforgedItems, startTime, null, BILLION);
+        ItemSet bestSet = EngineRandom.runSolver(model, reforgedItems, startTime, null, BILLION);
 //        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
-        outputResult(bestSets, model, detailedOutput);
+        outputResult(bestSet, model, detailedOutput);
+        ItemSet tweakSet = Tweaker.tweak(bestSet, model, reforgedItems);
+        if (bestSet != tweakSet) {
+            System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
+            outputResult(tweakSet, model, detailedOutput);
+        }
     }
 
     @SuppressWarnings("SameParameterValue")

@@ -7,6 +7,23 @@ import java.io.IOException;
 import java.util.*;
 
 public class ItemUtil {
+    static Set<SlotItem> expectedEnchant = buildExpectedEnchant();
+
+    private static Set<SlotItem> buildExpectedEnchant() {
+        EnumSet<SlotItem> set = EnumSet.noneOf(SlotItem.class);
+        set.add(SlotItem.Shoulder);
+        set.add(SlotItem.Back);
+        set.add(SlotItem.Chest);
+        set.add(SlotItem.Wrist);
+        set.add(SlotItem.Hand);
+//        set.add(SlotItem.Belt);
+        set.add(SlotItem.Leg);
+        set.add(SlotItem.Foot);
+        set.add(SlotItem.Weapon);
+        set.add(SlotItem.Offhand);
+        return set;
+    }
+
     public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) throws IOException {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
@@ -25,7 +42,13 @@ public class ItemUtil {
             item = new ItemData(item.slot, item.name, item.stat, gemStat, id);
         }
 
-        System.out.println(id + ": " + item);
+        if (detailedOutput) {
+            if (expectedEnchant.contains(item.slot) && equippedItem.enchant() == null) {
+                System.out.println(id + ": " + item + " MISSING EXPECTED ENCHANT");
+            } else {
+                System.out.println(id + ": " + item);
+            }
+        }
         return item;
     }
 
@@ -103,14 +126,10 @@ public class ItemUtil {
                 continue;
 
             ItemData example = slotOptions[0];
-            if (isSameItem(example, chosenItem)) {
+            if (ItemData.isSameEquippedItem(example, chosenItem)) {
                 submitMap.put(slot, new ItemData[] { chosenItem });
             }
         }
-    }
-
-    private static boolean isSameItem(ItemData a, ItemData b) {
-        return a.id == b.id && a.statFixed.equalsStats(b.statFixed);
     }
 
     static void validateDualSets(Map<SlotEquip, ItemData[]> retMap, Map<SlotEquip, ItemData[]> protMap) {
@@ -133,10 +152,32 @@ public class ItemUtil {
             if (aaa == null || bbb == null || aaa.length == 0 || bbb.length == 0)
                 continue;
 
-            if (isSameItem(aaa[0], bbb[0])) {
+            if (ItemData.isSameEquippedItem(aaa[0], bbb[0])) {
                 System.out.println("COMMON " + aaa[0].name);
             }
         }
+    }
+
+    static EnumMap<SlotEquip, ItemData[]> commonInDualSet(Map<SlotEquip, ItemData[]> retMap, Map<SlotEquip, ItemData[]> protMap) {
+        EnumMap<SlotEquip, ItemData[]> common = new EnumMap<>(SlotEquip.class);
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData[] aaa = retMap.get(slot);
+            ItemData[] bbb = protMap.get(slot);
+            if (aaa == null || bbb == null || aaa.length == 0 || bbb.length == 0)
+                continue;
+
+            if (ItemData.isSameEquippedItem(aaa[0], bbb[0])) {
+                ArrayList<ItemData> commonForges = new ArrayList<>();
+                for (ItemData a : aaa) {
+                    for (ItemData b : bbb) {
+                        if (ItemData.isIdenticalItem(a, b))
+                            commonForges.add(a);
+                    }
+                }
+                common.put(slot, commonForges.toArray(ItemData[]::new));
+            }
+        }
+        return common;
     }
 
     private static boolean hasNoDuplicate(CurryQueue<ItemData> items) {

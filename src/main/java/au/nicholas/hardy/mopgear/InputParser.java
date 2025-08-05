@@ -43,6 +43,7 @@ public class InputParser {
                     gems = array.asList().stream().mapToInt(JsonElement::getAsInt).toArray();
                 }
 
+                Integer enchant = null;
                 if (elementObject.has("enchant")) {
                     int enchantId = elementObject.get("enchant").getAsInt();
                     if (gems == null) {
@@ -51,11 +52,10 @@ public class InputParser {
                         gems = Arrays.copyOf(gems, gems.length + 1);
                         gems[gems.length - 1] = enchantId;
                     }
+                    enchant = enchantId;
                 }
 
-                // TODO new version of missing enchant warning
-
-                result.add(new EquippedItem(id, gems));
+                result.add(new EquippedItem(id, gems, enchant));
             }
         }
         return result;

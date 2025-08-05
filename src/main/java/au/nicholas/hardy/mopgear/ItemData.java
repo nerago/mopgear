@@ -43,4 +43,12 @@ public final class ItemData {
         sb.append('}');
         return sb.toString();
     }
+
+    static boolean isSameEquippedItem(ItemData a, ItemData b) {
+        return a.id == b.id && a.statFixed.equalsStats(b.statFixed);
+    }
+
+    static boolean isIdenticalItem(ItemData a, ItemData b) {
+        return a.id == b.id && a.stat.equalsStats(b.stat) && a.statFixed.equalsStats(b.statFixed);
+    }
 }
