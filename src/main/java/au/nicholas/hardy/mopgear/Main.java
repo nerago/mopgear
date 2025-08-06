@@ -50,10 +50,10 @@ public class Main {
     private void exceptionalCheck(Instant startTime) {
         try {
 //            multiSpecSpecifiedRating();
-//            multiSpecSequential(startTime);
+            multiSpecSequential(startTime);
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -86,27 +86,68 @@ public class Main {
     private void reforgeRet(Instant startTime) throws IOException {
         ModelCombined model = standardRetModel();
 
-        reforgeProcess(gearRetFile, model, startTime, true);
+//        reforgeProcess(gearRetFile, model, startTime, true);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
-//        reforgeProcessPlus(model, startTime, 89345, true); // shoulder
+//        reforgeProcessPlus(gearRetFile, model, startTime, true, 81130, false);
 //        reforgeProcessPlus(gearRetFile, model, startTime, 82824, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
-//        reforgeProcessRetFixed(model, startTime, true);
+//        reforgeProcessRetFixed(model, startTime);
+        findUpgradeSetup(gearRetFile, model);
     }
 
     private void reforgeProt(Instant startTime) throws IOException {
         ModelCombined model = standardProtModel();
 
 //        reforgeProcessProtFixed(model, startTime, true);
-//        reforgeProcessProtPlus2(model, startTime, 81696, 89823);
+//        reforgeProcessPlus(gearProtFile, model, startTime, true,90860, false);
+//        reforgeProcessPlus2(model, startTime, 81696, 89823);
 //        reforgeProcess(gearProtFile, model, startTime, true);
         findUpgradeSetup(gearProtFile, model);
 
         // so we could get a conclusive result from the ret, then set the common slots to fixed
     }
 
-    private void findUpgradeSetup(Path gearProtFile, ModelCombined model) throws IOException {
+    private void findUpgradeSetup(Path file, ModelCombined model) throws IOException {
+//        int[] extraItemArray = valorItemsArray();
+//        int[] extraItemArray = msvItemsArray();
+        int[] extraItemArray = new int[] {90860,90862};
+        SlotEquip slot = SlotEquip.Ring2;
+
+//        long runSize = 10000000; // quick runs
+//        long runSize = 100000000; // 4 min total runs
+        long runSize = 300000000; // 12 min total runs
+//        long runSize = 1000000000; // 40 min runs
+
+        ItemSet baseSet = reforgeProcessQuiet(file, model, runSize);
+        double baseRating = model.calcRating(baseSet);
+        System.out.printf("BASE RATING    = %.0f\n", baseRating);
+
+        for (int extraItemId : extraItemArray) {
+            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+//            SlotEquip slot = extraItem.slot.toSlotEquip();
+            System.out.println(extraItem);
+
+            ItemSet extraSet = reforgeProcessPlusCore(file, model, null, false, extraItemId, slot, true, runSize);
+            double extraRating = model.calcRating(extraSet);
+            double factor = extraRating / baseRating;
+            System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
+        }
+    }
+
+    private static int[] msvItemsArray() {
+        return new int[] {
+//                85922,85925,86134, // stone
+//                85983,85984,85985, // feng
+//                85991,85992,89817, // garaj
+//                86075,86076,86080, // kings
+                86130,86140,/*86135,*/ // elegon - starcrusher gauntlets error on ret, only 97% prot
+                86144,86145,89823  // will
+        };
+    }
+
+    private static int[] valorItemsArray() {
         int neckParagonPale = 89066; // 1250
+        int neckBloodseekers = 89064; // 1250
         int beltKlaxxiConsumer = 89056; // 1750
         int legKovokRiven = 89093; // 2500
         int backYiCloakCourage = 89075; // 1250
@@ -120,25 +161,8 @@ public class Main {
         int bootYulonGuardian = 88864; // 1750
         int bootTankissWarstomp = 88862; // 1750
 
-        int[] extraItemArray = new int[] { neckParagonPale, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage,headYiLeastFavorite,headVoiceAmpGreathelm, chestDawnblade,
+        return new int[] { neckParagonPale, neckBloodseekers, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage,headYiLeastFavorite,headVoiceAmpGreathelm, chestDawnblade,
         chestCuirassTwin,gloveOverwhelmSwarm,wristBattleShadow,wristBraidedBlackWhite,bootYulonGuardian,bootTankissWarstomp};
-
-//        int runSize = 100000000; // 2 min total runs
-        int runSize = 1000000000; // 20 min runs
-
-        ItemSet baseSet = reforgeProcessQuiet(gearProtFile, model, runSize);
-        double baseRating = model.calcRating(baseSet);
-        System.out.printf("BASE RATING    = %.0f\n", baseRating);
-
-        for (int extraItemId : extraItemArray) {
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-            System.out.println(extraItem);
-
-            ItemSet extraSet = reforgeProcessPlusCore(gearProtFile, model, null, false, extraItemId, extraItem.slot.toSlotEquip(), true, runSize);
-            double extraRating = model.calcRating(extraSet);
-            double factor = extraRating / baseRating;
-            System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
-        }
     }
 
     private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds) {
@@ -165,7 +189,6 @@ public class Main {
 
         Stream<ItemSet> retStream = EngineRandom.runSolverPartial(modelRet, retMap, startTime, null, BILLION);
 
-//        Stream<ItemSet> protStream = retStream.flatMap(r -> subSolveProt(r, protMap, modelProt));
         Stream<ItemSet> protStream = retStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt));
 
         Collection<ItemSet> best = protStream.collect(
@@ -256,19 +279,19 @@ public class Main {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void reforgeProcessRetFixed(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
+    private void reforgeProcessRetFixed(ModelCombined model, Instant startTime) throws IOException {
         List<EquippedItem> itemIds = InputParser.readInput(gearRetFile);
-        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
+        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, true);
 
         Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
-        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
-        presetReforge.put(SlotEquip.Neck, Tuple.create(StatType.Crit, StatType.Expertise));
+//        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
+        presetReforge.put(SlotEquip.Neck, Tuple.create(StatType.Hit, StatType.Expertise));
         //presetReforge.put(SlotEquip.Shoulder, Tuple.create(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Crit, StatType.Expertise));
-        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Crit, StatType.Expertise));
+        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Crit, StatType.Haste));
+//        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Crit, StatType.Expertise));
 //        presetReforge.put(SlotEquip.Wrist, Tuple.create(StatType.Dodge, StatType.Mastery));
-        presetReforge.put(SlotEquip.Ring2, Tuple.create(StatType.Crit, StatType.Mastery));
-        presetReforge.put(SlotEquip.Trinket2, Tuple.create(StatType.Expertise, StatType.Mastery));
+        presetReforge.put(SlotEquip.Ring2, Tuple.create(StatType.Crit, StatType.Hit));
+//        presetReforge.put(SlotEquip.Trinket2, Tuple.create(StatType.Expertise, StatType.Mastery));
 //        presetReforge.put(SlotEquip.Weapon, Tuple.create(null, null));
 //        presetReforge.put(SlotEquip.Offhand, Tuple.create(StatType.Parry, StatType.Hit));
 
@@ -278,7 +301,7 @@ public class Main {
 
 //        Collection<ItemSet> bestSets = EngineRandom.runSolver(model, map, null);
 
-        outputResult(bestSets, model, detailedOutput);
+        outputResult(bestSets, model, true);
     }
 
     private void multiSpecSpecifiedRating() throws IOException {
@@ -365,11 +388,11 @@ public class Main {
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessPlus(Path file, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace) throws IOException {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        ItemSet bestSet = reforgeProcessPlusCore(file, model, startTime, detailedOutput, extraItemId, extraItem.slot.toSlotEquip(), replace, null);
+        ItemSet bestSet = reforgeProcessPlusCore(file, model, startTime, detailedOutput, extraItemId, extraItem.slot.toSlotEquip(), replace, BILLION);
         outputResult(bestSet, model, detailedOutput);
     }
 
-    private ItemSet reforgeProcessPlusCore(Path file, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, SlotEquip slot, boolean replace, Integer runSize) throws IOException {
+    private ItemSet reforgeProcessPlusCore(Path file, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, SlotEquip slot, boolean replace, Long runSize) throws IOException {
         EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(detailedOutput, file, model.reforgeRules());
 
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
