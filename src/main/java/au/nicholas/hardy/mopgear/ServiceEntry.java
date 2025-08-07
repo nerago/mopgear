@@ -13,7 +13,7 @@ public class ServiceEntry {
     public ServiceEntry() throws IOException {
         itemCache = new ItemCache(cacheFile);
         StatRatingsWeights ratings = new StatRatingsWeights(null, true, 1, 1);
-        StatRequirements requirements = new StatRequirements(false);
+        StatRequirements requirements = StatRequirements.ret();
         model = new ModelCombined(ratings, requirements, ReforgeRules.ret());
     }
 

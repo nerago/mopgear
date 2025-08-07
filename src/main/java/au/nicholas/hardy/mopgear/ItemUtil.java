@@ -131,6 +131,15 @@ public class ItemUtil {
         }
     }
 
+    static void buildJobWithSpecifiedItemsFixed(EnumMap<SlotEquip, ItemData> chosenMap, EnumMap<SlotEquip, ItemData[]> submitMap) {
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData chosenItem = chosenMap.get(slot);
+            if (chosenItem != null) {
+                submitMap.put(slot, new ItemData[]{chosenItem});
+            }
+        }
+    }
+
     static void validateDualSets(Map<SlotEquip, ItemData[]> retMap, Map<SlotEquip, ItemData[]> protMap) {
         if (protMap.get(SlotEquip.Offhand) == null || protMap.get(SlotEquip.Offhand).length == 0)
             throw new IllegalArgumentException("no shield");
@@ -144,17 +153,6 @@ public class ItemUtil {
             throw new IllegalArgumentException("duplicate in non matching slot");
         if (protMap.get(SlotEquip.Trinket2)[0].id == retMap.get(SlotEquip.Trinket1)[0].id)
             throw new IllegalArgumentException("duplicate in non matching slot");
-
-        for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] aaa = retMap.get(slot);
-            ItemData[] bbb = protMap.get(slot);
-            if (aaa == null || bbb == null || aaa.length == 0 || bbb.length == 0)
-                continue;
-
-            if (ItemData.isSameEquippedItem(aaa[0], bbb[0])) {
-                System.out.println("COMMON " + aaa[0].name);
-            }
-        }
     }
 
     static EnumMap<SlotEquip, ItemData[]> commonInDualSet(Map<SlotEquip, ItemData[]> retMap, Map<SlotEquip, ItemData[]> protMap) {
@@ -166,6 +164,8 @@ public class ItemUtil {
                 continue;
 
             if (ItemData.isSameEquippedItem(aaa[0], bbb[0])) {
+                System.out.println("COMMON " + aaa[0].name);
+
                 ArrayList<ItemData> commonForges = new ArrayList<>();
                 for (ItemData a : aaa) {
                     for (ItemData b : bbb) {

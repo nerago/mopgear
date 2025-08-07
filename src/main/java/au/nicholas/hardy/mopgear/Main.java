@@ -64,14 +64,18 @@ public class Main {
 
     private static ModelCombined standardRetModel() throws IOException {
         StatRatings statRatings = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
-        StatRequirements statRequirements = new StatRequirements(false);
+        StatRequirements statRequirements = StatRequirements.ret();
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret());
     }
 
     private static ModelCombined standardProtModel() throws IOException {
         StatRatings statRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULTIPLY, 1);
-        StatRequirements statRequirements = new StatRequirements(true);
+        StatRequirements statRequirements = StatRequirements.prot();
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.prot());
+    }
+
+    private ModelCombined nullMixedModel() {
+        return new ModelCombined(null, StatRequirements.zero(), ReforgeRules.common());
     }
 
     private void rankSomething() throws IOException {
@@ -178,6 +182,7 @@ public class Main {
     }
 
     private void multiSpecSequential(Instant startTime) throws IOException {
+        ModelCombined modelNull = nullMixedModel();
         ModelCombined modelRet = standardRetModel();
         ModelCombined modelProt = standardProtModel();
 
@@ -186,10 +191,11 @@ public class Main {
         System.out.println("PROT GEAR CURRENT");
         EnumMap<SlotEquip, ItemData[]> protMap = readAndLoad(true, gearProtFile, modelProt.reforgeRules());
         ItemUtil.validateDualSets(retMap, protMap);
+        EnumMap<SlotEquip, ItemData[]> commonMap = ItemUtil.commonInDualSet(retMap, protMap);
 
-        Stream<ItemSet> retStream = EngineRandom.runSolverPartial(modelRet, retMap, startTime, null, BILLION);
+        Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null);
 
-        Stream<ItemSet> protStream = retStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt));
+        Stream<ItemSet> protStream = commonStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt)).filter(Objects::nonNull);
 
         Collection<ItemSet> best = protStream.collect(
                 new TopCollectorReporting<>(s -> dualRating(s, modelRet, modelProt),
@@ -234,13 +240,21 @@ public class Main {
     private ItemSet subSolveBoth(ItemSet chosenSet, EnumMap<SlotEquip, ItemData[]> retMap, ModelCombined modelRet, EnumMap<SlotEquip, ItemData[]> protMap, ModelCombined modelProt) {
         EnumMap<SlotEquip, ItemData> chosenMap = chosenSet.items;
 
-        EnumMap<SlotEquip, ItemData[]> submitRetMap = retMap.clone();
-        ItemUtil.buildJobWithCommonItemsFixed(chosenMap, submitRetMap);
-        ItemSet optimisedRet = EngineStream.runSolver(modelRet, submitRetMap, null, null);
+//        System.out.println(chosenMap.values().stream().map(ItemData::toString).reduce("", String::concat));
 
-        EnumMap<SlotEquip, ItemData[]> submitProtMap = protMap.clone();
-        ItemUtil.buildJobWithCommonItemsFixed(chosenMap, submitProtMap);
-        return EngineStream.runSolver(modelProt, submitProtMap, null, optimisedRet);
+        Optional<ItemSet> retSet = subSolvePart(retMap, modelRet, chosenMap, null);
+        if (retSet.isPresent()) {
+            Optional<ItemSet> protSet = subSolvePart(protMap, modelProt, chosenMap, retSet.get());
+            return protSet.orElse(null);
+        }
+        return null;
+    }
+
+    private static Optional<ItemSet> subSolvePart(EnumMap<SlotEquip, ItemData[]> fullItemMap, ModelCombined model, EnumMap<SlotEquip, ItemData> chosenMap, ItemSet otherSet) {
+        EnumMap<SlotEquip, ItemData[]> submitRetMap = fullItemMap.clone();
+        ItemUtil.buildJobWithSpecifiedItemsFixed(chosenMap, submitRetMap);
+        Stream<ItemSet> retStream = EngineStream.runSolverPartial(model, submitRetMap, null, otherSet);
+        return EngineStream.findBest(model, retStream);
     }
 
     private Stream<? extends ItemSet> subSolveProt(ItemSet retSet, EnumMap<SlotEquip, ItemData[]> protMap, ModelCombined modelProt) {

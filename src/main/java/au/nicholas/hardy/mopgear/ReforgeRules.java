@@ -1,5 +1,7 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.ArrayUtil;
+
 public class ReforgeRules {
     private static final StatType[] reforgeSource = new StatType[]{StatType.Mastery, StatType.Crit, StatType.Hit, StatType.Haste, StatType.Expertise, StatType.Dodge, StatType.Parry};
 
@@ -19,6 +21,10 @@ public class ReforgeRules {
 
     public static ReforgeRules ret() {
         return new ReforgeRules(reforgeTargetsRet);
+    }
+
+    public static ReforgeRules common() {
+        return new ReforgeRules(ArrayUtil.common(reforgeTargetsRet, reforgeTargetsProt));
     }
 
     public StatType[] source() {

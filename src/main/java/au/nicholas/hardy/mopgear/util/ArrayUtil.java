@@ -1,8 +1,10 @@
 package au.nicholas.hardy.mopgear.util;
 
 import au.nicholas.hardy.mopgear.ItemData;
+import au.nicholas.hardy.mopgear.StatType;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -20,6 +22,25 @@ public class ArrayUtil {
         System.arraycopy(first, 0, result, 0, first.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;
+    }
+
+    public static StatType[] common(StatType[] first, StatType[] second) {
+        ArrayList<StatType> result = new ArrayList<>();
+        for (StatType a : first) {
+            if (ArrayUtil.contains(second, a)) {
+                result.add(a);
+            }
+        }
+        return result.toArray(StatType[]::new);
+    }
+
+    private static boolean contains(StatType[] array, StatType e) {
+        for (StatType item : array) {
+            if (item == e) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static ItemData rand(ItemData[] itemList, Random random) {

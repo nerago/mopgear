@@ -12,9 +12,13 @@ import static java.util.Spliterator.*;
 public class EngineStream {
     public static ItemSet runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {
         Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, otherSet);
-        Optional<ItemSet> opt = finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
+        Optional<ItemSet> opt = findBest(model, finalSets);
         return opt.orElseThrow();
 //        return finalSets.collect(new TopCollector1<>(20, ItemSet::getStatRating));
+    }
+
+    public static Optional<ItemSet> findBest(ModelCombined model, Stream<ItemSet> finalSets) {
+        return finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
     }
 
     public static Stream<ItemSet> runSolverPartial(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {

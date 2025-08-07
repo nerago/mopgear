@@ -3,13 +3,21 @@ package au.nicholas.hardy.mopgear;
 import java.util.stream.Stream;
 
 public class StatRequirements {
-    public StatRequirements(boolean tankExpertise) {
-        requiredHit = TARGET_RATING_REGULAR;
-        if (tankExpertise)
-            requiredExpertise = TARGET_RATING_TANK;
-//            requiredExpertise = 0;
-        else
-            requiredExpertise = TARGET_RATING_REGULAR;
+    private StatRequirements(int hit, int expertise) {
+        requiredHit = hit;
+        requiredExpertise = expertise;
+    }
+
+    public static StatRequirements ret() {
+        return new StatRequirements(TARGET_RATING_REGULAR, TARGET_RATING_REGULAR);
+    }
+
+    public static StatRequirements prot() {
+        return new StatRequirements(TARGET_RATING_REGULAR, TARGET_RATING_TANK);
+    }
+
+    public static StatRequirements zero() {
+        return new StatRequirements(0, 0);
     }
 
     private static final double RATING_PER_PERCENT = 339.9534;

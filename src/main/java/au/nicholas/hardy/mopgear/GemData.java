@@ -42,7 +42,7 @@ public class GemData {
         map.put(4422, new StatBlock(0, 200, 0, 0, 0, 0, 0, 0, 0)); // back stam
         map.put(4824, new StatBlock(0, 430, 0, 0, 0, 0, 0, 165, 0)); // leg  tank
         map.put(4803, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0)); // dps shoulder
-        map.put(4443, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0)); // weapon
+        map.put(4443, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0)); // weapon
         map.put(4420, new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0)); // chest stam
         map.put(76627, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0)); // chest stam
         return map;
