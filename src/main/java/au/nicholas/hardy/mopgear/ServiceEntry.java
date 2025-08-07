@@ -3,6 +3,7 @@ package au.nicholas.hardy.mopgear;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Optional;
 
 import static au.nicholas.hardy.mopgear.Main.cacheFile;
 
@@ -18,10 +19,10 @@ public class ServiceEntry {
     }
 
     public ItemSet run(String jsonString) {
-        return reforgeProcess(jsonString);
+        return reforgeProcess(jsonString).orElse(null);
     }
 
-    private ItemSet reforgeProcess(String jsonString) {
+    private Optional<ItemSet> reforgeProcess(String jsonString) {
         List<EquippedItem> itemIds = InputParser.readString(jsonString);
         List<ItemData> items;
         synchronized (itemCache) {

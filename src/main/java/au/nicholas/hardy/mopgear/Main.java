@@ -23,7 +23,7 @@ public class Main {
     private static final Path gearRetFile = directory.resolve("gear-ret.json");
     private static final Path gearProtFile = directory.resolve("gear-prot.json");
     private static final Path weightFileRetMine = directory.resolve("weight-mysim.json");
-//    private static final Path weightFileStandard = directory.resolve("weight-standard.json");
+    //    private static final Path weightFileStandard = directory.resolve("weight-standard.json");
     private static final Path weightFileProtMine = directory.resolve("weight-prot-sim.json");
     public static final long BILLION = 1000 * 1000 * 1000;
 
@@ -50,10 +50,10 @@ public class Main {
     private void exceptionalCheck(Instant startTime) {
         try {
 //            multiSpecSpecifiedRating();
-            multiSpecSequential(startTime);
+//            multiSpecSequential(startTime);
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -112,17 +112,17 @@ public class Main {
     }
 
     private void findUpgradeSetup(Path file, ModelCombined model) throws IOException {
-//        int[] extraItemArray = valorItemsArray();
+        int[] extraItemArray = valorItemsArray();
 //        int[] extraItemArray = msvItemsArray();
-        int[] extraItemArray = new int[] {90860,90862};
+//        int[] extraItemArray = pvpCrapArray();
         SlotEquip slot = SlotEquip.Ring2;
 
 //        long runSize = 10000000; // quick runs
-//        long runSize = 100000000; // 4 min total runs
-        long runSize = 300000000; // 12 min total runs
+        long runSize = 100000000; // 4 min total runs
+//        long runSize = 300000000; // 12 min total runs
 //        long runSize = 1000000000; // 40 min runs
 
-        ItemSet baseSet = reforgeProcessQuiet(file, model, runSize);
+        ItemSet baseSet = reforgeProcessLight(file, model, runSize, true).get();
         double baseRating = model.calcRating(baseSet);
         System.out.printf("BASE RATING    = %.0f\n", baseRating);
 
@@ -131,21 +131,32 @@ public class Main {
 //            SlotEquip slot = extraItem.slot.toSlotEquip();
             System.out.println(extraItem);
 
-            ItemSet extraSet = reforgeProcessPlusCore(file, model, null, false, extraItemId, slot, true, runSize);
-            double extraRating = model.calcRating(extraSet);
-            double factor = extraRating / baseRating;
-            System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
+            Optional<ItemSet> extraSet = reforgeProcessPlusCore(file, model, null, false, extraItemId, slot, true, runSize);
+            if (extraSet.isPresent()) {
+                double extraRating = model.calcRating(extraSet.get());
+                double factor = extraRating / baseRating;
+                System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
+            } else {
+                System.out.print("UPGRADE SET NOT FOUND\n");
+            }
         }
     }
 
+    private int[] pvpCrapArray() {
+        return new int[]{
+                84807, 84794, 84806, 84810, 84822, 84834, 84851, 84870, 84915, 84949, 84950, 84986, 84891, 84985, 84892,
+                84828, 84829, // rings
+        };
+    }
+
     private static int[] msvItemsArray() {
-        return new int[] {
+        return new int[]{
 //                85922,85925,86134, // stone
 //                85983,85984,85985, // feng
 //                85991,85992,89817, // garaj
 //                86075,86076,86080, // kings
-                86130,86140,/*86135,*/ // elegon - starcrusher gauntlets error on ret, only 97% prot
-                86144,86145,89823  // will
+                86130, 86140,/*86135,*/ // elegon - starcrusher gauntlets error on ret, only 97% prot
+                86144, 86145, 89823  // will
         };
     }
 
@@ -165,8 +176,8 @@ public class Main {
         int bootYulonGuardian = 88864; // 1750
         int bootTankissWarstomp = 88862; // 1750
 
-        return new int[] { neckParagonPale, neckBloodseekers, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage,headYiLeastFavorite,headVoiceAmpGreathelm, chestDawnblade,
-        chestCuirassTwin,gloveOverwhelmSwarm,wristBattleShadow,wristBraidedBlackWhite,bootYulonGuardian,bootTankissWarstomp};
+        return new int[]{neckParagonPale, neckBloodseekers, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage, headYiLeastFavorite, headVoiceAmpGreathelm, chestDawnblade,
+                chestCuirassTwin, gloveOverwhelmSwarm, wristBattleShadow, wristBraidedBlackWhite, bootYulonGuardian, bootTankissWarstomp};
     }
 
     private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds) {
@@ -285,7 +296,7 @@ public class Main {
 
         EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 //        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
-        ItemSet bestSet = EngineStream.runSolver(model, map, startTime, null);
+        Optional<ItemSet> bestSet = EngineStream.runSolver(model, map, startTime, null);
 
 //        Collection<ItemSet> bestSets = EngineRandom.runSolver(model, map, null);
 
@@ -311,7 +322,7 @@ public class Main {
 
         EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 //        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
-        ItemSet bestSets = EngineStream.runSolver(model, map, startTime, null);
+        Optional<ItemSet> bestSets = EngineStream.runSolver(model, map, startTime, null);
 
 //        Collection<ItemSet> bestSets = EngineRandom.runSolver(model, map, null);
 
@@ -382,31 +393,33 @@ public class Main {
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcess(Path file, ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
         EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(detailedOutput, file, model.reforgeRules());
-        ItemSet bestSet = EngineRandom.runSolver(model, reforgedItems, startTime, null, BILLION);
+        Optional<ItemSet> bestSet = EngineRandom.runSolver(model, reforgedItems, startTime, null, BILLION);
 //        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSet, model, detailedOutput);
-        ItemSet tweakSet = Tweaker.tweak(bestSet, model, reforgedItems);
-        if (bestSet != tweakSet) {
-            if (detailedOutput)
-                System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
-            outputResult(tweakSet, model, detailedOutput);
+        if (bestSet.isPresent()) {
+            ItemSet tweakSet = Tweaker.tweak(bestSet.get(), model, reforgedItems);
+            if (bestSet.get() != tweakSet) {
+                if (detailedOutput)
+                    System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
+                outputResult(Optional.ofNullable(tweakSet), model, detailedOutput);
+            }
         }
     }
 
-    private ItemSet reforgeProcessQuiet(Path file, ModelCombined model, long runSize) throws IOException {
-        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, model.reforgeRules());
-        ItemSet bestSet = EngineRandom.runSolver(model, reforgedItems, null, null, runSize);
-        return Tweaker.tweak(bestSet, model, reforgedItems);
+    private Optional<ItemSet> reforgeProcessLight(Path file, ModelCombined model, long runSize, boolean outputExistingGear) throws IOException {
+        EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(outputExistingGear, file, model.reforgeRules());
+        Optional<ItemSet> bestSet = EngineRandom.runSolver(model, reforgedItems, null, null, runSize);
+        return bestSet.map(itemSet -> Tweaker.tweak(itemSet, model, reforgedItems));
     }
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessPlus(Path file, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace) throws IOException {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        ItemSet bestSet = reforgeProcessPlusCore(file, model, startTime, detailedOutput, extraItemId, extraItem.slot.toSlotEquip(), replace, BILLION);
+        Optional<ItemSet> bestSet = reforgeProcessPlusCore(file, model, startTime, detailedOutput, extraItemId, extraItem.slot.toSlotEquip(), replace, BILLION);
         outputResult(bestSet, model, detailedOutput);
     }
 
-    private ItemSet reforgeProcessPlusCore(Path file, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, SlotEquip slot, boolean replace, Long runSize) throws IOException {
+    private Optional<ItemSet> reforgeProcessPlusCore(Path file, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, SlotEquip slot, boolean replace, Long runSize) throws IOException {
         EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(detailedOutput, file, model.reforgeRules());
 
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
@@ -423,8 +436,8 @@ public class Main {
         }
 
         if (runSize != null) {
-            ItemSet proposed = EngineRandom.runSolver(model, reforgedItems, startTime, null, runSize);
-            return Tweaker.tweak(proposed, model, reforgedItems);
+            Optional<ItemSet> proposed = EngineRandom.runSolver(model, reforgedItems, startTime, null, runSize);
+            return proposed.map(itemSet -> Tweaker.tweak(itemSet, model, reforgedItems));
         } else {
             return EngineStream.runSolver(model, reforgedItems, startTime, null);
         }
@@ -437,8 +450,8 @@ public class Main {
         for (int extraItemId : alternateItems) {
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             Map<SlotEquip, ItemData[]> itemMap = new EnumMap<>(reforgedItems);
-            itemMap.put(extraItem.slot.toSlotEquip(), new ItemData[] { extraItem });
-            ItemSet bestSets = EngineStream.runSolver(model, itemMap, null, null);
+            itemMap.put(extraItem.slot.toSlotEquip(), new ItemData[]{extraItem});
+            Optional<ItemSet> bestSets = EngineStream.runSolver(model, itemMap, null, null);
             outputResult(bestSets, model, false);
         }
     }
@@ -449,14 +462,14 @@ public class Main {
         EnumMap<SlotEquip, ItemData[]> reforgedItems = readAndLoad(false, file, rules);
 
         ItemData extraItem1 = ItemUtil.loadItemBasic(itemCache, extraItemId1);
-        reforgedItems.computeIfPresent(extraItem1.slot.toSlotEquip(), (k,v) -> ArrayUtil.concat(v, Reforger.reforgeItem(rules, extraItem1)));
+        reforgedItems.computeIfPresent(extraItem1.slot.toSlotEquip(), (k, v) -> ArrayUtil.concat(v, Reforger.reforgeItem(rules, extraItem1)));
         System.out.println("EXTRA " + extraItem1);
 
         ItemData extraItem2 = ItemUtil.loadItemBasic(itemCache, extraItemId2);
-        reforgedItems.computeIfPresent(extraItem2.slot.toSlotEquip(), (k,v) -> ArrayUtil.concat(v, Reforger.reforgeItem(rules, extraItem2)));
+        reforgedItems.computeIfPresent(extraItem2.slot.toSlotEquip(), (k, v) -> ArrayUtil.concat(v, Reforger.reforgeItem(rules, extraItem2)));
         System.out.println("EXTRA " + extraItem2);
 
-        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
+        Optional<ItemSet> bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSets, model, true);
     }
 
@@ -474,9 +487,9 @@ public class Main {
         }
     }
 
-    private void outputResult(ItemSet bestSet, ModelCombined model, boolean detailedOutput) {
-        if (bestSet != null) {
-            bestSet.outputSet(model);
+    private void outputResult(Optional<ItemSet> bestSet, ModelCombined model, boolean detailedOutput) {
+        if (bestSet.isPresent()) {
+            bestSet.get().outputSet(model);
         } else {
             System.out.println("@@@@@@@@@ NO VALID SET RESULTS @@@@@@@@@");
         }

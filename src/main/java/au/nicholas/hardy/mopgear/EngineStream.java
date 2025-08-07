@@ -10,10 +10,9 @@ import java.util.stream.StreamSupport;
 import static java.util.Spliterator.*;
 
 public class EngineStream {
-    public static ItemSet runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {
+    public static Optional<ItemSet> runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {
         Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, otherSet);
-        Optional<ItemSet> opt = findBest(model, finalSets);
-        return opt.orElseThrow();
+        return findBest(model, finalSets);
 //        return finalSets.collect(new TopCollector1<>(20, ItemSet::getStatRating));
     }
 
