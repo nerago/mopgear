@@ -40,7 +40,7 @@ public class ItemUtil {
 
         if (equippedItem.gems().length > 0) {
             StatBlock gemStat = GemData.process(equippedItem.gems());
-            item = new ItemData(item.slot, item.name, item.stat, gemStat, id);
+            item = item.changeFixed(gemStat);
         }
 
         if (detailedOutput) {
@@ -224,6 +224,37 @@ public class ItemUtil {
     }
 
     public static void disenchant(EnumMap<SlotEquip, ItemData[]> itemMap) {
-        itemMap.forEach((s, array) -> ArrayUtil.mapInPlace(array, ItemData::disenchant));
+        itemMap.forEach((s, array) -> ArrayUtil.mapInPlace(array, ItemData::withoutFixed));
     }
+
+    public static void defaultEnchants(EnumMap<SlotEquip, ItemData[]> itemMap, ModelCombined model, boolean force) {
+        itemMap.forEach((s, array) -> ArrayUtil.mapInPlace(array, item -> defaultEnchants(item, model, force)));
+    }
+
+    public static ItemData defaultEnchants(ItemData item, ModelCombined model, boolean force) {
+        if (force || item.statFixed.isEmpty()) {
+            if (item.sockets == 0) {
+                return item.withoutFixed();
+            }
+
+            StatBlock total = StatBlock.empty;
+            StatBlock oneGem = model.standardGem();
+            for (int i = 0; i < item.sockets; ++i) {
+                total = total.plus(oneGem);
+            }
+            return item.changeFixed(total);
+        } else {
+            return item;
+        }
+    }
+//
+//    public static Map<Integer, Tuple.Tuple2<StatType, StatType>> slotMapToIdMap(List<ItemData> items, Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> map) {
+//        Map<Integer, Tuple.Tuple2<StatType, StatType>> result = new HashMap<>();
+//        for (Map.Entry<SlotEquip, Tuple.Tuple2<StatType, StatType>> entry : map.entrySet()) {
+//            SlotEquip slot = entry.getKey();
+//            Tuple.Tuple2<StatType, StatType> stat = entry.getValue();
+//            ItemData item = items.stream().filter(x -> x.slot == slot);
+//        }
+//        return result;
+//    }
 }

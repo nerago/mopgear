@@ -5,9 +5,11 @@ import java.util.Arrays;
 public class StatRatingsPriority implements StatRatings {
     private final StatType[] priority;
     private final static int DEFAULT_MULTIPLY = 4; // scale to similar rates as weighting
+    private StatBlock standardGem;
 
     public StatRatingsPriority(StatType[] priority) {
         this.priority = priority;
+        chooseGem();
         validate();
     }
 
@@ -33,5 +35,16 @@ public class StatRatingsPriority implements StatRatings {
             multiply /= 10;
         }
         return value * DEFAULT_MULTIPLY;
+    }
+
+    private void chooseGem() {
+        StatType stat = priority[0];
+        int value = GemData.standardValue(stat);
+        standardGem = StatBlock.empty.withChange(stat, value);
+    }
+
+    @Override
+    public StatBlock standardGem() {
+        return standardGem;
     }
 }

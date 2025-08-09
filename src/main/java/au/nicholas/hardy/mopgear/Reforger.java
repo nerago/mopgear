@@ -48,6 +48,6 @@ public class Reforger {
     private static ItemData makeModified(ItemData baseItem, StatType sourceStat, StatType targetStat, int remainQuantity, int reforgeQuantity) {
         String name = baseItem.name + " (" + sourceStat + "->" + targetStat + ")";
         StatBlock changedStats = baseItem.stat.withChange(sourceStat, remainQuantity, targetStat, reforgeQuantity);
-        return new ItemData(baseItem.slot, name, changedStats, baseItem.statFixed, baseItem.id);
+        return baseItem.changeNameAndStats(name, changedStats);
     }
 }

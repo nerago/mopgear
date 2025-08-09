@@ -56,12 +56,12 @@ public class ItemLevel {
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] items = itemMap.get(slot);
             if (items != null) {
-                ArrayUtil.mapInPlace(items, ItemLevel::mapItem);
+                ArrayUtil.mapInPlace(items, ItemLevel::scaleForChallengeMode);
             }
         }
     }
 
-    private static ItemData mapItem(ItemData item) {
+    public static ItemData scaleForChallengeMode(ItemData item) {
         Integer level = levelLookup.get(item.id);
         if (level == null) {
             throw new IllegalArgumentException("item level not known " + item.id + " " + item);
@@ -84,6 +84,6 @@ public class ItemLevel {
 
         }
         System.out.println("SCALED " + item.name + " " + stats);
-        return new ItemData(item.slot, item.name, stats, item.statFixed, item.id);
+        return item.changeStats(stats);
     }
 }

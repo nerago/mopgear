@@ -49,10 +49,12 @@ public class Main {
 
     private void exceptionalCheck(Instant startTime) {
         try {
-//            multiSpecSpecifiedRating();
-            multiSpecSequential(startTime);
+//            WowHead.fetchItem(84870);
 
-//        reforgeRet(startTime);
+//            multiSpecSpecifiedRating();
+//            multiSpecSequential(startTime);
+
+            reforgeRet(startTime);
 //            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -84,7 +86,8 @@ public class Main {
 //        rankAlternatives(new int [] {89530,81239,81567,81180,81568}); // necks
 //        rankAlternatives(new int [] {81129,81234,82850,81571}); // cloak
 //        rankAlternatives(new int [] {84036,81190,81687,81130,81086}); // belt
-        rankAlternativesAsSingleItems(model, new int[]{84027, 81284, 81073, 81113, 82852}); // feet
+//        rankAlternativesAsSingleItems(model, new int[]{84027, 81284, 81073, 81113, 82852}); // feet
+        rankAlternativesAsSingleItems(model, new int[]{84870, 89665, 82812}, true);
     }
 
     private void reforgeRet(Instant startTime) throws IOException {
@@ -96,9 +99,10 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, true, 81130, false);
 //        reforgeProcessPlus(items, model, startTime, 82824, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
-//        reforgeProcessRetFixed(model, startTime);
+        reforgeProcessRetFixed(model, startTime);
 //        findUpgradeSetup(items, model);
-        combinationDumb(items, model, startTime);
+//        combinationDumb(items, model, startTime);
+
     }
 
     private void reforgeProt(Instant startTime) throws IOException {
@@ -115,12 +119,13 @@ public class Main {
     }
 
     private void combinationDumb(EnumMap<SlotEquip, ItemData[]> items, ModelCombined model, Instant startTime) {
-        for (int extraId : new int[] {89503, 81129, 89649, 87060, 89665, 82812, 90910, 81284, 82814, 84807, 84870, 84790, 82822}) {
+        for (int extraId : new int[]{89503, 81129, 89649, 87060, 89665, 82812, 90910, 81284, 82814, 84807, 84870, 84790, 82822}) {
             ItemData extraItem = addExtra(items, model, extraId, false);
             System.out.println("EXTRA " + extraItem);
         }
+        //        ItemUtil.disenchant(items);
+        ItemUtil.defaultEnchants(items, model, true);
         ItemUtil.bestForgesOnly(items, model);
-        ItemUtil.disenchant(items);
         ItemLevel.scaleForChallengeMode(items);
 
         ModelCombined dumbModel = model.withNoRequirements();
@@ -199,29 +204,33 @@ public class Main {
 
     private static Tuple.Tuple2<Integer, Integer>[] valorItemsArray() {
         Tuple.Tuple2<Integer, Integer> neckParagonPale = Tuple.create(89066, 1250);
-        Tuple.Tuple2<Integer, Integer> neckBloodseekers = Tuple.create( 89064, 1250                   );
-        Tuple.Tuple2<Integer, Integer> beltKlaxxiConsumer = Tuple.create( 89056, 1750         );
-        Tuple.Tuple2<Integer, Integer> legKovokRiven = Tuple.create( 89093, 2500              );
-        Tuple.Tuple2<Integer, Integer> backYiCloakCourage = Tuple.create( 89075, 1250         );
-        Tuple.Tuple2<Integer, Integer> headYiLeastFavorite = Tuple.create( 89216, 2500        );
-        Tuple.Tuple2<Integer, Integer> headVoiceAmpGreathelm = Tuple.create( 89280, 2500      );
-        Tuple.Tuple2<Integer, Integer> chestDawnblade = Tuple.create( 89420, 2500             );
-        Tuple.Tuple2<Integer, Integer> chestCuirassTwin = Tuple.create( 89421, 2500           );
-        Tuple.Tuple2<Integer, Integer> gloveOverwhelmSwarm = Tuple.create( 88746, 1750        );
-        Tuple.Tuple2<Integer, Integer> wristBattleShadow = Tuple.create( 88880, 1250          );
-        Tuple.Tuple2<Integer, Integer> wristBraidedBlackWhite = Tuple.create( 88879, 1250     );
-        Tuple.Tuple2<Integer, Integer> bootYulonGuardian = Tuple.create( 88864, 1750          );
-        Tuple.Tuple2<Integer, Integer> bootTankissWarstomp = Tuple.create( 88862, 1750        );
+        Tuple.Tuple2<Integer, Integer> neckBloodseekers = Tuple.create(89064, 1250);
+        Tuple.Tuple2<Integer, Integer> beltKlaxxiConsumer = Tuple.create(89056, 1750);
+        Tuple.Tuple2<Integer, Integer> legKovokRiven = Tuple.create(89093, 2500);
+        Tuple.Tuple2<Integer, Integer> backYiCloakCourage = Tuple.create(89075, 1250);
+        Tuple.Tuple2<Integer, Integer> headYiLeastFavorite = Tuple.create(89216, 2500);
+        Tuple.Tuple2<Integer, Integer> headVoiceAmpGreathelm = Tuple.create(89280, 2500);
+        Tuple.Tuple2<Integer, Integer> chestDawnblade = Tuple.create(89420, 2500);
+        Tuple.Tuple2<Integer, Integer> chestCuirassTwin = Tuple.create(89421, 2500);
+        Tuple.Tuple2<Integer, Integer> gloveOverwhelmSwarm = Tuple.create(88746, 1750);
+        Tuple.Tuple2<Integer, Integer> wristBattleShadow = Tuple.create(88880, 1250);
+        Tuple.Tuple2<Integer, Integer> wristBraidedBlackWhite = Tuple.create(88879, 1250);
+        Tuple.Tuple2<Integer, Integer> bootYulonGuardian = Tuple.create(88864, 1750);
+        Tuple.Tuple2<Integer, Integer> bootTankissWarstomp = Tuple.create(88862, 1750);
 
         return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{neckParagonPale, neckBloodseekers, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage, headYiLeastFavorite, headVoiceAmpGreathelm, chestDawnblade,
                 chestCuirassTwin, gloveOverwhelmSwarm, wristBattleShadow, wristBraidedBlackWhite, bootYulonGuardian, bootTankissWarstomp};
     }
 
-    private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds) {
-        List<ItemData> reforgedItems = Arrays.stream(itemIds)
+    private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, boolean scaleChallenge) {
+        Stream<ItemData> stream = Arrays.stream(itemIds)
                 .mapToObj(x -> new EquippedItem(x, new int[0], null))
                 .map(x -> ItemUtil.loadItem(itemCache, x, true))
-                .flatMap(x -> Arrays.stream(Reforger.reforgeItem(model.reforgeRules(), x)))
+                .flatMap(x -> Arrays.stream(Reforger.reforgeItem(model.reforgeRules(), x)));
+        if (scaleChallenge) {
+            stream = stream.map(ItemLevel::scaleForChallengeMode);
+        }
+        List<ItemData> reforgedItems = stream
                 .sorted(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))
                 .toList();
         for (ItemData item : reforgedItems) {
@@ -344,25 +353,47 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessRetFixed(ModelCombined model, Instant startTime) throws IOException {
+        // CHALLENGE MODE SET
+
         List<EquippedItem> itemIds = InputParser.readInput(gearRetFile);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, true);
 
         Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetReforge = new EnumMap<>(SlotEquip.class);
-//        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
+        presetReforge.put(SlotEquip.Head, Tuple.create(null, null));
         presetReforge.put(SlotEquip.Neck, Tuple.create(StatType.Hit, StatType.Expertise));
-        //presetReforge.put(SlotEquip.Shoulder, Tuple.create(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Crit, StatType.Haste));
-//        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Crit, StatType.Expertise));
-//        presetReforge.put(SlotEquip.Wrist, Tuple.create(StatType.Dodge, StatType.Mastery));
+        presetReforge.put(SlotEquip.Shoulder, Tuple.create(StatType.Expertise, StatType.Haste));
+        presetReforge.put(SlotEquip.Back, Tuple.create(StatType.Crit, StatType.Expertise));
+        presetReforge.put(SlotEquip.Chest, Tuple.create(StatType.Mastery, StatType.Expertise));
+        presetReforge.put(SlotEquip.Wrist, Tuple.create(StatType.Crit, StatType.Expertise));
+        presetReforge.put(SlotEquip.Hand, Tuple.create(null, null));
+        presetReforge.put(SlotEquip.Belt, Tuple.create(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Leg, Tuple.create(StatType.Crit, StatType.Hit));
+        presetReforge.put(SlotEquip.Foot, Tuple.create(null, null));
+        presetReforge.put(SlotEquip.Ring1, Tuple.create(StatType.Expertise, StatType.Hit));
         presetReforge.put(SlotEquip.Ring2, Tuple.create(StatType.Crit, StatType.Hit));
-//        presetReforge.put(SlotEquip.Trinket2, Tuple.create(StatType.Expertise, StatType.Mastery));
-//        presetReforge.put(SlotEquip.Weapon, Tuple.create(null, null));
-//        presetReforge.put(SlotEquip.Offhand, Tuple.create(StatType.Parry, StatType.Hit));
+        presetReforge.put(SlotEquip.Trinket1, Tuple.create(StatType.Expertise, StatType.Haste));
+        presetReforge.put(SlotEquip.Trinket2, Tuple.create(null, null));
+        presetReforge.put(SlotEquip.Weapon, Tuple.create(StatType.Crit, StatType.Haste));
 
         EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
-//        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
-        Optional<ItemSet> bestSets = EngineStream.runSolver(model, map, startTime, null);
 
+        // compared to raid dps
+        int[] extraItems = new int[]{89503, 81129, 89649, 87060, 89665, 82812, 82814, 90910, 81284, 82822};
+
+        for (int extraId : extraItems) {
+            ItemData extraItem = addExtra(map, model, extraId, false);
+            if (extraId == 82812) {
+                extraItem = extraItem.changeFixed(new StatBlock(285, 0, 0, 165, 0, 320 + 60, 0, 0, 0));
+            } else if (extraItem.slot == SlotItem.Back) {
+                extraItem = extraItem.changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0));
+            } else {
+                extraItem = ItemUtil.defaultEnchants(extraItem, model, false);
+            }
+            System.out.println("EXTRA " + extraItem);
+        }
+        ItemLevel.scaleForChallengeMode(map);
+
+        Optional<ItemSet> bestSets = EngineStream.runSolver(model, map, startTime, null);
 //        Collection<ItemSet> bestSets = EngineRandom.runSolver(model, map, null);
 
         outputResult(bestSets, model, true);
@@ -426,7 +457,9 @@ public class Main {
     private EnumMap<SlotEquip, ItemData[]> readAndLoad(boolean detailedOutput, Path file, ReforgeRules rules) throws IOException {
         List<EquippedItem> itemIds = InputParser.readInput(file);
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
-        return ItemUtil.standardItemsReforgedToMap(rules, items);
+        EnumMap<SlotEquip, ItemData[]> result = ItemUtil.standardItemsReforgedToMap(rules, items);
+        itemCache.cacheSave();
+        return result;
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -482,8 +515,11 @@ public class Main {
         if (replace) {
             reforgedItems.put(slot, extraForged);
         } else {
-            ArrayUtil.mapInPlace(reforgedItems.get(slot), ItemData::disenchant);
-            reforgedItems.put(slot, ArrayUtil.concat(reforgedItems.get(slot), extraForged));
+            ItemData[] existing = reforgedItems.get(slot);
+            if (ArrayUtil.anyMatch(existing, item -> item.id == extraItemId))
+                throw new IllegalArgumentException("item already included " + extraItemId + " " + extraItem);
+//            ArrayUtil.mapInPlace(reforgedItems.get(slot), ItemData::withoutFixed);
+            reforgedItems.put(slot, ArrayUtil.concat(existing, extraForged));
         }
         return extraItem;
     }

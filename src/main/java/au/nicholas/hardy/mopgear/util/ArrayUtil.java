@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ArrayUtil {
     public static <T> void mapInPlace(T[] array, Function<T, T> function) {
@@ -48,5 +49,13 @@ public class ArrayUtil {
             return itemList[random.nextInt(itemList.length)];
         else
             return itemList[0];
+    }
+
+    public static <T> boolean anyMatch(T[] existing, Predicate<T> predicate) {
+        for (T item : existing) {
+            if (predicate.test(item))
+                return true;
+        }
+        return false;
     }
 }

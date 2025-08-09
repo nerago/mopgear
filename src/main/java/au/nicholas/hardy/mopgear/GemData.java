@@ -60,4 +60,18 @@ public class GemData {
         }
         return result;
     }
+
+    public static int standardValue(StatType stat) {
+        switch (stat) {
+            case Strength -> {
+                return 160;
+            }
+            case Stam -> {
+                return 240;
+            }
+            default -> {
+                return 320;
+            }
+        }
+    }
 }

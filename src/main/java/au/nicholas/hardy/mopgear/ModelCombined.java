@@ -22,4 +22,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     public ModelCombined withNoRequirements() {
         return new ModelCombined(statRatings, StatRequirements.zero(), reforgeRules);
     }
+
+    public StatBlock standardGem() {
+        return statRatings.standardGem();
+    }
 }

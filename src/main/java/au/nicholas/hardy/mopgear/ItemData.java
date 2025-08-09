@@ -1,18 +1,40 @@
 package au.nicholas.hardy.mopgear;
 
 public final class ItemData {
+    public final int id;
     public final SlotItem slot;
     public final String name;
     public final StatBlock stat;
     public final StatBlock statFixed;
-    public final int id;
+    public final int sockets;
 
-    public ItemData(SlotItem slot, String name, StatBlock stat, StatBlock statFixed, int id) {
+    private ItemData(int id, SlotItem slot, String name, StatBlock stat, StatBlock statFixed, int sockets) {
+        this.id = id;
         this.slot = slot;
         this.name = name;
         this.stat = stat;
         this.statFixed = statFixed;
-        this.id = id;
+        this.sockets = sockets;
+    }
+
+    public static ItemData build(int id, SlotItem slot, String name, StatBlock stat, int sockets) {
+        return new ItemData(id, slot, name, stat, StatBlock.empty, sockets);
+    }
+
+    public ItemData changeNameAndStats(String changedName, StatBlock changedStats) {
+        return new ItemData(id, slot, changedName, changedStats, statFixed, sockets);
+    }
+
+    public ItemData changeStats(StatBlock changedStats) {
+        return new ItemData(id, slot, name, changedStats, statFixed, sockets);
+    }
+
+    public ItemData changeFixed(StatBlock changedFixed) {
+        return new ItemData(id, slot, name, stat, changedFixed, sockets);
+    }
+
+    public ItemData withoutFixed() {
+        return new ItemData(id, slot, name, stat, StatBlock.empty, sockets);
     }
 
     public StatBlock totalStatCopy() {
@@ -20,10 +42,6 @@ public final class ItemData {
             return stat;
         else
             return stat.plus(statFixed);
-    }
-
-    public ItemData disenchant() {
-        return new ItemData(slot, name, stat, StatBlock.empty, id);
     }
 
     @Override

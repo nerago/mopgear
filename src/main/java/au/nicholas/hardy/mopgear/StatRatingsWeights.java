@@ -1,5 +1,7 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.BestHolder;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ public class StatRatingsWeights implements StatRatings {
     private final boolean includeHit;
     private final long numerator;
     private final long denominator;
+    private StatBlock standardGem;
 
     public StatRatingsWeights(Path weightFile, boolean includeHit, int numerator, int denominator) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
@@ -20,6 +23,7 @@ public class StatRatingsWeights implements StatRatings {
         this.includeHit = includeHit;
         this.numerator = numerator;
         this.denominator = denominator;
+        chooseGem();
     }
 
     private StatRatingsWeights(StatBlock weight) {
@@ -78,5 +82,24 @@ public class StatRatingsWeights implements StatRatings {
             total += value.expertise * weight.expertise;
         }
         return (total * numerator) / denominator;
+    }
+
+    private void chooseGem() {
+        BestHolder<StatType> best = new BestHolder<>(null, 0);
+        for (StatType stat : StatType.values()) {
+            int multiply = weight.get(stat);
+            if (multiply > 0) {
+                long value = GemData.standardValue(stat);
+                best.add(stat, multiply * value);
+            }
+        }
+
+        StatType bestStat = best.get();
+        standardGem = StatBlock.empty.withChange(bestStat, GemData.standardValue(bestStat));
+    }
+
+    @Override
+    public StatBlock standardGem() {
+        return standardGem;
     }
 }

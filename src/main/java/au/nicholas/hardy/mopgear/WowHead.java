@@ -29,7 +29,7 @@ public class WowHead {
                 JsonObject io = json.get(String.valueOf(itemId)).getAsJsonObject();
                 JsonObject je = io.get("jsonequip").getAsJsonObject();
                 int level = je.get("reqlevel").getAsInt();
-                if (level < 90) {
+                if (level < 87) {
                     System.out.println("Skipping " + itemId + " version for level " + level);
                     startIndex = startDataSection + 1;
                     continue;
@@ -71,6 +71,7 @@ public class WowHead {
 
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
         SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
+        int sockets = objectGetInt(equipObject, "nsockets");
 
         StatBlock statBlock = new StatBlock(
                 objectGetInt(equipObject, "str"),
@@ -83,7 +84,7 @@ public class WowHead {
                 objectGetInt(equipObject, "dodgertng"),
                 objectGetInt(equipObject, "parryrtng"));
 
-        return new ItemData(slot, name, statBlock, StatBlock.empty, itemId);
+        return ItemData.build(itemId, slot, name, statBlock, sockets);
     }
 
     @SuppressWarnings("SameParameterValue")
