@@ -69,16 +69,19 @@ public class ItemLevel {
         if (level <= CHALLENGE_TARGET_LEVEL) {
             return item;
         }
-        if (!multiplier.containsKey(level))
+        if (!multiplier.containsKey(level)) {
             throw new IllegalArgumentException("missing level scaling for " + level);
+        }
+
         double factor = multiplier.get(level);
         StatBlock stats = item.stat;
         for (StatType type : StatType.values()) {
             double val = stats.get(type);
-            if ( val != 0) {
+            if (val != 0) {
                 val *= factor;
                 stats = stats.withChange(type, (int) Math.round(val));
             }
+
         }
         System.out.println("SCALED " + item.name + " " + stats);
         return new ItemData(item.slot, item.name, stats, item.statFixed, item.id);

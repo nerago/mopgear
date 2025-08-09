@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class StatRatingsWeights implements StatRatings {
-    public static final int PROT_MULTIPLY = 15;
+    public static final int PROT_MULTIPLY = 17;
 
     private final StatBlock weight;
     private final boolean includeHit;

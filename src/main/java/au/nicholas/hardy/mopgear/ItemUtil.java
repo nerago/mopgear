@@ -44,8 +44,12 @@ public class ItemUtil {
         }
 
         if (detailedOutput) {
-            if (expectedEnchant.contains(item.slot) && equippedItem.enchant() == null) {
-                System.out.println(id + ": " + item + " MISSING EXPECTED ENCHANT");
+            if (expectedEnchant.contains(item.slot)) {
+                if (equippedItem.enchant() != null) {
+                    System.out.println(id + ": " + item + " ENCHANT=" + equippedItem.enchant());
+                } else {
+                    System.out.println(id + ": " + item + " MISSING EXPECTED ENCHANT");
+                }
             } else {
                 System.out.println(id + ": " + item);
             }
