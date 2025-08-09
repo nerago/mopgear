@@ -4,6 +4,7 @@ import au.nicholas.hardy.mopgear.util.CurryQueue;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ItemUtil {
     private static final Set<SlotItem> expectedEnchant = buildExpectedEnchant();
@@ -200,5 +201,20 @@ public class ItemUtil {
             items = items.tail();
         } while (items != null);
         return true;
+    }
+
+    public static void bestForgesOnly(EnumMap<SlotEquip, ItemData[]> itemMap, ModelCombined model) {
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData[] items = itemMap.get(slot);
+            if (items != null) {
+                ItemData[] bestByItemId = Arrays.stream(items)
+                        .collect(Collectors.groupingBy(x -> x.id,
+                                Collectors.maxBy(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))))
+                        .values().stream().map(Optional::orElseThrow)
+                        .toArray(ItemData[]::new);
+//                Optional<ItemData> best = Arrays.stream(items).max(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())));
+                itemMap.put(slot, bestByItemId);
+            }
+        }
     }
 }

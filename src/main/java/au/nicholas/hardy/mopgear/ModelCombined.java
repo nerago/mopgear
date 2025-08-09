@@ -18,4 +18,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
         return statRequirements.filterSetsMax(stream);
     }
+
+    public ModelCombined withNoRequirements() {
+        return new ModelCombined(statRatings, StatRequirements.zero(), reforgeRules);
+    }
 }
