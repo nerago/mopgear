@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 public class ArrayUtil {
-    public static <T> void map(T[] array, Function<T, T> function) {
+    public static <T> void mapInPlace(T[] array, Function<T, T> function) {
         for (int i = 0; i < array.length; ++i) {
             array[i] = function.apply(array[i]);
         }

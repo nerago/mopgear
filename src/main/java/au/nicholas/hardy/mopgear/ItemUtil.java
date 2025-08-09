@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
@@ -216,5 +217,9 @@ public class ItemUtil {
                 itemMap.put(slot, bestByItemId);
             }
         }
+    }
+
+    public static void disenchant(EnumMap<SlotEquip, ItemData[]> itemMap) {
+        itemMap.forEach((s, array) -> ArrayUtil.mapInPlace(array, ItemData::disenchant));
     }
 }

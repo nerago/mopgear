@@ -44,6 +44,8 @@ public class GemData {
         map.put(4803, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0)); // dps shoulder
         map.put(4443, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0)); // weapon
         map.put(4420, new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0)); // chest stam
+        map.put(4421, new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0));// cloak hit
+        map.put(4993, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 170));// shield
         map.put(76627, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0)); // chest stam
         return map;
     }

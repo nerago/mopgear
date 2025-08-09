@@ -22,7 +22,7 @@ public class Main {
     static final Path cacheFile = directory.resolve("cache.json");
     private static final Path gearRetFile = directory.resolve("gear-ret.json");
     private static final Path gearProtFile = directory.resolve("gear-prot.json");
-    private static final Path weightFileRetMine = directory.resolve("weight-mysim.json");
+    private static final Path weightFileRetMine = directory.resolve("weight-ret-sim.json");
     //    private static final Path weightFileStandard = directory.resolve("weight-standard.json");
     private static final Path weightFileProtMine = directory.resolve("weight-prot-sim.json");
     public static final long BILLION = 1000 * 1000 * 1000;
@@ -50,9 +50,9 @@ public class Main {
     private void exceptionalCheck(Instant startTime) {
         try {
 //            multiSpecSpecifiedRating();
-//            multiSpecSequential(startTime);
+            multiSpecSequential(startTime);
 
-        reforgeRet(startTime);
+//        reforgeRet(startTime);
 //            reforgeProt(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -97,8 +97,8 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, 82824, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
 //        reforgeProcessRetFixed(model, startTime);
-        findUpgradeSetup(items, model);
-//        combinationDumb(items, model, startTime);
+//        findUpgradeSetup(items, model);
+        combinationDumb(items, model, startTime);
     }
 
     private void reforgeProt(Instant startTime) throws IOException {
@@ -115,11 +115,13 @@ public class Main {
     }
 
     private void combinationDumb(EnumMap<SlotEquip, ItemData[]> items, ModelCombined model, Instant startTime) {
-        for (int extraId : new int[] {89503, 81129, 89649, 87060, 89665, 82812, 90910, 81284, 82814}) {
+        for (int extraId : new int[] {89503, 81129, 89649, 87060, 89665, 82812, 90910, 81284, 82814, 84807, 84870, 84790, 82822}) {
             ItemData extraItem = addExtra(items, model, extraId, false);
             System.out.println("EXTRA " + extraItem);
         }
         ItemUtil.bestForgesOnly(items, model);
+        ItemUtil.disenchant(items);
+        ItemLevel.scaleForChallengeMode(items);
 
         ModelCombined dumbModel = model.withNoRequirements();
         Optional<ItemSet> bestSet = EngineStream.runSolver(dumbModel, items, startTime, null);
@@ -480,7 +482,7 @@ public class Main {
         if (replace) {
             reforgedItems.put(slot, extraForged);
         } else {
-            ArrayUtil.map(reforgedItems.get(slot), ItemData::disenchant);
+            ArrayUtil.mapInPlace(reforgedItems.get(slot), ItemData::disenchant);
             reforgedItems.put(slot, ArrayUtil.concat(reforgedItems.get(slot), extraForged));
         }
         return extraItem;
