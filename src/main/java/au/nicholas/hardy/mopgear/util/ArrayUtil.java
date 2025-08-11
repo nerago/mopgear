@@ -16,13 +16,25 @@ public class ArrayUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    public static <T> T[] mapAsNew(T[] input, Function<T, T> function) {
+        T[] result = createGeneric(input, input.length);
+        for (int i = 0; i < input.length; ++i) {
+            result[i] = function.apply(input[i]);
+        }
+        return result;
+    }
+
     public static <T> T[] concat(T[] first, T[] second) {
         int newLen = first.length + second.length;
-        T[] result = (T[]) Array.newInstance(first.getClass().getComponentType(), newLen);
+        T[] result = createGeneric(first, newLen);
         System.arraycopy(first, 0, result, 0, first.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T[] createGeneric(T[] example, int length) {
+        return (T[]) Array.newInstance(example.getClass().getComponentType(), length);
     }
 
     public static StatType[] common(StatType[] first, StatType[] second) {
@@ -57,5 +69,29 @@ public class ArrayUtil {
                 return true;
         }
         return false;
+    }
+
+    public static <T> T findOne(T[] existing, Predicate<T> predicate) {
+        boolean found = false;
+        T result = null;
+        for (T item : existing) {
+            if (predicate.test(item)) {
+                if (found)
+                    throw new IllegalStateException("unexpected repeat match");
+                found = true;
+                result = item;
+            }
+        }
+        return result;
+    }
+
+    public static <T> T[] allMatch(T[] existing, Predicate<T> predicate) {
+        ArrayList<T> temp = new ArrayList<>();
+        for (T item : existing) {
+            if (predicate.test(item)) {
+                temp.add(item);
+            }
+        }
+        return temp.toArray(createGeneric(existing, temp.size()));
     }
 }

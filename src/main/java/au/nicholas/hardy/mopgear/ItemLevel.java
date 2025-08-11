@@ -52,13 +52,15 @@ public class ItemLevel {
         return map;
     }
 
-    public static void scaleForChallengeMode(EnumMap<SlotEquip, ItemData[]> itemMap) {
+    public static EnumMap<SlotEquip, ItemData[]> scaleForChallengeMode(EnumMap<SlotEquip, ItemData[]> itemMap) {
+        EnumMap<SlotEquip, ItemData[]> result = new EnumMap<>(SlotEquip.class);
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] items = itemMap.get(slot);
             if (items != null) {
-                ArrayUtil.mapInPlace(items, ItemLevel::scaleForChallengeMode);
+                result.put(slot, ArrayUtil.mapAsNew(items, ItemLevel::scaleForChallengeMode));
             }
         }
+        return result;
     }
 
     public static ItemData scaleForChallengeMode(ItemData item) {

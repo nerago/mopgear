@@ -1,7 +1,5 @@
 package au.nicholas.hardy.mopgear;
 
-import au.nicholas.hardy.mopgear.util.Tuple;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +16,7 @@ public class Reforger {
                 int remainQuantity = originalValue - reforgeQuantity;
                 for (StatType targetStat : target) {
                     if (baseItem.stat.get(targetStat) == 0) {
-                        ItemData modified = makeModified(baseItem, sourceStat, targetStat, remainQuantity, reforgeQuantity);
+                        ItemData modified = makeModified(baseItem, new ReforgeRecipe(sourceStat, targetStat), remainQuantity, reforgeQuantity);
                         outputItems.add(modified);
                     }
                 }
@@ -28,9 +26,9 @@ public class Reforger {
         return outputItems.toArray(ItemData[]::new);
     }
 
-    public static ItemData presetReforge(ItemData baseItem, Tuple.Tuple2<StatType, StatType> statChange) {
-        StatType sourceStat = statChange.a();
-        StatType targetStat = statChange.b();
+    public static ItemData presetReforge(ItemData baseItem, ReforgeRecipe statChange) {
+        StatType sourceStat = statChange.source();
+        StatType targetStat = statChange.dest();
         if (sourceStat == null && targetStat == null) {
             return baseItem;
         } else if (sourceStat != null && targetStat != null)  {
@@ -39,15 +37,15 @@ public class Reforger {
                 throw new RuntimeException("expected non-zero and zero");
             int reforgeQuantity = (originalValue * 4) / 10;
             int remainQuantity = originalValue - reforgeQuantity;
-            return makeModified(baseItem, sourceStat, targetStat, remainQuantity, reforgeQuantity);
+            return makeModified(baseItem, new ReforgeRecipe(sourceStat, targetStat), remainQuantity, reforgeQuantity);
         } else {
             throw new IllegalStateException();
         }
     }
 
-    private static ItemData makeModified(ItemData baseItem, StatType sourceStat, StatType targetStat, int remainQuantity, int reforgeQuantity) {
-        String name = baseItem.name + " (" + sourceStat + "->" + targetStat + ")";
-        StatBlock changedStats = baseItem.stat.withChange(sourceStat, remainQuantity, targetStat, reforgeQuantity);
-        return baseItem.changeNameAndStats(name, changedStats);
+    private static ItemData makeModified(ItemData baseItem, ReforgeRecipe recipe, int remainQuantity, int reforgeQuantity) {
+        String name = baseItem.name + " (" + recipe.source() + "->" + recipe.dest() + ")";
+        StatBlock changedStats = baseItem.stat.withChange(recipe.source(), remainQuantity, recipe.dest(), reforgeQuantity);
+        return baseItem.changeNameAndStats(name, changedStats, recipe);
     }
 }

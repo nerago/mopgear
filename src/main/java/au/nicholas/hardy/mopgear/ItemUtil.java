@@ -2,7 +2,6 @@ package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
-import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -86,7 +85,7 @@ public class ItemUtil {
     }
 
     public static EnumMap<SlotEquip, ItemData[]> limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
-                                                                       Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetForge) {
+                                                                       Map<SlotEquip, ReforgeRecipe> presetForge) {
         EnumMap<SlotEquip, ItemData[]> map = new EnumMap<>(SlotEquip.class);
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
@@ -105,7 +104,7 @@ public class ItemUtil {
         return map;
     }
 
-    public static EnumMap<SlotEquip, ItemData> chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> presetForge) {
+    public static EnumMap<SlotEquip, ItemData> chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, ReforgeRecipe> presetForge) {
         EnumMap<SlotEquip, ItemData> map = new EnumMap<>(SlotEquip.class);
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();

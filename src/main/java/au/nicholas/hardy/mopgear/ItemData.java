@@ -4,37 +4,39 @@ public final class ItemData {
     public final int id;
     public final SlotItem slot;
     public final String name;
+    public final ReforgeRecipe reforge;
     public final StatBlock stat;
     public final StatBlock statFixed;
     public final int sockets;
 
-    private ItemData(int id, SlotItem slot, String name, StatBlock stat, StatBlock statFixed, int sockets) {
+    private ItemData(int id, SlotItem slot, String name, ReforgeRecipe reforge, StatBlock stat, StatBlock statFixed, int sockets) {
         this.id = id;
         this.slot = slot;
         this.name = name;
+        this.reforge = reforge;
         this.stat = stat;
         this.statFixed = statFixed;
         this.sockets = sockets;
     }
 
     public static ItemData build(int id, SlotItem slot, String name, StatBlock stat, int sockets) {
-        return new ItemData(id, slot, name, stat, StatBlock.empty, sockets);
+        return new ItemData(id, slot, name, null, stat, StatBlock.empty, sockets);
     }
 
-    public ItemData changeNameAndStats(String changedName, StatBlock changedStats) {
-        return new ItemData(id, slot, changedName, changedStats, statFixed, sockets);
+    public ItemData changeNameAndStats(String changedName, StatBlock changedStats, ReforgeRecipe recipe) {
+        return new ItemData(id, slot, changedName, recipe, changedStats, statFixed, sockets);
     }
 
     public ItemData changeStats(StatBlock changedStats) {
-        return new ItemData(id, slot, name, changedStats, statFixed, sockets);
+        return new ItemData(id, slot, name, reforge, changedStats, statFixed, sockets);
     }
 
     public ItemData changeFixed(StatBlock changedFixed) {
-        return new ItemData(id, slot, name, stat, changedFixed, sockets);
+        return new ItemData(id, slot, name, reforge, stat, changedFixed, sockets);
     }
 
     public ItemData withoutFixed() {
-        return new ItemData(id, slot, name, stat, StatBlock.empty, sockets);
+        return new ItemData(id, slot, name, reforge, stat, StatBlock.empty, sockets);
     }
 
     public StatBlock totalStatCopy() {
