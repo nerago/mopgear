@@ -246,6 +246,10 @@ public class ItemUtil {
             return item;
         }
     }
+
+    static long estimateSets(Map<SlotEquip, ItemData[]> reforgedItems) {
+        return reforgedItems.values().stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
+    }
 //
 //    public static Map<Integer, Tuple.Tuple2<StatType, StatType>> slotMapToIdMap(List<ItemData> items, Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> map) {
 //        Map<Integer, Tuple.Tuple2<StatType, StatType>> result = new HashMap<>();

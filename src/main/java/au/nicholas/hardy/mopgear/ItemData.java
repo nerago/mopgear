@@ -55,10 +55,10 @@ public final class ItemData {
             sb.append('"').append(name).append("\" ");
         else
             sb.append("TOTAL ");
-        stat.append(sb);
+        stat.append(sb, false);
         if (!statFixed.isEmpty()) {
             sb.append("GEMS ");
-            statFixed.append(sb);
+            statFixed.append(sb, false);
         }
         sb.append('}');
         return sb.toString();

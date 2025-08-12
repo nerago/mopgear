@@ -16,16 +16,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "ExtractMethodRecommender", "unchecked"})
+@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "unchecked", "OptionalUsedAsFieldOrParameterType"})
 public class Main {
 
     private static final Path directory = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\paladin_gearing");
     static final Path cacheFile = directory.resolve("cache.json");
     private static final Path gearRetFile = directory.resolve("gear-ret.json");
     private static final Path gearProtFile = directory.resolve("gear-prot.json");
-    private static final Path weightFileRetMine = directory.resolve("weight-ret-sim.json");
-    //    private static final Path weightFileStandard = directory.resolve("weight-standard.json");
-    private static final Path weightFileProtMine = directory.resolve("weight-prot-sim.json");
+    private static final Path gearBoomFile = directory.resolve("gear-druid-boom.json");
+    private static final Path weightRetFile = directory.resolve("weight-ret-sim.txt");
+    private static final Path weightProtFile = directory.resolve("weight-prot-sim.txt");
+    private static final Path weightBoomFile = directory.resolve("weight-druid-boom.txt");
     public static final long BILLION = 1000 * 1000 * 1000;
 
     ItemCache itemCache;
@@ -56,7 +57,8 @@ public class Main {
 //            multiSpecSequential(startTime);
 
 //            reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
+            reforgeBoom(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -66,15 +68,21 @@ public class Main {
     }
 
     private static ModelCombined standardRetModel() throws IOException {
-        StatRatings statRatings = new StatRatingsWeights(weightFileRetMine, false, 1, 1);
+        StatRatings statRatings = new StatRatingsWeights(weightRetFile, false, 1, 1);
         StatRequirements statRequirements = StatRequirements.ret();
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret());
     }
 
     private static ModelCombined standardProtModel() throws IOException {
-        StatRatings statRatings = new StatRatingsWeights(weightFileProtMine, false, StatRatingsWeights.PROT_MULTIPLY, 1);
+        StatRatings statRatings = new StatRatingsWeights(weightProtFile, false, StatRatingsWeights.PROT_MULTIPLY, 1);
         StatRequirements statRequirements = StatRequirements.prot();
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.prot());
+    }
+
+    private ModelCombined standardBoomModel() throws IOException {
+        StatRatings statRatings = new StatRatingsWeights(weightBoomFile, false, 1, 1);
+        StatRequirements statRequirements = StatRequirements.boom();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom());
     }
 
     private ModelCombined nullMixedModel() {
@@ -88,8 +96,8 @@ public class Main {
         // assumes socket bonus+non matching gems
         Map<Integer, StatBlock> enchants = Map.of(
 //                86145, new StatBlock(120+285, 0, 0, 165, 0, 640,0,0,0),
-                86145, new StatBlock(285, 0, 0, 165, 0, 640,0,0,0),
-                84870, new StatBlock(0,430,0,0,0,640,0,165,0));
+                86145, new StatBlock(285, 0, 0, 165, 0, 640,0,0,0, 0),
+                84870, new StatBlock(0,430,0,0,0,640,0,165,0, 0));
 
         rankAlternativesAsSingleItems(model, new int [] {89530,81239,81567,81180,81568,85991,90594}, enchants, false); // necks
 //        rankAlternatives(new int [] {81129,81234,82850,81571}); // cloak
@@ -110,6 +118,10 @@ public class Main {
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
 //        reforgeProcessRetFixed(model, startTime, true);
         reforgeProcessRetChallenge(model, startTime);
+
+        //        Tuple.Tuple2<Integer, Integer>[] extraItemArray = valorItemsArray();
+//        Tuple.Tuple2<Integer, Integer>[] extraItemArray = msvItemsArray();
+//        Tuple.Tuple2<Integer, Integer>[] extraItemArray = pvpCrapArray();
 //        findUpgradeSetup(items, model);
 //        combinationDumb(items, model, startTime);
 
@@ -129,6 +141,14 @@ public class Main {
         // so we could get a conclusive result from the ret, then set the common slots to fixed
     }
 
+    private void reforgeBoom(Instant startTime) throws IOException {
+        ModelCombined model = standardBoomModel();
+        EnumMap<SlotEquip, ItemData[]> items = readAndLoad(true, gearBoomFile, model.reforgeRules());
+
+//        reforgeProcess(items, model, startTime, true);
+        findUpgradeSetup(items, intellectLeatherValorArray(), model);
+    }
+
     private void combinationDumb(EnumMap<SlotEquip, ItemData[]> items, ModelCombined model, Instant startTime) {
         for (int extraId : new int[]{89503, 81129, 89649, 87060, 89665, 82812, 90910, 81284, 82814, 84807, 84870, 84790, 82822}) {
             ItemData extraItem = addExtra(items, model, extraId, Function.identity(), false);
@@ -140,19 +160,17 @@ public class Main {
         ItemLevel.scaleForChallengeMode(items);
 
         ModelCombined dumbModel = model.withNoRequirements();
-        Optional<ItemSet> bestSet = EngineStream.runSolver(dumbModel, items, startTime, null);
+
+        Optional<ItemSet> bestSet = chooseEngineAndRun(dumbModel, items, startTime, null, null);
         outputResult(bestSet, model, true);
     }
 
-    private void findUpgradeSetup(EnumMap<SlotEquip, ItemData[]> reforgedItems, ModelCombined model) throws IOException {
-//        Tuple.Tuple2<Integer, Integer>[] extraItemArray = valorItemsArray();
-        Tuple.Tuple2<Integer, Integer>[] extraItemArray = msvItemsArray();
-//        Tuple.Tuple2<Integer, Integer>[] extraItemArray = pvpCrapArray();
+    private void findUpgradeSetup(EnumMap<SlotEquip, ItemData[]> reforgedItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, ModelCombined model) throws IOException {
 //        SlotEquip slot = SlotEquip.Ring2;
 
 //        long runSize = 10000000; // quick runs
-        long runSize = 100000000; // 4 min total runs
-//        long runSize = 300000000; // 12 min total runs
+//        long runSize = 100000000; // 4 min total runs
+        long runSize = 300000000; // 12 min total runs
 //        long runSize = 1000000000; // 40 min runs
 
         ItemSet baseSet = reforgeProcessLight(reforgedItems, model, runSize, true).get();
@@ -182,7 +200,7 @@ public class Main {
         }
     }
 
-    private Tuple.Tuple2<Integer, Integer>[] pvpCrapArray() {
+    private Tuple.Tuple2<Integer, Integer>[] strengthPlatePvpArray() {
         return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
                 Tuple.create(84807, 1250),
                 Tuple.create(84794, 2250),
@@ -204,7 +222,7 @@ public class Main {
         };
     }
 
-    private static Tuple.Tuple2<Integer, Integer>[] msvItemsArray() {
+    private static Tuple.Tuple2<Integer, Integer>[] strengthPlateMsvArray() {
         return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
 //                // stone
 //                Tuple.create(85922, 0),
@@ -233,7 +251,7 @@ public class Main {
         };
     }
 
-    private static Tuple.Tuple2<Integer, Integer>[] valorItemsArray() {
+    private static Tuple.Tuple2<Integer, Integer>[] strengthPlateValorArray() {
         Tuple.Tuple2<Integer, Integer> neckParagonPale = Tuple.create(89066, 1250);
         Tuple.Tuple2<Integer, Integer> neckBloodseekers = Tuple.create(89064, 1250);
         Tuple.Tuple2<Integer, Integer> beltKlaxxiConsumer = Tuple.create(89056, 1750);
@@ -251,6 +269,25 @@ public class Main {
 
         return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{neckParagonPale, neckBloodseekers, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage, headYiLeastFavorite, headVoiceAmpGreathelm, chestDawnblade,
                 chestCuirassTwin, gloveOverwhelmSwarm, wristBattleShadow, wristBraidedBlackWhite, bootYulonGuardian, bootTankissWarstomp};
+    }
+
+    private Tuple.Tuple2<Integer, Integer>[] intellectLeatherValorArray() {
+        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
+                Tuple.create(89308, 2500),
+                Tuple.create(89342, 1750),
+                Tuple.create(89432, 2500),
+                Tuple.create(88885, 1250),
+                Tuple.create(88743, 1750),
+                Tuple.create(89061, 1750),
+                Tuple.create(89089, 2500),
+                Tuple.create(88876, 1750),
+                Tuple.create(89078, 1250),
+                Tuple.create(89067, 1250),
+                Tuple.create(89073, 1250),
+                Tuple.create(89072, 1250),
+                Tuple.create(89081, 1750),
+                Tuple.create(89080, 1750),
+        };
     }
 
     private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {
@@ -288,8 +325,7 @@ public class Main {
         ItemUtil.validateDualSets(retMap, protMap);
         EnumMap<SlotEquip, ItemData[]> commonMap = ItemUtil.commonInDualSet(retMap, protMap);
 
-        Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null);
-//        Stream<ItemSet> commonStream = EngineRandom.runSolverPartial(modelNull, commonMap, startTime, null, 10);
+        Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null, 0);
 
         // TODO solve for challenge dps too
 
@@ -352,11 +388,7 @@ public class Main {
     private static Optional<ItemSet> subSolvePart(EnumMap<SlotEquip, ItemData[]> fullItemMap, ModelCombined model, EnumMap<SlotEquip, ItemData> chosenMap, ItemSet otherSet, Long runSize) {
         EnumMap<SlotEquip, ItemData[]> submitMap = fullItemMap.clone();
         ItemUtil.buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
-        EngineRandom.runSolverPartial(model, submitMap, null, null, runSize);
-        Stream<ItemSet> stream = runSize != null
-                ? EngineRandom.runSolverPartial(model, submitMap, null, otherSet, runSize)
-                : EngineStream.runSolverPartial(model, submitMap, null, otherSet);
-        return EngineStream.findBest(model, stream);
+        return chooseEngineAndRun(model, submitMap, null, runSize, null);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -380,9 +412,7 @@ public class Main {
         EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 //        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
 
-//        Optional<ItemSet> bestSet = EngineStream.runSolver(model, map, startTime, null);
-        Optional<ItemSet> bestSet = EngineRandom.runSolver(model, map, startTime,null,BILLION);
-
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, BILLION, null);
         outputResult(bestSet, model, detailedOutput);
         outputTweaked(bestSet, map, model);
     }
@@ -407,8 +437,7 @@ public class Main {
 
         EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 
-//        Optional<ItemSet> bestSet = EngineStream.runSolver(model, map, startTime, null);
-        Optional<ItemSet> bestSet = EngineRandom.runSolver(model, map, startTime,null,BILLION);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, null, BILLION, null);
 
         outputResult(bestSet, model, detailedOutput);
         outputTweaked(bestSet, map, model);
@@ -445,18 +474,18 @@ public class Main {
 
         Function<ItemData, ItemData> customiseItem = extraItem -> {
             if (extraItem.id == 82812) {
-                return extraItem.changeFixed(new StatBlock(285, 0, 0, 165, 160, 160 + 60, 0, 0, 0));
+                return extraItem.changeFixed(new StatBlock(285, 0, 0, 165, 160, 160 + 60, 0, 0, 0, 0));
             } else if (extraItem.id == 89649) {
-                return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 0, 320, 0, 0, 0));
+                return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 0, 320, 0, 0, 0, 0));
             } else if (extraItem.id == 81284) {
-                return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0));
+                return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0, 0));
             } else if (extraItem.id == 87060) {
-                return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 160, 160, 320 + 160 + 160, 120, 0));
+                return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 160, 160, 320 + 160 + 160, 120, 0, 0));
             } else if (extraItem.id == 89503) {
-                return extraItem.changeStats(new StatBlock(501,751,0,334,334,0,0,0,0))
-                        .changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0));
+                return extraItem.changeStats(new StatBlock(501,751,0,334,334,0,0,0,0, 0))
+                        .changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else if (extraItem.slot == SlotItem.Back) {
-                return extraItem.changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0));
+                return extraItem.changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else {
                 System.out.println("DEFAULT ENCHANT " + extraItem);
                 return ItemUtil.defaultEnchants(extraItem, model, false);
@@ -469,7 +498,7 @@ public class Main {
         }
         EnumMap<SlotEquip, ItemData[]> scaledMap = ItemLevel.scaleForChallengeMode(map);
 
-        ItemSet bestScaledSet = EngineStream.runSolver(model, scaledMap, startTime, null).orElseThrow();
+        ItemSet bestScaledSet = chooseEngineAndRun(model, scaledMap, startTime, null, null).orElseThrow();
 
         System.out.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
         outputResult(Optional.of(bestScaledSet), model, true);
@@ -495,7 +524,7 @@ public class Main {
         }
 
         ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirements.retWideCapRange(), model.reforgeRules());
-        Optional<ItemSet> bestSetFinal = EngineStream.runSolver(finalModel, map, startTime, null);
+        Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null, null);
 
         System.out.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
         outputResult(bestSetFinal, model, true);
@@ -566,14 +595,13 @@ public class Main {
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcess(EnumMap<SlotEquip, ItemData[]> reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        Optional<ItemSet> bestSet = EngineRandom.runSolver(model, reforgedItems, startTime, null, BILLION);
-//        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, reforgedItems, startTime, BILLION, null);
         outputResult(bestSet, model, detailedOutput);
         outputTweaked(bestSet, reforgedItems, model);
     }
 
     private Optional<ItemSet> reforgeProcessLight(EnumMap<SlotEquip, ItemData[]> reforgedItems, ModelCombined model, long runSize, boolean outputExistingGear) throws IOException {
-        Optional<ItemSet> bestSet = EngineRandom.runSolver(model, reforgedItems, null, null, runSize);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, reforgedItems, null, runSize, null);
         return bestSet.map(itemSet -> Tweaker.tweak(itemSet, model, reforgedItems));
     }
 
@@ -595,12 +623,7 @@ public class Main {
             System.out.println("EXTRA " + extraItem);
         }
 
-        if (runSize != null) {
-            Optional<ItemSet> proposed = EngineRandom.runSolver(model, reforgedItems, startTime, null, runSize);
-            return proposed.map(itemSet -> Tweaker.tweak(itemSet, model, reforgedItems));
-        } else {
-            return EngineStream.runSolver(model, reforgedItems, startTime, null);
-        }
+        return chooseEngineAndRun(model, reforgedItems, startTime, runSize, null);
     }
 
     private ItemData addExtra(EnumMap<SlotEquip, ItemData[]> reforgedItems, ModelCombined model, int extraItemId, Function<ItemData, ItemData> customiseItem, boolean replace) {
@@ -632,7 +655,7 @@ public class Main {
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             Map<SlotEquip, ItemData[]> itemMap = new EnumMap<>(reforgedItems);
             itemMap.put(extraItem.slot.toSlotEquip(), new ItemData[]{extraItem});
-            Optional<ItemSet> bestSets = EngineStream.runSolver(model, itemMap, null, null);
+            Optional<ItemSet> bestSets = EngineStream.runSolver(model, itemMap, null, null, 0);
             outputResult(bestSets, model, false);
         }
     }
@@ -644,14 +667,18 @@ public class Main {
         ItemData extraItem2 = addExtra(reforgedItems, model, extraItemId2, Function.identity(), false);
         System.out.println("EXTRA " + extraItem2);
 
-//        if (runSize != null) {
-        Optional<ItemSet> proposed = EngineRandom.runSolver(model, reforgedItems, startTime, null, BILLION * 3);
-        proposed = proposed.map(itemSet -> Tweaker.tweak(itemSet, model, reforgedItems));
-        outputResult(proposed, model, true);
-//        } else {
-//        Optional<ItemSet> best = EngineStream.runSolver(model, reforgedItems, startTime, null);
-//        outputResult(best, model, true);
-//        }
+        Optional<ItemSet> best = chooseEngineAndRun(model, reforgedItems, startTime, BILLION * 3, null);
+        outputResult(best, model, true);
+    }
+
+    private static Optional<ItemSet> chooseEngineAndRun(ModelCombined model, EnumMap<SlotEquip, ItemData[]> reforgedItems, Instant startTime, Long runSize, ItemSet otherSet) {
+        long estimate = ItemUtil.estimateSets(reforgedItems);
+        if (runSize != null && estimate > runSize) {
+            Optional<ItemSet> proposed = EngineRandom.runSolver(model, reforgedItems, startTime, otherSet, runSize);
+            return proposed.map(itemSet -> Tweaker.tweak(itemSet, model, reforgedItems));
+        } else {
+            return EngineStream.runSolver(model, reforgedItems, startTime, otherSet, estimate);
+        }
     }
 
     private void outputResult(Collection<ItemSet> bestSets, ModelCombined model, boolean detailedOutput) {
@@ -682,7 +709,7 @@ public class Main {
             if (bestSet.get() != tweakSet) {
                 System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
 
-                System.out.println(tweakSet.getTotals() + " " + model.calcRating(tweakSet.getTotals()));
+                System.out.println(tweakSet.getTotals().toStringExtended() + " " + model.calcRating(tweakSet.getTotals()));
                 for (Map.Entry<SlotEquip, ItemData> entry : tweakSet.getItems().entrySet()) {
                     ItemData orig = bestSet.get().items.get(entry.getKey());
                     ItemData change = entry.getValue();

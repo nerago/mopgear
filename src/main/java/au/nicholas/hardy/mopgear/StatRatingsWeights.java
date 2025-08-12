@@ -47,7 +47,7 @@ public class StatRatingsWeights implements StatRatings {
         for (int i = 1; i < parts.length; ++i) {
             String[] pair = parts[i].split("=");
             stat = switch (pair[0]) {
-                case "Strength" -> addNum(stat, StatType.Strength, pair[1]);
+                case "Intellect", "Strength" -> addNum(stat, StatType.Primary, pair[1]);
                 case "Stamina" -> addNum(stat, StatType.Stam, pair[1]);
                 case "HitRating" -> addNum(stat, StatType.Hit, pair[1]);
                 case "CritRating" -> addNum(stat, StatType.Crit, pair[1]);
@@ -56,6 +56,7 @@ public class StatRatingsWeights implements StatRatings {
                 case "MasteryRating" -> addNum(stat, StatType.Mastery, pair[1]);
                 case "DodgeRating" -> addNum(stat, StatType.Dodge, pair[1]);
                 case "ParryRating" -> addNum(stat, StatType.Parry, pair[1]);
+                case "Spirit" -> addNum(stat, StatType.Spirit, pair[1]);
                 default -> stat;
             };
         }
@@ -71,7 +72,7 @@ public class StatRatingsWeights implements StatRatings {
     @Override
     public long calcRating(StatBlock value) {
         int total = 0;
-        total += value.str * weight.str;
+        total += value.primary * weight.primary;
         total += value.mastery * weight.mastery;
         total += value.crit * weight.crit;
         total += value.parry * weight.parry;

@@ -28,11 +28,13 @@ public class WowHead {
             if (json.has(String.valueOf(itemId))) {
                 JsonObject io = json.get(String.valueOf(itemId)).getAsJsonObject();
                 JsonObject je = io.get("jsonequip").getAsJsonObject();
-                int level = je.get("reqlevel").getAsInt();
-                if (level < 87) {
-                    System.out.println("Skipping " + itemId + " version for level " + level);
-                    startIndex = startDataSection + 1;
-                    continue;
+                if (je.has("reqlevel")) {
+                    int level = je.get("reqlevel").getAsInt();
+                    if (level > 1 && level < 87) {
+                        System.out.println("Skipping " + itemId + " version for level " + level);
+                        startIndex = startDataSection + 1;
+                        continue;
+                    }
                 }
             } else {
                 startIndex = startDataSection + 1;
@@ -44,7 +46,8 @@ public class WowHead {
 
             ItemData item = buildItem(itemObject, itemId);
             System.out.println(item);
-//            throw  new RuntimeException("todo");
+            if (item.stat.isEmpty())
+                System.out.println("WARNWARNWARN item has no stats " + item);
             return item;
         }
 
@@ -74,7 +77,7 @@ public class WowHead {
         int sockets = objectGetInt(equipObject, "nsockets");
 
         StatBlock statBlock = new StatBlock(
-                objectGetInt(equipObject, "str"),
+                objectGetIntOneOf(equipObject, "str", "int"),
                 objectGetInt(equipObject, "sta"),
                 objectGetInt(equipObject, "mastrtng"),
                 objectGetInt(equipObject, "critstrkrtng"),
@@ -82,7 +85,8 @@ public class WowHead {
                 objectGetInt(equipObject, "hastertng"),
                 objectGetInt(equipObject, "exprtng"),
                 objectGetInt(equipObject, "dodgertng"),
-                objectGetInt(equipObject, "parryrtng"));
+                objectGetInt(equipObject, "parryrtng"),
+                objectGetInt(equipObject, "spi"));
 
         return ItemData.build(itemId, slot, name, statBlock, sockets);
     }
@@ -98,6 +102,17 @@ public class WowHead {
     private static int objectGetInt(JsonObject object, String field) {
         if (object.has(field))
             return object.get(field).getAsInt();
+        else
+            return 0;
+    }
+
+    private static int objectGetIntOneOf(JsonObject object, String fieldA, String fieldB) {
+        if (object.has(fieldA) && object.has(fieldB))
+            throw new IllegalArgumentException("primary stat conflict, both " + fieldA + " and " + fieldB);
+        else if (object.has(fieldA))
+            return object.get(fieldA).getAsInt();
+        else if (object.has(fieldB))
+            return object.get(fieldB).getAsInt();
         else
             return 0;
     }

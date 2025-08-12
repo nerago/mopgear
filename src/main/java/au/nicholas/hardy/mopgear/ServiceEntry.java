@@ -8,27 +8,27 @@ import java.util.Optional;
 import static au.nicholas.hardy.mopgear.Main.cacheFile;
 
 public class ServiceEntry {
-    private final ItemCache itemCache;
-    private final ModelCombined model;
-
-    public ServiceEntry() throws IOException {
-        itemCache = new ItemCache(cacheFile);
-        StatRatingsWeights ratings = new StatRatingsWeights(null, true, 1, 1);
-        StatRequirements requirements = StatRequirements.ret();
-        model = new ModelCombined(ratings, requirements, ReforgeRules.ret());
-    }
-
-    public ItemSet run(String jsonString) {
-        return reforgeProcess(jsonString).orElse(null);
-    }
-
-    private Optional<ItemSet> reforgeProcess(String jsonString) {
-        List<EquippedItem> itemIds = InputParser.readString(jsonString);
-        List<ItemData> items;
-        synchronized (itemCache) {
-            items = ItemUtil.loadItems(itemCache, itemIds, false);
-        }
-        EnumMap<SlotEquip, ItemData[]> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.reforgeRules(), items);
-        return EngineStream.runSolver(model, reforgedItems, null, null);
-    }
+//    private final ItemCache itemCache;
+//    private final ModelCombined model;
+//
+//    public ServiceEntry() throws IOException {
+//        itemCache = new ItemCache(cacheFile);
+//        StatRatingsWeights ratings = new StatRatingsWeights(null, true, 1, 1);
+//        StatRequirements requirements = StatRequirements.ret();
+//        model = new ModelCombined(ratings, requirements, ReforgeRules.ret());
+//    }
+//
+//    public ItemSet run(String jsonString) {
+//        return reforgeProcess(jsonString).orElse(null);
+//    }
+//
+//    private Optional<ItemSet> reforgeProcess(String jsonString) {
+//        List<EquippedItem> itemIds = InputParser.readString(jsonString);
+//        List<ItemData> items;
+//        synchronized (itemCache) {
+//            items = ItemUtil.loadItems(itemCache, itemIds, false);
+//        }
+//        EnumMap<SlotEquip, ItemData[]> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.reforgeRules(), items);
+//        return EngineStream.runSolver(model, reforgedItems, null, null);
+//    }
 }

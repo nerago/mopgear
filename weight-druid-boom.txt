@@ -1,0 +1,1 @@
+( Pawn: v1: "Balance WoWSims Weights": Class=Druid,Intellect=1.300,Spirit=1.270,HitRating=1.270,CritRating=0.560,HasteRating=0.800,MasteryRating=0.410,SpellDamage=1.000 )

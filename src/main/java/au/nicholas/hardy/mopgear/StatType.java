@@ -1,6 +1,8 @@
 package au.nicholas.hardy.mopgear;
 
 public enum StatType {
+    Primary,
+    Stam,
     Mastery,
     Crit,
     Hit,
@@ -8,6 +10,5 @@ public enum StatType {
     Expertise,
     Dodge,
     Parry,
-    Strength,
-    Stam,
+    Spirit
 }

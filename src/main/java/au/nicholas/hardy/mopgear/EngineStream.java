@@ -10,18 +10,15 @@ import java.util.stream.StreamSupport;
 import static java.util.Spliterator.*;
 
 public class EngineStream {
-    public static Optional<ItemSet> runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {
-        Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, otherSet);
-        return findBest(model, finalSets);
-//        return finalSets.collect(new TopCollector1<>(20, ItemSet::getStatRating));
+    public static Optional<ItemSet> runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet, long estimate) {
+        Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, otherSet, estimate);
+        return BigStreamUtil.findBest(model, finalSets);
     }
 
-    public static Optional<ItemSet> findBest(ModelCombined model, Stream<ItemSet> finalSets) {
-        return finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
-    }
+    public static Stream<ItemSet> runSolverPartial(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet, long estimate) {
+        if (estimate == 0)
+            estimate = ItemUtil.estimateSets(items);
 
-    public static Stream<ItemSet> runSolverPartial(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet) {
-        long estimate = estimateSets(items);
         Stream<ItemSet> initialSets = generateItemCombinations(items, model, otherSet);
 
         if (startTime != null)
@@ -31,14 +28,6 @@ public class EngineStream {
     }
 
     // NOTES: we could dig right down a path to find its max/min hit/exp limits, then know if we're on a bad path
-
-    private static long estimateSets(Map<SlotEquip, ItemData[]> reforgedItems) {
-        return reforgedItems.values().stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
-    }
-
-//    private static Stream<ItemSet> makeFinalisedSets(Model model, Stream<ItemSet> initialSets) {
-//        return initialSets.map(x -> x.finished(model::calcRating));
-//    }
 
     private static Stream<ItemSet> generateItemCombinations(Map<SlotEquip, ItemData[]> itemsBySlot, ModelCombined model, ItemSet otherSet) {
         Stream<ItemSet> stream = null;

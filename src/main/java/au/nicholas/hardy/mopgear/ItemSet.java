@@ -40,7 +40,7 @@ public final class ItemSet {
     }
 
     void outputSet(ModelCombined model) {
-        System.out.println(getTotals() + " " + model.calcRating(getTotals()));
+        System.out.println(getTotals().toStringExtended() + " " + model.calcRating(getTotals()));
         for (ItemData it : getItems().values()) {
             System.out.println(it + " " + model.calcRating(it.totalStatCopy()));
         }
