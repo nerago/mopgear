@@ -44,7 +44,9 @@ public class WowHead {
             JsonObject itemObject = json.get(String.valueOf(itemId)).getAsJsonObject();
             System.out.println(itemObject);
 
-            ItemData item = buildItem(itemObject, itemId);
+            int itemLevel = readItemLevel(htmlContent);
+
+            ItemData item = buildItem(itemObject, itemId, itemLevel);
             System.out.println(item);
             if (item.stat.isEmpty())
                 System.out.println("WARNWARNWARN item has no stats " + item);
@@ -53,6 +55,16 @@ public class WowHead {
 
         System.out.println("Failed " + itemId);
         return null;
+    }
+
+    private static int readItemLevel(String htmlContent) {
+        String search = "<!--ilvl-->";
+        int index = htmlContent.indexOf(search);
+        if (index == -1)
+            return 0;
+        index += search.length();
+        String sub = htmlContent.substring(index, index + 3);
+        return Integer.parseInt(sub);
     }
 
     private static String fetchHTML(String url) {
@@ -69,12 +81,13 @@ public class WowHead {
 //    "jsonequip":{"appearances":{"0":[104069,""]},"armor":2995,"buyprice":946846,"classes":2,"displayid":104069,"dura":100,"exprtng":277,"hitrtng":237,"itemset":1064,"nsockets":2,"races":2099199,"reqlevel":85,"sellprice":189369,"slotbak":1,"socket1":1,"socket2":2,"socketbonus":4158,"sta":646,"str":371},
 //    "attainable":0,"flags2":134242304,"displayName":"","qualityTier":0}
 
-    private static ItemData buildItem(JsonObject itemObject, int itemId) {
+    private static ItemData buildItem(JsonObject itemObject, int itemId, int itemLevel) {
         String name = objectGetString(itemObject, "name_enus");
 
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
         SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
         int sockets = objectGetInt(equipObject, "nsockets");
+        int socketBonus = objectGetInt(equipObject, "socketbonus");
 
         StatBlock statBlock = new StatBlock(
                 objectGetIntOneOf(equipObject, "str", "int"),
@@ -88,7 +101,7 @@ public class WowHead {
                 objectGetInt(equipObject, "parryrtng"),
                 objectGetInt(equipObject, "spi"));
 
-        return ItemData.build(itemId, slot, name, statBlock, sockets);
+        return ItemData.build(itemId, slot, name, statBlock, sockets, socketBonus, itemLevel);
     }
 
     @SuppressWarnings("SameParameterValue")

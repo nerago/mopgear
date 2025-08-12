@@ -5,6 +5,14 @@ import java.util.Map;
 
 public class GemData {
     static final Map<Integer, StatBlock> known = buildKnown();
+    static final Map<Integer, StatBlock> knownSocketBonus = buildSocketBonus();
+
+    private static Map<Integer, StatBlock> buildSocketBonus() {
+        Map<Integer, StatBlock> map = new HashMap<>();
+        map.put(4860, new StatBlock(180,0,0,0,0,0,0,0,0,0));
+        map.put(4838, new StatBlock(0,0,0,0,0,0,0,0,0,60));
+        return map;
+    }
 
     private static Map<Integer, StatBlock> buildKnown() {
         Map<Integer, StatBlock> map = new HashMap<>();
@@ -51,17 +59,25 @@ public class GemData {
         map.put(4823, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// leg dps
         map.put(76627, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
         map.put(76669, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
+        map.put(76585, new StatBlock(0, 0, 0, 0, 0, 160, 0, 0, 0, 160));
         return map;
     }
 
-    public static StatBlock process(int[] gemIds) {
+    public static StatBlock process(int[] gemIds, int socketBonus, String name) {
         StatBlock result = StatBlock.empty;
         for (int id : gemIds) {
             StatBlock stats = known.get(id);
             if (stats == null)
-                throw new IllegalArgumentException("unknown gem " + id);
+                throw new IllegalArgumentException("unknown gem " + id + " on " + name);
             result = result.plus(stats);
         }
+        if (socketBonus != 0) {
+            StatBlock bonus = knownSocketBonus.get(socketBonus);
+            if (bonus == null)
+                throw new IllegalArgumentException("unknown socket bonus " + socketBonus + " on " + name);
+            result = result.plus(bonus);
+        }
+
         return result;
     }
 

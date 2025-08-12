@@ -3,6 +3,7 @@ package au.nicholas.hardy.mopgear;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ public class ItemUtil {
         return set;
     }
 
-    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) {
+    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) throws IOException {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
             ItemData item = loadItem(itemCache, equippedItem, detailedOutput);
@@ -38,7 +39,7 @@ public class ItemUtil {
         ItemData item = loadItemBasic(itemCache, id);
 
         if (equippedItem.gems().length > 0) {
-            StatBlock gemStat = GemData.process(equippedItem.gems());
+            StatBlock gemStat = GemData.process(equippedItem.gems(), item.socketBonus, item.name);
             item = item.changeFixed(gemStat);
         }
 
@@ -62,6 +63,7 @@ public class ItemUtil {
             item = WowHead.fetchItem(id);
             if (item != null) {
                 itemCache.put(id, item);
+                itemCache.cacheSave();
             } else {
                 throw new RuntimeException("missing item");
             }
@@ -232,13 +234,13 @@ public class ItemUtil {
 
     public static ItemData defaultEnchants(ItemData item, ModelCombined model, boolean force) {
         if (force || item.statFixed.isEmpty()) {
-            if (item.sockets == 0) {
+            if (item.socketCount == 0) {
                 return item.withoutFixed();
             }
 
             StatBlock total = StatBlock.empty;
             StatBlock oneGem = model.standardGem();
-            for (int i = 0; i < item.sockets; ++i) {
+            for (int i = 0; i < item.socketCount; ++i) {
                 total = total.plus(oneGem);
             }
             return item.changeFixed(total);

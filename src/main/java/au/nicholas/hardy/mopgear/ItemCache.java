@@ -28,9 +28,11 @@ public class ItemCache {
     }
 
 
-    public void cacheSave() throws IOException {
+    public void cacheSave() {
         try (BufferedWriter writer = Files.newBufferedWriter(file)) {
             new Gson().toJson(itemCache, writer);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 

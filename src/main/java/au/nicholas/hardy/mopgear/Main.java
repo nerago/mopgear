@@ -51,7 +51,7 @@ public class Main {
 
     private void exceptionalCheck(Instant startTime) {
         try {
-//            WowHead.fetchItem(84870);
+//            WowHead.fetchItem(89061);
 
 //            multiSpecSpecifiedRating();
 //            multiSpecSequential(startTime);
@@ -287,6 +287,67 @@ public class Main {
                 Tuple.create(89072, 1250),
                 Tuple.create(89081, 1750),
                 Tuple.create(89080, 1750),
+        };
+    }
+
+    private Tuple.Tuple2<Integer, Integer>[] plateStrCelestialArray() {
+        // skipping neck cloak offhand weaps
+        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
+                // plate
+                Tuple.create(86803, 40),
+                Tuple.create(86742, 40),
+                Tuple.create(89976, 40),
+                Tuple.create(89969, 25),
+                Tuple.create(86752, 40),
+                Tuple.create(89954, 45),
+                Tuple.create(86751, 25),
+                Tuple.create(86823, 30),
+                Tuple.create(86860, 30),
+                Tuple.create(86793, 40),
+                Tuple.create(86868, 30),
+                Tuple.create(89981, 30),
+                Tuple.create(86852, 45),
+                Tuple.create(86832, 45),
+                Tuple.create(86794, 25),
+                Tuple.create(86780, 25),
+                Tuple.create(86779, 40),
+                Tuple.create(89958, 45),
+                Tuple.create(89956, 30),
+                Tuple.create(86822, 45),
+                Tuple.create(86904, 50),
+                Tuple.create(86854, 45),
+                Tuple.create(86849, 30),
+                Tuple.create(86760, 40),
+                Tuple.create(86848, 30),
+                Tuple.create(89963, 45),
+                Tuple.create(86903, 25),
+                Tuple.create(86870, 50),
+                Tuple.create(86891, 50),
+
+                // ring
+                Tuple.create(86820, 30),
+                Tuple.create(86830, 30),
+                Tuple.create(89972, 25),
+                Tuple.create(86813, 30),
+                Tuple.create(86880, 30),
+
+                // weap
+                Tuple.create(86799, 40),
+                Tuple.create(86906, 30),
+                Tuple.create(86789, 25),
+
+                // neck
+                Tuple.create(86759, 25),
+                Tuple.create(86872, 25),
+                Tuple.create(86739, 25),
+                Tuple.create(86871, 30),
+                Tuple.create(86835, 30),
+
+                // back
+                Tuple.create(86753, 25),
+                Tuple.create(86812, 30),
+                Tuple.create(86883, 25),
+                Tuple.create(86853, 25)
         };
     }
 
