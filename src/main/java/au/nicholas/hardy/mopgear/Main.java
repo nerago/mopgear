@@ -145,8 +145,8 @@ public class Main {
         ModelCombined model = standardBoomModel();
         EnumMap<SlotEquip, ItemData[]> items = readAndLoad(true, gearBoomFile, model.reforgeRules());
 
-//        reforgeProcess(items, model, startTime, true);
-        findUpgradeSetup(items, intellectLeatherValorArray(), model);
+        reforgeProcess(items, model, startTime, true);
+//        findUpgradeSetup(items, intellectLeatherValorArray(), model);
     }
 
     private void combinationDumb(EnumMap<SlotEquip, ItemData[]> items, ModelCombined model, Instant startTime) {

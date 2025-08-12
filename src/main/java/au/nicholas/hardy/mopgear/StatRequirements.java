@@ -38,7 +38,7 @@ public class StatRequirements {
     private static final int TARGET_RATING_TANK = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_TANK); // 5100
     private static final int TARGET_RATING_CAST = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_CAST); // 5100
 
-    private static final int DEFAULT_CAP_ALLOW_EXCEED = 50;
+    private static final int DEFAULT_CAP_ALLOW_EXCEED = 150;
 
     private final int requiredHit;
     private final int requiredExpertise;

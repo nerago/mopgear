@@ -43,7 +43,7 @@ public class BigStreamUtil {
         for (int i = 0; i < digitCount; ++i) {
             freq *= 10;
         }
-        return freq;
+        return Math.max(freq, 1000000);
     }
 
     public static Duration estimateRemain(Instant startTime, double percent) {
