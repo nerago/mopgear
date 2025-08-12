@@ -82,13 +82,20 @@ public class Main {
     }
 
     private void rankSomething() throws IOException {
-        ModelCombined model = standardRetModel();
+//        ModelCombined model = standardRetModel();
+        ModelCombined model = standardProtModel();
 
-//        rankAlternatives(new int [] {89530,81239,81567,81180,81568}); // necks
+        // assumes socket bonus+non matching gems
+        Map<Integer, StatBlock> enchants = Map.of(
+//                86145, new StatBlock(120+285, 0, 0, 165, 0, 640,0,0,0),
+                86145, new StatBlock(285, 0, 0, 165, 0, 640,0,0,0),
+                84870, new StatBlock(0,430,0,0,0,640,0,165,0));
+
+        rankAlternativesAsSingleItems(model, new int [] {89530,81239,81567,81180,81568,85991,90594}, enchants, false); // necks
 //        rankAlternatives(new int [] {81129,81234,82850,81571}); // cloak
 //        rankAlternatives(new int [] {84036,81190,81687,81130,81086}); // belt
 //        rankAlternativesAsSingleItems(model, new int[]{84027, 81284, 81073, 81113, 82852}); // feet
-        rankAlternativesAsSingleItems(model, new int[]{84870, 89665, 82812}, true);
+//        rankAlternativesAsSingleItems(model, new int[]{86145, 82812, 84870}, enchants, false); // legs
     }
 
     private void reforgeRet(Instant startTime) throws IOException {
@@ -98,10 +105,12 @@ public class Main {
 //        reforgeProcess(items, model, startTime, true);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 //        reforgeProcessPlus(items, model, startTime, true, 90592, false);
+//        reforgeProcessPlus(items, model, startTime, true,86145, false, true, new StatBlock(285+80+120,0,0,165,160,160+160,0,0,0));
 //        reforgeProcessPlus(items, model, startTime, 82824, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
-//        reforgeProcessRetChallenge(model, startTime);
-        findUpgradeSetup(items, model);
+//        reforgeProcessRetFixed(model, startTime, true);
+        reforgeProcessRetChallenge(model, startTime);
+//        findUpgradeSetup(items, model);
 //        combinationDumb(items, model, startTime);
 
     }
@@ -110,9 +119,9 @@ public class Main {
         ModelCombined model = standardProtModel();
         EnumMap<SlotEquip, ItemData[]> items = readAndLoad(true, gearProtFile, model.reforgeRules());
 
-//        reforgeProcessProtFixed(model, startTime, true);
-        reforgeProcessPlus(items, model, startTime, true,86145, false, true);
-//        reforgeProcessPlus(items, model, startTime, true,89823, false, Function.identity());
+        reforgeProcessProtFixed(model, startTime, true);
+//        reforgeProcessPlus(items, model, startTime, true,86145, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, true,90594, false, true, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 90594, 90592);
 //        reforgeProcess(items, model, startTime, true);
 //        findUpgradeSetup(items, model);
@@ -244,11 +253,18 @@ public class Main {
                 chestCuirassTwin, gloveOverwhelmSwarm, wristBattleShadow, wristBraidedBlackWhite, bootYulonGuardian, bootTankissWarstomp};
     }
 
-    private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, boolean scaleChallenge) {
+    private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {
         Stream<ItemData> stream = Arrays.stream(itemIds)
                 .mapToObj(x -> new EquippedItem(x, new int[0], null))
                 .map(x -> ItemUtil.loadItem(itemCache, x, true))
                 .flatMap(x -> Arrays.stream(Reforger.reforgeItem(model.reforgeRules(), x)));
+        if (enchants != null) {
+            stream = stream.map(x ->
+                            enchants.containsKey(x.id) ?
+                                    x.changeFixed(enchants.get(x.id)) :
+                                    ItemUtil.defaultEnchants(x,model,true)
+                    );
+        }
         if (scaleChallenge) {
             stream = stream.map(ItemLevel::scaleForChallengeMode);
         }
@@ -273,10 +289,12 @@ public class Main {
         EnumMap<SlotEquip, ItemData[]> commonMap = ItemUtil.commonInDualSet(retMap, protMap);
 
         Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null);
+//        Stream<ItemSet> commonStream = EngineRandom.runSolverPartial(modelNull, commonMap, startTime, null, 10);
 
         // TODO solve for challenge dps too
 
-        Stream<ItemSet> protStream = commonStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt)).filter(Objects::nonNull);
+        Long runSize = BILLION / 10;
+        Stream<ItemSet> protStream = commonStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt, runSize)).filter(Objects::nonNull);
 
         Collection<ItemSet> best = protStream.collect(
                 new TopCollectorReporting<>(s -> dualRating(s, modelRet, modelProt),
@@ -318,33 +336,27 @@ public class Main {
         return modelRet.calcRating(set.otherSet) + modelProt.calcRating(set);
     }
 
-    private ItemSet subSolveBoth(ItemSet chosenSet, EnumMap<SlotEquip, ItemData[]> retMap, ModelCombined modelRet, EnumMap<SlotEquip, ItemData[]> protMap, ModelCombined modelProt) {
+    private ItemSet subSolveBoth(ItemSet chosenSet, EnumMap<SlotEquip, ItemData[]> retMap, ModelCombined modelRet, EnumMap<SlotEquip, ItemData[]> protMap, ModelCombined modelProt, Long runSize) {
         EnumMap<SlotEquip, ItemData> chosenMap = chosenSet.items;
 
 //        System.out.println(chosenMap.values().stream().map(ItemData::toString).reduce("", String::concat));
 
-        Optional<ItemSet> retSet = subSolvePart(retMap, modelRet, chosenMap, null);
+        Optional<ItemSet> retSet = subSolvePart(retMap, modelRet, chosenMap, null, runSize);
         if (retSet.isPresent()) {
-            Optional<ItemSet> protSet = subSolvePart(protMap, modelProt, chosenMap, retSet.get());
+            Optional<ItemSet> protSet = subSolvePart(protMap, modelProt, chosenMap, retSet.get(), runSize);
             return protSet.orElse(null);
         }
         return null;
     }
 
-    private static Optional<ItemSet> subSolvePart(EnumMap<SlotEquip, ItemData[]> fullItemMap, ModelCombined model, EnumMap<SlotEquip, ItemData> chosenMap, ItemSet otherSet) {
-        EnumMap<SlotEquip, ItemData[]> submitRetMap = fullItemMap.clone();
-        ItemUtil.buildJobWithSpecifiedItemsFixed(chosenMap, submitRetMap);
-        Stream<ItemSet> retStream = EngineStream.runSolverPartial(model, submitRetMap, null, otherSet);
-        return EngineStream.findBest(model, retStream);
-    }
-
-    private Stream<? extends ItemSet> subSolveProt(ItemSet retSet, EnumMap<SlotEquip, ItemData[]> protMap, ModelCombined modelProt) {
-        EnumMap<SlotEquip, ItemData> retMap = retSet.items;
-        EnumMap<SlotEquip, ItemData[]> submitMap = protMap.clone();
-
-        ItemUtil.buildJobWithCommonItemsFixed(retMap, submitMap);
-
-        return EngineStream.runSolverPartial(modelProt, submitMap, null, retSet);
+    private static Optional<ItemSet> subSolvePart(EnumMap<SlotEquip, ItemData[]> fullItemMap, ModelCombined model, EnumMap<SlotEquip, ItemData> chosenMap, ItemSet otherSet, Long runSize) {
+        EnumMap<SlotEquip, ItemData[]> submitMap = fullItemMap.clone();
+        ItemUtil.buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
+        EngineRandom.runSolverPartial(model, submitMap, null, null, runSize);
+        Stream<ItemSet> stream = runSize != null
+                ? EngineRandom.runSolverPartial(model, submitMap, null, otherSet, runSize)
+                : EngineStream.runSolverPartial(model, submitMap, null, otherSet);
+        return EngineStream.findBest(model, stream);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -353,24 +365,53 @@ public class Main {
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
 
         Map<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
-        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+//        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(null, null));
+//        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
         //presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipie(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+//        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+//        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
 //        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipie(StatType.Dodge, StatType.Mastery));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Mastery));
-        presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
+//        presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
 //        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipie(null, null));
 //        presetReforge.put(SlotEquip.Offhand, new ReforgeRecipie(StatType.Parry, StatType.Hit));
 
         EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 //        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.standardItemsReforgedToMap(model.getReforgeRules(), items);
-        Optional<ItemSet> bestSet = EngineStream.runSolver(model, map, startTime, null);
 
-//        Collection<ItemSet> bestSets = EngineRandom.runSolver(model, map, null);
+//        Optional<ItemSet> bestSet = EngineStream.runSolver(model, map, startTime, null);
+        Optional<ItemSet> bestSet = EngineRandom.runSolver(model, map, startTime,null,BILLION);
 
         outputResult(bestSet, model, detailedOutput);
+        outputTweaked(bestSet, map, model);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void reforgeProcessRetFixed(ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
+        List<EquippedItem> itemIds = InputParser.readInput(gearRetFile);
+        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
+
+        Map<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
+//        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(null, null));
+//        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+        //presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipie(StatType.Crit, StatType.Haste));
+//        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+//        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+//        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipie(StatType.Dodge, StatType.Mastery));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
+//        presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
+//        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipie(null, null));
+//        presetReforge.put(SlotEquip.Offhand, new ReforgeRecipie(StatType.Parry, StatType.Hit));
+
+        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
+
+//        Optional<ItemSet> bestSet = EngineStream.runSolver(model, map, startTime, null);
+        Optional<ItemSet> bestSet = EngineRandom.runSolver(model, map, startTime,null,BILLION);
+
+        outputResult(bestSet, model, detailedOutput);
+        outputTweaked(bestSet, map, model);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -383,15 +424,15 @@ public class Main {
         Map<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
         presetReforge.put(SlotEquip.Head, new ReforgeRecipe(null, null));
         presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Hit, StatType.Expertise));
-        presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Expertise, StatType.Haste));
-        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Mastery, StatType.Expertise));
-        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+        presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Hit));
+        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Hit, StatType.Haste));
         presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(null, null));
         presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Crit, StatType.Hit));
+        presetReforge.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Hit, StatType.Expertise));
         presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Expertise, StatType.Hit));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(null, null));
         presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
         presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(StatType.Expertise, StatType.Haste));
         presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(null, null));
@@ -409,9 +450,15 @@ public class Main {
                 return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 0, 320, 0, 0, 0));
             } else if (extraItem.id == 81284) {
                 return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0));
+            } else if (extraItem.id == 87060) {
+                return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 160, 160, 320 + 160 + 160, 120, 0));
+            } else if (extraItem.id == 89503) {
+                return extraItem.changeStats(new StatBlock(501,751,0,334,334,0,0,0,0))
+                        .changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0));
             } else if (extraItem.slot == SlotItem.Back) {
                 return extraItem.changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0));
             } else {
+                System.out.println("DEFAULT ENCHANT " + extraItem);
                 return ItemUtil.defaultEnchants(extraItem, model, false);
             }
         };
@@ -522,14 +569,7 @@ public class Main {
         Optional<ItemSet> bestSet = EngineRandom.runSolver(model, reforgedItems, startTime, null, BILLION);
 //        ItemSet bestSets = EngineStream.runSolver(model, reforgedItems, startTime, null);
         outputResult(bestSet, model, detailedOutput);
-        if (bestSet.isPresent()) {
-            ItemSet tweakSet = Tweaker.tweak(bestSet.get(), model, reforgedItems);
-            if (bestSet.get() != tweakSet) {
-                if (detailedOutput)
-                    System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
-                outputResult(Optional.ofNullable(tweakSet), model, detailedOutput);
-            }
-        }
+        outputTweaked(bestSet, reforgedItems, model);
     }
 
     private Optional<ItemSet> reforgeProcessLight(EnumMap<SlotEquip, ItemData[]> reforgedItems, ModelCombined model, long runSize, boolean outputExistingGear) throws IOException {
@@ -538,10 +578,13 @@ public class Main {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private void reforgeProcessPlus(EnumMap<SlotEquip, ItemData[]> reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace, boolean defaultEnchants) throws IOException {
+    private void reforgeProcessPlus(EnumMap<SlotEquip, ItemData[]> reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants) throws IOException {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        Function<ItemData, ItemData> enchanting = defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, false) : Function.identity();
-        Optional<ItemSet> bestSet = reforgeProcessPlusCore(reforgedItems, model, startTime, detailedOutput, extraItemId, extraItem.slot.toSlotEquip(), enchanting, replace, BILLION);
+        Function<ItemData, ItemData> enchanting =
+                extraItemEnchants != null ? x -> x.changeFixed(extraItemEnchants) :
+                defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, false) :
+                        Function.identity();
+        Optional<ItemSet> bestSet = reforgeProcessPlusCore(reforgedItems, model, startTime, detailedOutput, extraItemId, extraItem.slot.toSlotEquip(), enchanting, replace, null);
         outputResult(bestSet, model, detailedOutput);
     }
 
@@ -630,6 +673,24 @@ public class Main {
             bestSet.get().outputSet(model);
         } else {
             System.out.println("@@@@@@@@@ NO VALID SET RESULTS @@@@@@@@@");
+        }
+    }
+
+    private void outputTweaked(Optional<ItemSet> bestSet, EnumMap<SlotEquip, ItemData[]> reforgedItems, ModelCombined model) {
+        if (bestSet.isPresent()) {
+            ItemSet tweakSet = Tweaker.tweak(bestSet.get(), model, reforgedItems);
+            if (bestSet.get() != tweakSet) {
+                System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
+
+                System.out.println(tweakSet.getTotals() + " " + model.calcRating(tweakSet.getTotals()));
+                for (Map.Entry<SlotEquip, ItemData> entry : tweakSet.getItems().entrySet()) {
+                    ItemData orig = bestSet.get().items.get(entry.getKey());
+                    ItemData change = entry.getValue();
+                    if (!ItemData.isIdenticalItem(orig, change)) {
+                        System.out.println(change + " " + model.calcRating(change.totalStatCopy()));
+                    }
+                }
+            }
         }
     }
 

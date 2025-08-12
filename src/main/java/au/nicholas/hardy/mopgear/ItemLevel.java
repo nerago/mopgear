@@ -49,6 +49,7 @@ public class ItemLevel {
         map.put(82822, 463);
         map.put(84790, 483);
         map.put(82814, 463);
+        map.put(86145, 489);
         return map;
     }
 
