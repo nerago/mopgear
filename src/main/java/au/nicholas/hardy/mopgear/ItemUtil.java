@@ -261,6 +261,19 @@ public class ItemUtil {
     static long estimateSets(Map<SlotEquip, ItemData[]> reforgedItems) {
         return reforgedItems.values().stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
     }
+
+    public static EnumMap<SlotEquip, ItemData[]> deepClone(EnumMap<SlotEquip, ItemData[]> inputMap) {
+        EnumMap<SlotEquip, ItemData[]> map = new EnumMap<>(SlotEquip.class);
+        for (Map.Entry<SlotEquip, ItemData[]> entry : inputMap.entrySet()) {
+            map.put(entry.getKey(), deepClone(entry.getValue()));
+        }
+        return map;
+    }
+
+    private static ItemData[] deepClone(ItemData[] array) {
+        return ArrayUtil.mapAsNew(array, item -> item.copy());
+    }
+
 //
 //    public static Map<Integer, Tuple.Tuple2<StatType, StatType>> slotMapToIdMap(List<ItemData> items, Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> map) {
 //        Map<Integer, Tuple.Tuple2<StatType, StatType>> result = new HashMap<>();

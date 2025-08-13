@@ -4,6 +4,4 @@ public interface StatRatings {
     long calcRating(StatBlock totals);
 
     StatBlock standardGem();
-
-    StatBlock standardEnchant(SlotItem slot);
 }

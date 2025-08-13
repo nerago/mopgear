@@ -12,19 +12,13 @@ public class StatRatingsWeights implements StatRatings {
 
     private final StatBlock weight;
     private final boolean includeHit;
-    private final long numerator;
-    private final long denominator;
-    private final SpecType spec;
     private StatBlock standardGem;
 
-    public StatRatingsWeights(Path weightFile, boolean includeHit, int numerator, int denominator, SpecType spec, Integer defaultGem) throws IOException {
+    public StatRatingsWeights(Path weightFile, boolean includeHit, Integer defaultGem) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
             weight = parseReader(reader);
         }
         this.includeHit = includeHit;
-        this.numerator = numerator;
-        this.denominator = denominator;
-        this.spec = spec;
         chooseGem(defaultGem);
     }
 
@@ -68,6 +62,7 @@ public class StatRatingsWeights implements StatRatings {
     public long calcRating(StatBlock value) {
         int total = 0;
         total += value.primary * weight.primary;
+        total += value.stam * weight.stam;
         total += value.mastery * weight.mastery;
         total += value.crit * weight.crit;
         total += value.parry * weight.parry;
@@ -76,8 +71,9 @@ public class StatRatingsWeights implements StatRatings {
         if (includeHit) {
             total += value.hit * weight.hit;
             total += value.expertise * weight.expertise;
+            total += value.spirit * weight.spirit;
         }
-        return (total * numerator) / denominator;
+        return total;
     }
 
     private void chooseGem(Integer defaultGem) {
@@ -99,76 +95,11 @@ public class StatRatingsWeights implements StatRatings {
             }
         }
 
-        StatType bestStat = best.get();
-        return bestStat;
+        return best.get();
     }
 
     @Override
     public StatBlock standardGem() {
         return standardGem;
-    }
-
-    @Override
-    public StatBlock standardEnchant(SlotItem slot) {
-        if (spec == SpecType.PaladinRet) {
-            switch (slot) {
-                case Shoulder -> {
-                    return new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0);
-                }
-                case Back -> {
-                    return new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0);
-                }
-                case Chest -> {
-                    return new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Wrist -> {
-                    return new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Hand -> {
-                    return new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Leg -> {
-                    return new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0);
-                }
-                case Foot -> {
-                    return new StatBlock(0, 0, 0, 0, 0, 175, 0, 0, 0, 0);
-                }
-                default -> {
-                    return null;
-                }
-            }
-        } else if (spec == SpecType.PaladinProt) {
-            switch (slot) {
-                case Shoulder -> {
-                    return new StatBlock(0, 300, 0, 0, 0, 0, 0, 100, 0, 0);
-                }
-                case Back -> {
-                    return new StatBlock(0, 200, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Chest -> {
-                    return new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Wrist -> {
-                    return new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Hand -> {
-                    return new StatBlock(0, 0, 0, 0, 0, 0, 170, 0, 0, 0);
-                }
-                case Leg -> {
-                    return new StatBlock(0, 430, 0, 0, 0, 0, 0, 165, 0, 0);
-                }
-                case Foot -> {
-                    return new StatBlock(0, 0, 0, 0, 175, 0, 0, 0, 0, 0);
-                }
-                case Offhand -> {
-                    return new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 175, 0);
-                }
-                default -> {
-                    return null;
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("need enchants");
-        }
     }
 }

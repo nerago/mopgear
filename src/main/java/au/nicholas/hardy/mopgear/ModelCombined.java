@@ -2,7 +2,7 @@ package au.nicholas.hardy.mopgear;
 
 import java.util.stream.Stream;
 
-public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules) {
+public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules, DefaultEnchants enchants) {
     public long calcRating(ItemSet set) {
         return calcRating(set.getTotals());
     }
@@ -20,7 +20,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public ModelCombined withNoRequirements() {
-        return new ModelCombined(statRatings, StatRequirements.zero(), reforgeRules);
+        return new ModelCombined(statRatings, StatRequirements.zero(), reforgeRules, enchants);
     }
 
     public StatBlock standardGem() {
@@ -28,6 +28,6 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public StatBlock standardEnchant(SlotItem slot) {
-        return statRatings.standardEnchant(slot);
+        return enchants.standardEnchant(slot);
     }
 }

@@ -43,6 +43,11 @@ public final class ItemData {
         return new ItemData(id, slot, name, reforge, stat, StatBlock.empty, socketCount, socketBonus, itemLevel);
     }
 
+    // avoid using this, shouldn't be needed with immutable
+    public ItemData copy() {
+        return new ItemData(id, slot, name, reforge, stat, statFixed, socketCount, socketBonus, itemLevel);
+    }
+
     public StatBlock totalStatCopy() {
         if (statFixed.isEmpty())
             return stat;
@@ -53,6 +58,21 @@ public final class ItemData {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{ ");
+        append(sb);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    public String toStringExtended() {
+        final StringBuilder sb = new StringBuilder("{ ");
+        append(sb);
+        sb.append("ilevel=").append(itemLevel).append(' ');
+        sb.append("itemId=").append(id).append(' ');
+        sb.append('}');
+        return sb.toString();
+    }
+
+    private void append(StringBuilder sb) {
         if (slot != null)
             sb.append(slot).append(' ');
         if (name != null)
@@ -64,8 +84,6 @@ public final class ItemData {
             sb.append("GEMS ");
             statFixed.append(sb, false);
         }
-        sb.append('}');
-        return sb.toString();
     }
 
     static boolean isSameEquippedItem(ItemData a, ItemData b) {
