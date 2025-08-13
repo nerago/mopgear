@@ -14,23 +14,18 @@ public class StatRatingsWeights implements StatRatings {
     private final boolean includeHit;
     private final long numerator;
     private final long denominator;
+    private final SpecType spec;
     private StatBlock standardGem;
 
-    public StatRatingsWeights(Path weightFile, boolean includeHit, int numerator, int denominator) throws IOException {
+    public StatRatingsWeights(Path weightFile, boolean includeHit, int numerator, int denominator, SpecType spec, Integer defaultGem) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
             weight = parseReader(reader);
         }
         this.includeHit = includeHit;
         this.numerator = numerator;
         this.denominator = denominator;
-        chooseGem();
-    }
-
-    private StatRatingsWeights(StatBlock weight) {
-        this.weight = weight;
-        this.includeHit = false;
-        this.numerator = 1;
-        this.denominator = 1;
+        this.spec = spec;
+        chooseGem(defaultGem);
     }
 
     private static StatBlock parseReader(BufferedReader reader) throws IOException {
@@ -85,7 +80,16 @@ public class StatRatingsWeights implements StatRatings {
         return (total * numerator) / denominator;
     }
 
-    private void chooseGem() {
+    private void chooseGem(Integer defaultGem) {
+        if (defaultGem != null) {
+            standardGem = GemData.known.get(defaultGem);
+        } else {
+            StatType bestStat = getBestStat();
+            standardGem = StatBlock.empty.withChange(bestStat, GemData.standardValue(bestStat));
+        }
+    }
+
+    private StatType getBestStat() {
         BestHolder<StatType> best = new BestHolder<>(null, 0);
         for (StatType stat : StatType.values()) {
             int multiply = weight.get(stat);
@@ -96,11 +100,75 @@ public class StatRatingsWeights implements StatRatings {
         }
 
         StatType bestStat = best.get();
-        standardGem = StatBlock.empty.withChange(bestStat, GemData.standardValue(bestStat));
+        return bestStat;
     }
 
     @Override
     public StatBlock standardGem() {
         return standardGem;
+    }
+
+    @Override
+    public StatBlock standardEnchant(SlotItem slot) {
+        if (spec == SpecType.PaladinRet) {
+            switch (slot) {
+                case Shoulder -> {
+                    return new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0);
+                }
+                case Back -> {
+                    return new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0);
+                }
+                case Chest -> {
+                    return new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Wrist -> {
+                    return new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Hand -> {
+                    return new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Leg -> {
+                    return new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0);
+                }
+                case Foot -> {
+                    return new StatBlock(0, 0, 0, 0, 0, 175, 0, 0, 0, 0);
+                }
+                default -> {
+                    return null;
+                }
+            }
+        } else if (spec == SpecType.PaladinProt) {
+            switch (slot) {
+                case Shoulder -> {
+                    return new StatBlock(0, 300, 0, 0, 0, 0, 0, 100, 0, 0);
+                }
+                case Back -> {
+                    return new StatBlock(0, 200, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Chest -> {
+                    return new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Wrist -> {
+                    return new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Hand -> {
+                    return new StatBlock(0, 0, 0, 0, 0, 0, 170, 0, 0, 0);
+                }
+                case Leg -> {
+                    return new StatBlock(0, 430, 0, 0, 0, 0, 0, 165, 0, 0);
+                }
+                case Foot -> {
+                    return new StatBlock(0, 0, 0, 0, 175, 0, 0, 0, 0, 0);
+                }
+                case Offhand -> {
+                    return new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 175, 0);
+                }
+                default -> {
+                    return null;
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("need enchants");
+        }
     }
 }

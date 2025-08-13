@@ -6,10 +6,18 @@ import au.nicholas.hardy.mopgear.StatType;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ArrayUtil {
+
+    public static <T> void forEach(T[] array, Consumer<T> function) {
+        for (T t : array) {
+            function.accept(t);
+        }
+    }
+
     public static <T> void mapInPlace(T[] array, Function<T, T> function) {
         for (int i = 0; i < array.length; ++i) {
             array[i] = function.apply(array[i]);

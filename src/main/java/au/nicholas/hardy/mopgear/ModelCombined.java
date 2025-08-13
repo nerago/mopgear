@@ -26,4 +26,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     public StatBlock standardGem() {
         return statRatings.standardGem();
     }
+
+    public StatBlock standardEnchant(SlotItem slot) {
+        return statRatings.standardEnchant(slot);
+    }
 }

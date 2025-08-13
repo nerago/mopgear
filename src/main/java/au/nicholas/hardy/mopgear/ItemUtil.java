@@ -234,15 +234,24 @@ public class ItemUtil {
 
     public static ItemData defaultEnchants(ItemData item, ModelCombined model, boolean force) {
         if (force || item.statFixed.isEmpty()) {
-            if (item.socketCount == 0) {
-                return item.withoutFixed();
-            }
+            int socketCount = item.socketCount;
+            if (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand) // TODO blacksmith only
+                socketCount++;
 
             StatBlock total = StatBlock.empty;
             StatBlock oneGem = model.standardGem();
-            for (int i = 0; i < item.socketCount; ++i) {
+            for (int i = 0; i < socketCount; ++i) {
                 total = total.plus(oneGem);
             }
+            if (item.socketBonus != 0) {
+                StatBlock bonus = GemData.getSocketBonus(item);
+                total = total.plus(bonus);
+            }
+            StatBlock enchant = model.standardEnchant(item.slot);
+            if (enchant != null) {
+                total = total.plus(enchant);
+            }
+
             return item.changeFixed(total);
         } else {
             return item;

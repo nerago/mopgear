@@ -47,4 +47,9 @@ public class StatRatingsPriority implements StatRatings {
     public StatBlock standardGem() {
         return standardGem;
     }
+
+    @Override
+    public StatBlock standardEnchant(SlotItem slot) {
+        return null;
+    }
 }

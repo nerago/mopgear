@@ -9,8 +9,24 @@ public class GemData {
 
     private static Map<Integer, StatBlock> buildSocketBonus() {
         Map<Integer, StatBlock> map = new HashMap<>();
-        map.put(4860, new StatBlock(180,0,0,0,0,0,0,0,0,0));
-        map.put(4838, new StatBlock(0,0,0,0,0,0,0,0,0,60));
+        map.put(4860, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4838, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 60));
+        map.put(4853, new StatBlock(120, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4868, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4832, new StatBlock(0, 90, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4839, new StatBlock(0, 0, 0, 0, 0, 0, 0, 60, 0, 0));
+        map.put(4844, new StatBlock(0, 0, 0, 0, 0, 0, 0, 120, 0, 0));
+        map.put(4851, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4833, new StatBlock(0, 0, 0, 60, 0, 0, 0, 0, 0, 0));
+        map.put(4855, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
+        map.put(4845, new StatBlock(0, 0, 0, 0, 0, 0, 120, 0, 0, 0));
+        map.put(4840, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 60, 0));
+        map.put(4830, new StatBlock(60, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4835, new StatBlock(0, 0, 0, 0, 60, 0, 0, 0, 0, 0));
+        map.put(4836, new StatBlock(0, 0, 0, 0, 0, 60, 0, 0, 0, 0));
+        map.put(4867, new StatBlock(0, 270, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4846, new StatBlock(0, 0, 0, 0, 0, 120, 0, 0, 0, 0));
+        map.put(4854, new StatBlock(0, 180, 0, 0, 0, 0, 0, 0, 0, 0));
         return map;
     }
 
@@ -72,9 +88,7 @@ public class GemData {
             result = result.plus(stats);
         }
         if (socketBonus != 0) {
-            StatBlock bonus = knownSocketBonus.get(socketBonus);
-            if (bonus == null)
-                throw new IllegalArgumentException("unknown socket bonus " + socketBonus + " on " + name);
+            StatBlock bonus = getSocketBonus(name, socketBonus);
             result = result.plus(bonus);
         }
 
@@ -93,5 +107,16 @@ public class GemData {
                 return 320;
             }
         }
+    }
+
+    public static StatBlock getSocketBonus(ItemData item) {
+        return getSocketBonus(item.name, item.socketBonus);
+    }
+
+    private static StatBlock getSocketBonus(String name, int socketBonus) {
+        StatBlock bonus = knownSocketBonus.get(socketBonus);
+        if (bonus == null)
+            throw new IllegalArgumentException("unknown socket bonus " + socketBonus + " on " + name);
+        return bonus;
     }
 }
