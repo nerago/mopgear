@@ -1,14 +1,21 @@
 package au.nicholas.hardy.mopgear.util;
 
 import au.nicholas.hardy.mopgear.ItemData;
+import au.nicholas.hardy.mopgear.ItemSet;
 import au.nicholas.hardy.mopgear.StatType;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.Spliterator.*;
 
 public class ArrayUtil {
 
@@ -101,5 +108,10 @@ public class ArrayUtil {
             }
         }
         return temp.toArray(createGeneric(existing, temp.size()));
+    }
+
+    public static <T> Stream<T> arrayStream(T[] initialSets) {
+        final Spliterator<T> split = Spliterators.spliterator(initialSets, SIZED | SUBSIZED | ORDERED | DISTINCT | NONNULL | IMMUTABLE);
+        return StreamSupport.stream(split, true);
     }
 }

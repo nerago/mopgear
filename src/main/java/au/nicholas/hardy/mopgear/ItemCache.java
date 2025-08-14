@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class ItemCache {
+    private static final Object writeSync = new Object();
     private final Map<Integer, ItemData> itemCache;
     private final Path file;
 
@@ -29,10 +30,12 @@ public class ItemCache {
 
 
     public void cacheSave() {
-        try (BufferedWriter writer = Files.newBufferedWriter(file)) {
-            new Gson().toJson(itemCache, writer);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+        synchronized (writeSync) {
+            try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+                new Gson().toJson(itemCache, writer);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 

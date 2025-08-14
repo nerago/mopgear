@@ -1,13 +1,11 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.BigStreamUtil;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import static java.util.Spliterator.*;
 
 public class EngineStream {
     public static Optional<ItemSet> runSolver(ModelCombined model, Map<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet, long estimate) {
@@ -48,17 +46,16 @@ public class EngineStream {
     }
 
     private static Stream<ItemSet> newCombinationStream(SlotEquip slot, ItemData[] slotItems, ItemSet otherSet) {
-//        shuffle(slotItems);
         final ItemSet[] initialSets = new ItemSet[slotItems.length];
         for (int i = 0; i < slotItems.length; ++i) {
             initialSets[i] = ItemSet.singleItem(slot, slotItems[i], otherSet);
         }
-        final Spliterator<ItemSet> split = Spliterators.spliterator(initialSets, SIZED | SUBSIZED | ORDERED | DISTINCT | NONNULL | IMMUTABLE);
-        return StreamSupport.stream(split, true);
+        return ArrayUtil.arrayStream(initialSets);
     }
 
     private static Stream<ItemSet> applyItemsToCombination(Stream<ItemSet> stream, SlotEquip slot, ItemData[] slotItems) {
-//        shuffle(slotItems);
+//        return stream.flatMap(upstream -> ArrayUtil.arrayStream(slotItems).map(add -> upstream.copyWithAddedItem(slot, add)));
+
         Stream<ItemSet> n = stream.mapMulti((set, sink) -> {
             for (ItemData add : slotItems) {
                 sink.accept(set.copyWithAddedItem(slot, add));

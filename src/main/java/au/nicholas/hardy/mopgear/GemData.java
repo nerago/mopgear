@@ -27,6 +27,10 @@ public class GemData {
         map.put(4867, new StatBlock(0, 270, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(4846, new StatBlock(0, 0, 0, 0, 0, 120, 0, 0, 0, 0));
         map.put(4854, new StatBlock(0, 180, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4831, new StatBlock(80, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4848, new StatBlock(120, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4858, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4852, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 120));
         return map;
     }
 
@@ -76,6 +80,8 @@ public class GemData {
         map.put(76627, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
         map.put(76669, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
         map.put(76585, new StatBlock(0, 0, 0, 0, 0, 160, 0, 0, 0, 160));
+        map.put(76694, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(76603, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
         return map;
     }
 

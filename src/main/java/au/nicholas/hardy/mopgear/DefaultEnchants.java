@@ -7,6 +7,7 @@ public class DefaultEnchants {
         this.spec = spec;
     }
 
+    @SuppressWarnings("DuplicateBranchesInSwitch")
     public StatBlock standardEnchant(SlotItem slot) {
         if (spec == SpecType.PaladinRet) {
             switch (slot) {
@@ -60,6 +61,36 @@ public class DefaultEnchants {
                 }
                 case Offhand -> {
                     return new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 175, 0);
+                }
+                default -> {
+                    return null;
+                }
+            }
+        } else if (spec == SpecType.DruidBoom) {
+            switch (slot) {
+                case Shoulder -> {
+                    return new StatBlock(120, 0, 0, 80, 0, 0, 0, 0, 0, 0);
+                }
+                case Back -> {
+                    return new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Chest -> {
+                    return new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 80);
+                }
+                case Wrist -> {
+                    return new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Hand -> {
+                    return new StatBlock(0, 0, 0, 0, 0, 170, 0, 0, 0, 0);
+                }
+                case Leg -> {
+                    return new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 100);
+                }
+                case Foot -> {
+                    return new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0);
+                }
+                case Offhand -> {
+                    return new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                 }
                 default -> {
                     return null;

@@ -8,7 +8,7 @@ public class ReforgeRules {
     private static final StatType[] reforgeTargetsRetExtended = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Haste, StatType.Mastery};
     private static final StatType[] reforgeTargetsRet = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Haste};
     private static final StatType[] reforgeTargetsProt = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Mastery, StatType.Haste};
-    private static final StatType[] reforgeTargetsBoom = new StatType[]{/*StatType.Hit,*/ StatType.Spirit, StatType.Mastery, StatType.Haste};
+    private static final StatType[] reforgeTargetsBoom = new StatType[]{StatType.Spirit, StatType.Mastery, StatType.Haste, StatType.Crit};
 
     private final StatType[] reforgeTargets;
 
