@@ -161,9 +161,10 @@ public class Main {
         ModelCombined model = standardProtModel();
         EnumMap<SlotEquip, ItemData[]> items = readAndLoad(true, gearProtFile, model.reforgeRules());
 
+        reforgeProcessProtFixedPlus(model, startTime, 86789, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessPlus(items, model, startTime, true,86145, false, true, null);
-        reforgeProcessPlus(items, model, startTime, true,86789, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, true,86789, false, true, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 89817, 86075);
 //        reforgeProcess(items, model, startTime, true);
 //        findUpgradeSetup(items, strengthPlateCelestialArray(), model);
@@ -568,6 +569,24 @@ public class Main {
 
         Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null);
         outputResult(bestSet, model, detailedOutput);
+        outputTweaked(bestSet, map, model);
+    }
+
+    private void reforgeProcessProtFixedPlus(ModelCombined model, Instant startTime, int extraItemId, boolean replace, boolean defaultEnchants) throws IOException {
+        List<EquippedItem> itemIds = InputParser.readInput(gearProtFile);
+        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, true);
+
+        Map<SlotEquip, ReforgeRecipe> presetReforge = commonFixedItems();
+        EnumMap<SlotEquip, ItemData[]> map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
+
+        Function<ItemData, ItemData> enchanting = defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) : Function.identity();
+
+        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+        extraItem = addExtra(map, model, extraItemId, extraItem.slot.toSlotEquip(), enchanting, replace, true);
+        System.out.println("EXTRA " + extraItem);
+
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null);
+        outputResult(bestSet, model, true);
         outputTweaked(bestSet, map, model);
     }
 
