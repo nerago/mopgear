@@ -1,6 +1,5 @@
 package au.nicholas.hardy.mopgear;
 
-import java.util.EnumMap;
 import java.util.Objects;
 
 public final class StatBlock {
@@ -56,7 +55,7 @@ public final class StatBlock {
                 spirit + first.spirit + second.spirit);
     }
 
-    public static StatBlock sum(EnumMap<SlotEquip, ItemData> items) {
+    public static StatBlock sum(EquipMap items) {
         int primary = 0;
         int stam = 0;
         int mastery = 0;

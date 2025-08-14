@@ -26,7 +26,7 @@ public class EngineRandom {
 
     private static ItemSet makeSet(EnumMap<SlotEquip, ItemData[]> items, ItemSet otherSet) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        EnumMap<SlotEquip, ItemData> chosen = new EnumMap<>(SlotEquip.class);
+        EquipMap chosen = new EquipMap();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] itemList = items.get(slot);
             if (itemList != null) {

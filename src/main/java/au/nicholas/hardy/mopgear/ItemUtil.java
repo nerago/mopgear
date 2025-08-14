@@ -106,13 +106,13 @@ public class ItemUtil {
         return map;
     }
 
-    public static EnumMap<SlotEquip, ItemData> chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, ReforgeRecipe> presetForge) {
-        EnumMap<SlotEquip, ItemData> map = new EnumMap<>(SlotEquip.class);
+    public static EquipMap chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, ReforgeRecipe> presetForge) {
+        EquipMap map = new EquipMap();
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
-            if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
+            if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 slot = SlotEquip.Ring2;
-            } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
+            } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
                 slot = SlotEquip.Trinket2;
             }
             if (presetForge.containsKey(slot)) {
@@ -138,7 +138,7 @@ public class ItemUtil {
         }
     }
 
-    static void buildJobWithSpecifiedItemsFixed(EnumMap<SlotEquip, ItemData> chosenMap, EnumMap<SlotEquip, ItemData[]> submitMap) {
+    static void buildJobWithSpecifiedItemsFixed(EquipMap chosenMap, EnumMap<SlotEquip, ItemData[]> submitMap) {
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData chosenItem = chosenMap.get(slot);
             if (chosenItem != null) {

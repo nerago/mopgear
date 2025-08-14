@@ -522,7 +522,7 @@ public class Main {
     }
 
     private ItemSet subSolveBoth(ItemSet chosenSet, EnumMap<SlotEquip, ItemData[]> retMap, ModelCombined modelRet, EnumMap<SlotEquip, ItemData[]> protMap, ModelCombined modelProt, Long runSize) {
-        EnumMap<SlotEquip, ItemData> chosenMap = chosenSet.items;
+        EquipMap chosenMap = chosenSet.items;
 
 //        System.out.println(chosenMap.values().stream().map(ItemData::toString).reduce("", String::concat));
 
@@ -534,7 +534,7 @@ public class Main {
         return null;
     }
 
-    private static Optional<ItemSet> subSolvePart(EnumMap<SlotEquip, ItemData[]> fullItemMap, ModelCombined model, EnumMap<SlotEquip, ItemData> chosenMap, ItemSet otherSet, Long runSize) {
+    private static Optional<ItemSet> subSolvePart(EnumMap<SlotEquip, ItemData[]> fullItemMap, ModelCombined model, EquipMap chosenMap, ItemSet otherSet, Long runSize) {
         EnumMap<SlotEquip, ItemData[]> submitMap = fullItemMap.clone();
         ItemUtil.buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
         return chooseEngineAndRun(model, submitMap, null, runSize, otherSet);
@@ -736,10 +736,10 @@ public class Main {
         reforgeProt.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
         reforgeProt.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
 
-        EnumMap<SlotEquip, ItemData> retForgedItems = ItemUtil.chosenItemsReforgedToMap(retItems, reforgeRet);
+        EquipMap retForgedItems = ItemUtil.chosenItemsReforgedToMap(retItems, reforgeRet);
         ItemSet retSet = ItemSet.manyItems(retForgedItems, null);
 
-        EnumMap<SlotEquip, ItemData> protForgedItems = ItemUtil.chosenItemsReforgedToMap(protItems, reforgeProt);
+        EquipMap protForgedItems = ItemUtil.chosenItemsReforgedToMap(protItems, reforgeProt);
         ItemSet protSet = ItemSet.manyItems(protForgedItems, null);
 
         retSet.outputSet(modelRet);
@@ -882,13 +882,13 @@ public class Main {
                 System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
 
                 System.out.println(tweakSet.getTotals().toStringExtended() + " " + model.calcRating(tweakSet.getTotals()));
-                for (Map.Entry<SlotEquip, ItemData> entry : tweakSet.getItems().entrySet()) {
-                    ItemData orig = bestSet.get().items.get(entry.getKey());
-                    ItemData change = entry.getValue();
+                tweakSet.getItems().forEachPair((key, value) -> {
+                    ItemData orig = bestSet.get().items.get(key);
+                    ItemData change = value;
                     if (!ItemData.isIdenticalItem(orig, change)) {
                         System.out.println(change + " " + model.calcRating(change.totalStatCopy()));
                     }
-                }
+                });
             }
         }
     }

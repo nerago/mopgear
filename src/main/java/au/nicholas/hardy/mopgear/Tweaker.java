@@ -9,7 +9,7 @@ public class Tweaker {
         BestHolder<ItemSet> best = new BestHolder<>(baseSet, model.calcRating(baseSet));
 
         for (SlotEquip slot : SlotEquip.values()) {
-            EnumMap<SlotEquip, ItemData> baseItems = best.get().getItems();
+            EquipMap baseItems = best.get().getItems();
             ItemData existing = baseItems.get(slot);
             ItemData[] slotItems = items.get(slot);
             if (existing == null ^ slotItems == null) {
@@ -31,8 +31,8 @@ public class Tweaker {
         return best.get();
     }
 
-    private static ItemSet substitutedSet(SlotEquip slot, ItemData replace, EnumMap<SlotEquip, ItemData> baseItems, ItemSet otherSet) {
-        EnumMap<SlotEquip, ItemData> map = baseItems.clone();
+    private static ItemSet substitutedSet(SlotEquip slot, ItemData replace, EquipMap baseItems, ItemSet otherSet) {
+        EquipMap map = baseItems.clone();
         map.put(slot, replace);
         return ItemSet.manyItems(map, otherSet);
     }
