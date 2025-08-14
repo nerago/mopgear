@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
 public class EngineRandom {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet, long count) {
+    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, Instant startTime, ItemSet otherSet, long count) {
         Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, otherSet, count);
         return finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
     }
 
-    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EnumMap<SlotEquip, ItemData[]> items, Instant startTime, ItemSet otherSet, long count) {
+    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, Instant startTime, ItemSet otherSet, long count) {
         Stream<Long> dumbStream = generateDumbStream(count);
         Stream<ItemSet> setStream = dumbStream.parallel()
                                               .map(x -> makeSet(items, otherSet));
@@ -24,9 +24,9 @@ public class EngineRandom {
         return model.filterSets(setStream);
     }
 
-    private static ItemSet makeSet(EnumMap<SlotEquip, ItemData[]> items, ItemSet otherSet) {
+    private static ItemSet makeSet(EquipOptionsMap items, ItemSet otherSet) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        EquipMap chosen = new EquipMap();
+        EquipMap chosen = EquipMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] itemList = items.get(slot);
             if (itemList != null) {

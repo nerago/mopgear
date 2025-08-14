@@ -5,10 +5,7 @@ import au.nicholas.hardy.mopgear.ItemSet;
 import au.nicholas.hardy.mopgear.StatType;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -113,5 +110,13 @@ public class ArrayUtil {
     public static <T> Stream<T> arrayStream(T[] initialSets) {
         final Spliterator<T> split = Spliterators.spliterator(initialSets, SIZED | SUBSIZED | ORDERED | DISTINCT | NONNULL | IMMUTABLE);
         return StreamSupport.stream(split, true);
+    }
+
+    public static ItemData[] clone(ItemData[] array) {
+        if (array != null) {
+            return Arrays.copyOf(array, array.length);
+        } else {
+            return null;
+        }
     }
 }

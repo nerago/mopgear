@@ -1,40 +1,39 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.ArrayUtil;
+import au.nicholas.hardy.mopgear.util.Tuple;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public final class EquipMap {
-    private ItemData head;
-    private ItemData neck;
-    private ItemData shoulder;
-    private ItemData back;
-    private ItemData chest;
-    private ItemData wrist;
-    private ItemData hand;
-    private ItemData belt;
-    private ItemData leg;
-    private ItemData foot;
-    private ItemData ring1;
-    private ItemData ring2;
-    private ItemData trinket1;
-    private ItemData trinket2;
-    private ItemData weapon;
-    private ItemData offhand;
+public final class EquipOptionsMap {
+    private ItemData[] head;
+    private ItemData[] neck;
+    private ItemData[] shoulder;
+    private ItemData[] back;
+    private ItemData[] chest;
+    private ItemData[] wrist;
+    private ItemData[] hand;
+    private ItemData[] belt;
+    private ItemData[] leg;
+    private ItemData[] foot;
+    private ItemData[] ring1;
+    private ItemData[] ring2;
+    private ItemData[] trinket1;
+    private ItemData[] trinket2;
+    private ItemData[] weapon;
+    private ItemData[] offhand;
 
-    public static EquipMap empty() {
-        return new EquipMap();
+    public static EquipOptionsMap empty() {
+        return new EquipOptionsMap();
     }
 
-    public static EquipMap single(SlotEquip slot, ItemData item) {
-        EquipMap map = new EquipMap();
-        map.put(slot, item);
-        return map;
+    private EquipOptionsMap() {
     }
 
-    private EquipMap() {
-    }
-
-    private EquipMap(EquipMap other) {
+    private EquipOptionsMap(EquipOptionsMap other) {
         this.head = other.head;
         this.neck = other.neck;
         this.shoulder = other.shoulder;
@@ -53,7 +52,29 @@ public final class EquipMap {
         this.offhand = other.offhand;
     }
 
-    public ItemData get(SlotEquip slot) {
+    private EquipOptionsMap(
+            ItemData[] head, ItemData[] neck, ItemData[] shoulder, ItemData[] back, ItemData[] chest, ItemData[] wrist,
+            ItemData[] hand, ItemData[] belt, ItemData[] leg, ItemData[] foot, ItemData[] ring1, ItemData[] ring2,
+            ItemData[] trinket1, ItemData[] trinket2, ItemData[] weapon, ItemData[] offhand) {
+        this.head = head;
+        this.neck = neck;
+        this.shoulder = shoulder;
+        this.back = back;
+        this.chest = chest;
+        this.wrist = wrist;
+        this.hand = hand;
+        this.belt = belt;
+        this.leg = leg;
+        this.foot = foot;
+        this.ring1 = ring1;
+        this.ring2 = ring2;
+        this.trinket1 = trinket1;
+        this.trinket2 = trinket2;
+        this.weapon = weapon;
+        this.offhand = offhand;
+    }
+
+    public ItemData[] get(SlotEquip slot) {
         return switch (slot) {
             case Head -> head;
             case Neck -> neck;
@@ -95,7 +116,7 @@ public final class EquipMap {
         };
     }
 
-    public void put(SlotEquip slot, ItemData value) {
+    public void put(SlotEquip slot, ItemData[] value) {
         switch (slot) {
             case Head -> head = value;
             case Neck -> neck = value;
@@ -117,19 +138,45 @@ public final class EquipMap {
         }
     }
 
-    @Deprecated(since = "avoid extra allocation")
-    public EquipMap shallowClone() {
-        return new EquipMap(this);
+    public void put(SlotEquip slot, ItemData item) {
+        put(slot, new ItemData[] { item });
     }
 
-    public EquipMap copyWithReplace(SlotEquip slot, ItemData replace) {
-        EquipMap other = new EquipMap(this);
-        other.put(slot, replace);
+//    @Deprecated(since = "avoid extra allocation")
+    public EquipOptionsMap shallowClone() {
+        return new EquipOptionsMap(this);
+    }
+
+//    @Deprecated(since = "avoid extra allocation")
+    public EquipOptionsMap deepClone() {
+        return new EquipOptionsMap(
+                ArrayUtil.clone(head),
+                ArrayUtil.clone(neck),
+                ArrayUtil.clone(shoulder),
+                ArrayUtil.clone(back),
+                ArrayUtil.clone(chest),
+                ArrayUtil.clone(wrist),
+                ArrayUtil.clone(hand),
+                ArrayUtil.clone(belt),
+                ArrayUtil.clone(leg),
+                ArrayUtil.clone(foot),
+                ArrayUtil.clone(ring1),
+                ArrayUtil.clone(ring2),
+                ArrayUtil.clone(trinket1),
+                ArrayUtil.clone(trinket2),
+                ArrayUtil.clone(weapon),
+                ArrayUtil.clone(offhand)
+        );
+    }
+
+    public EquipOptionsMap copyWithReplaceSingle(SlotEquip slot, ItemData replace) {
+        EquipOptionsMap other = new EquipOptionsMap(this);
+        other.put(slot, new ItemData[] { replace });
         return other;
     }
 
     @Deprecated(since = "avoid bad performance")
-    public void forEachValue(Consumer<ItemData> func) {
+    public void forEachValue(Consumer<ItemData[]> func) {
         if (head != null) func.accept(head);
         if (neck != null) func.accept(neck);
         if (shoulder != null) func.accept(shoulder);
@@ -149,7 +196,7 @@ public final class EquipMap {
     }
 
     @Deprecated(since = "avoid bad performance")
-    public void forEachPair(BiConsumer<SlotEquip, ItemData> func) {
+    public void forEachPair(BiConsumer<SlotEquip, ItemData[]> func) {
         if (head != null) func.accept(SlotEquip.Head, head);
         if (neck != null) func.accept(SlotEquip.Neck, neck);
         if (shoulder != null) func.accept(SlotEquip.Shoulder, shoulder);
@@ -166,5 +213,12 @@ public final class EquipMap {
         if (trinket2 != null) func.accept(SlotEquip.Trinket2, trinket2);
         if (weapon != null) func.accept(SlotEquip.Weapon, weapon);
         if (offhand != null) func.accept(SlotEquip.Offhand, offhand);
+    }
+
+    @Deprecated(since = "avoid bad performance")
+    public Collection<Tuple.Tuple2<SlotEquip, ItemData[]>> entrySet() {
+        ArrayList<Tuple.Tuple2<SlotEquip, ItemData[]>> list = new ArrayList<>();
+        forEachPair((slot, array) -> list.add(Tuple.create(slot, array)));
+        return list;
     }
 }

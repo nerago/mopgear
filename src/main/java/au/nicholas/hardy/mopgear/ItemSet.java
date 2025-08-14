@@ -18,14 +18,12 @@ public final class ItemSet {
     }
 
     public static ItemSet singleItem(SlotEquip slot, ItemData item, ItemSet otherSet) {
-        EquipMap itemMap = new EquipMap();
-        itemMap.put(slot, item);
+        EquipMap itemMap = EquipMap.single(slot, item);
         return new ItemSet(itemMap, item.totalStatCopy(), otherSet);
     }
 
     public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {
-        EquipMap itemMap = items.clone();
-        itemMap.put(slot, item);
+        EquipMap itemMap = items.copyWithReplace(slot, item);
         return new ItemSet(itemMap, totals.plus(item.stat, item.statFixed), otherSet);
     }
 

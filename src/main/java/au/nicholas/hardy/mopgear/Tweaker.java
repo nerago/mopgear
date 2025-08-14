@@ -2,10 +2,8 @@ package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.util.BestHolder;
 
-import java.util.EnumMap;
-
 public class Tweaker {
-    public static ItemSet tweak(ItemSet baseSet, ModelCombined model, EnumMap<SlotEquip, ItemData[]> items) {
+    public static ItemSet tweak(ItemSet baseSet, ModelCombined model, EquipOptionsMap items) {
         BestHolder<ItemSet> best = new BestHolder<>(baseSet, model.calcRating(baseSet));
 
         for (SlotEquip slot : SlotEquip.values()) {
@@ -32,8 +30,7 @@ public class Tweaker {
     }
 
     private static ItemSet substitutedSet(SlotEquip slot, ItemData replace, EquipMap baseItems, ItemSet otherSet) {
-        EquipMap map = baseItems.clone();
-        map.put(slot, replace);
+        EquipMap map = baseItems.copyWithReplace(slot, replace);
         return ItemSet.manyItems(map, otherSet);
     }
 }

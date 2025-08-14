@@ -53,8 +53,8 @@ public class ItemLevel {
         return map;
     }
 
-    public static EnumMap<SlotEquip, ItemData[]> scaleForChallengeMode(EnumMap<SlotEquip, ItemData[]> itemMap) {
-        EnumMap<SlotEquip, ItemData[]> result = new EnumMap<>(SlotEquip.class);
+    public static EquipOptionsMap scaleForChallengeMode(EquipOptionsMap itemMap) {
+        EquipOptionsMap result = EquipOptionsMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] items = itemMap.get(slot);
             if (items != null) {

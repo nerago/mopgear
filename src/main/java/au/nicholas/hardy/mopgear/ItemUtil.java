@@ -71,13 +71,13 @@ public class ItemUtil {
         return item;
     }
 
-    public static EnumMap<SlotEquip, ItemData[]> standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
-        EnumMap<SlotEquip, ItemData[]> map = new EnumMap<>(SlotEquip.class);
+    public static EquipOptionsMap standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
+        EquipOptionsMap map = EquipOptionsMap.empty();
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
-            if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
+            if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 map.put(SlotEquip.Ring2, Reforger.reforgeItem(rules, item));
-            } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
+            } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
                 map.put(SlotEquip.Trinket2, Reforger.reforgeItem(rules, item));
             } else {
                 map.put(slot, Reforger.reforgeItem(rules, item));
@@ -86,14 +86,14 @@ public class ItemUtil {
         return map;
     }
 
-    public static EnumMap<SlotEquip, ItemData[]> limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
-                                                                       Map<SlotEquip, ReforgeRecipe> presetForge) {
-        EnumMap<SlotEquip, ItemData[]> map = new EnumMap<>(SlotEquip.class);
+    public static EquipOptionsMap limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
+                                                                       EnumMap<SlotEquip, ReforgeRecipe> presetForge) {
+        EquipOptionsMap map = EquipOptionsMap.empty();
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
-            if (slot == SlotEquip.Ring1 && map.containsKey(slot)) {
+            if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 slot = SlotEquip.Ring2;
-            } else if (slot == SlotEquip.Trinket1 && map.containsKey(slot)) {
+            } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
                 slot = SlotEquip.Trinket2;
             }
             if (presetForge.containsKey(slot)) {
@@ -107,7 +107,7 @@ public class ItemUtil {
     }
 
     public static EquipMap chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, ReforgeRecipe> presetForge) {
-        EquipMap map = new EquipMap();
+        EquipMap map = EquipMap.empty();
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.has(slot)) {
@@ -138,16 +138,16 @@ public class ItemUtil {
         }
     }
 
-    static void buildJobWithSpecifiedItemsFixed(EquipMap chosenMap, EnumMap<SlotEquip, ItemData[]> submitMap) {
+    static void buildJobWithSpecifiedItemsFixed(EquipMap chosenMap, EquipOptionsMap submitMap) {
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData chosenItem = chosenMap.get(slot);
             if (chosenItem != null) {
-                submitMap.put(slot, new ItemData[]{chosenItem});
+                submitMap.put(slot, chosenItem);
             }
         }
     }
 
-    static void validateDualSets(Map<SlotEquip, ItemData[]> retMap, Map<SlotEquip, ItemData[]> protMap) {
+    static void validateDualSets(EquipOptionsMap retMap, EquipOptionsMap protMap) {
         if (protMap.get(SlotEquip.Offhand) == null || protMap.get(SlotEquip.Offhand).length == 0)
             throw new IllegalArgumentException("no shield");
         if (retMap.get(SlotEquip.Offhand) != null)
@@ -162,8 +162,8 @@ public class ItemUtil {
             throw new IllegalArgumentException("duplicate in non matching slot");
     }
 
-    static EnumMap<SlotEquip, ItemData[]> commonInDualSet(Map<SlotEquip, ItemData[]> retMap, Map<SlotEquip, ItemData[]> protMap) {
-        EnumMap<SlotEquip, ItemData[]> common = new EnumMap<>(SlotEquip.class);
+    static EquipOptionsMap commonInDualSet(EquipOptionsMap retMap, EquipOptionsMap protMap) {
+        EquipOptionsMap common = EquipOptionsMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] aaa = retMap.get(slot);
             ItemData[] bbb = protMap.get(slot);
@@ -209,7 +209,7 @@ public class ItemUtil {
         return true;
     }
 
-    public static void bestForgesOnly(EnumMap<SlotEquip, ItemData[]> itemMap, ModelCombined model) {
+    public static void bestForgesOnly(EquipOptionsMap itemMap, ModelCombined model) {
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] items = itemMap.get(slot);
             if (items != null) {
@@ -228,8 +228,8 @@ public class ItemUtil {
         itemMap.forEach((s, array) -> ArrayUtil.mapInPlace(array, ItemData::withoutFixed));
     }
 
-    public static void defaultEnchants(EnumMap<SlotEquip, ItemData[]> itemMap, ModelCombined model, boolean force) {
-        itemMap.forEach((s, array) -> ArrayUtil.mapInPlace(array, item -> defaultEnchants(item, model, force)));
+    public static void defaultEnchants(EquipOptionsMap itemMap, ModelCombined model, boolean force) {
+        itemMap.forEachValue(array -> ArrayUtil.mapInPlace(array, item -> defaultEnchants(item, model, force)));
     }
 
     public static ItemData defaultEnchants(ItemData item, ModelCombined model, boolean force) {
@@ -258,30 +258,7 @@ public class ItemUtil {
         }
     }
 
-    static long estimateSets(Map<SlotEquip, ItemData[]> reforgedItems) {
-        return reforgedItems.values().stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
+    static long estimateSets(EquipOptionsMap reforgedItems) {
+        return reforgedItems.entrySet().stream().mapToLong((x) -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
     }
-
-    public static EnumMap<SlotEquip, ItemData[]> deepClone(EnumMap<SlotEquip, ItemData[]> inputMap) {
-        EnumMap<SlotEquip, ItemData[]> map = new EnumMap<>(SlotEquip.class);
-        for (Map.Entry<SlotEquip, ItemData[]> entry : inputMap.entrySet()) {
-            map.put(entry.getKey(), deepClone(entry.getValue()));
-        }
-        return map;
-    }
-
-    private static ItemData[] deepClone(ItemData[] array) {
-        return ArrayUtil.mapAsNew(array, item -> item.copy());
-    }
-
-//
-//    public static Map<Integer, Tuple.Tuple2<StatType, StatType>> slotMapToIdMap(List<ItemData> items, Map<SlotEquip, Tuple.Tuple2<StatType, StatType>> map) {
-//        Map<Integer, Tuple.Tuple2<StatType, StatType>> result = new HashMap<>();
-//        for (Map.Entry<SlotEquip, Tuple.Tuple2<StatType, StatType>> entry : map.entrySet()) {
-//            SlotEquip slot = entry.getKey();
-//            Tuple.Tuple2<StatType, StatType> stat = entry.getValue();
-//            ItemData item = items.stream().filter(x -> x.slot == slot);
-//        }
-//        return result;
-//    }
 }
