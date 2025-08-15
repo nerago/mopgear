@@ -54,8 +54,12 @@ public class StatRatingsWeights implements StatRatings {
 
     private static StatBlock addNum(StatBlock block, StatType type, String text) {
         float givenValue = Float.parseFloat(text);
-        int intValue = Math.round(givenValue * 1000f);
-        return block.withChange(type, intValue);
+        if (givenValue > 0) {
+            int intValue = Math.round(givenValue * 1000f);
+            return block.withChange(type, intValue);
+        } else {
+            return block;
+        }
     }
 
     @Override

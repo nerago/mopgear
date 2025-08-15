@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class InputParser {
+public class InputGearParser {
     static List<EquippedItem> readInput(Path file) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             return parseReader(reader);

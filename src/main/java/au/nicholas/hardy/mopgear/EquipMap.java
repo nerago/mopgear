@@ -128,7 +128,7 @@ public final class EquipMap {
         return other;
     }
 
-    @Deprecated(since = "avoid bad performance")
+//    @Deprecated(since = "avoid bad performance")
     public void forEachValue(Consumer<ItemData> func) {
         if (head != null) func.accept(head);
         if (neck != null) func.accept(neck);

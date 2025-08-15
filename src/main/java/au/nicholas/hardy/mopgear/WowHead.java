@@ -58,13 +58,17 @@ public class WowHead {
     }
 
     private static int readItemLevel(String htmlContent) {
-        String search = "<!--ilvl-->";
-        int index = htmlContent.indexOf(search);
-        if (index == -1)
+        try {
+            String search = "<!--ilvl-->";
+            int index = htmlContent.indexOf(search);
+            if (index == -1)
+                return 0;
+            index += search.length();
+            String sub = htmlContent.substring(index, index + 3);
+            return Integer.parseInt(sub);
+        } catch (Exception e) {
             return 0;
-        index += search.length();
-        String sub = htmlContent.substring(index, index + 3);
-        return Integer.parseInt(sub);
+        }
     }
 
     private static String fetchHTML(String url) {
