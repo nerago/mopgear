@@ -142,6 +142,11 @@ public final class EquipOptionsMap {
         put(slot, new ItemData[] { item });
     }
 
+    public void replaceWithFirstOption(SlotEquip slot) {
+        ItemData[] array = get(slot);
+        put(slot, array[0]);
+    }
+
 //    @Deprecated(since = "avoid extra allocation")
     public EquipOptionsMap shallowClone() {
         return new EquipOptionsMap(this);

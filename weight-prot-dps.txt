@@ -1,1 +1,1 @@
-( Pawn: v1: "Protection WoWSims Weights": Class=Paladin,Strength=2.357,Agility=0.116,Stamina=-0.090,HitRating=3.229,CritRating=2.751,HasteRating=3.007,ExpertiseRating=1.995,DodgeRating=0.183,ParryRating=0.185,MasteryRating=0.023,Ap=1.000,Armor=-0.013,Armor2=-0.012,MeleeDps=1.883 )
+( Pawn: v1: "Protection WoWSims Weights": Class=Paladin,Strength=2.368,Stamina=-0.069,HitRating=2.335,CritRating=2.800,HasteRating=2.795,ExpertiseRating=1.477,DodgeRating=0.160,ParryRating=0.239,MasteryRating=0.069,Ap=1.000,Armor=0.279,Armor2=0.248 )
