@@ -60,8 +60,8 @@ public class Main {
 //            multiSpecSequential(startTime);
 
 //            reforgeRet(startTime);
-            reforgeProt(startTime);
-//            reforgeBoom(startTime);
+//            reforgeProt(startTime);
+            reforgeBoom(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
         } catch (IOException e) {
@@ -147,16 +147,14 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, true,86145, false, true, new StatBlock(285+80+120,0,0,165,160,160+160,0,0,0));
 //        reforgeProcessPlus(items, model, startTime, 82824, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
-        reforgeProcessRetFixed(model, startTime, true);
+//        reforgeProcessRetFixed(model, startTime, true);
 //        reforgeProcessRetChallenge(model, startTime);
 
-        //        Tuple.Tuple2<Integer, Integer>[] extraItemArray = valorItemsArray();
-//        Tuple.Tuple2<Integer, Integer>[] extraItemArray = msvItemsArray();
-//        Tuple.Tuple2<Integer, Integer>[] extraItemArray = pvpCrapArray();
-//                findUpgradeSetup(items, strengthPlateValorArray(), model);
-//        findUpgradeSetup(items, strengthPlateCelestialArray(), model);
-//        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
-//        findUpgradeSetup(items, bagItemsArray(model), model);
+                        findUpgradeSetup(items, strengthPlateMsvArray(), model, null);
+//                findUpgradeSetup(items, strengthPlateValorArray(), model, null);
+//        findUpgradeSetup(items, strengthPlateCelestialArray(), model, 476);
+//        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model, null);
+//        findUpgradeSetup(items, bagItemsArray(model), model, null);
 //        combinationDumb(items, model, startTime);
 
     }
@@ -167,15 +165,17 @@ public class Main {
 
 //        reforgeProcess(items, model, startTime, true);
 //        reforgeProcessProtFixedPlus(model, startTime, 86789, false, true);
-        reforgeProcessProtFixed(model, startTime, true);
+//        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessPlus(items, model, startTime, true,86075, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true,85991, false, true, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 89817, 86075);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
-//        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
-//        findUpgradeSetup(items, bagItemsArray(model), model);
-//        findUpgradeSetup(items, strengthPlateValorArray(), model);
-//        findUpgradeSetup(items, strengthPlateCelestialArray(), model);
+//        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model, null);
+//        findUpgradeSetup(items, bagItemsArray(model), model, null);
+        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, null);
+//        findUpgradeSetup(items, strengthPlateMsvArray(), model, null);
+//        findUpgradeSetup(items, strengthPlateValorArray(), model, null);
+//        findUpgradeSetup(items, strengthPlateCelestialArray(), model, 476);
 
         // so we could get a conclusive result from the ret, then set the common slots to fixed
     }
@@ -184,10 +184,10 @@ public class Main {
         ModelCombined model = standardBoomModel();
         EquipOptionsMap items = readAndLoad(true, gearBoomFile, model.reforgeRules());
 
-        reforgeProcess(items, model, startTime, true);
+//        reforgeProcess(items, model, startTime, true);
 
-//        findUpgradeSetup(items, intellectLeatherCelestialArray(), model);
-//        findUpgradeSetup(items, intellectLeatherValorArray(), model);
+        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
+//        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);
     }
 
     private void combinationDumb(EquipOptionsMap items, ModelCombined model, Instant startTime) {
@@ -206,7 +206,7 @@ public class Main {
         outputResult(bestSet, model, true);
     }
 
-    private void findUpgradeSetup(EquipOptionsMap reforgedItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, ModelCombined model) throws IOException {
+    private void findUpgradeSetup(EquipOptionsMap reforgedItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, ModelCombined model, Integer maxItemLevel) throws IOException {
 //        SlotEquip slot = SlotEquip.Ring2;
 
 //        long runSize = 10000000; // quick runs
@@ -226,9 +226,19 @@ public class Main {
             int extraItemId = extraItemInfo.a();
             if (extraItemId == 63207) continue; // org port cloak
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-            if (extraItem.itemLevel > 476) { System.out.println("rejecting ilvl " + extraItem.itemLevel); continue; };
-//            extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
+            if (maxItemLevel != null && extraItem.itemLevel > maxItemLevel) {
+                System.out.println("rejecting ilvl " + extraItem.itemLevel);
+                continue;
+            };
             SlotEquip slot = extraItem.slot.toSlotEquip();
+            if (reforgedItems.get(slot) == null) {
+                System.out.println("SLOT NOT USED IN CURRENT SET " + extraItem.toStringExtended());
+                continue;
+            }
+            if (reforgedItems.get(slot)[0].id == extraItemId) {
+                System.out.println("SAME ITEM " + extraItem.toStringExtended());
+                continue;
+            }
             if (extraItemInfo.b() != null) {
                 System.out.println(extraItem.toStringExtended() + " $" + extraItemInfo.b());
             } else {
@@ -258,52 +268,82 @@ public class Main {
 
     private Tuple.Tuple2<Integer, Integer>[] strengthPlatePvpArray() {
         return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                Tuple.create(84807, 1250),
                 Tuple.create(84794, 2250),
                 Tuple.create(84806, 1250),
+                Tuple.create(84807, 1250),
                 Tuple.create(84810, 1750),
                 Tuple.create(84822, 1750),
+                Tuple.create(84828, 1250),
+                Tuple.create(84829, 1250),
                 Tuple.create(84834, 1750),
                 Tuple.create(84851, 2250),
                 Tuple.create(84870, 2250),
+                Tuple.create(84891, 1250),
+                Tuple.create(84892, 1250),
                 Tuple.create(84915, 1750),
                 Tuple.create(84949, 1750),
                 Tuple.create(84950, 1750),
-                Tuple.create(84986, 1250),
-                Tuple.create(84891, 1250),
                 Tuple.create(84985, 1250),
-                Tuple.create(84892, 1250),
-                Tuple.create(84828, 1250),
-                Tuple.create(84829, 1250),
+                Tuple.create(84986, 1250),
         };
     }
 
     private static Tuple.Tuple2<Integer, Integer>[] strengthPlateMsvArray() {
         return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
                 // stone
-                Tuple.create(85922, 0),
-                Tuple.create(85925, 0),
-//                Tuple.create(86134, 0), got heroic
+                Tuple.create(85922, 1),
+                Tuple.create(85925, 1),
+//                Tuple.create(86134, 1), got heroic
                 // feng
-//                Tuple.create(85983, 0), got norm
-                Tuple.create(85984, 0),
-                Tuple.create(85985, 0),
+//                Tuple.create(85983, 2), got norm
+                Tuple.create(85984, 2),
+                Tuple.create(85985, 2),
                 // garaj
-//                Tuple.create(85991, 0), got norm
-                Tuple.create(85992, 0),
-                Tuple.create(89817, 0),
+//                Tuple.create(85991, 3), got norm
+                Tuple.create(85992, 3),
+                Tuple.create(89817, 3),
                 // kings
-                Tuple.create(86075, 0),
-                Tuple.create(86076, 0),
-                Tuple.create(86080, 0),
+                Tuple.create(86075, 4),
+                Tuple.create(86076, 4),
+                Tuple.create(86080, 4),
                 // elegon
-                Tuple.create(86130, 0), // prot weapon
-//                Tuple.create(86140, 0), // ret weapon
-                Tuple.create(86135, 0), // starcrusher questionable
+//                Tuple.create(86130, 5), // prot weapon
+                Tuple.create(86140, 5), // ret weapon
+                Tuple.create(86135, 5), // starcrusher
                 // will
-                Tuple.create(86144, 0),
-                Tuple.create(86145, 0),
-//                Tuple.create(89823, 0) // got norm
+                Tuple.create(86144, 6),
+                Tuple.create(86145, 6),
+//                Tuple.create(89823, 6) // got norm
+        };
+    }
+
+    private static Tuple.Tuple2<Integer, Integer>[] strengthPlateMsvHeroicArray() {
+        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
+                // stone
+                Tuple.create(87016, 1),
+                Tuple.create(87015, 1),
+//                Tuple.create(87060, 1), got heroic
+                // feng
+                Tuple.create(87026, 2),
+                Tuple.create(87024, 2),
+                Tuple.create(87025, 2),
+                // garaj
+                Tuple.create(89934, 3),
+                Tuple.create(87035, 3),
+                Tuple.create(87036, 3),
+                // kings
+                Tuple.create(87049, 4),
+                Tuple.create(87048, 4),
+                Tuple.create(87050, 4),
+                // elegon
+                Tuple.create(87062, 5), // prot weapon
+//                Tuple.create(87061, 5), // ret weapon
+                Tuple.create(87059, 5), // starcrusher
+                Tuple.create(89937, 5),
+                // will
+                Tuple.create(89941, 6),
+                Tuple.create(87071, 6),
+                Tuple.create(87072, 6)
         };
     }
 
@@ -354,8 +394,11 @@ public class Main {
                 Tuple.create(86840,30 ),
                 Tuple.create(86645,55 ),
                 Tuple.create(86786,25 ),
+                Tuple.create(86768,25 ),
                 Tuple.create(86648,50 ),
                 Tuple.create(86746,40 ),
+                Tuple.create(86748,25 ),
+                Tuple.create(89971,25 ),
                 Tuple.create(86646,55 ),
                 Tuple.create(86878,50 ),
                 Tuple.create(86814,30 ),
@@ -363,6 +406,15 @@ public class Main {
                 Tuple.create(86792,40 ),
                 Tuple.create(86907,50 ),
                 Tuple.create(86893,50 ),
+                Tuple.create(86808,40 ),
+                Tuple.create(86797,40 ),
+                Tuple.create(86806,25 ),
+                Tuple.create(89426,15 ),
+                Tuple.create(86754,25 ),
+                Tuple.create(86783,25 ),
+                Tuple.create(86810,25 ),
+                Tuple.create(86767,25 ),
+                Tuple.create(89968,25 ),
         };
     }
 

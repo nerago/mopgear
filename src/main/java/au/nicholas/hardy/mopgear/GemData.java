@@ -31,6 +31,8 @@ public class GemData {
         map.put(4848, new StatBlock(120, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(4858, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(4852, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 120));
+        map.put(4842, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4863, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         return map;
     }
 
@@ -78,6 +80,9 @@ public class GemData {
         map.put(4993, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 170, 0));// shield
         map.put(4823, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// leg dps
         map.put(4429, new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0));// panda feet
+        map.put(4909, new StatBlock(120, 0, 0, 80, 0, 0, 0, 0, 0, 0));// int shoulder
+        map.put(4423, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int back
+        map.put(4430, new StatBlock(0, 0, 0, 0, 0, 170, 0, 0, 0, 0));// hand
         map.put(76627, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
         map.put(76669, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
         map.put(76585, new StatBlock(0, 0, 0, 0, 0, 160, 0, 0, 0, 160));
