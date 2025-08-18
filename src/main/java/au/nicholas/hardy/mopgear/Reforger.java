@@ -32,6 +32,8 @@ public class Reforger {
         if (sourceStat == null && targetStat == null) {
             return baseItem;
         } else if (sourceStat != null && targetStat != null)  {
+            if (sourceStat == targetStat)
+                throw new RuntimeException("expected different stats");
             int originalValue = baseItem.stat.get(sourceStat);
             if (originalValue == 0 || baseItem.stat.get(targetStat) != 0)
                 throw new RuntimeException("expected non-zero and zero");

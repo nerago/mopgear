@@ -4,6 +4,7 @@ import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,16 @@ public class ItemUtil {
         set.add(SlotItem.Weapon);
         set.add(SlotItem.Offhand);
         return set;
+    }
+
+    public static EquipOptionsMap readAndLoad(ItemCache itemCache, boolean detailedOutput, Path file, ReforgeRules rules, EnumMap<SlotEquip, ReforgeRecipe> presetForge) throws IOException {
+        List<EquippedItem> itemIds = InputGearParser.readInput(file);
+        List<ItemData> items = loadItems(itemCache, itemIds, detailedOutput);
+        EquipOptionsMap result = presetForge != null
+                ? limitedItemsReforgedToMap(rules, items, presetForge)
+                : standardItemsReforgedToMap(rules, items);
+        itemCache.cacheSave();
+        return result;
     }
 
     public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) throws IOException {

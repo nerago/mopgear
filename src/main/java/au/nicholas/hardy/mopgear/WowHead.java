@@ -30,7 +30,7 @@ public class WowHead {
                 JsonObject je = io.get("jsonequip").getAsJsonObject();
                 if (je.has("reqlevel")) {
                     int level = je.get("reqlevel").getAsInt();
-                    if (level > 1 && level < 87) {
+                    if (level > 1 && level < 85) {
                         System.out.println("Skipping " + itemId + " version for level " + level);
                         startIndex = startDataSection + 1;
                         continue;

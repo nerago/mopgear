@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static au.nicholas.hardy.mopgear.StatType.*;
+
 @SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "unchecked", "OptionalUsedAsFieldOrParameterType"})
 public class Main {
 
@@ -47,9 +49,9 @@ public class Main {
 //            WowHead.fetchItem(89061);
 
 //            multiSpecSpecifiedRating();
-            multiSpecSequential(startTime);
+//            multiSpecSequential(startTime);
 
-//            reforgeRet(startTime);
+            reforgeRet(startTime);
 //            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        rankSomething();
@@ -73,23 +75,27 @@ public class Main {
         // assumes socket bonus+non matching gems
         Map<Integer, StatBlock> enchants = Map.of(
 //                86145, new StatBlock(120+285, 0, 0, 165, 0, 640,0,0,0),
-                86145, new StatBlock(285, 0, 0, 165, 0, 640,0,0,0, 0),
-                84870, new StatBlock(0,430,0,0,0,640,0,165,0, 0));
+                86145, new StatBlock(285, 0, 0, 165, 0, 640, 0, 0, 0, 0),
+                84870, new StatBlock(0, 430, 0, 0, 0, 640, 0, 165, 0, 0));
 
-        rankAlternativesAsSingleItems(model, new int [] {82856,86794}, enchants, false);
+        rankAlternativesAsSingleItems(model, new int[]{82856, 86794}, enchants, false);
 //        rankAlternatives(new int [] {81129,81234,82850,81571}); // cloak
 //        rankAlternatives(new int [] {84036,81190,81687,81130,81086}); // belt
 //        rankAlternativesAsSingleItems(model, new int[]{84027, 81284, 81073, 81113, 82852}); // feet
 //        rankAlternativesAsSingleItems(model, new int[]{86145, 82812, 84870}, enchants, false); // legs
     }
 
-    private void reforgeRet(Instant startTime) throws IOException {
+    private void  reforgeRet(Instant startTime) throws IOException {
 //        ModelCombined model = ModelCombined.standardRetModel();
-        ModelCombined model = ModelCombined.extendedRetModel(true, true);
+//        ModelCombined model = ModelCombined.extendedRetModel(true, true);
+        ModelCombined model = ModelCombined.priorityRetModel();
 
-        EquipOptionsMap items = readAndLoad(true, DataLocation.gearRetFile, model.reforgeRules());
+        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
+//        EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
 
-        reforgeProcess(items, model, startTime, true);
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonFixedItems());
+
+//        reforgeProcess(items, model, startTime, true);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
 
@@ -97,6 +103,7 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, true,86145, false, true, new StatBlock(285+80+120,0,0,165,160,160+160,0,0,0));
 //        reforgeProcessPlus(items, model, startTime, 82824, false);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
+        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new int[]{77530,89075}));
 //        reforgeProcessRetFixed(model, startTime, true);
 //        reforgeProcessRetChallenge(model, startTime);
 
@@ -111,11 +118,14 @@ public class Main {
 
     private void reforgeProt(Instant startTime) throws IOException {
         ModelCombined model = ModelCombined.standardProtModel();
-        EquipOptionsMap items = readAndLoad(true, DataLocation.gearProtFile, model.reforgeRules());
+//        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
+        EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
 
-//        reforgeProcess(items, model, startTime, true);
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, model.reforgeRules(), commonItems);
+
+        reforgeProcess(items, model, startTime, true);
 //        reforgeProcessProtFixedPlus(model, startTime, 86789, false, true);
-        reforgeProcessProtFixed(model, startTime, true);
+//        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessPlus(items, model, startTime, true,86075, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true,85991, false, true, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 89817, 86075);
@@ -132,7 +142,7 @@ public class Main {
 
     private void reforgeBoom(Instant startTime) throws IOException {
         ModelCombined model = ModelCombined.standardBoomModel();
-        EquipOptionsMap items = readAndLoad(true, DataLocation.gearBoomFile, model.reforgeRules());
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearBoomFile, model.reforgeRules(), null);
 
         reforgeProcess(items, model, startTime, true);
 
@@ -177,12 +187,14 @@ public class Main {
         BestCollection<ItemData> bestCollection = new BestCollection<>();
         for (Tuple.Tuple2<Integer, Integer> extraItemInfo : extraItemArray) {
             int extraItemId = extraItemInfo.a();
-            if (extraItemId == 63207) continue; // org port cloak
+
+            if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue; // org port cloak
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+
             if (maxItemLevel != null && extraItem.itemLevel > maxItemLevel) {
                 System.out.println("rejecting ilvl " + extraItem.itemLevel);
                 continue;
-            };
+            }
             SlotEquip slot = extraItem.slot.toSlotEquip();
             if (reforgedItems.get(slot) == null) {
                 System.out.println("SLOT NOT USED IN CURRENT SET " + extraItem.toStringExtended());
@@ -198,287 +210,36 @@ public class Main {
                 System.out.println(extraItem.toStringExtended());
             }
 
-            Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, false);
-            Optional<ItemSet> extraSet = reforgeProcessPlusCore(reforgedItems.deepClone(), model, null, false, extraItemId, slot, enchanting, true, runSize);
-            if (extraSet.isPresent()) {
-                System.out.println("PROPOSED " + extraSet.get().totals);
-                double extraRating = model.calcRating(extraSet.get());
-                double factor = extraRating / baseRating;
-                System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
-                bestCollection.add(extraItem, factor);
-            } else {
-                System.out.print("UPGRADE SET NOT FOUND\n");
+            checkOneUpgrade(reforgedItems.deepClone(), model, extraItemId, slot, runSize, baseRating, bestCollection, extraItem);
+
+            if (slot == SlotEquip.Trinket1) {
+                checkOneUpgrade(reforgedItems.deepClone(), model, extraItemId, SlotEquip.Trinket2, runSize, baseRating, bestCollection, extraItem);
             }
-            System.out.println();
+            if (slot == SlotEquip.Ring1) {
+                checkOneUpgrade(reforgedItems.deepClone(), model, extraItemId, SlotEquip.Ring2, runSize, baseRating, bestCollection, extraItem);
+            }
         }
 
         System.out.println("RANKING RANKING");
         bestCollection.forEach((item, factor) ->
                 System.out.printf("%10s \t%35s \t$%d \t%1.3f\n", item.slot, item.name,
-                        ArrayUtil.findOne(extraItemArray, x -> x.a()==item.id).b(),
+                        ArrayUtil.findOne(extraItemArray, x -> x.a() == item.id).b(),
                         factor));
     }
 
-    private Tuple.Tuple2<Integer, Integer>[] strengthPlatePvpArray() {
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                Tuple.create(84794, 2250),
-                Tuple.create(84806, 1250),
-                Tuple.create(84807, 1250),
-                Tuple.create(84810, 1750),
-                Tuple.create(84822, 1750),
-                Tuple.create(84828, 1250),
-                Tuple.create(84829, 1250),
-                Tuple.create(84834, 1750),
-                Tuple.create(84851, 2250),
-                Tuple.create(84870, 2250),
-                Tuple.create(84891, 1250),
-                Tuple.create(84892, 1250),
-                Tuple.create(84915, 1750),
-                Tuple.create(84949, 1750),
-                Tuple.create(84950, 1750),
-                Tuple.create(84985, 1250),
-                Tuple.create(84986, 1250),
-        };
-    }
-
-    private static Tuple.Tuple2<Integer, Integer>[] strengthPlateMsvArray() {
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                // stone
-                Tuple.create(85922, 1),
-                Tuple.create(85925, 1),
-//                Tuple.create(86134, 1), got heroic
-                // feng
-//                Tuple.create(85983, 2), got norm
-                Tuple.create(85984, 2),
-                Tuple.create(85985, 2),
-                // garaj
-//                Tuple.create(85991, 3), got norm
-                Tuple.create(85992, 3),
-                Tuple.create(89817, 3),
-                // kings
-                Tuple.create(86075, 4),
-                Tuple.create(86076, 4),
-                Tuple.create(86080, 4),
-                // elegon
-//                Tuple.create(86130, 5), // prot weapon
-                Tuple.create(86140, 5), // ret weapon
-                Tuple.create(86135, 5), // starcrusher
-                // will
-                Tuple.create(86144, 6),
-                Tuple.create(86145, 6),
-//                Tuple.create(89823, 6) // got norm
-        };
-    }
-
-    private static Tuple.Tuple2<Integer, Integer>[] strengthPlateMsvHeroicArray() {
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                // stone
-                Tuple.create(87016, 1),
-                Tuple.create(87015, 1),
-//                Tuple.create(87060, 1), got heroic
-                // feng
-                Tuple.create(87026, 2),
-                Tuple.create(87024, 2),
-                Tuple.create(87025, 2),
-                // garaj
-                Tuple.create(89934, 3),
-                Tuple.create(87035, 3),
-                Tuple.create(87036, 3),
-                // kings
-                Tuple.create(87049, 4),
-                Tuple.create(87048, 4),
-                Tuple.create(87050, 4),
-                // elegon
-                Tuple.create(87062, 5), // prot weapon
-//                Tuple.create(87061, 5), // ret weapon
-                Tuple.create(87059, 5), // starcrusher
-                Tuple.create(89937, 5),
-                // will
-                Tuple.create(89941, 6),
-                Tuple.create(87071, 6),
-                Tuple.create(87072, 6)
-        };
-    }
-
-    private static Tuple.Tuple2<Integer, Integer>[] strengthPlateValorArray() {
-        Tuple.Tuple2<Integer, Integer> neckParagonPale = Tuple.create(89066, 1250);
-        Tuple.Tuple2<Integer, Integer> neckBloodseekers = Tuple.create(89064, 1250);
-        Tuple.Tuple2<Integer, Integer> beltKlaxxiConsumer = Tuple.create(89056, 1750);
-        Tuple.Tuple2<Integer, Integer> legKovokRiven = Tuple.create(89093, 2500);
-        Tuple.Tuple2<Integer, Integer> backYiCloakCourage = Tuple.create(89075, 1250);
-        Tuple.Tuple2<Integer, Integer> headYiLeastFavorite = Tuple.create(89216, 2500);
-        Tuple.Tuple2<Integer, Integer> headVoiceAmpGreathelm = Tuple.create(89280, 2500);
-        Tuple.Tuple2<Integer, Integer> chestDawnblade = Tuple.create(89420, 2500);
-        Tuple.Tuple2<Integer, Integer> chestCuirassTwin = Tuple.create(89421, 2500);
-        Tuple.Tuple2<Integer, Integer> gloveOverwhelmSwarm = Tuple.create(88746, 1750);
-        Tuple.Tuple2<Integer, Integer> wristBattleShadow = Tuple.create(88880, 1250);
-        Tuple.Tuple2<Integer, Integer> wristBraidedBlackWhite = Tuple.create(88879, 1250);
-        Tuple.Tuple2<Integer, Integer> bootYulonGuardian = Tuple.create(88864, 1750);
-        Tuple.Tuple2<Integer, Integer> bootTankissWarstomp = Tuple.create(88862, 1750);
-
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{neckParagonPale, neckBloodseekers, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage, headYiLeastFavorite, headVoiceAmpGreathelm, chestDawnblade,
-                chestCuirassTwin, gloveOverwhelmSwarm, wristBattleShadow, wristBraidedBlackWhite, bootYulonGuardian, bootTankissWarstomp};
-    }
-
-    private Tuple.Tuple2<Integer, Integer>[] intellectLeatherValorArray() {
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                Tuple.create(89308, 2500),
-                Tuple.create(89342, 1750),
-                Tuple.create(89432, 2500),
-                Tuple.create(88885, 1250),
-                Tuple.create(88743, 1750),
-                Tuple.create(89061, 1750),
-                Tuple.create(89089, 2500),
-                Tuple.create(88876, 1750),
-                Tuple.create(89078, 1250),
-                Tuple.create(89067, 1250),
-                Tuple.create(89073, 1250),
-                Tuple.create(89072, 1250),
-                Tuple.create(89081, 1750),
-                Tuple.create(89080, 1750),
-        };
-    }
-
-    private Tuple.Tuple2<Integer, Integer>[] intellectLeatherCelestialArray() {
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                Tuple.create(89957,45 ),
-                Tuple.create(86856,30 ),
-                Tuple.create(86644,50 ),
-                Tuple.create(86840,30 ),
-                Tuple.create(86645,55 ),
-                Tuple.create(86786,25 ),
-                Tuple.create(86768,25 ),
-                Tuple.create(86648,50 ),
-                Tuple.create(86746,40 ),
-                Tuple.create(86748,25 ),
-                Tuple.create(89971,25 ),
-                Tuple.create(86646,55 ),
-                Tuple.create(86878,50 ),
-                Tuple.create(86814,30 ),
-                Tuple.create(86873,30 ),
-                Tuple.create(86792,40 ),
-                Tuple.create(86907,50 ),
-                Tuple.create(86893,50 ),
-                Tuple.create(86808,40 ),
-                Tuple.create(86797,40 ),
-                Tuple.create(86806,25 ),
-                Tuple.create(89426,15 ),
-                Tuple.create(86754,25 ),
-                Tuple.create(86783,25 ),
-                Tuple.create(86810,25 ),
-                Tuple.create(86767,25 ),
-                Tuple.create(89968,25 ),
-        };
-    }
-
-    private Tuple.Tuple2<Integer, Integer>[] filterItemArray(Tuple.Tuple2<Integer, Integer>[] existing, int maxItemLevel) {
-        return Arrays.stream(existing)
-                .map(tup -> Tuple.create(tup, ItemUtil.loadItemBasic(itemCache, tup.a())))
-                .filter(tup2 -> tup2.b().itemLevel <= maxItemLevel)
-                .map(Tuple.Tuple2::a)
-                .toArray(Tuple.Tuple2[]::new);
-    }
-
-
-    private Tuple.Tuple2<Integer, Integer>[] strengthPlateCelestialArrayTankPicks() {
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                Tuple.create(86794, 25),
-                Tuple.create(86742, 40),
-                Tuple.create(86760, 40),
-                Tuple.create(86789, 25),
-                Tuple.create(86759, 25),
-                Tuple.create(86753, 25),
-        };
-    }
-
-    private Tuple.Tuple2<Integer, Integer>[] strengthPlateCelestialArrayRetPicks() {
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                Tuple.create(89969, 25),
-                Tuple.create(86794, 25),
-                Tuple.create(86742, 40),
-                // also trinket lei shen's final orders
-        };
-    }
-
-    private Tuple.Tuple2<Integer, Integer>[] strengthPlateCelestialArray() {
-        // skipping neck cloak offhand weaps
-        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-                // plate
-                Tuple.create(86803, 40),
-                Tuple.create(86742, 40),
-                Tuple.create(89976, 40),
-                Tuple.create(89969, 25),
-                Tuple.create(86752, 40),
-                Tuple.create(89954, 45),
-                Tuple.create(86751, 25),
-                Tuple.create(86823, 30),
-                Tuple.create(86860, 30),
-                Tuple.create(86793, 40),
-                Tuple.create(86868, 30),
-                Tuple.create(89981, 30),
-                Tuple.create(86852, 45),
-                Tuple.create(86832, 45),
-                Tuple.create(86794, 25),
-                Tuple.create(86780, 25),
-                Tuple.create(86779, 40),
-                Tuple.create(89958, 45),
-                Tuple.create(89956, 30),
-                Tuple.create(86822, 45),
-                Tuple.create(86904, 50),
-                Tuple.create(86854, 45),
-                Tuple.create(86849, 30),
-                Tuple.create(86760, 40),
-                Tuple.create(86848, 30),
-                Tuple.create(89963, 45),
-                Tuple.create(86903, 25),
-                Tuple.create(86870, 50),
-                Tuple.create(86891, 50),
-
-                // ring
-                Tuple.create(86820, 30),
-                Tuple.create(86830, 30),
-                Tuple.create(89972, 25),
-                Tuple.create(86813, 30),
-                Tuple.create(86880, 30),
-
-                // weap
-                Tuple.create(86799, 40),
-                Tuple.create(86906, 30),
-                Tuple.create(86789, 25),
-
-                // neck
-                Tuple.create(86759, 25),
-                Tuple.create(86872, 25),
-                Tuple.create(86739, 25),
-                Tuple.create(86871, 30),
-                Tuple.create(86835, 30),
-
-                // back
-                Tuple.create(86753, 25),
-                Tuple.create(86812, 30),
-                Tuple.create(86883, 25),
-                Tuple.create(86853, 25)
-        };
-    }
-
-    private Tuple.Tuple2<Integer, Integer>[] bagItemsArray(ModelCombined model) throws IOException {
-        return InputBagsParser.readInput(DataLocation.bagsFile);
-    }
-
-    private Tuple.Tuple2<Integer, Integer>[] strengthPlateCurrentItemsRet(ModelCombined model) throws IOException {
-        EquipOptionsMap items = readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.ret());
-        Stream<Tuple.Tuple2<Integer, Integer>> itemStream = items.entrySet().stream()
-                .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
-                .map(tup -> Tuple.create(tup.b()[0].id, 0));
-        return itemStream.toArray(Tuple.Tuple2[]::new);
-    }
-
-    private Tuple.Tuple2<Integer, Integer>[] strengthPlateCurrentItemsProt(ModelCombined model) throws IOException {
-        EquipOptionsMap items = readAndLoad(true, DataLocation.gearProtFile, ReforgeRules.ret());
-        Stream<Tuple.Tuple2<Integer, Integer>> itemStream = items.entrySet().stream()
-                .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
-                .map(tup -> Tuple.create(tup.b()[0].id, 0));
-        return itemStream.toArray(Tuple.Tuple2[]::new);
+    private void checkOneUpgrade(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, SlotEquip slot, long runSize, double baseRating, BestCollection<ItemData> bestCollection, ItemData extraItem) throws IOException {
+        Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, false);
+        Optional<ItemSet> extraSet = reforgeProcessPlusCore(reforgedItems, model, null, false, extraItemId, slot, enchanting, true, runSize);
+        if (extraSet.isPresent()) {
+            System.out.println("PROPOSED " + extraSet.get().totals);
+            double extraRating = model.calcRating(extraSet.get());
+            double factor = extraRating / baseRating;
+            System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
+            bestCollection.add(extraItem, factor);
+        } else {
+            System.out.print("UPGRADE SET NOT FOUND\n");
+        }
+        System.out.println();
     }
 
     private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {
@@ -488,10 +249,10 @@ public class Main {
                 .flatMap(x -> Arrays.stream(Reforger.reforgeItem(model.reforgeRules(), x)));
         if (enchants != null) {
             stream = stream.map(x ->
-                            enchants.containsKey(x.id) ?
-                                    x.changeFixed(enchants.get(x.id)) :
-                                    ItemUtil.defaultEnchants(x,model,true)
-                    );
+                    enchants.containsKey(x.id) ?
+                            x.changeFixed(enchants.get(x.id)) :
+                            ItemUtil.defaultEnchants(x, model, true)
+            );
         }
         if (scaleChallenge) {
             stream = stream.map(ItemLevel::scaleForChallengeMode);
@@ -510,21 +271,21 @@ public class Main {
         ModelCombined modelProt = ModelCombined.standardProtModel();
 
         System.out.println("RET GEAR CURRENT");
-        EquipOptionsMap retMap = readAndLoad(true, DataLocation.gearRetFile, modelRet.reforgeRules());
+        EquipOptionsMap retMap = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, modelRet.reforgeRules(), null);
         System.out.println("PROT GEAR CURRENT");
-        EquipOptionsMap protMap = readAndLoad(true, DataLocation.gearProtFile, modelProt.reforgeRules());
+        EquipOptionsMap protMap = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, modelProt.reforgeRules(), null);
         ItemUtil.validateDualSets(retMap, protMap);
         EquipOptionsMap commonMap = ItemUtil.commonInDualSet(retMap, protMap);
 
 //        commonMap.replaceWithFirstOption(SlotEquip.Neck);
 //        commonMap.replaceWithFirstOption(SlotEquip.Hand);
 //        commonMap.replaceWithFirstOption(SlotEquip.Trinket1);
-        
+
         Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null, 0);
 
         // TODO solve for challenge dps too
 
-        Long runSize = BILLION/100;
+        Long runSize = BILLION / 100;
 //        Long runSize = 10000L;
         Stream<ItemSet> protStream = commonStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt, runSize))
                 .filter(Objects::nonNull);
@@ -582,19 +343,29 @@ public class Main {
     private static EnumMap<SlotEquip, ReforgeRecipe> commonFixedItems() {
         EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
 //        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Haste, StatType.Mastery));
+        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(Haste, Expertise));
         //presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Crit, StatType.Haste));
 //        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(null,null));
-        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Haste, StatType.Mastery));
-        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(StatType.Haste, StatType.Mastery));
-        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Mastery, StatType.Hit));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Haste, StatType.Hit));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Expertise, StatType.Hit));
-//        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
+        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(Haste, Expertise));
+        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(Haste, Expertise));
+        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(Mastery, Haste));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(Haste, Hit));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Hit));
+        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
 //        presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
 //        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
 //        presetReforge.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
+
+//        COMMON Soulgrasp Choker
+//        COMMON Malevolent Gladiator's Cloak of Alacrity
+//        COMMON Bonded Soul Bracers
+//        COMMON Starcrusher Gauntlets
+//        COMMON Jasper Clawfeet
+//        COMMON Seal of the Bloodseeker
+//        COMMON Ring of the Golden Stair
+//        COMMON Lei Shen's Final Orders
+
         return presetReforge;
     }
 
@@ -654,20 +425,20 @@ public class Main {
 
         EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
         presetReforge.put(SlotEquip.Head, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Hit, StatType.Expertise));
-        presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Hit, Expertise));
+        presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Crit, Haste));
         presetReforge.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Hit));
-        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Hit, StatType.Haste));
+        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, Haste));
+        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Hit, Haste));
         presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Hit, StatType.Expertise));
+        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Crit, Haste));
+        presetReforge.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Hit, Expertise));
         presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(null, null));
         presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(StatType.Expertise, StatType.Haste));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, Haste));
+        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Expertise, Haste));
         presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(StatType.Crit, StatType.Haste));
+        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(StatType.Crit, Haste));
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
 
@@ -684,7 +455,7 @@ public class Main {
             } else if (extraItem.id == 87060) {
                 return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 160, 160, 320 + 160 + 160, 120, 0, 0));
             } else if (extraItem.id == 89503) {
-                return extraItem.changeStats(new StatBlock(501,751,0,334,334,0,0,0,0, 0))
+                return extraItem.changeStats(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
                         .changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else if (extraItem.slot == SlotItem.Back) {
                 return extraItem.changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
@@ -743,36 +514,36 @@ public class Main {
 
         Map<SlotEquip, ReforgeRecipe> reforgeRet = new EnumMap<>(SlotEquip.class);
         reforgeRet.put(SlotEquip.Head, new ReforgeRecipe(null, null));
-        reforgeRet.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Expertise, StatType.Haste));
-        reforgeRet.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Hit, StatType.Haste));
+        reforgeRet.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, Expertise));
+        reforgeRet.put(SlotEquip.Shoulder, new ReforgeRecipe(Expertise, Haste));
+        reforgeRet.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, Expertise));
+        reforgeRet.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, Expertise));
+        reforgeRet.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Hit, Haste));
         reforgeRet.put(SlotEquip.Hand, new ReforgeRecipe(StatType.Crit, StatType.Hit));
-        reforgeRet.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Mastery, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Crit, StatType.Mastery));
-        reforgeRet.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Mastery, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        reforgeRet.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Mastery));
+        reforgeRet.put(SlotEquip.Belt, new ReforgeRecipe(Mastery, Expertise));
+        reforgeRet.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Crit, Mastery));
+        reforgeRet.put(SlotEquip.Foot, new ReforgeRecipe(Mastery, Expertise));
+        reforgeRet.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Crit, Haste));
+        reforgeRet.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, Mastery));
         reforgeRet.put(SlotEquip.Trinket1, new ReforgeRecipe(null, null));
-        reforgeRet.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
-        reforgeRet.put(SlotEquip.Weapon, new ReforgeRecipe(StatType.Hit, StatType.Haste));
+        reforgeRet.put(SlotEquip.Trinket2, new ReforgeRecipe(Expertise, Mastery));
+        reforgeRet.put(SlotEquip.Weapon, new ReforgeRecipe(StatType.Hit, Haste));
 
         Map<SlotEquip, ReforgeRecipe> reforgeProt = new EnumMap<>(SlotEquip.class);
         reforgeProt.put(SlotEquip.Head, new ReforgeRecipe(null, null));
-        reforgeProt.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+        reforgeProt.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, Expertise));
         reforgeProt.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Dodge, StatType.Hit));
-        reforgeProt.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeProt.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeProt.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Dodge, StatType.Mastery));
+        reforgeProt.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, Expertise));
+        reforgeProt.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, Expertise));
+        reforgeProt.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Dodge, Mastery));
         reforgeProt.put(SlotEquip.Hand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
         reforgeProt.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Dodge, StatType.Hit));
-        reforgeProt.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Dodge, StatType.Mastery));
-        reforgeProt.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Parry, StatType.Expertise));
-        reforgeProt.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Parry, StatType.Expertise));
-        reforgeProt.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Mastery));
+        reforgeProt.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Dodge, Mastery));
+        reforgeProt.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Parry, Expertise));
+        reforgeProt.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Parry, Expertise));
+        reforgeProt.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, Mastery));
         reforgeProt.put(SlotEquip.Trinket1, new ReforgeRecipe(null, null));
-        reforgeProt.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
+        reforgeProt.put(SlotEquip.Trinket2, new ReforgeRecipe(Expertise, Mastery));
         reforgeProt.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
         reforgeProt.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
 
@@ -787,17 +558,9 @@ public class Main {
         protSet.outputSet(modelProt);
     }
 
-    private EquipOptionsMap readAndLoad(boolean detailedOutput, Path file, ReforgeRules rules) throws IOException {
-        List<EquippedItem> itemIds = InputGearParser.readInput(file);
-        List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
-        EquipOptionsMap result = ItemUtil.standardItemsReforgedToMap(rules, items);
-        itemCache.cacheSave();
-        return result;
-    }
-
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcess(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, reforgedItems, startTime, BILLION/22/*TODO*/, null);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, reforgedItems, startTime, BILLION / 22/*TODO*/, null);
         outputResult(bestSet, model, detailedOutput);
         outputTweaked(bestSet, reforgedItems, model);
     }
@@ -812,8 +575,8 @@ public class Main {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
         Function<ItemData, ItemData> enchanting =
                 extraItemEnchants != null ? x -> x.changeFixed(extraItemEnchants) :
-                defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) :
-                        Function.identity();
+                        defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) :
+                                Function.identity();
         Optional<ItemSet> bestSet = reforgeProcessPlusCore(reforgedItems, model, startTime, detailedOutput, extraItemId, extraItem.slot.toSlotEquip(), enchanting, replace, BILLION);
         outputResult(bestSet, model, detailedOutput);
     }
@@ -852,13 +615,19 @@ public class Main {
         if (customiseOthersInSlot) {
             ArrayUtil.mapInPlace(slotArray, customiseItem);
         }
-        ArrayUtil.forEach(slotArray, x -> { if (x.reforge == null) System.out.println("NEW " + slot + " " + x);});
+        HashSet<Integer> seen = new HashSet<>();
+        ArrayUtil.forEach(slotArray, it -> {
+            if (seen.add(it.id)) {
+                System.out.println("NEW " + slot + " " + it);
+            }
+        });
+        System.out.println();
         return extraItem;
     }
 
     @SuppressWarnings("SameParameterValue")
     private void reforgeAlternatives(Path file, ModelCombined model, Instant startTime, int[] alternateItems) throws IOException {
-        EquipOptionsMap reforgedItems = readAndLoad(false, file, model.reforgeRules());
+        EquipOptionsMap reforgedItems = ItemUtil.readAndLoad(itemCache, false, file, model.reforgeRules(), null);
 
         for (int extraItemId : alternateItems) {
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
@@ -887,13 +656,19 @@ public class Main {
 
         for (Tuple.Tuple2<Integer, Integer> entry : extraItems) {
             int extraItemId = entry.a();
+            if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             SlotEquip slot = extraItem.slot.toSlotEquip();
             ItemData[] existing = items.get(slot);
-            if (ArrayUtil.anyMatch(existing, item -> item.id == extraItemId)) {
+            if (existing == null) {
+                System.out.println("SKIP SLOT NOT NEEDED " + extraItem);
+            } else if (ArrayUtil.anyMatch(existing, item -> item.id == extraItemId)) {
                 System.out.println("SKIP DUP " + extraItem);
             } else {
-                extraItem = addExtra(items, model, extraItemId, enchant, false, true);
+                if (slot == SlotEquip.Trinket1)
+                    addExtra(items, model, extraItemId, SlotEquip.Trinket2, enchant, false, true);
+                else
+                    addExtra(items, model, extraItemId, enchant, false, true);
             }
         }
 

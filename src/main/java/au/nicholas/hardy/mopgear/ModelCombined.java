@@ -62,6 +62,14 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statRatings, statRequirements, reforge, enchants);
     }
 
+    public static ModelCombined priorityRetModel() throws IOException {
+        StatRatings statRatings = new StatRatingsPriority(new StatType[] {StatType.Haste, StatType.Primary, StatType.Mastery, StatType.Crit});
+        StatRequirements statRequirements = StatRequirements.retWideCapRange();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
+        ReforgeRules reforge = ReforgeRules.retExtended();
+        return new ModelCombined(statRatings, statRequirements, reforge, enchants);
+    }
+
     public static ModelCombined standardBoomModel() throws IOException {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBoomFile, false, null);
         StatRequirements statRequirements = StatRequirements.boom();
