@@ -38,7 +38,7 @@ public class StatRequirements {
     private static final int TARGET_RATING_TANK = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_TANK); // 5100
     private static final int TARGET_RATING_CAST = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_CAST); // 5100
 
-    private static final int DEFAULT_CAP_ALLOW_EXCEED = 500;
+    private static final int DEFAULT_CAP_ALLOW_EXCEED = 100;
 
     private final int requiredHit;
     private final int requiredExpertise;
@@ -50,11 +50,15 @@ public class StatRequirements {
     }
 
     public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
-        return stream.filter(set -> inRange(set.getTotals()));
+        return stream.filter(this::filter);
     }
 
     public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
-        return stream.filter(set -> inRangeMax(set.getTotals()));
+        return stream.filter(set -> inRangeMax(set.getTotals()) && noDuplicates(set.items));
+    }
+
+    public boolean filter(ItemSet set) {
+        return inRange(set.getTotals()) && noDuplicates(set.items);
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -83,5 +87,12 @@ public class StatRequirements {
                 return false;
         }
         return true;
+    }
+
+    private boolean noDuplicates(EquipMap items) {
+        ItemData t1 = items.getTrinket1(), t2 = items.getTrinket2();
+        ItemData r1 = items.getRing1(), r2 = items.getRing2();
+        return (t1 == null || t2 == null || t1.id != t2.id) &&
+                (r1 == null || r2 == null || r1.id != r2.id);
     }
 }

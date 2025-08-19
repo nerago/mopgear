@@ -33,15 +33,6 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return enchants.standardEnchant(slot);
     }
 
-    public static ModelCombined standardRetModel() throws IOException {
-        int gem = 76615;
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
-        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0, gem);
-        StatRequirements statRequirements = StatRequirements.ret();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret(), enchants);
-    }
-
     public static ModelCombined standardProtModel() throws IOException {
         int gem = 76615;
         StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, gem);
@@ -52,10 +43,21 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statMix, statRequirements, ReforgeRules.prot(), enchants);
     }
 
+    public static ModelCombined standardRetModel() throws IOException {
+        int gem = 76615;
+//        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
+        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
+        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0, gem);
+        StatRequirements statRequirements = StatRequirements.ret();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret(), enchants);
+    }
+
     public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) throws IOException {
         int gem = 76615;
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
-        statRatings = new StatRatingsWeightsMix(statRatings, 21, null, 0, gem);
+//        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
+        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
+        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0, gem);
         StatRequirements statRequirements = wideHitRange ? StatRequirements.retWideCapRange() : StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
         ReforgeRules reforge = extraReforge ? ReforgeRules.retExtended() : ReforgeRules.ret();
@@ -63,7 +65,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined priorityRetModel() throws IOException {
-        StatRatings statRatings = new StatRatingsPriority(new StatType[] {StatType.Haste, StatType.Primary, StatType.Mastery, StatType.Crit});
+        StatRatings statRatings = new StatRatingsPriority(new StatType[] {StatType.Primary, StatType.Haste, StatType.Mastery, StatType.Crit});
         StatRequirements statRequirements = StatRequirements.retWideCapRange();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
         ReforgeRules reforge = ReforgeRules.retExtended();

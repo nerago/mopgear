@@ -19,7 +19,7 @@ public class Tweaker {
             for (ItemData replace : slotItems) {
                 if (replace != existing) {
                     ItemSet proposed = substitutedSet(slot, replace, baseItems, baseSet.otherSet);
-                    if (model.statRequirements().inRange(proposed.totals)) {
+                    if (model.statRequirements().filter(proposed)) {
                         best.add(proposed, model.calcRating(proposed));
                     }
                 }

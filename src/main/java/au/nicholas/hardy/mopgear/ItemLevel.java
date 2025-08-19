@@ -50,6 +50,10 @@ public class ItemLevel {
         map.put(84790, 483);
         map.put(82814, 463);
         map.put(86145, 489);
+        map.put(89817, 489);
+        map.put(81251, 463);
+        map.put(86802, 476);
+        map.put(86042, 489);
         return map;
     }
 
@@ -67,7 +71,9 @@ public class ItemLevel {
     public static ItemData scaleForChallengeMode(ItemData item) {
         Integer level = levelLookup.get(item.id);
         if (level == null) {
-            throw new IllegalArgumentException("item level not known " + item.id + " " + item);
+            throw new IllegalArgumentException("item level not known " + item.id + " " + item.toStringExtended());
+        } else if (level != item.itemLevel) {
+            throw new IllegalArgumentException("item level mismatch " + item.id + " " + item.toStringExtended() + " vs " + level);
         }
         if (level <= CHALLENGE_TARGET_LEVEL) {
             return item;

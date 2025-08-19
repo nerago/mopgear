@@ -167,4 +167,68 @@ public final class EquipMap {
         if (weapon != null) func.accept(SlotEquip.Weapon, weapon);
         if (offhand != null) func.accept(SlotEquip.Offhand, offhand);
     }
+
+    public ItemData getHead() {
+        return head;
+    }
+
+    public ItemData getNeck() {
+        return neck;
+    }
+
+    public ItemData getShoulder() {
+        return shoulder;
+    }
+
+    public ItemData getBack() {
+        return back;
+    }
+
+    public ItemData getChest() {
+        return chest;
+    }
+
+    public ItemData getWrist() {
+        return wrist;
+    }
+
+    public ItemData getHand() {
+        return hand;
+    }
+
+    public ItemData getBelt() {
+        return belt;
+    }
+
+    public ItemData getLeg() {
+        return leg;
+    }
+
+    public ItemData getFoot() {
+        return foot;
+    }
+
+    public ItemData getRing1() {
+        return ring1;
+    }
+
+    public ItemData getRing2() {
+        return ring2;
+    }
+
+    public ItemData getTrinket1() {
+        return trinket1;
+    }
+
+    public ItemData getTrinket2() {
+        return trinket2;
+    }
+
+    public ItemData getWeapon() {
+        return weapon;
+    }
+
+    public ItemData getOffhand() {
+        return offhand;
+    }
 }

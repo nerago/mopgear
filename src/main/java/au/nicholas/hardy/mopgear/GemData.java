@@ -89,6 +89,7 @@ public class GemData {
         map.put(76694, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76603, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
         map.put(76601, new StatBlock(0, 0, 0, 0, 0, 160, 160, 0, 0, 0));
+        map.put(4414, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int bracer
         return map;
     }
 
