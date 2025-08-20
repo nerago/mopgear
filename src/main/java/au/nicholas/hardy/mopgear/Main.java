@@ -8,7 +8,6 @@ import au.nicholas.hardy.mopgear.io.SourcesOfItems;
 import au.nicholas.hardy.mopgear.model.ItemLevel;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.model.StatRequirements;
-import au.nicholas.hardy.mopgear.util.BestCollection;
 import au.nicholas.hardy.mopgear.util.TopCollectorReporting;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.Tuple;
@@ -25,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static au.nicholas.hardy.mopgear.EngineUtil.chooseEngineAndRun;
 import static au.nicholas.hardy.mopgear.io.SourcesOfItems.*;
 import static au.nicholas.hardy.mopgear.io.SourcesOfItems.strengthPlateValorCelestialP1;
 import static au.nicholas.hardy.mopgear.domain.StatType.*;
@@ -119,7 +119,7 @@ public class Main {
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model);
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
-        findUpgradeSetup(items, strengthPlateValorCelestialP1(itemCache), model);
+        new FindUpgrades(itemCache).findUpgradeSetup(model, items, strengthPlateValorCelestialP1(itemCache));
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
 //        findUpgradeSetup(items, bagItemsArray(model), model);
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
@@ -142,7 +142,7 @@ public class Main {
 //        reforgeProcessPlusPlus(items, model, startTime, 89817, 86075);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
-        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model);
+        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
 //        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model);
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model);
@@ -161,7 +161,7 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, true, 86783, false, true, null);
 
         Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 476);
-        findUpgradeSetup(items, ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray()), model);
+       new FindUpgrades(itemCache).findUpgradeSetup(model, items, ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray()));
 
 //        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
 //        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);
@@ -181,84 +181,6 @@ public class Main {
 
         Optional<ItemSet> bestSet = chooseEngineAndRun(dumbModel, items, startTime, null, null);
         outputResult(bestSet, model, true);
-    }
-
-    private void findUpgradeSetup(EquipOptionsMap reforgedItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, ModelCombined model) throws IOException {
-//        SlotEquip slot = SlotEquip.Ring2;
-
-//        long runSize = 10000000; // quick runs
-        long runSize = 50000000; // 2 min total runs
-//        long runSize = 100000000; // 4 min total runs
-//        long runSize = 300000000; // 12 min total runs
-//        long runSize = 1000000000; // 40 min runs
-
-//        ItemUtil.defaultEnchants(reforgedItems, model, true);
-
-        ItemSet baseSet = reforgeProcessLight(reforgedItems, model, runSize, true).get();
-        double baseRating = model.calcRating(baseSet);
-        System.out.printf("BASE RATING    = %.0f\n", baseRating);
-
-        BestCollection<ItemData> bestCollection = new BestCollection<>();
-        for (Tuple.Tuple2<Integer, Integer> extraItemInfo : extraItemArray) {
-            int extraItemId = extraItemInfo.a();
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-            SlotEquip slot = extraItem.slot.toSlotEquip();
-
-            if (canSkipUpgradeCheck(extraItem, slot, reforgedItems))
-                continue;
-
-            if (extraItemInfo.b() != null) {
-                System.out.println(extraItem.toStringExtended() + " $" + extraItemInfo.b());
-            } else {
-                System.out.println(extraItem.toStringExtended());
-            }
-
-            checkOneUpgrade(reforgedItems.deepClone(), model, extraItemId, slot, runSize, baseRating, bestCollection, extraItem);
-
-            if (slot == SlotEquip.Trinket1) {
-                checkOneUpgrade(reforgedItems.deepClone(), model, extraItemId, SlotEquip.Trinket2, runSize, baseRating, bestCollection, extraItem);
-            }
-            if (slot == SlotEquip.Ring1) {
-                checkOneUpgrade(reforgedItems.deepClone(), model, extraItemId, SlotEquip.Ring2, runSize, baseRating, bestCollection, extraItem);
-            }
-        }
-
-        System.out.println("RANKING RANKING");
-        bestCollection.forEach((item, factor) ->
-                System.out.printf("%10s \t%35s \t$%d \t%1.3f\n", item.slot, item.name,
-                        ArrayUtil.findOne(extraItemArray, x -> x.a() == item.id).b(),
-                        factor));
-    }
-
-    private boolean canSkipUpgradeCheck(ItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {
-        if (SourcesOfItems.ignoredItems.contains(extraItem.id))
-            return true;
-
-        if (reforgedItems.get(slot) == null) {
-            System.out.println("SLOT NOT USED IN CURRENT SET " + extraItem.toStringExtended());
-            return true;
-        }
-        if (reforgedItems.get(slot)[0].id == extraItem.id) {
-            System.out.println("SAME ITEM " + extraItem.toStringExtended());
-            return true;
-        }
-
-        return false;
-    }
-
-    private void checkOneUpgrade(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, SlotEquip slot, long runSize, double baseRating, BestCollection<ItemData> bestCollection, ItemData extraItem) throws IOException {
-        Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
-        Optional<ItemSet> extraSet = reforgeProcessPlusCore(reforgedItems, model, null, false, extraItemId, slot, enchanting, true, runSize);
-        if (extraSet.isPresent()) {
-            System.out.println("PROPOSED " + extraSet.get().totals);
-            double extraRating = model.calcRating(extraSet.get());
-            double factor = extraRating / baseRating;
-            System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
-            bestCollection.add(extraItem, factor);
-        } else {
-            System.out.print("UPGRADE SET NOT FOUND\n");
-        }
-        System.out.println();
     }
 
     private void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {
@@ -600,11 +522,6 @@ public class Main {
         outputTweaked(bestSet, reforgedItems, model);
     }
 
-    private Optional<ItemSet> reforgeProcessLight(EquipOptionsMap reforgedItems, ModelCombined model, long runSize, boolean outputExistingGear) throws IOException {
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, reforgedItems, null, runSize, null);
-        return bestSet.map(itemSet -> Tweaker.tweak(itemSet, model, reforgedItems));
-    }
-
     @SuppressWarnings("SameParameterValue")
     private void reforgeProcessPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants) throws IOException {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
@@ -720,21 +637,6 @@ public class Main {
 //        Long runSize = null;
         Optional<ItemSet> best = chooseEngineAndRun(model, items, startTime, runSize, null);
         outputResult(best, model, true);
-    }
-
-    private static Optional<ItemSet> chooseEngineAndRun(ModelCombined model, EquipOptionsMap reforgedItems, Instant startTime, Long runSize, ItemSet otherSet) {
-        long estimate = ItemUtil.estimateSets(reforgedItems);
-
-        if (runSize != null && estimate > runSize) {
-            if (startTime != null)
-                System.out.printf("COMBINATIONS estimate=%,d RANDOM SAMPLE %,d\n", estimate, runSize);
-            Optional<ItemSet> proposed = EngineRandom.runSolver(model, reforgedItems, startTime, otherSet, runSize);
-            return proposed.map(itemSet -> Tweaker.tweak(itemSet, model, reforgedItems));
-        } else {
-            if (startTime != null)
-                System.out.printf("COMBINATIONS estimate=%,d FULL RUN\n", estimate);
-            return EngineStream.runSolver(model, reforgedItems, startTime, otherSet, estimate);
-        }
     }
 
     private void outputResult(Collection<ItemSet> bestSets, ModelCombined model, boolean detailedOutput) {
