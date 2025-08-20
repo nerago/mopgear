@@ -1,11 +1,12 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
@@ -34,9 +35,9 @@ public class SourcesOfItems {
                 Tuple.create(86076, 4),
                 Tuple.create(86080, 4),
                 // elegon
-//                Tuple.create(86130, 5), // prot weapon
+                Tuple.create(86130, 5), // prot weapon
                 Tuple.create(86140, 5), // ret weapon
-                Tuple.create(86135, 5), // starcrusher
+                Tuple.create(86135, 5), // got celestial
                 // will
                 Tuple.create(86144, 6),
                 Tuple.create(86145, 6),
@@ -175,10 +176,9 @@ public class SourcesOfItems {
                 .toArray(Tuple.Tuple2[]::new);
     }
 
-    public static Tuple.Tuple2<Integer, Integer>[] filterExclude(Tuple.Tuple2<Integer, Integer>[] existing, int[] exclude) {
-        List<Integer> excludeList = Arrays.stream(exclude).boxed().toList();
+    public static Tuple.Tuple2<Integer, Integer>[] filterExclude(Tuple.Tuple2<Integer, Integer>[] existing, List<Integer> exclude) {
         return Arrays.stream(existing)
-                .filter(tup -> !excludeList.contains(tup.a()))
+                .filter(tup -> !exclude.contains(tup.a()))
                 .toArray(Tuple.Tuple2[]::new);
     }
 
@@ -263,7 +263,55 @@ public class SourcesOfItems {
         };
     }
 
-    public static Tuple.Tuple2<Integer, Integer>[] bagItemsArray(ModelCombined model, int[] skip) throws IOException {
+    public static Tuple.Tuple2<Integer, Integer>[] strengthPlateHeartOfFear() {
+        // skipping neck cloak offhand weaps
+        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
+
+                Tuple.create(86154,1 ),
+                Tuple.create(89826,1 ),
+                Tuple.create(86203,1 ),
+                Tuple.create(86155,1 ),
+                Tuple.create(89828,2 ),
+                Tuple.create(86165,2 ),
+                Tuple.create(86164,2 ),
+                Tuple.create(86162,2 ),
+                Tuple.create(86174,3 ),
+                Tuple.create(89832,3 ),
+                Tuple.create(86177,3 ),
+                Tuple.create(86172,3 ),
+                Tuple.create(86202,4 ),
+                Tuple.create(86201,4 ),
+                Tuple.create(85322,4 ),
+                Tuple.create(86213,5 ),
+                Tuple.create(86219,5 ),
+                Tuple.create(85320,5 ),
+                Tuple.create(89837,6 ),
+                Tuple.create(85323,6 ),
+                Tuple.create(86191,0 ),
+                Tuple.create(86190,0 )
+        };
+    }
+
+    public static Tuple.Tuple2<Integer, Integer>[] strengthPlateHeartOfFearHeroic() {
+        // skipping neck cloak offhand weaps
+        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
+
+                Tuple.create(86966,3 ),
+        };
+    }
+
+    public static Tuple.Tuple2<Integer, Integer>[] strengthPlateCrafted() {
+        // skipping neck cloak offhand weaps
+        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
+
+                Tuple.create(87402,0 ),
+                Tuple.create(87406,0 ),
+                Tuple.create(87405,0 ),
+                Tuple.create(87407,0 ),
+        };
+    }
+
+    public static Tuple.Tuple2<Integer, Integer>[] bagItemsArray(ModelCombined model, List<Integer> skip) throws IOException {
         Tuple.Tuple2<Integer, Integer>[] bagArray = InputBagsParser.readInput(DataLocation.bagsFile);
         if (skip == null)
             return bagArray;
@@ -285,5 +333,10 @@ public class SourcesOfItems {
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
                 .map(tup -> Tuple.create(tup.b()[0].id, 0));
         return itemStream.toArray(Tuple.Tuple2[]::new);
+    }
+
+    static Tuple.Tuple2<Integer, Integer>[] strengthPlateValorCelestialP1(ItemCache itemCache) {
+        Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 476);
+        return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray());
     }
 }

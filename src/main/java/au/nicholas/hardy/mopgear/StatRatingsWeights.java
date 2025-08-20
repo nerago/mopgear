@@ -22,16 +22,18 @@ public class StatRatingsWeights implements StatRatings {
         chooseGem(defaultGem);
     }
 
-    private StatRatingsWeights(StatBlock weight) {
+    private StatRatingsWeights(StatBlock weight, StatBlock standardGem) {
         this.weight = weight;
         this.includeHit = false;
+        this.standardGem = standardGem;
     }
 
     // because a sim value doesn't understand breakpoints
     public static StatRatingsWeights hardCodeRetWeight() {
         // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.762,CritRating=0.375,HasteRating=0.561,ExpertiseRating=0.530,MasteryRating=0.369,Ap=0.436,MeleeDps=1.632 )
         // this was initial sim value at approx 6700 haste
-         return new StatRatingsWeights(new StatBlock(1000,0,375,369,0,561,0,0,0,0));
+         return new StatRatingsWeights(new StatBlock(1000,0,375,369,0,561,0,0,0,0),
+                 new StatBlock(0,0,0,0,0,320,0,0,0,0));
         // however haste isn't always that good, so dropped a bit to round number
         // also crit is valued higher than I'd like so moved some value from crit->mastery
 //        return new StatRatingsWeights(new StatBlock(1000,0,389,355,0,500,0,0,0,0));

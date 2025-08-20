@@ -9,12 +9,12 @@ public class StatRatingsWeightsMix implements StatRatings {
     private final int multiplyB;
     private final StatBlock standardGem;
 
-    public StatRatingsWeightsMix(StatRatings weightA, int multiplyA, StatRatings weightB, int multiplyB, int defaultGem) throws IOException {
+    public StatRatingsWeightsMix(StatRatings weightA, int multiplyA, StatRatings weightB, int multiplyB, StatBlock standardGem) throws IOException {
         this.weightA = weightA;
         this.weightB = weightB;
         this.multiplyA = multiplyA;
         this.multiplyB = multiplyB;
-        this.standardGem = GemData.known.get(defaultGem);
+        this.standardGem = standardGem;
     }
 
     @Override

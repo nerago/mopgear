@@ -13,4 +13,5 @@ public class DataLocation {
     public static final Path gearProtFile = directory.resolve("gear-prot.json");
     public static final Path gearRetFile = directory.resolve("gear-ret.json");
     public static final Path cacheFile = directory.resolve("cache.json");
+    public static final Path resultsDir = directory.resolve("results");
 }

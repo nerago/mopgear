@@ -248,6 +248,8 @@ public class ItemUtil {
             int socketCount = item.socketCount;
             if (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand) // TODO blacksmith only
                 socketCount++;
+            else if (item.slot == SlotItem.Belt)
+                socketCount++;
 
             StatBlock total = StatBlock.empty;
             StatBlock oneGem = model.standardGem();

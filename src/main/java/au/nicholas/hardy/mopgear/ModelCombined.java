@@ -34,30 +34,28 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined standardProtModel() throws IOException {
-        int gem = 76615;
+        Integer gem = 76633;
         StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, gem);
         StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, gem);
-        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13, gem);
+        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13, statDps.standardGem());
         StatRequirements statRequirements = StatRequirements.prot();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt);
         return new ModelCombined(statMix, statRequirements, ReforgeRules.prot(), enchants);
     }
 
     public static ModelCombined standardRetModel() throws IOException {
-        int gem = 76615;
 //        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
         StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
-        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0, gem);
+        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0, statRatings.standardGem());
         StatRequirements statRequirements = StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret(), enchants);
     }
 
     public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) throws IOException {
-        int gem = 76615;
 //        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
         StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
-        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0, gem);
+        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0, statRatings.standardGem());
         StatRequirements statRequirements = wideHitRange ? StatRequirements.retWideCapRange() : StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
         ReforgeRules reforge = extraReforge ? ReforgeRules.retExtended() : ReforgeRules.ret();
