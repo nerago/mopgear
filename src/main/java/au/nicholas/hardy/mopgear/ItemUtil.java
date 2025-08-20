@@ -1,5 +1,12 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.domain.*;
+import au.nicholas.hardy.mopgear.io.InputGearParser;
+import au.nicholas.hardy.mopgear.io.ItemCache;
+import au.nicholas.hardy.mopgear.io.WowHead;
+import au.nicholas.hardy.mopgear.model.GemData;
+import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.model.ReforgeRules;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 

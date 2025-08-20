@@ -1,11 +1,15 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.io;
 
+import au.nicholas.hardy.mopgear.ItemUtil;
+import au.nicholas.hardy.mopgear.domain.EquipOptionsMap;
+import au.nicholas.hardy.mopgear.domain.SlotItem;
+import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.model.ReforgeRules;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -335,7 +339,7 @@ public class SourcesOfItems {
         return itemStream.toArray(Tuple.Tuple2[]::new);
     }
 
-    static Tuple.Tuple2<Integer, Integer>[] strengthPlateValorCelestialP1(ItemCache itemCache) {
+    public static Tuple.Tuple2<Integer, Integer>[] strengthPlateValorCelestialP1(ItemCache itemCache) {
         Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 476);
         return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray());
     }

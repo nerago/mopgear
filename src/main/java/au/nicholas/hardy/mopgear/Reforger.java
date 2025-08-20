@@ -1,5 +1,11 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.domain.ItemData;
+import au.nicholas.hardy.mopgear.domain.ReforgeRecipe;
+import au.nicholas.hardy.mopgear.domain.StatBlock;
+import au.nicholas.hardy.mopgear.domain.StatType;
+import au.nicholas.hardy.mopgear.model.ReforgeRules;
+
 import java.util.ArrayList;
 import java.util.List;
 

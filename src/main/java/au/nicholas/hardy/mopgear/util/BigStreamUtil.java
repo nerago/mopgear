@@ -1,7 +1,7 @@
 package au.nicholas.hardy.mopgear.util;
 
-import au.nicholas.hardy.mopgear.ItemSet;
-import au.nicholas.hardy.mopgear.ModelCombined;
+import au.nicholas.hardy.mopgear.domain.ItemSet;
+import au.nicholas.hardy.mopgear.model.ModelCombined;
 
 import java.time.Duration;
 import java.time.Instant;

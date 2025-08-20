@@ -1,4 +1,8 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.model;
+
+import au.nicholas.hardy.mopgear.domain.SlotItem;
+import au.nicholas.hardy.mopgear.domain.SpecType;
+import au.nicholas.hardy.mopgear.domain.StatBlock;
 
 public class DefaultEnchants {
     private final SpecType spec;

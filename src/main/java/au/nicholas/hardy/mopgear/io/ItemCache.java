@@ -1,5 +1,6 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.io;
 
+import au.nicholas.hardy.mopgear.domain.ItemData;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

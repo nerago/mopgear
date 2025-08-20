@@ -1,4 +1,4 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.domain;
 
 import java.util.Objects;
 
@@ -96,7 +96,7 @@ public final class StatBlock {
         return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
     }
 
-    int get(StatType stat) {
+    public int get(StatType stat) {
         switch (stat) {
             case Primary -> {
                 return primary;
@@ -132,7 +132,7 @@ public final class StatBlock {
         }
     }
 
-    StatBlock withChange(StatType a_stat, int a_value) {
+    public StatBlock withChange(StatType a_stat, int a_value) {
         int primary = this.primary;
         int stam = this.stam;
         int mastery = this.mastery;
@@ -159,7 +159,7 @@ public final class StatBlock {
         return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
     }
 
-    StatBlock withChange(StatType a_stat, int a_value, StatType b_stat, int b_value) {
+    public StatBlock withChange(StatType a_stat, int a_value, StatType b_stat, int b_value) {
         int primary = this.primary;
         int stam = this.stam;
         int mastery = this.mastery;

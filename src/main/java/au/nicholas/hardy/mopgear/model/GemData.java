@@ -1,4 +1,8 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.model;
+
+import au.nicholas.hardy.mopgear.domain.ItemData;
+import au.nicholas.hardy.mopgear.domain.StatBlock;
+import au.nicholas.hardy.mopgear.domain.StatType;
 
 import java.util.HashMap;
 import java.util.Map;

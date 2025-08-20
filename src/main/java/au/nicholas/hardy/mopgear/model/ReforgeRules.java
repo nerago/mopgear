@@ -1,5 +1,6 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.model;
 
+import au.nicholas.hardy.mopgear.domain.StatType;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 
 public class ReforgeRules {

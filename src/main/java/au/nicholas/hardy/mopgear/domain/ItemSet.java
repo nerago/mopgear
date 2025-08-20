@@ -1,4 +1,6 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.domain;
+
+import au.nicholas.hardy.mopgear.model.ModelCombined;
 
 public final class ItemSet {
     public final EquipMap items;
@@ -35,7 +37,7 @@ public final class ItemSet {
         return items;
     }
 
-    void outputSet(ModelCombined model) {
+    public void outputSet(ModelCombined model) {
         System.out.println(getTotals().toStringExtended() + " " + model.calcRating(getTotals()));
         getItems().forEachValue(it -> System.out.println(it + " " + model.calcRating(it.totalStatCopy())));
     }

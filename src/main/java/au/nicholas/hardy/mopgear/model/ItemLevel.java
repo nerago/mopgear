@@ -1,8 +1,8 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.model;
 
+import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 

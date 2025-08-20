@@ -1,4 +1,9 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.model;
+
+import au.nicholas.hardy.mopgear.domain.EquipMap;
+import au.nicholas.hardy.mopgear.domain.ItemData;
+import au.nicholas.hardy.mopgear.domain.ItemSet;
+import au.nicholas.hardy.mopgear.domain.StatBlock;
 
 import java.util.stream.Stream;
 

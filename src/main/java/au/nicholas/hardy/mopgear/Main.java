@@ -1,5 +1,13 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.domain.*;
+import au.nicholas.hardy.mopgear.io.DataLocation;
+import au.nicholas.hardy.mopgear.io.InputGearParser;
+import au.nicholas.hardy.mopgear.io.ItemCache;
+import au.nicholas.hardy.mopgear.io.SourcesOfItems;
+import au.nicholas.hardy.mopgear.model.ItemLevel;
+import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.model.StatRequirements;
 import au.nicholas.hardy.mopgear.util.BestCollection;
 import au.nicholas.hardy.mopgear.util.TopCollectorReporting;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
@@ -17,9 +25,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static au.nicholas.hardy.mopgear.SourcesOfItems.*;
-import static au.nicholas.hardy.mopgear.SourcesOfItems.strengthPlateValorCelestialP1;
-import static au.nicholas.hardy.mopgear.StatType.*;
+import static au.nicholas.hardy.mopgear.io.SourcesOfItems.*;
+import static au.nicholas.hardy.mopgear.io.SourcesOfItems.strengthPlateValorCelestialP1;
+import static au.nicholas.hardy.mopgear.domain.StatType.*;
 
 @SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType"})
 public class Main {

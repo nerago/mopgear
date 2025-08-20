@@ -1,5 +1,8 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.io;
 
+import au.nicholas.hardy.mopgear.domain.ItemData;
+import au.nicholas.hardy.mopgear.domain.SlotItem;
+import au.nicholas.hardy.mopgear.domain.StatBlock;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 
@@ -9,7 +12,7 @@ import java.io.StringReader;
 import java.net.URI;
 
 public class WowHead {
-    static ItemData fetchItem(int itemId) {
+    public static ItemData fetchItem(int itemId) {
         String url = "https://www.wowhead.com/mop-classic/item=" + itemId;
         String htmlContent = fetchHTML(url);
 

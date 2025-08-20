@@ -1,4 +1,4 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.domain;
 
 public final class ItemData {
     public final int id;
@@ -86,11 +86,11 @@ public final class ItemData {
         }
     }
 
-    static boolean isSameEquippedItem(ItemData a, ItemData b) {
+    public static boolean isSameEquippedItem(ItemData a, ItemData b) {
         return a.id == b.id && a.statFixed.equalsStats(b.statFixed);
     }
 
-    static boolean isIdenticalItem(ItemData a, ItemData b) {
+    public static boolean isIdenticalItem(ItemData a, ItemData b) {
         return a.id == b.id && a.stat.equalsStats(b.stat) && a.statFixed.equalsStats(b.statFixed);
     }
 }

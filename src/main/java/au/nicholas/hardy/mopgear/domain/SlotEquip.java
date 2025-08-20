@@ -1,4 +1,4 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.domain;
 
 public enum SlotEquip {
     Head,

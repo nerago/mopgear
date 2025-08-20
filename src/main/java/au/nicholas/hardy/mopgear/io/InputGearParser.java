@@ -1,5 +1,6 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.io;
 
+import au.nicholas.hardy.mopgear.domain.EquippedItem;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -16,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class InputGearParser {
-    static List<EquippedItem> readInput(Path file) throws IOException {
+    public static List<EquippedItem> readInput(Path file) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             return parseReader(reader);
         }

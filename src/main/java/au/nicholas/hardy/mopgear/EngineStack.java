@@ -1,5 +1,10 @@
 package au.nicholas.hardy.mopgear;
 
+import au.nicholas.hardy.mopgear.domain.ItemData;
+import au.nicholas.hardy.mopgear.domain.ItemSet;
+import au.nicholas.hardy.mopgear.domain.SlotEquip;
+import au.nicholas.hardy.mopgear.model.StatRatings;
+
 import java.util.*;
 
 public class EngineStack {

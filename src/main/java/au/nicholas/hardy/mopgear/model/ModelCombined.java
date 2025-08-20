@@ -1,4 +1,7 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.model;
+
+import au.nicholas.hardy.mopgear.domain.*;
+import au.nicholas.hardy.mopgear.io.DataLocation;
 
 import java.io.IOException;
 import java.util.stream.Stream;

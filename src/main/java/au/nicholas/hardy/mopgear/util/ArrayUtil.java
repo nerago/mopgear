@@ -1,8 +1,7 @@
 package au.nicholas.hardy.mopgear.util;
 
-import au.nicholas.hardy.mopgear.ItemData;
-import au.nicholas.hardy.mopgear.ItemSet;
-import au.nicholas.hardy.mopgear.StatType;
+import au.nicholas.hardy.mopgear.domain.ItemData;
+import au.nicholas.hardy.mopgear.domain.StatType;
 
 import java.lang.reflect.Array;
 import java.util.*;

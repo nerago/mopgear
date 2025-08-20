@@ -1,5 +1,7 @@
-package au.nicholas.hardy.mopgear;
+package au.nicholas.hardy.mopgear.model;
 
+import au.nicholas.hardy.mopgear.domain.StatBlock;
+import au.nicholas.hardy.mopgear.domain.StatType;
 import au.nicholas.hardy.mopgear.util.BestHolder;
 
 import java.io.BufferedReader;
