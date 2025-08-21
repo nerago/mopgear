@@ -20,7 +20,7 @@ public class StatRequirements {
     }
 
     public static StatRequirements retWideCapRange() {
-        return new StatRequirements(TARGET_RATING_MELEE, TARGET_RATING_MELEE, DEFAULT_CAP_ALLOW_EXCEED * 5, false);
+        return new StatRequirements(TARGET_RATING_MELEE, TARGET_RATING_MELEE, DEFAULT_CAP_ALLOW_EXCEED * 10, false);
     }
 
     public static StatRequirements prot() {

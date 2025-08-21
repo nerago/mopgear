@@ -4,6 +4,7 @@ import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -147,6 +148,12 @@ public final class EquipOptionsMap {
         put(slot, array[0]);
     }
 
+    public void replaceWithSpecificForge(SlotEquip slot, ReforgeRecipe reforgeRecipe) {
+        ItemData[] array = get(slot);
+        ItemData choice = ArrayUtil.findOne(array, item -> reforgeRecipe.equalsTyped(item.reforge));
+        put(slot, choice);
+    }
+
 //    @Deprecated(since = "avoid extra allocation")
     public EquipOptionsMap shallowClone() {
         return new EquipOptionsMap(this);
@@ -225,5 +232,34 @@ public final class EquipOptionsMap {
         ArrayList<Tuple.Tuple2<SlotEquip, ItemData[]>> list = new ArrayList<>();
         forEachPair((slot, array) -> list.add(Tuple.create(slot, array)));
         return list;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EquipOptionsMap that = (EquipOptionsMap) o;
+        return Arrays.equals(head, that.head) && Arrays.equals(neck, that.neck) && Arrays.equals(shoulder, that.shoulder) && Arrays.equals(back, that.back) && Arrays.equals(chest, that.chest) && Arrays.equals(wrist, that.wrist) && Arrays.equals(hand, that.hand) && Arrays.equals(belt, that.belt) && Arrays.equals(leg, that.leg) && Arrays.equals(foot, that.foot) && Arrays.equals(ring1, that.ring1) && Arrays.equals(ring2, that.ring2) && Arrays.equals(trinket1, that.trinket1) && Arrays.equals(trinket2, that.trinket2) && Arrays.equals(weapon, that.weapon) && Arrays.equals(offhand, that.offhand);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(head);
+        result = 31 * result + Arrays.hashCode(neck);
+        result = 31 * result + Arrays.hashCode(shoulder);
+        result = 31 * result + Arrays.hashCode(back);
+        result = 31 * result + Arrays.hashCode(chest);
+        result = 31 * result + Arrays.hashCode(wrist);
+        result = 31 * result + Arrays.hashCode(hand);
+        result = 31 * result + Arrays.hashCode(belt);
+        result = 31 * result + Arrays.hashCode(leg);
+        result = 31 * result + Arrays.hashCode(foot);
+        result = 31 * result + Arrays.hashCode(ring1);
+        result = 31 * result + Arrays.hashCode(ring2);
+        result = 31 * result + Arrays.hashCode(trinket1);
+        result = 31 * result + Arrays.hashCode(trinket2);
+        result = 31 * result + Arrays.hashCode(weapon);
+        result = 31 * result + Arrays.hashCode(offhand);
+        return result;
     }
 }

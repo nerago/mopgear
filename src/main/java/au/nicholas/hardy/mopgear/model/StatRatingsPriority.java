@@ -1,18 +1,21 @@
 package au.nicholas.hardy.mopgear.model;
 
+import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.domain.StatType;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 
 public class StatRatingsPriority implements StatRatings {
     private final StatType[] priority;
     private final static int DEFAULT_MULTIPLY = 4; // scale to similar rates as weighting
-    private StatBlock standardGem;
+    private EnumMap<SocketType,StatBlock> standardGems;
+
 
     public StatRatingsPriority(StatType[] priority) {
         this.priority = priority;
-        chooseGem();
+        chooseGems();
         validate();
     }
 
@@ -40,14 +43,16 @@ public class StatRatingsPriority implements StatRatings {
         return value * DEFAULT_MULTIPLY;
     }
 
-    private void chooseGem() {
-        StatType stat = priority[0];
-        int value = GemData.standardValue(stat);
-        standardGem = StatBlock.empty.withChange(stat, value);
+    private void chooseGems() {
+        standardGems = new EnumMap<>(SocketType.class);
+        GemData.chooseGem(standardGems, SocketType.Red, this::calcRating);
+        GemData.chooseGem(standardGems, SocketType.Blue, this::calcRating);
+        GemData.chooseGem(standardGems, SocketType.Yellow, this::calcRating);
+        GemData.chooseGem(standardGems, SocketType.General, this::calcRating);
     }
 
     @Override
-    public StatBlock standardGem() {
-        return standardGem;
+    public StatBlock gemChoice(SocketType socket) {
+        return standardGems.get(socket);
     }
 }

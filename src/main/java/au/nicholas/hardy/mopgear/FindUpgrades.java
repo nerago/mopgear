@@ -15,8 +15,8 @@ import java.util.function.Function;
 public class FindUpgrades {
     private ItemCache itemCache;
 
-//    private static final long runSize = 10000000; // quick runs
-    private static final long runSize = 50000000; // 2 min total runs
+    private static final long runSize = 10000000; // quick runs
+//    private static final long runSize = 50000000; // 2 min total runs
 //    private static final long runSize = 100000000; // 4 min total runs
 //    private static final long runSize = 300000000; // 12 min total runs
 //    private static final long runSize = 1000000000; // 40 min runs
@@ -28,7 +28,7 @@ public class FindUpgrades {
     public void findUpgradeSetup(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
         ItemSet baseSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null).orElseThrow();
         double baseRating = model.calcRating(baseSet);
-        System.out.printf("BASE RATING    = %.0f\n", baseRating);
+        System.out.printf("\nBASE RATING    = %.0f\n\n", baseRating);
 
         Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
 
@@ -63,7 +63,7 @@ public class FindUpgrades {
         System.out.println("RANKING RANKING");
         bestCollection.forEach((item, factor) ->
                 System.out.printf("%10s \t%35s \t$%d \t%1.3f\n", item.slot, item.name,
-                        ArrayUtil.findOne(extraItemArray, x -> x.a() == item.id).b(),
+                        ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b(),
                         factor));
     }
 
@@ -101,6 +101,7 @@ public class FindUpgrades {
         extraItem = enchanting.apply(extraItem);
         ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
+        System.out.println("OFFER " + extraItem);
         System.out.println("REPLACING " + (runItems.get(slot) != null ? runItems.get(slot)[0] : "NOTHING"));
         runItems.put(slot, extraForged);
         ArrayUtil.mapInPlace(runItems.get(slot), enchanting);

@@ -160,8 +160,33 @@ public class ItemUtil {
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData chosenItem = chosenMap.get(slot);
             if (chosenItem != null) {
-                submitMap.put(slot, chosenItem);
+                ItemData[] options = submitMap.get(slot);
+                boolean justThat = true;
+                for (ItemData item : options) {
+                    if (item.id != chosenItem.id) {
+                        justThat = false;
+                        break;
+                    }
+                }
+
+                if (justThat) {
+                    submitMap.put(slot, chosenItem);
+                } else {
+                    ArrayList<ItemData> replace = new ArrayList<>();
+                    replace.add(chosenItem);
+                    for (ItemData item : options) {
+                        if (item.id != chosenItem.id) {
+                            replace.add(item);
+                        }
+                    }
+                    submitMap.put(slot, replace.toArray(ItemData[]::new));
+                }
             }
+
+//            ItemData chosenItem = chosenMap.get(slot);
+//            if (chosenItem != null) {
+//                submitMap.put(slot, chosenItem);
+//            }
         }
     }
 
@@ -252,16 +277,19 @@ public class ItemUtil {
 
     public static ItemData defaultEnchants(ItemData item, ModelCombined model, boolean force) {
         if (force || item.statFixed.isEmpty()) {
-            int socketCount = item.socketCount;
-            if (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand) // TODO blacksmith only
-                socketCount++;
+            SocketType[] socketSlots = item.socketSlots;
+
+            // TODO blacksmith only
+            if (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand)
+                socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[] { SocketType.General };
             else if (item.slot == SlotItem.Belt)
-                socketCount++;
+                socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[] { SocketType.General };
 
             StatBlock total = StatBlock.empty;
-            StatBlock oneGem = model.standardGem();
-            for (int i = 0; i < socketCount; ++i) {
-                total = total.plus(oneGem);
+            if (socketSlots != null) {
+                for (SocketType type : socketSlots) {
+                    total = total.plus(model.gemChoice(type));
+                }
             }
             if (item.socketBonus != 0) {
                 StatBlock bonus = GemData.getSocketBonus(item);

@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear.domain;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -230,5 +231,18 @@ public final class EquipMap {
 
     public ItemData getOffhand() {
         return offhand;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EquipMap equipMap = (EquipMap) o;
+        return Objects.equals(head, equipMap.head) && Objects.equals(neck, equipMap.neck) && Objects.equals(shoulder, equipMap.shoulder) && Objects.equals(back, equipMap.back) && Objects.equals(chest, equipMap.chest) && Objects.equals(wrist, equipMap.wrist) && Objects.equals(hand, equipMap.hand) && Objects.equals(belt, equipMap.belt) && Objects.equals(leg, equipMap.leg) && Objects.equals(foot, equipMap.foot) && Objects.equals(ring1, equipMap.ring1) && Objects.equals(ring2, equipMap.ring2) && Objects.equals(trinket1, equipMap.trinket1) && Objects.equals(trinket2, equipMap.trinket2) && Objects.equals(weapon, equipMap.weapon) && Objects.equals(offhand, equipMap.offhand);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(head, neck, shoulder, back, chest, wrist, hand, belt, leg, foot, ring1, ring2, trinket1, trinket2, weapon, offhand);
     }
 }

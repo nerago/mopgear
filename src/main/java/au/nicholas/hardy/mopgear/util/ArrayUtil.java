@@ -1,6 +1,7 @@
 package au.nicholas.hardy.mopgear.util;
 
 import au.nicholas.hardy.mopgear.domain.ItemData;
+import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatType;
 
 import java.lang.reflect.Array;
@@ -40,6 +41,14 @@ public class ArrayUtil {
         T[] result = createGeneric(first, newLen);
         System.arraycopy(first, 0, result, 0, first.length);
         System.arraycopy(second, 0, result, first.length, second.length);
+        return result;
+    }
+
+    public static <T> T[] append(T[] array, T item) {
+        int newLen = array.length + 1;
+        T[] result = createGeneric(array, newLen);
+        System.arraycopy(array, 0, result, 0, array.length);
+        result[array.length] = item;
         return result;
     }
 
@@ -93,7 +102,19 @@ public class ArrayUtil {
                 result = item;
             }
         }
-        return result;
+        if (found)
+            return result;
+        else
+            throw new IllegalStateException("no match found");
+    }
+
+    public static <T> T findAny(T[] existing, Predicate<T> predicate) {
+        for (T item : existing) {
+            if (predicate.test(item)) {
+                return item;
+            }
+        }
+        throw new IllegalStateException("no match found");
     }
 
     public static <T> T[] allMatch(T[] existing, Predicate<T> predicate) {

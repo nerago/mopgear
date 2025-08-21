@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear.model;
 
+import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.domain.StatType;
 import au.nicholas.hardy.mopgear.util.BestHolder;
@@ -8,34 +9,33 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EnumMap;
 
 public class StatRatingsWeights implements StatRatings {
     public static final int PROT_MULTIPLY = 17;
 
     private final StatBlock weight;
     private final boolean includeHit;
-    private StatBlock standardGem;
+    private EnumMap<SocketType, StatBlock> standardGems;
 
-    public StatRatingsWeights(Path weightFile, boolean includeHit, Integer defaultGem) throws IOException {
+    public StatRatingsWeights(Path weightFile, boolean includeHit) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
             weight = parseReader(reader);
         }
         this.includeHit = includeHit;
-        chooseGem(defaultGem);
+        chooseGems();
     }
 
-    private StatRatingsWeights(StatBlock weight, StatBlock standardGem) {
+    private StatRatingsWeights(StatBlock weight) {
         this.weight = weight;
         this.includeHit = false;
-        this.standardGem = standardGem;
     }
 
     // because a sim value doesn't understand breakpoints
     public static StatRatingsWeights hardCodeRetWeight() {
         // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.762,CritRating=0.375,HasteRating=0.561,ExpertiseRating=0.530,MasteryRating=0.369,Ap=0.436,MeleeDps=1.632 )
         // this was initial sim value at approx 6700 haste
-         return new StatRatingsWeights(new StatBlock(1000,0,375,369,0,561,0,0,0,0),
-                 new StatBlock(0,0,0,0,0,320,0,0,0,0));
+         return new StatRatingsWeights(new StatBlock(1000,0,375,369,0,561,0,0,0,0));
         // however haste isn't always that good, so dropped a bit to round number
         // also crit is valued higher than I'd like so moved some value from crit->mastery
 //        return new StatRatingsWeights(new StatBlock(1000,0,389,355,0,500,0,0,0,0));
@@ -104,30 +104,16 @@ public class StatRatingsWeights implements StatRatings {
         return value.haste * weight.haste;
     }
 
-    private void chooseGem(Integer defaultGem) {
-        if (defaultGem != null) {
-            standardGem = GemData.known.get(defaultGem);
-        } else {
-            StatType bestStat = getBestStat();
-            standardGem = StatBlock.empty.withChange(bestStat, GemData.standardValue(bestStat));
-        }
-    }
-
-    private StatType getBestStat() {
-        BestHolder<StatType> best = new BestHolder<>(null, 0);
-        for (StatType stat : StatType.values()) {
-            int multiply = weight.get(stat);
-            if (multiply > 0) {
-                long value = GemData.standardValue(stat);
-                best.add(stat, multiply * value);
-            }
-        }
-
-        return best.get();
+    private void chooseGems() {
+        standardGems = new EnumMap<>(SocketType.class);
+        GemData.chooseGem(standardGems, SocketType.Red, this::calcRating);
+        GemData.chooseGem(standardGems, SocketType.Blue, this::calcRating);
+        GemData.chooseGem(standardGems, SocketType.Yellow, this::calcRating);
+        GemData.chooseGem(standardGems, SocketType.General, this::calcRating);
     }
 
     @Override
-    public StatBlock standardGem() {
-        return standardGem;
+    public StatBlock gemChoice(SocketType socket) {
+        return standardGems.get(socket);
     }
 }

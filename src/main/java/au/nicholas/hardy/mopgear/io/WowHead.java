@@ -2,6 +2,7 @@ package au.nicholas.hardy.mopgear.io;
 
 import au.nicholas.hardy.mopgear.domain.ItemData;
 import au.nicholas.hardy.mopgear.domain.SlotItem;
+import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
@@ -10,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WowHead {
     public static ItemData fetchItem(int itemId) {
@@ -93,7 +96,6 @@ public class WowHead {
 
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
         SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
-        int sockets = objectGetInt(equipObject, "nsockets");
         int socketBonus = objectGetInt(equipObject, "socketbonus");
 
         StatBlock statBlock = new StatBlock(
@@ -108,7 +110,17 @@ public class WowHead {
                 objectGetInt(equipObject, "parryrtng"),
                 objectGetInt(equipObject, "spi"));
 
-        return ItemData.build(itemId, slot, name, statBlock, sockets, socketBonus, itemLevel);
+        List<SocketType> sockets = new ArrayList<>();
+        for (int i = 1; i <= 5; ++i) {
+            int socketTypeNum = objectGetInt(equipObject, "socket" + i);
+            if (socketTypeNum != 0) {
+                SocketType type = SocketType.withNum(socketTypeNum);
+                sockets.add(type);
+            }
+        }
+        SocketType[] socketArray = sockets.isEmpty() ? null : sockets.toArray(SocketType[]::new);
+
+        return ItemData.build(itemId, slot, name, statBlock, socketArray, socketBonus, itemLevel);
     }
 
     @SuppressWarnings("SameParameterValue")
