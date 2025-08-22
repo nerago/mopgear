@@ -3,15 +3,16 @@ package au.nicholas.hardy.mopgear.model;
 import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.domain.StatType;
+import au.nicholas.hardy.mopgear.util.BestHolder;
 
 import java.util.Arrays;
 import java.util.EnumMap;
 
-public class StatRatingsPriority implements StatRatings {
+import static au.nicholas.hardy.mopgear.domain.StatType.*;
+
+public class StatRatingsPriority extends StatRatings {
     private final StatType[] priority;
     private final static int DEFAULT_MULTIPLY = 4; // scale to similar rates as weighting
-    private EnumMap<SocketType,StatBlock> standardGems;
-
 
     public StatRatingsPriority(StatType[] priority) {
         this.priority = priority;
@@ -34,25 +35,24 @@ public class StatRatingsPriority implements StatRatings {
      */
     @Override
     public long calcRating(StatBlock totals) {
-        long value = 0;
+        long result = 0;
         long multiply = 1000;
         for (StatType stat : priority) {
-            value += totals.get(stat) * multiply;
+            result += totals.get(stat) * multiply;
             multiply /= 10;
         }
-        return value * DEFAULT_MULTIPLY;
-    }
-
-    private void chooseGems() {
-        standardGems = new EnumMap<>(SocketType.class);
-        GemData.chooseGem(standardGems, SocketType.Red, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.Blue, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.Yellow, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.General, this::calcRating);
+        return result * DEFAULT_MULTIPLY;
     }
 
     @Override
-    public StatBlock gemChoice(SocketType socket) {
-        return standardGems.get(socket);
+    public long calcRating(StatType queryStat, int value) {
+        long multiply = 1000;
+        for (StatType stat : priority) {
+            if (stat == queryStat) {
+                return value * multiply * DEFAULT_MULTIPLY;
+            }
+            multiply /= 10;
+        }
+        return 0;
     }
 }

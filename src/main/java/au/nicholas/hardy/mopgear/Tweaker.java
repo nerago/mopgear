@@ -33,6 +33,6 @@ public class Tweaker {
 
     private static ItemSet substitutedSet(SlotEquip slot, ItemData replace, EquipMap baseItems, ItemSet otherSet) {
         EquipMap map = baseItems.copyWithReplace(slot, replace);
-        return ItemSet.manyItems(map, otherSet);
+        return ItemSet.manyItems(map, otherSet, null);
     }
 }

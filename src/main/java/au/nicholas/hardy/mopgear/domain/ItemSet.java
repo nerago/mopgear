@@ -13,15 +13,24 @@ public final class ItemSet {
         this.otherSet = otherSet;
     }
 
-    public static ItemSet manyItems(EquipMap items, ItemSet otherSet) {
+    public static ItemSet manyItems(EquipMap items, ItemSet otherSet, StatBlock adjustment) {
         // trust caller is creating unique maps
         StatBlock totals = StatBlock.sum(items);
+        if (adjustment != null) {
+            totals = totals.plus(adjustment);
+        }
         return new ItemSet(items, totals, otherSet);
     }
 
-    public static ItemSet singleItem(SlotEquip slot, ItemData item, ItemSet otherSet) {
+    public static ItemSet singleItem(SlotEquip slot, ItemData item, ItemSet otherSet, StatBlock adjustment) {
         EquipMap itemMap = EquipMap.single(slot, item);
-        return new ItemSet(itemMap, item.totalStatCopy(), otherSet);
+        StatBlock total;
+        if (adjustment == null) {
+            total = item.totalStatCopy();
+        } else {
+            total = adjustment.plus(item.stat, item.statFixed);
+        }
+        return new ItemSet(itemMap, total, otherSet);
     }
 
     public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {

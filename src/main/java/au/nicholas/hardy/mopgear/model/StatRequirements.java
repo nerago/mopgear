@@ -100,4 +100,21 @@ public class StatRequirements {
         return (t1 == null || t2 == null || t1.id != t2.id) &&
                 (r1 == null || r2 == null || r1.id != r2.id);
     }
+
+    public int getMinimumHit() {
+        return requiredHit;
+    }
+
+    public int getMinimumExpertise() {
+        return requiredExpertise;
+    }
+
+
+    public int getMaximumHit() {
+        return requiredHit != 0 && maxExceed != 0 ? requiredHit + maxExceed : Integer.MAX_VALUE;
+    }
+
+    public int getMaximumExpertise() {
+        return requiredExpertise != 0 && maxExceed != 0 ? requiredExpertise + maxExceed : Integer.MAX_VALUE;
+    }
 }

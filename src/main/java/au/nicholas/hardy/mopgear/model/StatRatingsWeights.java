@@ -11,12 +11,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumMap;
 
-public class StatRatingsWeights implements StatRatings {
+import static au.nicholas.hardy.mopgear.domain.StatType.*;
+
+public class StatRatingsWeights extends StatRatings {
     public static final int PROT_MULTIPLY = 17;
 
     private final StatBlock weight;
     private final boolean includeHit;
     private EnumMap<SocketType, StatBlock> standardGems;
+    private StatType bestNonHit;
 
     public StatRatingsWeights(Path weightFile, boolean includeHit) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
@@ -55,12 +58,12 @@ public class StatRatingsWeights implements StatRatings {
         for (int i = 1; i < parts.length; ++i) {
             String[] pair = parts[i].split("=");
             stat = switch (pair[0]) {
-                case "Intellect", "Strength" -> addNum(stat, StatType.Primary, pair[1]);
+                case "Intellect", "Strength" -> addNum(stat, Primary, pair[1]);
                 case "Stamina" -> addNum(stat, StatType.Stam, pair[1]);
-                case "HitRating" -> addNum(stat, StatType.Hit, pair[1]);
+                case "HitRating" -> addNum(stat, Hit, pair[1]);
                 case "CritRating" -> addNum(stat, StatType.Crit, pair[1]);
                 case "HasteRating" -> addNum(stat, StatType.Haste, pair[1]);
-                case "ExpertiseRating" -> addNum(stat, StatType.Expertise, pair[1]);
+                case "ExpertiseRating" -> addNum(stat, Expertise, pair[1]);
                 case "MasteryRating" -> addNum(stat, StatType.Mastery, pair[1]);
                 case "DodgeRating" -> addNum(stat, StatType.Dodge, pair[1]);
                 case "ParryRating" -> addNum(stat, StatType.Parry, pair[1]);
@@ -99,21 +102,13 @@ public class StatRatingsWeights implements StatRatings {
         return total;
     }
 
+    @Override
+    public long calcRating(StatType stat, int value) {
+        return (long) value * weight.get(stat);
+    }
+
     private int hasteValue(StatBlock value) {
         // TODO breakpoints
         return value.haste * weight.haste;
-    }
-
-    private void chooseGems() {
-        standardGems = new EnumMap<>(SocketType.class);
-        GemData.chooseGem(standardGems, SocketType.Red, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.Blue, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.Yellow, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.General, this::calcRating);
-    }
-
-    @Override
-    public StatBlock gemChoice(SocketType socket) {
-        return standardGems.get(socket);
     }
 }

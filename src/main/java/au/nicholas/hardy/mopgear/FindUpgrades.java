@@ -15,10 +15,10 @@ import java.util.function.Function;
 public class FindUpgrades {
     private ItemCache itemCache;
 
-    private static final long runSize = 10000000; // quick runs
+//    private static final long runSize = 10000000; // quick runs
 //    private static final long runSize = 50000000; // 2 min total runs
 //    private static final long runSize = 100000000; // 4 min total runs
-//    private static final long runSize = 300000000; // 12 min total runs
+    private static final long runSize = 300000000; // 12 min total runs
 //    private static final long runSize = 1000000000; // 40 min runs
 
     public FindUpgrades(ItemCache itemCache) {
@@ -26,7 +26,7 @@ public class FindUpgrades {
     }
 
     public void findUpgradeSetup(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
-        ItemSet baseSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null).orElseThrow();
+        ItemSet baseSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null, null).orElseThrow();
         double baseRating = model.calcRating(baseSet);
         System.out.printf("\nBASE RATING    = %.0f\n\n", baseRating);
 
@@ -47,16 +47,13 @@ public class FindUpgrades {
                 System.out.println(extraItem.toStringExtended());
             }
 
-            Optional<ItemSet> resultDirect = reforgeProcessPlusCore(baseItems.deepClone(), model, extraItem, slot, enchanting);
-            reportUpgrade(model, extraItem, baseRating, bestCollection, resultDirect);
+            checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, slot, baseRating, bestCollection);
 
             if (slot == SlotEquip.Trinket1) {
-                Optional<ItemSet> resultTrinket = reforgeProcessPlusCore(baseItems.deepClone(), model, extraItem, SlotEquip.Trinket2, enchanting);
-                reportUpgrade(model, extraItem, baseRating, bestCollection, resultTrinket);
+                checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Trinket2, baseRating, bestCollection);
             }
             if (slot == SlotEquip.Ring1) {
-                Optional<ItemSet> resultRing = reforgeProcessPlusCore(baseItems.deepClone(), model, extraItem, SlotEquip.Ring2, enchanting);
-                reportUpgrade(model, extraItem, baseRating, bestCollection, resultRing);
+                checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Ring2, baseRating, bestCollection);
             }
         }
 
@@ -65,6 +62,30 @@ public class FindUpgrades {
                 System.out.printf("%10s \t%35s \t$%d \t%1.3f\n", item.slot, item.name,
                         ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b(),
                         factor));
+    }
+
+    private static void checkForUpgrade(ModelCombined model, EquipOptionsMap baseItems, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating, BestCollection<ItemData> bestCollection) {
+        extraItem = enchanting.apply(extraItem);
+        System.out.println("OFFER " + extraItem);
+        System.out.println("REPLACING " + (baseItems.get(slot) != null ? baseItems.get(slot)[0] : "NOTHING"));
+
+        ItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
+        baseItems.put(slot, extraOptions);
+        ArrayUtil.mapInPlace(baseItems.get(slot), enchanting);
+
+        StatBlock adjustment = FindStatRange.checkSetAdjust(model, baseItems);
+
+        Optional<ItemSet> resultSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null, adjustment);
+        if (resultSet.isPresent()) {
+            System.out.println("SET STATS " + resultSet.get().totals);
+            double extraRating = model.calcRating(resultSet.get());
+            double factor = extraRating / baseRating;
+            System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
+            bestCollection.add(extraItem, factor);
+        } else {
+            System.out.print("UPGRADE SET NOT FOUND\n");
+        }
+        System.out.println();
     }
 
     private boolean canSkipUpgradeCheck(ItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {
@@ -76,36 +97,11 @@ public class FindUpgrades {
             return true;
         }
         if (reforgedItems.get(slot)[0].id == extraItem.id) {
-            System.out.println("SAME ITEM " + extraItem.toStringExtended());
+            System.out.println("SAME ITEM " + extraItem.toStringExtended() + "\n");
             return true;
         }
 
         return false;
-    }
-
-    private static void reportUpgrade(ModelCombined model, ItemData extraItem, double baseRating, BestCollection<ItemData> bestCollection, Optional<ItemSet> extraSet) {
-        if (extraSet.isPresent()) {
-            System.out.println("PROPOSED " + extraSet.get().totals);
-            double extraRating = model.calcRating(extraSet.get());
-            double factor = extraRating / baseRating;
-            System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
-            bestCollection.add(extraItem, factor);
-        } else {
-            System.out.print("UPGRADE SET NOT FOUND\n");
-        }
-        System.out.println();
-    }
-
-    private Optional<ItemSet> reforgeProcessPlusCore(EquipOptionsMap submitItems, ModelCombined model, ItemData extraItem, SlotEquip slot, Function<ItemData, ItemData> enchanting) {
-        EquipOptionsMap runItems = submitItems.deepClone();
-        extraItem = enchanting.apply(extraItem);
-        ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
-
-        System.out.println("OFFER " + extraItem);
-        System.out.println("REPLACING " + (runItems.get(slot) != null ? runItems.get(slot)[0] : "NOTHING"));
-        runItems.put(slot, extraForged);
-        ArrayUtil.mapInPlace(runItems.get(slot), enchanting);
-        return EngineUtil.chooseEngineAndRun(model, runItems, null, runSize, null);
     }
 
 }

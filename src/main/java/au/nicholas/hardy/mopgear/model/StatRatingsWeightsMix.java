@@ -1,17 +1,15 @@
 package au.nicholas.hardy.mopgear.model;
 
-import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
+import au.nicholas.hardy.mopgear.domain.StatType;
 
 import java.io.IOException;
-import java.util.EnumMap;
 
-public class StatRatingsWeightsMix implements StatRatings {
+public class StatRatingsWeightsMix extends StatRatings {
     private final StatRatings weightA;
     private final StatRatings weightB;
     private final int multiplyA;
     private final int multiplyB;
-    private EnumMap<SocketType, StatBlock> standardGems;
 
     public StatRatingsWeightsMix(StatRatings weightA, int multiplyA, StatRatings weightB, int multiplyB) throws IOException {
         this.weightA = weightA;
@@ -31,16 +29,13 @@ public class StatRatingsWeightsMix implements StatRatings {
         return total;
     }
 
-    private void chooseGems() {
-        standardGems = new EnumMap<>(SocketType.class);
-        GemData.chooseGem(standardGems, SocketType.Red, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.Blue, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.Yellow, this::calcRating);
-        GemData.chooseGem(standardGems, SocketType.General, this::calcRating);
+    public long calcRating(StatType stat, int value) {
+        long total = 0;
+        if (multiplyA > 0)
+            total += weightA.calcRating(stat, value) * multiplyA;
+        if (multiplyB > 0)
+            total += weightB.calcRating(stat, value) * multiplyB;
+        return total;
     }
 
-    @Override
-    public StatBlock gemChoice(SocketType socket) {
-        return standardGems.get(socket);
-    }
 }
