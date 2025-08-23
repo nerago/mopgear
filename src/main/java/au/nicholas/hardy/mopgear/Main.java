@@ -201,8 +201,8 @@ public class Main {
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null, null);
-        outputResult(bestSet, model, detailedOutput);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null);
+        outputResultSimple(bestSet, model, detailedOutput);
         outputTweaked(bestSet, map, model);
     }
 
@@ -229,8 +229,8 @@ public class Main {
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null, null);
-        outputResult(bestSet, model, detailedOutput);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null);
+        outputResultSimple(bestSet, model, detailedOutput);
         outputTweaked(bestSet, map, model);
     }
 
@@ -247,8 +247,8 @@ public class Main {
         extraItem = addExtra(map, model, extraItemId, extraItem.slot.toSlotEquip(), enchanting, null, replace, true);
         System.out.println("EXTRA " + extraItem);
 
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null, null);
-        outputResult(bestSet, model, true);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null);
+        outputResultSimple(bestSet, model, true);
         outputTweaked(bestSet, map, model);
     }
 
@@ -261,9 +261,9 @@ public class Main {
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, null, null, null, null);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, null, null, null);
 
-        outputResult(bestSet, model, detailedOutput);
+        outputResultSimple(bestSet, model, detailedOutput);
         outputTweaked(bestSet, map, model);
     }
 
@@ -290,9 +290,9 @@ public class Main {
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), items, presetReforge);
 
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, null, null, null, null);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, null, null, null);
 
-        outputResult(bestSet, model, detailedOutput);
+        outputResultSimple(bestSet, model, detailedOutput);
         outputTweaked(bestSet, map, model);
     }
 
@@ -366,10 +366,10 @@ public class Main {
 
         EquipOptionsMap scaledMap = ItemLevel.scaleForChallengeMode(map);
 
-        ItemSet bestScaledSet = chooseEngineAndRun(model, scaledMap, startTime, null, null, null).orElseThrow();
+        ItemSet bestScaledSet = chooseEngineAndRun(model, scaledMap, startTime, null, null).orElseThrow();
 
         System.out.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
-        outputResult(Optional.of(bestScaledSet), model, true);
+        outputResultSimple(Optional.of(bestScaledSet), model, true);
 
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData scaledChoice = bestScaledSet.items.get(slot);
@@ -392,10 +392,10 @@ public class Main {
         }
 
         ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirements.retWideCapRange(), model.reforgeRules(), model.enchants());
-        Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null, null, null);
+        Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null, null);
 
         System.out.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
-        outputResult(bestSetFinal, model, true);
+        outputResultSimple(bestSetFinal, model, true);
     }
 
     private void multiSpecSpecifiedRating() throws IOException {
@@ -443,10 +443,10 @@ public class Main {
         reforgeProt.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
 
         EquipMap retForgedItems = ItemUtil.chosenItemsReforgedToMap(retItems, reforgeRet);
-        ItemSet retSet = ItemSet.manyItems(retForgedItems, null, null);
+        ItemSet retSet = ItemSet.manyItems(retForgedItems, null);
 
         EquipMap protForgedItems = ItemUtil.chosenItemsReforgedToMap(protItems, reforgeProt);
-        ItemSet protSet = ItemSet.manyItems(protForgedItems, null, null);
+        ItemSet protSet = ItemSet.manyItems(protForgedItems, null);
 
         retSet.outputSet(modelRet);
         System.out.println("---------------------" + (modelRet.calcRating(retSet) + modelProt.calcRating(protSet)));

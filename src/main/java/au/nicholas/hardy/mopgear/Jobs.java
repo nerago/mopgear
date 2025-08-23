@@ -6,6 +6,7 @@ import au.nicholas.hardy.mopgear.io.ItemCache;
 import au.nicholas.hardy.mopgear.io.SourcesOfItems;
 import au.nicholas.hardy.mopgear.model.ItemLevel;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.results.JobInfo;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.TopCollectorReporting;
 import au.nicholas.hardy.mopgear.util.Tuple;
@@ -19,7 +20,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static au.nicholas.hardy.mopgear.EngineUtil.chooseEngineAndRun;
+import static au.nicholas.hardy.mopgear.EngineUtil.chooseEngineAndRunAsJob;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class Jobs {
     public static final long BILLION = 1000 * 1000 * 1000;
     public static ItemCache itemCache;
@@ -36,8 +39,8 @@ public class Jobs {
 
         ModelCombined dumbModel = model.withNoRequirements();
 
-        Optional<ItemSet> bestSet = chooseEngineAndRun(dumbModel, items, startTime, null, null, null);
-        outputResult(bestSet, model, true);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(dumbModel, items, startTime, null, null);
+        outputResultSimple(bestSet, model, true);
     }
 
     public static void findUpgradeSetup(EquipOptionsMap items, Tuple.Tuple2<Integer, Integer>[] tuple2s, ModelCombined model) {
@@ -93,50 +96,52 @@ public class Jobs {
 
         System.out.println("COMMON COMBOS " + ItemUtil.estimateSets(commonMap));
 
-        Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null, null,0);
+        Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null, 0);
 //        long initialSize = 50000;
 //        Stream<ItemSet> commonStream = EngineRandom.runSolverPartial(modelNull, commonMap, startTime, null, initialSize);
 
 //        Long runSize = BILLION / 1000;
         Long runSize = 200000L;
-        Stream<ItemSet> protStream = commonStream.map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt, runSize))
+        Stream<Tuple.Tuple2<ItemSet, ItemSet>> resultStream = commonStream
+                .map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt, runSize))
                 .filter(Objects::nonNull);
 
-        Collection<ItemSet> best = protStream.collect(
+        Collection<Tuple.Tuple2<ItemSet, ItemSet>> best = resultStream.collect(
                 new TopCollectorReporting<>(s -> dualRating(s, modelRet, modelProt),
                         s -> reportBetter(s, modelRet, modelProt, retMap, protMap)));
-        outputResult(best, modelProt, true);
+        outputResultTwins(best, modelRet, modelProt, true);
 
         // TODO solve for challenge dps too
     }
 
-    public static long dualRating(ItemSet set, ModelCombined modelRet, ModelCombined modelProt) {
-        return modelRet.calcRating(set.otherSet) + modelProt.calcRating(set);
+    public static long dualRating(Tuple.Tuple2<ItemSet, ItemSet> pair, ModelCombined modelRet, ModelCombined modelProt) {
+        return modelRet.calcRating(pair.a()) + modelProt.calcRating(pair.b());
     }
 
-    public static ItemSet subSolveBoth(ItemSet chosenSet, EquipOptionsMap retMap, ModelCombined modelRet, EquipOptionsMap protMap, ModelCombined modelProt, Long runSize) {
+    public static Tuple.Tuple2<ItemSet, ItemSet> subSolveBoth(ItemSet chosenSet, EquipOptionsMap retMap, ModelCombined modelRet, EquipOptionsMap protMap, ModelCombined modelProt, Long runSize) {
         EquipMap chosenMap = chosenSet.items;
 
-//        System.out.println(chosenMap.values().stream().map(ItemData::toString).reduce("", String::concat));
-
-        Optional<ItemSet> retSet = subSolvePart(retMap, modelRet, chosenMap, null, runSize);
-        if (retSet.isPresent()) {
-            Optional<ItemSet> protSet = subSolvePart(protMap, modelProt, chosenMap, retSet.get(), runSize);
-            return protSet.orElse(null);
+        JobInfo retJob = subSolvePart(retMap, modelRet, chosenMap, runSize);
+        if (retJob.resultSet.isPresent() && retJob.hackCount == 0) {
+            JobInfo protJob = subSolvePart(protMap, modelProt, chosenMap, runSize);
+            if (protJob.resultSet.isPresent() && protJob.hackCount == 0) {
+                return Tuple.create(retJob.resultSet.get(), protJob.resultSet.get());
+            }
         }
+
         return null;
     }
 
-    private static Optional<ItemSet> subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, EquipMap chosenMap, ItemSet otherSet, Long runSize) {
+    private static JobInfo subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, EquipMap chosenMap, Long runSize) {
         EquipOptionsMap submitMap = fullItemMap.shallowClone();
         ItemUtil.buildJobWithSpecifiedItemsFixed(chosenMap, submitMap); // TODO build into map object
-        return chooseEngineAndRun(model, submitMap, null, runSize, otherSet, null);
+        return chooseEngineAndRunAsJob(model, submitMap, null, runSize, null);
     }
 
     @SuppressWarnings("SameParameterValue")
     public static void reforgeProcess(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, reforgedItems, startTime, BILLION, null, null);
-        outputResult(bestSet, model, detailedOutput);
+        Optional<ItemSet> bestSet = chooseEngineAndRun(model, reforgedItems, startTime, BILLION, null);
+        outputResultSimple(bestSet, model, detailedOutput);
         outputTweaked(bestSet, reforgedItems, model);
     }
 
@@ -158,11 +163,13 @@ public class Jobs {
         }
 
         long runSize = BILLION;
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, runItems, startTime, runSize, null, null);
-        outputResult(bestSet, model, detailedOutput);
+        JobInfo job = chooseEngineAndRunAsJob(model, runItems, startTime, runSize, null);
+        Optional<ItemSet> bestSet = job.resultSet;
+        outputResultSimple(bestSet, model, detailedOutput);
         if (bestSet.isEmpty() && detailedOutput) {
-            outputFailureDetails(model, runItems);
+            outputFailureDetails(model, runItems, job);
         }
+        job.outputNow();
     }
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot) {
@@ -206,8 +213,8 @@ public class Jobs {
         for (int extraItemId : alternateItems) {
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             EquipOptionsMap itemMap = reforgedItems.copyWithReplaceSingle(extraItem.slot.toSlotEquip(), extraItem);
-            Optional<ItemSet> bestSets = EngineStream.runSolver(model, itemMap, null, null, null, 0);
-            outputResult(bestSets, model, false);
+            Optional<ItemSet> bestSets = EngineStream.runSolver(model, itemMap, null, null, 0);
+            outputResultSimple(bestSets, model, false);
         }
     }
 
@@ -221,8 +228,8 @@ public class Jobs {
         ItemData extraItem2 = addExtra(reforgedItems, model, extraItemId2, enchant, null, false, true);
         System.out.println("EXTRA " + extraItem2);
 
-        Optional<ItemSet> best = chooseEngineAndRun(model, reforgedItems, startTime, BILLION * 3, null, null);
-        outputResult(best, model, true);
+        Optional<ItemSet> best = chooseEngineAndRun(model, reforgedItems, startTime, BILLION * 3, null);
+        outputResultSimple(best, model, true);
     }
 
     public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, Tuple.Tuple2<Integer, Integer>[] extraItems) {
@@ -254,25 +261,31 @@ public class Jobs {
         Long runSize = BILLION * 2;
 //                Long runSize = BILLION / 10;
 //        Long runSize = null;
-        Optional<ItemSet> best = chooseEngineAndRun(model, items, startTime, runSize, null, null);
-        outputResult(best, model, true);
+        Optional<ItemSet> best = chooseEngineAndRun(model, items, startTime, runSize, null);
+        outputResultSimple(best, model, true);
     }
 
-    public static void outputResult(Collection<ItemSet> bestSets, ModelCombined model, boolean detailedOutput) {
+    public static void outputResultTwins(Collection<Tuple.Tuple2<ItemSet, ItemSet>> bestSets, ModelCombined modelA, ModelCombined modelB, boolean detailedOutput) {
         if (detailedOutput) {
             System.out.println("@@@@@@@@@ Set count " + bestSets.size() + " @@@@@@@@@");
-            bestSets.forEach(s -> System.out.println(s.getTotals()));
+            bestSets.forEach(s -> {
+                System.out.println("RET " + s.a().getTotals());
+                System.out.println("PROT " + s.b().getTotals());
+                System.out.println();
+            });
             bestSets.forEach(s -> {
                 System.out.println("#######################################");
-                s.outputSet(model);
+                s.a().outputSet(modelA);
+                s.b().outputSet(modelB);
             });
         } else {
-            Optional<ItemSet> last = bestSets.stream().reduce((a, b) -> b);
-            last.orElseThrow().outputSet(model);
+            Tuple.Tuple2<ItemSet, ItemSet> last = bestSets.stream().reduce((a, b) -> b).orElseThrow();
+            last.a().outputSet(modelA);
+            last.b().outputSet(modelB);
         }
     }
 
-    public static void outputResult(Optional<ItemSet> bestSet, ModelCombined model, boolean detailedOutput) {
+    public static void outputResultSimple(Optional<ItemSet> bestSet, ModelCombined model, boolean detailedOutput) {
         if (bestSet.isPresent()) {
             bestSet.get().outputSet(model);
         } else {
@@ -281,9 +294,7 @@ public class Jobs {
     }
 
     public static void outputTweaked(Optional<ItemSet> bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
-        if (bestSet.isPresent()) {
-            outputTweaked(bestSet.get(), reforgedItems, model);
-        }
+        bestSet.ifPresent(itemSet -> outputTweaked(itemSet, reforgedItems, model));
     }
 
     public static void outputTweaked(ItemSet bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
@@ -306,16 +317,17 @@ public class Jobs {
         }
     }
 
-    private static void reportBetter(ItemSet itemSet, ModelCombined modelRet, ModelCombined modelProt, EquipOptionsMap itemsRet, EquipOptionsMap itemsProt) {
-        long rating = modelProt.calcRating(itemSet) + modelRet.calcRating(itemSet.otherSet);
+    private static void reportBetter(Tuple.Tuple2<ItemSet, ItemSet> pair, ModelCombined modelRet, ModelCombined modelProt, EquipOptionsMap itemsRet, EquipOptionsMap itemsProt) {
+        ItemSet retSet = pair.a(), protSet = pair.b();
+        long rating = modelProt.calcRating(protSet) + modelRet.calcRating(retSet);
         synchronized (System.out) {
             System.out.println(LocalDateTime.now());
             System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-            itemSet.otherSet.outputSet(modelRet);
-            outputTweaked(itemSet.otherSet, itemsRet, modelRet);
+            protSet.outputSet(modelProt);
+            outputTweaked(protSet, itemsProt, modelProt);
             System.out.println("--------------------------------------- " + rating);
-            itemSet.outputSet(modelProt);
-            outputTweaked(itemSet, itemsProt, modelProt);
+            retSet.outputSet(modelRet);
+            outputTweaked(retSet, itemsRet, modelRet);
             System.out.println("#######################################");
         }
     }
@@ -327,7 +339,7 @@ public class Jobs {
         itemSet.outputSet(model);
     }
 
-    private static void outputFailureDetails(ModelCombined model, EquipOptionsMap runItems) {
-        FindStatRange.checkSetReport(model, runItems);
+    private static void outputFailureDetails(ModelCombined model, EquipOptionsMap runItems, JobInfo job) {
+        FindStatRange.checkSetReport(model, runItems, job);
     }
 }

@@ -12,21 +12,21 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
 public class EngineRandom {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, ItemSet otherSet, long count) {
-        Stream<ItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, otherSet, count);
+    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
+        Stream<ItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
         return finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
     }
 
-    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, ItemSet otherSet, long count) {
+    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
         Stream<Long> dumbStream = generateDumbStream(count);
         Stream<ItemSet> setStream = dumbStream.parallel()
-                                              .map(x -> makeSet(items, otherSet, adjustment));
+                                              .map(x -> makeSet(items, adjustment));
         if (startTime != null)
             setStream = BigStreamUtil.countProgress(count, startTime, setStream);
         return model.filterSets(setStream);
     }
 
-    private static ItemSet makeSet(EquipOptionsMap items, ItemSet otherSet, StatBlock adjustment) {
+    private static ItemSet makeSet(EquipOptionsMap items, StatBlock adjustment) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         EquipMap chosen = EquipMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
@@ -36,7 +36,7 @@ public class EngineRandom {
                 chosen.put(slot, item);
             }
         }
-        return ItemSet.manyItems(chosen, otherSet, adjustment);
+        return ItemSet.manyItems(chosen, adjustment);
     }
 
     private static Stream<Long> generateDumbStream(long count) {

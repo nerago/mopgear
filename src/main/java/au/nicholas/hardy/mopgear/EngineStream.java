@@ -11,16 +11,16 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class EngineStream {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, ItemSet otherSet, long estimate) {
-        Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, adjustment, otherSet, estimate);
+    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long estimate) {
+        Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, adjustment, estimate);
         return BigStreamUtil.findBest(model, finalSets);
     }
 
-    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, Instant startTime, StatBlock adjustment, ItemSet otherSet, long estimate) {
+    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, Instant startTime, StatBlock adjustment, long estimate) {
         if (estimate == 0)
             estimate = ItemUtil.estimateSets(items);
 
-        Stream<ItemSet> initialSets = generateItemCombinations(items, model, otherSet, adjustment);
+        Stream<ItemSet> initialSets = generateItemCombinations(items, model, adjustment);
 
         if (startTime != null)
             initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
@@ -29,7 +29,7 @@ public class EngineStream {
     }
 
     // NOTES: we could dig right down a path to find its max/min hit/exp limits, then know if we're on a bad path
-    private static Stream<ItemSet> generateItemCombinations(EquipOptionsMap itemsBySlot, ModelCombined model, ItemSet otherSet, StatBlock adjustment) {
+    private static Stream<ItemSet> generateItemCombinations(EquipOptionsMap itemsBySlot, ModelCombined model, StatBlock adjustment) {
         Stream<ItemSet> stream = null;
 
         List<Tuple.Tuple2<SlotEquip, ItemData[]>> sortedEntries =
@@ -38,7 +38,7 @@ public class EngineStream {
                         .sorted(Comparator.comparingInt(x -> -x.b().length)).toList();
         for (Tuple.Tuple2<SlotEquip, ItemData[]> slotEntry : sortedEntries) {
             if (stream == null) {
-                stream = newCombinationStream(slotEntry.a(), slotEntry.b(), otherSet, adjustment);
+                stream = newCombinationStream(slotEntry.a(), slotEntry.b(), adjustment);
             } else {
                 stream = applyItemsToCombination(stream, slotEntry.a(), slotEntry.b());
             }
@@ -47,10 +47,10 @@ public class EngineStream {
         return stream;
     }
 
-    private static Stream<ItemSet> newCombinationStream(SlotEquip slot, ItemData[] slotItems, ItemSet otherSet, StatBlock adjustment) {
+    private static Stream<ItemSet> newCombinationStream(SlotEquip slot, ItemData[] slotItems, StatBlock adjustment) {
         final ItemSet[] initialSets = new ItemSet[slotItems.length];
         for (int i = 0; i < slotItems.length; ++i) {
-            initialSets[i] = ItemSet.singleItem(slot, slotItems[i], otherSet, adjustment);
+            initialSets[i] = ItemSet.singleItem(slot, slotItems[i], adjustment);
         }
         return ArrayUtil.arrayStream(initialSets);
     }

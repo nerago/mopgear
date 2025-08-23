@@ -32,7 +32,7 @@ public class EngineStack {
     private void addFirstItem() {
         Map.Entry<SlotEquip, List<ItemData>> first = slotItems.getFirst();
         for (ItemData item : first.getValue()) {
-            queue.addLast(new Step(1, ItemSet.singleItem(first.getKey(), item, null, null)));
+            queue.addLast(new Step(1, ItemSet.singleItem(first.getKey(), item, null)));
         }
     }
 

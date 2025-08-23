@@ -5,24 +5,22 @@ import au.nicholas.hardy.mopgear.model.ModelCombined;
 public final class ItemSet {
     public final EquipMap items;
     public final StatBlock totals;
-    public final ItemSet otherSet;
 
-    private ItemSet(EquipMap items, StatBlock totals, ItemSet otherSet) {
+    private ItemSet(EquipMap items, StatBlock totals) {
         this.items = items;
         this.totals = totals;
-        this.otherSet = otherSet;
     }
 
-    public static ItemSet manyItems(EquipMap items, ItemSet otherSet, StatBlock adjustment) {
+    public static ItemSet manyItems(EquipMap items, StatBlock adjustment) {
         // trust caller is creating unique maps
         StatBlock totals = StatBlock.sum(items);
         if (adjustment != null) {
             totals = totals.plus(adjustment);
         }
-        return new ItemSet(items, totals, otherSet);
+        return new ItemSet(items, totals);
     }
 
-    public static ItemSet singleItem(SlotEquip slot, ItemData item, ItemSet otherSet, StatBlock adjustment) {
+    public static ItemSet singleItem(SlotEquip slot, ItemData item, StatBlock adjustment) {
         EquipMap itemMap = EquipMap.single(slot, item);
         StatBlock total;
         if (adjustment == null) {
@@ -30,12 +28,12 @@ public final class ItemSet {
         } else {
             total = adjustment.plus(item.stat, item.statFixed);
         }
-        return new ItemSet(itemMap, total, otherSet);
+        return new ItemSet(itemMap, total);
     }
 
     public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {
         EquipMap itemMap = items.copyWithReplace(slot, item);
-        return new ItemSet(itemMap, totals.plus(item.stat, item.statFixed), otherSet);
+        return new ItemSet(itemMap, totals.plus(item.stat, item.statFixed));
     }
 
     public StatBlock getTotals() {

@@ -2,6 +2,7 @@ package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.results.JobInfo;
 import au.nicholas.hardy.mopgear.util.Holder;
 import au.nicholas.hardy.mopgear.util.LongHolder;
 import au.nicholas.hardy.mopgear.util.LowHighHolder;
@@ -11,54 +12,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FindStatRange {
-    public static void checkSetReport(ModelCombined model, EquipOptionsMap items) {
+    public static void checkSetReport(ModelCombined model, EquipOptionsMap items, JobInfo job) {
         for (StatType statType : StatType.values()) {
             Tuple.Tuple2<Integer, Integer> range = findRange(items, statType);
-            report(statType, range, model);
+            report(statType, range, model, job);
         }
     }
 
-    public static StatBlock checkSetAdjust(ModelCombined model, EquipOptionsMap items) {
+    public static StatBlock checkSetAdjust(ModelCombined model, EquipOptionsMap items, JobInfo job) {
         for (StatType statType : StatType.values()) {
             Tuple.Tuple2<Integer, Integer> range = findRange(items, statType);
-            StatBlock adjust = reportAndAdjust(statType, range, model);
+            StatBlock adjust = reportAndAdjust(statType, range, model, job);
             if (adjust != null)
                 return adjust;
         }
         return null;
     }
 
-    public static List<ItemSet> setsAtLimits(EquipOptionsMap itemOptions, StatBlock adjustment, ItemSet otherSet) {
+    public static List<ItemSet> setsAtLimits(EquipOptionsMap itemOptions, StatBlock adjustment) {
         List<ItemSet> setList = new ArrayList<>();
         for (StatType statType : StatType.values()) {
-            findSets(itemOptions, otherSet, adjustment, statType, setList);
+            findSets(itemOptions, adjustment, statType, setList);
         }
         return setList;
     }
 
-    private static void report(StatType statType, Tuple.Tuple2<Integer, Integer> range, ModelCombined model) {
+    private static void report(StatType statType, Tuple.Tuple2<Integer, Integer> range, ModelCombined model, JobInfo job) {
         int lowAvailable = range.a(), highAvailable = range.b();
         if (statType == StatType.Hit) {
             int minTarget = model.statRequirements().getMinimumHit(), maxTarget = model.statRequirements().getMaximumHit();
             if (highAvailable >= minTarget && lowAvailable <= maxTarget) {
-                System.out.printf("Hit %d-%d\n", lowAvailable, highAvailable);
+                job.printf("Hit %d-%d\n", lowAvailable, highAvailable);
             } else {
-                System.out.printf("FAIL Hit %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
+                job.printf("FAIL Hit %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
             }
         } else if (statType == StatType.Expertise) {
             int minTarget = model.statRequirements().getMinimumExpertise(), maxTarget = model.statRequirements().getMaximumExpertise();
             if (highAvailable >= minTarget && lowAvailable <= maxTarget) {
-                System.out.printf("Expertise %d-%d\n", lowAvailable, highAvailable);
+                job.printf("Expertise %d-%d\n", lowAvailable, highAvailable);
             } else {
-                System.out.printf("FAIL Expertise %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
+                job.printf("FAIL Expertise %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
             }
         } else {
-            System.out.printf("%s %d-%d\n", statType, lowAvailable, highAvailable);
+            job.printf("%s %d-%d\n", statType, lowAvailable, highAvailable);
         }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    private static StatBlock reportAndAdjust(StatType statType, Tuple.Tuple2<Integer, Integer> range, ModelCombined model) {
+    private static StatBlock reportAndAdjust(StatType statType, Tuple.Tuple2<Integer, Integer> range, ModelCombined model, JobInfo job) {
         int lowAvailable = range.a(), highAvailable = range.b();
         if (statType == StatType.Hit) {
             int minTarget = model.statRequirements().getMinimumHit(), maxTarget = model.statRequirements().getMaximumHit();
@@ -67,10 +68,10 @@ public class FindStatRange {
             } else if (highAvailable < minTarget) {
                 StatType takeStat = model.statRatings().bestNonHit();
                 int need = minTarget - highAvailable;
-                System.out.printf("FAIL Hit Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
+                job.printf("FAIL Hit Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
                 return StatBlock.empty.withChange(StatType.Hit, need, takeStat, -need);
             } else {
-                System.out.printf("FAIL Hit %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
+                job.printf("FAIL Hit %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
                 throw new RuntimeException("not yet supported");
             }
         } else if (statType == StatType.Expertise) {
@@ -80,10 +81,10 @@ public class FindStatRange {
             } else if (highAvailable < minTarget) {
                 StatType takeStat = model.statRatings().bestNonHit();
                 int need = minTarget - highAvailable;
-                System.out.printf("FAIL Expertise Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
+                job.printf("FAIL Expertise Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
                 return StatBlock.empty.withChange(StatType.Expertise, need, takeStat, -need);
             } else {
-                System.out.printf("FAIL Expertise %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
+                job.printf("FAIL Expertise %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
                 throw new RuntimeException("not yet supported");
             }
         }
@@ -100,13 +101,13 @@ public class FindStatRange {
         return Tuple.create((int) low.value, (int) high.value);
     }
 
-    private static void findSets(EquipOptionsMap itemOptions, ItemSet otherSet, StatBlock adjustment, StatType statType, List<ItemSet> setList) {
+    private static void findSets(EquipOptionsMap itemOptions, StatBlock adjustment, StatType statType, List<ItemSet> setList) {
         Holder<ItemSet> lowSet = new Holder<>(), highSet = new Holder<>();
         itemOptions.forEachPair((slot, array) -> {
             LowHighHolder<ItemData> statRange = findMinMax(array, statType);
             if (lowSet.value == null) {
-                lowSet.value = ItemSet.singleItem(slot, statRange.getLow(), otherSet, adjustment);
-                highSet.value = ItemSet.singleItem(slot, statRange.getHigh(), otherSet, adjustment);
+                lowSet.value = ItemSet.singleItem(slot, statRange.getLow(), adjustment);
+                highSet.value = ItemSet.singleItem(slot, statRange.getHigh(), adjustment);
             } else {
                 lowSet.value = lowSet.value.copyWithAddedItem(slot, statRange.getLow());
                 highSet.value = highSet.value.copyWithAddedItem(slot, statRange.getHigh());

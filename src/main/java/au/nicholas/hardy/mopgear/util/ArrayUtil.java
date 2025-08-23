@@ -139,4 +139,13 @@ public class ArrayUtil {
             return null;
         }
     }
+
+    public static String repeat(char c, int count) {
+        if (count == 0) {
+            return "";
+        }
+        char[] chars = new char[count];
+        Arrays.fill(chars, c);
+        return new String(chars);
+    }
 }

@@ -4,11 +4,14 @@ import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.io.ItemCache;
 import au.nicholas.hardy.mopgear.io.SourcesOfItems;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.results.JobInfo;
 import au.nicholas.hardy.mopgear.results.UpgradeResultItem;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.BestCollection;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -28,14 +31,31 @@ public class FindUpgrades {
     }
 
     public void findUpgradeSetup(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
-        ItemSet baseSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null, null).orElseThrow();
+        ItemSet baseSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null).orElseThrow();
         double baseRating = model.calcRating(baseSet);
         System.out.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.totals, baseRating);
 
         Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
 
-        BestCollection<UpgradeResultItem> bestCollection = new BestCollection<>();
+        List<JobInfo> jobList = makeJobs(model, baseItems, extraItemArray, enchanting, baseRating);
+
+        jobList = jobList.parallelStream()
+                .map(EngineUtil::runJob)
+                .peek(job -> handleResult(job, baseRating))
+                .toList();
+
+        BestCollection<JobInfo> bestCollection = new BestCollection<>();
+        jobList.forEach(job -> bestCollection.add(job, job.factor));
+
+        System.out.println("RANKING RANKING");
+        bestCollection.forEach((item, factor) -> reportItem(item, extraItemArray));
+    }
+
+    private ArrayList<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, Function<ItemData, ItemData> enchanting, double baseRating) {
+        ArrayList<JobInfo> jobList = new ArrayList<>();
         for (Tuple.Tuple2<Integer, Integer> extraItemInfo : extraItemArray) {
+            JobInfo job = new JobInfo();
+
             int extraItemId = extraItemInfo.a();
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             SlotEquip slot = extraItem.slot.toSlotEquip();
@@ -49,49 +69,57 @@ public class FindUpgrades {
                 System.out.println(extraItem.toStringExtended());
             }
 
-            checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, slot, baseRating, bestCollection);
+            jobList.add(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, slot, baseRating));
 
             if (slot == SlotEquip.Trinket1) {
-                checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Trinket2, baseRating, bestCollection);
+                jobList.add(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Trinket2, baseRating));
             }
             if (slot == SlotEquip.Ring1) {
-                checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Ring2, baseRating, bestCollection);
+                jobList.add(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Ring2, baseRating));
             }
         }
-
-        System.out.println("RANKING RANKING");
-        bestCollection.forEach((item, factor) -> reportItem(item, extraItemArray));
+        return jobList;
     }
 
-    private static void reportItem(UpgradeResultItem resultItem, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
-        ItemData item = resultItem.item();
-        double factor = resultItem.factor();
-        boolean hacked = resultItem.hacked();
+    private static void reportItem(JobInfo resultItem, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
+        ItemData item = resultItem.extraItem;
+        double factor = resultItem.factor;
+        String stars = ArrayUtil.repeat('*', resultItem.hackCount);
         Integer cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
-        System.out.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, hacked ? "*" : "");
+        System.out.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, stars);
     }
 
-    private static void checkForUpgrade(ModelCombined model, EquipOptionsMap baseItems, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating, BestCollection<UpgradeResultItem> bestCollection) {
+    private static JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating) {
+        JobInfo job = new JobInfo();
+
         extraItem = enchanting.apply(extraItem);
-        System.out.println("OFFER " + extraItem);
-        System.out.println("REPLACING " + (baseItems.get(slot) != null ? baseItems.get(slot)[0] : "NOTHING"));
+        job.println("OFFER " + extraItem);
+        job.println("REPLACING " + (items.get(slot) != null ? items.get(slot)[0] : "NOTHING"));
 
         ItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
-        baseItems.put(slot, extraOptions);
-        ArrayUtil.mapInPlace(baseItems.get(slot), enchanting);
+        items.put(slot, extraOptions);
+        ArrayUtil.mapInPlace(items.get(slot), enchanting);
 
-        StatBlock adjustment = FindStatRange.checkSetAdjust(model, baseItems);
+        StatBlock adjustment = FindStatRange.checkSetAdjust(model, items, job);
+        if (adjustment != null)
+            job.hackCount++;
 
-        Optional<ItemSet> resultSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null, adjustment);
+        job.config(model, items, null, runSize, adjustment);
+        job.extraItem = extraItem;
+        return job;
+    }
+
+    private void handleResult(JobInfo job, double baseRating) {
+        Optional<ItemSet> resultSet = job.resultSet;
         if (resultSet.isPresent()) {
             System.out.println("SET STATS " + resultSet.get().totals);
-            double extraRating = model.calcRating(resultSet.get());
+            double extraRating = job.model.calcRating(resultSet.get());
             double factor = extraRating / baseRating;
             System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
-            UpgradeResultItem resultInfo = new UpgradeResultItem(extraItem, factor, adjustment != null);
-            bestCollection.add(resultInfo, factor);
+            job.factor = factor;
         } else {
             System.out.print("UPGRADE SET NOT FOUND\n");
+            job.factor = 0;
         }
         System.out.println();
     }

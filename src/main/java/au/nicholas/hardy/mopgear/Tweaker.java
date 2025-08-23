@@ -20,7 +20,7 @@ public class Tweaker {
 
             for (ItemData replace : slotItems) {
                 if (replace != existing) {
-                    ItemSet proposed = substitutedSet(slot, replace, baseItems, baseSet.otherSet);
+                    ItemSet proposed = substitutedSet(slot, replace, baseItems);
                     if (model.statRequirements().filter(proposed)) {
                         best.add(proposed, model.calcRating(proposed));
                     }
@@ -31,8 +31,8 @@ public class Tweaker {
         return best.get();
     }
 
-    private static ItemSet substitutedSet(SlotEquip slot, ItemData replace, EquipMap baseItems, ItemSet otherSet) {
+    private static ItemSet substitutedSet(SlotEquip slot, ItemData replace, EquipMap baseItems) {
         EquipMap map = baseItems.copyWithReplace(slot, replace);
-        return ItemSet.manyItems(map, otherSet, null);
+        return ItemSet.manyItems(map, null);
     }
 }
