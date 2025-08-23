@@ -51,20 +51,28 @@ public class EngineUtil {
         return runJob(job);
     }
 
-    private static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobInfo result) {
+    private static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobInfo job) {
         List<ItemSet> proposedList = FindStatRange.setsAtLimits(itemOptions, adjustment);
         BestHolder<ItemSet> bestHolder = new BestHolder<>(null, 0);
-        result.println("FALLBACK SET CHECKING");
+        job.println("FALLBACK SET CHECKING");
         for (ItemSet set : proposedList) {
             if (model.statRequirements().filter(set)) {
                 long rating = model.calcRating(set);
                 bestHolder.add(set, rating);
             }
         }
-        if (bestHolder.get() == null) {
-            result.println("FALLBACK SET FAILED WITHIN HIT/EXP CAP");
+        if (bestHolder.get() != null) {
+            job.println("FALLBACK SET FOUND USING MIN/MAX ONLY");
+            job.hackCount++;
+            return Optional.ofNullable(bestHolder.get());
+        } else {
+            job.println("FALLBACK SET FAILED WITHIN HIT/EXP CAP");
 
             for (ItemSet set : proposedList) {
+                set = FindStatRange.adjustForCapsFinalSet(set, model, job);
+                if (!model.statRequirements().filter(set)) {
+                    throw new IllegalStateException("adjust didn't fix caps");
+                }
                 long rating = model.calcRating(set);
                 bestHolder.add(set, rating);
             }
@@ -72,14 +80,11 @@ public class EngineUtil {
             if (bestHolder.get() == null) {
                 return Optional.empty();
             } else {
-                result.println("FALLBACK SET FOUND IGNORING CAPS");
-                result.hackCount += 2;
+                job.println("FALLBACK SET FOUND FORCING CAPS");
+                job.hackCount += 2;
                 return Optional.ofNullable(bestHolder.get());
             }
-        } else {
-            result.println("FALLBACK SET FOUND USING MIN/MAX ONLY");
-            result.hackCount++;
-            return Optional.ofNullable(bestHolder.get());
         }
     }
+
 }

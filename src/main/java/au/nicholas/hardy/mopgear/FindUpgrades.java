@@ -43,7 +43,7 @@ public class FindUpgrades {
 
         List<JobInfo> jobList = makeJobs(model, baseItems, extraItemArray, enchanting, baseRating);
 
-        jobList = jobList.parallelStream()
+        jobList = jobList.parallelStream().unordered()
                 .map(EngineUtil::runJob)
                 .peek(job -> handleResult(job, baseRating))
                 .toList();

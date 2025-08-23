@@ -57,8 +57,8 @@ public class Main {
 
 //            multiSpecSequential(startTime);
 
-//            reforgeRet(startTime);
-            reforgeProt(startTime);
+            reforgeRet(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -111,13 +111,13 @@ public class Main {
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new int[]{77530,89075,81262,87607,89823}));
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new ArrayList<>()));
-            reforgeProcessRetFixed(model, startTime, true);
+//            reforgeProcessRetFixed(model, startTime, true);
 //            reforgeProcessRetFixedAlone(model, startTime, true);
 //        reforgeProcessRetChallenge(model, startTime);
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model);
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
-//        new FindUpgrades(itemCache).findUpgradeSetup(model, items, strengthPlateValorCelestialP1(itemCache));
+        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, strengthPlateValorCelestialP1(itemCache));
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
 //        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model);
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);

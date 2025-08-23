@@ -68,10 +68,10 @@ public class FindStatRange {
             } else if (highAvailable < minTarget) {
                 StatType takeStat = model.statRatings().bestNonHit();
                 int need = minTarget - highAvailable;
-                job.printf("FAIL Hit Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
+                job.printf("BAD Hit Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
                 return StatBlock.empty.withChange(StatType.Hit, need, takeStat, -need);
             } else {
-                job.printf("FAIL Hit %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
+                job.printf("BAD Hit %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
                 throw new RuntimeException("not yet supported");
             }
         } else if (statType == StatType.Expertise) {
@@ -81,14 +81,48 @@ public class FindStatRange {
             } else if (highAvailable < minTarget) {
                 StatType takeStat = model.statRatings().bestNonHit();
                 int need = minTarget - highAvailable;
-                job.printf("FAIL Expertise Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
+                job.printf("BAD Expertise Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
                 return StatBlock.empty.withChange(StatType.Expertise, need, takeStat, -need);
             } else {
-                job.printf("FAIL Expertise %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
+                job.printf("BAD Expertise %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
                 throw new RuntimeException("not yet supported");
             }
         }
         return null;
+    }
+
+    public static ItemSet adjustForCapsFinalSet(ItemSet set, ModelCombined model, JobInfo job) {
+        StatBlock itemTotal = StatBlock.sum(set.items);
+        StatBlock adjust = StatBlock.empty;
+        StatType takeStat = model.statRatings().bestNonHit();
+
+        int minHit = model.statRequirements().getMinimumHit(), maxHit = model.statRequirements().getMaximumHit();
+        if (minHit != 0 && itemTotal.hit < minHit) {
+            int need = minHit - itemTotal.hit;
+            job.printf("ADJUST Hit Low %d NEED %d STEALING %d %s\n", itemTotal.hit, minHit, need, takeStat);
+            adjust = adjust.withChange(StatType.Hit, need, takeStat, -need);
+        } else if (maxHit != 0 && itemTotal.hit > maxHit) {
+            int excess = itemTotal.hit - maxHit;
+            job.printf("ADJUST Hit High %d LIMIT %d GIFTING %d %s\n", itemTotal.hit, maxHit, excess, takeStat);
+            adjust = adjust.withChange(StatType.Hit, -excess, takeStat, excess);
+        }
+
+        int minExp = model.statRequirements().getMinimumExpertise(), maxExp = model.statRequirements().getMaximumExpertise();
+        if (itemTotal.expertise < minExp) {
+            int need = minExp - itemTotal.expertise;
+            job.printf("ADJUST Expertise Low %d NEED %d STEALING %d %s\n", itemTotal.expertise, minExp, need, takeStat);
+            adjust = adjust.withChange(StatType.Expertise, need, takeStat, -need);
+        } else if (maxExp != 0 && itemTotal.expertise > maxExp) {
+            int excess = itemTotal.expertise - maxExp;
+            job.printf("ADJUST Hit High %d LIMIT %d GIFTING %d %s\n", itemTotal.expertise, maxExp, excess, takeStat);
+            adjust = adjust.withChange(StatType.Expertise, -excess, takeStat, excess);
+        }
+
+        if (adjust == StatBlock.empty) {
+            throw new IllegalStateException("expected to need adjust");
+        }
+
+        return ItemSet.manyItems(set.items, adjust);
     }
 
     private static Tuple.Tuple2<Integer, Integer> findRange(EquipOptionsMap itemOptions, StatType statType) {
