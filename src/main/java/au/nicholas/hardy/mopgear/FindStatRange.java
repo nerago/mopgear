@@ -1,13 +1,14 @@
 package au.nicholas.hardy.mopgear;
 
-import au.nicholas.hardy.mopgear.domain.EquipOptionsMap;
-import au.nicholas.hardy.mopgear.domain.ItemData;
-import au.nicholas.hardy.mopgear.domain.StatBlock;
-import au.nicholas.hardy.mopgear.domain.StatType;
+import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.util.Holder;
 import au.nicholas.hardy.mopgear.util.LongHolder;
 import au.nicholas.hardy.mopgear.util.LowHighHolder;
 import au.nicholas.hardy.mopgear.util.Tuple;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FindStatRange {
     public static void checkSetReport(ModelCombined model, EquipOptionsMap items) {
@@ -25,6 +26,14 @@ public class FindStatRange {
                 return adjust;
         }
         return null;
+    }
+
+    public static List<ItemSet> setsAtLimits(EquipOptionsMap itemOptions, StatBlock adjustment, ItemSet otherSet) {
+        List<ItemSet> setList = new ArrayList<>();
+        for (StatType statType : StatType.values()) {
+            findSets(itemOptions, otherSet, adjustment, statType, setList);
+        }
+        return setList;
     }
 
     private static void report(StatType statType, Tuple.Tuple2<Integer, Integer> range, ModelCombined model) {
@@ -81,18 +90,34 @@ public class FindStatRange {
         return null;
     }
 
-    private static Tuple.Tuple2<Integer, Integer> findRange(EquipOptionsMap items, StatType statType) {
+    private static Tuple.Tuple2<Integer, Integer> findRange(EquipOptionsMap itemOptions, StatType statType) {
         LongHolder low = new LongHolder(), high = new LongHolder();
-        items.forEachValue(array -> {
-            LowHighHolder<Object> statRange = findMinMax(array, statType);
+        itemOptions.forEachValue(array -> {
+            LowHighHolder<ItemData> statRange = findMinMax(array, statType);
             low.value += statRange.getLowRating();
             high.value += statRange.getHighRating();
         });
         return Tuple.create((int) low.value, (int) high.value);
     }
 
-    private static LowHighHolder<Object> findMinMax(ItemData[] itemArray, StatType statType) {
-        LowHighHolder<Object> holder = new LowHighHolder<>();
+    private static void findSets(EquipOptionsMap itemOptions, ItemSet otherSet, StatBlock adjustment, StatType statType, List<ItemSet> setList) {
+        Holder<ItemSet> lowSet = new Holder<>(), highSet = new Holder<>();
+        itemOptions.forEachPair((slot, array) -> {
+            LowHighHolder<ItemData> statRange = findMinMax(array, statType);
+            if (lowSet.value == null) {
+                lowSet.value = ItemSet.singleItem(slot, statRange.getLow(), otherSet, adjustment);
+                highSet.value = ItemSet.singleItem(slot, statRange.getHigh(), otherSet, adjustment);
+            } else {
+                lowSet.value = lowSet.value.copyWithAddedItem(slot, statRange.getLow());
+                highSet.value = highSet.value.copyWithAddedItem(slot, statRange.getHigh());
+            }
+        });
+        setList.add(lowSet.value);
+        setList.add(highSet.value);
+    }
+
+    private static LowHighHolder<ItemData> findMinMax(ItemData[] itemArray, StatType statType) {
+        LowHighHolder<ItemData> holder = new LowHighHolder<>();
         for (ItemData item : itemArray) {
             int value = item.totalStatCopy().get(statType);
             holder.add(item, value);

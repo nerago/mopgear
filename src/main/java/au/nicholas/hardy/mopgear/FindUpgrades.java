@@ -4,6 +4,7 @@ import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.io.ItemCache;
 import au.nicholas.hardy.mopgear.io.SourcesOfItems;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.results.UpgradeResultItem;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.BestCollection;
 import au.nicholas.hardy.mopgear.util.Tuple;
@@ -15,10 +16,11 @@ import java.util.function.Function;
 public class FindUpgrades {
     private ItemCache itemCache;
 
+//    private static final Long runSize = null; // full search
 //    private static final long runSize = 10000000; // quick runs
 //    private static final long runSize = 50000000; // 2 min total runs
-//    private static final long runSize = 100000000; // 4 min total runs
-    private static final long runSize = 300000000; // 12 min total runs
+    private static final long runSize = 100000000; // 4 min total runs
+//    private static final long runSize = 300000000; // 12 min total runs
 //    private static final long runSize = 1000000000; // 40 min runs
 
     public FindUpgrades(ItemCache itemCache) {
@@ -28,11 +30,11 @@ public class FindUpgrades {
     public void findUpgradeSetup(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
         ItemSet baseSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null, null).orElseThrow();
         double baseRating = model.calcRating(baseSet);
-        System.out.printf("\nBASE RATING    = %.0f\n\n", baseRating);
+        System.out.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.totals, baseRating);
 
         Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
 
-        BestCollection<ItemData> bestCollection = new BestCollection<>();
+        BestCollection<UpgradeResultItem> bestCollection = new BestCollection<>();
         for (Tuple.Tuple2<Integer, Integer> extraItemInfo : extraItemArray) {
             int extraItemId = extraItemInfo.a();
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
@@ -58,13 +60,18 @@ public class FindUpgrades {
         }
 
         System.out.println("RANKING RANKING");
-        bestCollection.forEach((item, factor) ->
-                System.out.printf("%10s \t%35s \t$%d \t%1.3f\n", item.slot, item.name,
-                        ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b(),
-                        factor));
+        bestCollection.forEach((item, factor) -> reportItem(item, extraItemArray));
     }
 
-    private static void checkForUpgrade(ModelCombined model, EquipOptionsMap baseItems, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating, BestCollection<ItemData> bestCollection) {
+    private static void reportItem(UpgradeResultItem resultItem, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
+        ItemData item = resultItem.item();
+        double factor = resultItem.factor();
+        boolean hacked = resultItem.hacked();
+        Integer cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
+        System.out.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, hacked ? "*" : "");
+    }
+
+    private static void checkForUpgrade(ModelCombined model, EquipOptionsMap baseItems, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating, BestCollection<UpgradeResultItem> bestCollection) {
         extraItem = enchanting.apply(extraItem);
         System.out.println("OFFER " + extraItem);
         System.out.println("REPLACING " + (baseItems.get(slot) != null ? baseItems.get(slot)[0] : "NOTHING"));
@@ -81,7 +88,8 @@ public class FindUpgrades {
             double extraRating = model.calcRating(resultSet.get());
             double factor = extraRating / baseRating;
             System.out.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
-            bestCollection.add(extraItem, factor);
+            UpgradeResultItem resultInfo = new UpgradeResultItem(extraItem, factor, adjustment != null);
+            bestCollection.add(resultInfo, factor);
         } else {
             System.out.print("UPGRADE SET NOT FOUND\n");
         }

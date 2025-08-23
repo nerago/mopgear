@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class EngineStream {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, Instant startTime, StatBlock adjustment, ItemSet otherSet, long estimate) {
+    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, ItemSet otherSet, long estimate) {
         Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, adjustment, otherSet, estimate);
         return BigStreamUtil.findBest(model, finalSets);
     }
