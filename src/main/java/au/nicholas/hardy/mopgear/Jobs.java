@@ -43,8 +43,8 @@ public class Jobs {
         outputResultSimple(bestSet, model, true);
     }
 
-    public static void findUpgradeSetup(EquipOptionsMap items, Tuple.Tuple2<Integer, Integer>[] tuple2s, ModelCombined model) {
-        new FindUpgrades(itemCache).findUpgradeSetup(model, items, tuple2s);
+    public static void findUpgradeSetup(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItems, ModelCombined model, boolean allowHacks) {
+        new FindUpgrades(itemCache, model, allowHacks).findUpgradeSetup(baseItems, extraItems);
     }
 
     public static void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {

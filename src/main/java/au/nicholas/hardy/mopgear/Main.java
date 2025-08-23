@@ -23,8 +23,7 @@ import java.util.function.Function;
 import static au.nicholas.hardy.mopgear.EngineUtil.chooseEngineAndRun;
 import static au.nicholas.hardy.mopgear.Jobs.*;
 import static au.nicholas.hardy.mopgear.domain.StatType.*;
-import static au.nicholas.hardy.mopgear.io.SourcesOfItems.intellectLeatherCelestialArray;
-import static au.nicholas.hardy.mopgear.io.SourcesOfItems.intellectLeatherValorArray;
+import static au.nicholas.hardy.mopgear.io.SourcesOfItems.*;
 
 @SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType", "ConstantValue"})
 public class Main {
@@ -149,9 +148,9 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model);
 //        findUpgradeSetup(items, strengthPlateValorArray(), model);
 //        findUpgradeSetup(items, strengthPlateCrafted(), model);
-//        new FindUpgrades(itemCache).findUpgradeSetup(model, items, strengthPlateValorCelestialP1(itemCache));
+        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, strengthPlateValorCelestialP1(itemCache));
 
-        new FindUpgrades(itemCache).findUpgradeSetup(model, items, new Tuple.Tuple2[] { Tuple.create(86751,0)});
+//        new FindUpgrades(itemCache).findUpgradeSetup(model, items, new Tuple.Tuple2[] { Tuple.create(86751,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
 
         // so we could get a conclusive result from the ret, then set the common slots to fixed
@@ -165,7 +164,7 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, true, 86783, false, true, null);
 
         Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 476);
-       new FindUpgrades(itemCache).findUpgradeSetup(model, items, ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray()));
+       new FindUpgrades(itemCache, model, false).findUpgradeSetup(items, ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray()));
 
 //        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
 //        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);

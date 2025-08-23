@@ -29,7 +29,7 @@ public class EngineUtil {
             proposed = EngineStream.runSolver(model, itemOptions, adjustment, startTime, estimate);
         }
 
-        if (proposed.isEmpty()) {
+        if (proposed.isEmpty() && job.hackAllow) {
             proposed = fallbackLimits(model, itemOptions, adjustment, job);
         }
 
@@ -62,14 +62,24 @@ public class EngineUtil {
             }
         }
         if (bestHolder.get() == null) {
-            result.println("FALLBACK SET FAILED WITHIN CAPS");
+            result.println("FALLBACK SET FAILED WITHIN HIT/EXP CAP");
+
             for (ItemSet set : proposedList) {
                 long rating = model.calcRating(set);
                 bestHolder.add(set, rating);
             }
+
+            if (bestHolder.get() == null) {
+                return Optional.empty();
+            } else {
+                result.println("FALLBACK SET FOUND IGNORING CAPS");
+                result.hackCount += 2;
+                return Optional.ofNullable(bestHolder.get());
+            }
+        } else {
+            result.println("FALLBACK SET FOUND USING MIN/MAX ONLY");
+            result.hackCount++;
+            return Optional.ofNullable(bestHolder.get());
         }
-        if (bestHolder.get() != null)
-            result.println("FALLBACK SET FOUND");
-        return Optional.ofNullable(bestHolder.get());
     }
 }

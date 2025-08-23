@@ -15,6 +15,7 @@ import java.util.Optional;
 public class JobInfo {
     public final List<String> prints = new ArrayList<>();
     public Optional<ItemSet> resultSet;
+    public boolean hackAllow;
     public int hackCount;
     public ModelCombined model;
     public EquipOptionsMap itemOptions;

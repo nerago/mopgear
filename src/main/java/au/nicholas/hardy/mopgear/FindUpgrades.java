@@ -17,20 +17,24 @@ import java.util.function.Function;
 
 @SuppressWarnings({"SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType"})
 public class FindUpgrades {
+    private final ModelCombined model;
+    private boolean hackAllow;
     private ItemCache itemCache;
 
 //    private static final Long runSize = null; // full search
 //    private static final long runSize = 10000000; // quick runs
-//    private static final long runSize = 50000000; // 2 min total runs
-    private static final long runSize = 100000000; // 4 min total runs
+    private static final long runSize = 50000000; // 2 min total runs
+//    private static final long runSize = 100000000; // 4 min total runs
 //    private static final long runSize = 300000000; // 12 min total runs
 //    private static final long runSize = 1000000000; // 40 min runs
 
-    public FindUpgrades(ItemCache itemCache) {
+    public FindUpgrades(ItemCache itemCache, ModelCombined model, boolean hackAllow) {
         this.itemCache = itemCache;
+        this.model = model;
+        this.hackAllow = hackAllow;
     }
 
-    public void findUpgradeSetup(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
+    public void findUpgradeSetup(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
         ItemSet baseSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null).orElseThrow();
         double baseRating = model.calcRating(baseSet);
         System.out.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.totals, baseRating);
@@ -63,11 +67,7 @@ public class FindUpgrades {
             if (canSkipUpgradeCheck(extraItem, slot, baseItems))
                 continue;
 
-            if (extraItemInfo.b() != null) {
-                System.out.println(extraItem.toStringExtended() + " $" + extraItemInfo.b());
-            } else {
-                System.out.println(extraItem.toStringExtended());
-            }
+            System.out.println("JOB " + extraItem.toStringExtended() + " $" + extraItemInfo.b());
 
             jobList.add(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, slot, baseRating));
 
@@ -89,7 +89,7 @@ public class FindUpgrades {
         System.out.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, stars);
     }
 
-    private static JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating) {
+    private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating) {
         JobInfo job = new JobInfo();
 
         extraItem = enchanting.apply(extraItem);
@@ -100,9 +100,13 @@ public class FindUpgrades {
         items.put(slot, extraOptions);
         ArrayUtil.mapInPlace(items.get(slot), enchanting);
 
-        StatBlock adjustment = FindStatRange.checkSetAdjust(model, items, job);
-        if (adjustment != null)
-            job.hackCount++;
+        StatBlock adjustment = null;
+        if (hackAllow) {
+            adjustment = FindStatRange.checkSetAdjust(model, items, job);
+            if (adjustment != null)
+                job.hackCount++;
+            job.hackAllow = true;
+        }
 
         job.config(model, items, null, runSize, adjustment);
         job.extraItem = extraItem;
@@ -111,6 +115,7 @@ public class FindUpgrades {
 
     private void handleResult(JobInfo job, double baseRating) {
         Optional<ItemSet> resultSet = job.resultSet;
+        job.outputNow();
         if (resultSet.isPresent()) {
             System.out.println("SET STATS " + resultSet.get().totals);
             double extraRating = job.model.calcRating(resultSet.get());
@@ -133,7 +138,7 @@ public class FindUpgrades {
             return true;
         }
         if (reforgedItems.get(slot)[0].id == extraItem.id) {
-            System.out.println("SAME ITEM " + extraItem.toStringExtended() + "\n");
+            System.out.println("SAME ITEM " + extraItem.toStringExtended());
             return true;
         }
 
