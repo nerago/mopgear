@@ -11,7 +11,7 @@ public class StatRatingsWeightsMix extends StatRatings {
     private final int multiplyA;
     private final int multiplyB;
 
-    public StatRatingsWeightsMix(StatRatings weightA, int multiplyA, StatRatings weightB, int multiplyB) throws IOException {
+    public StatRatingsWeightsMix(StatRatings weightA, int multiplyA, StatRatings weightB, int multiplyB) {
         this.weightA = weightA;
         this.weightB = weightB;
         this.multiplyA = multiplyA;

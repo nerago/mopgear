@@ -16,16 +16,18 @@ public class ItemCache {
     private final Map<Integer, ItemData> itemCache;
     private final Path file;
 
-    public ItemCache(Path file) throws IOException {
+    public ItemCache(Path file) {
         this.file = file;
         this.itemCache = cacheLoad(file);
     }
 
-    private static Map<Integer, ItemData> cacheLoad(Path file) throws IOException {
+    private static Map<Integer, ItemData> cacheLoad(Path file) {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             TypeToken<Map<Integer, ItemData>> typeToken = new TypeToken<>() {
             };
             return new Gson().fromJson(reader, typeToken);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 

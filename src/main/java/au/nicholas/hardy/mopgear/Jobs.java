@@ -139,14 +139,19 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcess(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput) throws IOException {
-        Optional<ItemSet> bestSet = chooseEngineAndRun(model, reforgedItems, startTime, BILLION, null);
-        outputResultSimple(bestSet, model, detailedOutput);
-        outputTweaked(bestSet, reforgedItems, model);
+    public static void reforgeProcess(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput) {
+        JobInfo job = new JobInfo();
+        job.outputImmediate = true;
+        job.hackAllow = true;
+        job.config(model, reforgedItems, startTime, BILLION/10, null);
+        EngineUtil.runJob(job);
+
+        outputResultSimple(job.resultSet, model, detailedOutput);
+        outputTweaked(job.resultSet, reforgedItems, model);
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants) throws IOException {
+    public static void reforgeProcessPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
         Function<ItemData, ItemData> enchanting =
                 extraItemEnchants != null ? x -> x.changeFixed(extraItemEnchants) :

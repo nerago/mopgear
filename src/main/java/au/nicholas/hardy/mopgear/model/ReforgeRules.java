@@ -3,13 +3,16 @@ package au.nicholas.hardy.mopgear.model;
 import au.nicholas.hardy.mopgear.domain.StatType;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 
-public class ReforgeRules {
-    private static final StatType[] reforgeSource = new StatType[]{StatType.Mastery, StatType.Crit, StatType.Hit, StatType.Haste, StatType.Expertise, StatType.Dodge, StatType.Parry};
+import static au.nicholas.hardy.mopgear.domain.StatType.*;
 
-    private static final StatType[] reforgeTargetsRetExtended = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Haste, StatType.Mastery};
-    private static final StatType[] reforgeTargetsRet = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Haste};
-    private static final StatType[] reforgeTargetsProt = new StatType[]{StatType.Hit, StatType.Expertise, StatType.Mastery, StatType.Haste};
-    private static final StatType[] reforgeTargetsBoom = new StatType[]{StatType.Spirit, StatType.Hit, StatType.Mastery, StatType.Haste, StatType.Crit};
+public class ReforgeRules {
+    private static final StatType[] reforgeSource = new StatType[]{Mastery, Crit, Haste, Hit, Spirit, Expertise, Dodge, Parry};
+
+    private static final StatType[] reforgeTargetsRetExtended = new StatType[]{Hit, Expertise, Haste, Mastery};
+    private static final StatType[] reforgeTargetsRet = new StatType[]{Hit, Expertise, Haste};
+    private static final StatType[] reforgeTargetsProt = new StatType[]{Hit, Expertise, Mastery, Haste};
+    private static final StatType[] reforgeTargetsBoom = new StatType[]{Spirit, Hit, Mastery, Haste, Crit};
+    private static final StatType[] reforgeTargetsWarlock = new StatType[]{Hit, Mastery, Haste, Crit};
 
     private final StatType[] reforgeTargets;
 
@@ -30,6 +33,10 @@ public class ReforgeRules {
 
     public static ReforgeRules boom() {
         return new ReforgeRules(reforgeTargetsBoom);
+    }
+
+    public static ReforgeRules warlock() {
+        return new ReforgeRules(reforgeTargetsWarlock);
     }
 
     public static ReforgeRules common() {

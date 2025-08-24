@@ -33,7 +33,7 @@ public class ItemUtil {
         return set;
     }
 
-    public static EquipOptionsMap readAndLoad(ItemCache itemCache, boolean detailedOutput, Path file, ReforgeRules rules, EnumMap<SlotEquip, ReforgeRecipe> presetForge) throws IOException {
+    public static EquipOptionsMap readAndLoad(ItemCache itemCache, boolean detailedOutput, Path file, ReforgeRules rules, EnumMap<SlotEquip, ReforgeRecipe> presetForge) {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
         List<ItemData> items = loadItems(itemCache, itemIds, detailedOutput);
         EquipOptionsMap result = presetForge != null
@@ -43,7 +43,7 @@ public class ItemUtil {
         return result;
     }
 
-    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) throws IOException {
+    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
             ItemData item = loadItem(itemCache, equippedItem, detailedOutput);

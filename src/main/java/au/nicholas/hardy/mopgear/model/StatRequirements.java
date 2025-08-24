@@ -27,8 +27,12 @@ public class StatRequirements {
         return new StatRequirements(TARGET_RATING_MELEE, TARGET_RATING_TANK, DEFAULT_CAP_ALLOW_EXCEED, false);
     }
 
-    public static StatRequirements boom() {
+    public static StatRequirements caster() {
         return new StatRequirements(TARGET_RATING_CAST, 0, DEFAULT_CAP_ALLOW_EXCEED, true);
+    }
+
+    public static StatRequirements warlockDungeon() {
+        return new StatRequirements(TARGET_RATING_CAST_DUNGEON, 0, DEFAULT_CAP_ALLOW_EXCEED, false);
     }
 
     public static StatRequirements zero() {
@@ -42,6 +46,7 @@ public class StatRequirements {
     private static final int TARGET_RATING_MELEE = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_MELEE); // 2550
     private static final int TARGET_RATING_TANK = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_TANK); // 5100
     private static final int TARGET_RATING_CAST = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_CAST); // 5100
+    private static final int TARGET_RATING_CAST_DUNGEON = (int) Math.ceil(RATING_PER_PERCENT * 12); // 4080
 
     private static final int DEFAULT_CAP_ALLOW_EXCEED = 100;
 
@@ -50,7 +55,7 @@ public class StatRequirements {
     private final int maxExceed;
     private final boolean combineHitLike;
 
-    private int effectiveHit(StatBlock totals) {
+    public int effectiveHit(StatBlock totals) {
         return combineHitLike ? totals.hit + totals.expertise + totals.spirit : totals.hit;
     }
 

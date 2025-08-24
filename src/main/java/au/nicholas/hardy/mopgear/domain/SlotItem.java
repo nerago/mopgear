@@ -36,6 +36,8 @@ public enum SlotItem {
             return SlotItem.Chest;
         else if (wowHeadSlotNum == 23)
             return SlotItem.Offhand;
+        else if (wowHeadSlotNum == 26)
+            return SlotItem.Weapon;
         throw new IllegalArgumentException("unknown slot " + wowHeadSlotNum);
     }
 

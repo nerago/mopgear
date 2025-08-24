@@ -3,7 +3,6 @@ package au.nicholas.hardy.mopgear.model;
 import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.io.DataLocation;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
@@ -44,7 +43,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return enchants.standardEnchant(slot);
     }
 
-    public static ModelCombined standardProtModel() throws IOException {
+    public static ModelCombined standardProtModel() {
         StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false);
         StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false);
         StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13);
@@ -54,7 +53,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statMix, statRequirements, reforge, enchants);
     }
 
-    public static ModelCombined standardRetModel() throws IOException {
+    public static ModelCombined standardRetModel() {
 //        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
         StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
         statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0);
@@ -63,7 +62,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret(), enchants);
     }
 
-    public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) throws IOException {
+    public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) {
 //        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
         StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
         statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0);
@@ -73,7 +72,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statRatings, statRequirements, reforge, enchants);
     }
 
-    public static ModelCombined priorityRetModel() throws IOException {
+    public static ModelCombined priorityRetModel() {
         StatRatings statRatings = new StatRatingsPriority(new StatType[]{StatType.Primary, StatType.Haste, StatType.Mastery, StatType.Crit});
         StatRequirements statRequirements = StatRequirements.retWideCapRange();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
@@ -81,11 +80,18 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statRatings, statRequirements, reforge, enchants);
     }
 
-    public static ModelCombined standardBoomModel() throws IOException {
+    public static ModelCombined standardBoomModel() {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBoomFile, false);
-        StatRequirements statRequirements = StatRequirements.boom();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom);
+        StatRequirements statRequirements = StatRequirements.caster();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom); // TODO check same
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants);
+    }
+
+    public static ModelCombined standardWarlockModel() {
+        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightWarlockFile, false);
+        StatRequirements statRequirements = StatRequirements.warlockDungeon();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom);
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.warlock(), enchants);
     }
 
     public static ModelCombined nullMixedModel() {

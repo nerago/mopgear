@@ -172,6 +172,38 @@ public class SourcesOfItems {
         };
     }
 
+    public static Tuple.Tuple2<Integer, Integer>[] intellectClothValorCelestialP1Array() {
+        return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
+                Tuple.create(89337,2500 ),
+                Tuple.create(89340,1750 ),
+                Tuple.create(89433,2500 ),
+                Tuple.create(88893,1250 ),
+                Tuple.create(88742,1750 ),
+                Tuple.create(89062,1750 ),
+                Tuple.create(89088,2500 ),
+                Tuple.create(88878,1750 ),
+                Tuple.create(89077,1250 ),
+                Tuple.create(89068,1250 ),
+                Tuple.create(89072,1250 ),
+                Tuple.create(89081,1750 ),
+                Tuple.create(86809,40 ),
+                Tuple.create(86770,25 ),
+                Tuple.create(86758,40 ),
+                Tuple.create(86787,25 ),
+                Tuple.create(89966,25 ),
+                Tuple.create(86798,40 ),
+                Tuple.create(89965,40 ),
+                Tuple.create(89971,25 ),
+                Tuple.create(86796,25 ),
+                Tuple.create(86829,15 ),
+                Tuple.create(86754,25 ),
+                Tuple.create(86810,25 ),
+                Tuple.create(86767,25 ),
+                Tuple.create(86773,40 ),
+                Tuple.create(86792,40 )
+        };
+    }
+
     public static Tuple.Tuple2<Integer, Integer>[] filterItemLevel(ItemCache itemCache, Tuple.Tuple2<Integer, Integer>[] existing, int maxItemLevel) {
         return Arrays.stream(existing)
                 .map(tup -> Tuple.create(tup, ItemUtil.loadItemBasic(itemCache, tup.a())))

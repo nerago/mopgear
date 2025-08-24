@@ -126,6 +126,8 @@ public class GemData {
         map.put(4430, new StatBlock(0, 0, 0, 0, 0, 170, 0, 0, 0, 0));// hand
         map.put(4414, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int bracer
         map.put(4415, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// str bracer
+        map.put(4892, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));// lightweave
+        map.put(4895, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
         return map;
     }
 

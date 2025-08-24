@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType"})
 public class FindUpgrades {
@@ -23,8 +24,8 @@ public class FindUpgrades {
 
 //    private static final Long runSize = null; // full search
 //    private static final long runSize = 10000000; // quick runs
-    private static final long runSize = 50000000; // 2 min total runs
-//    private static final long runSize = 100000000; // 4 min total runs
+//    private static final long runSize = 50000000; // 2 min total runs
+    private static final long runSize = 100000000; // 4 min total runs
 //    private static final long runSize = 300000000; // 12 min total runs
 //    private static final long runSize = 1000000000; // 40 min runs
 
@@ -46,7 +47,7 @@ public class FindUpgrades {
         jobList = jobList.parallelStream().unordered()
                 .map(EngineUtil::runJob)
                 .peek(job -> handleResult(job, baseRating))
-                .toList();
+                .collect(Collectors.toList());
 
         BestCollection<JobInfo> bestCollection = new BestCollection<>();
         jobList.forEach(job -> bestCollection.add(job, job.factor));
@@ -85,8 +86,14 @@ public class FindUpgrades {
         ItemData item = resultItem.extraItem;
         double factor = resultItem.factor;
         String stars = ArrayUtil.repeat('*', resultItem.hackCount);
-        Integer cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
-        System.out.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, stars);
+        int cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
+        if (factor > 1.0) {
+            double plusPercent = (factor - 1.0) * 100;
+            double plusPerCost = cost != 0 ? plusPercent / cost : 0;
+            System.out.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f\t %1.4f\n", item.slot, item.name, cost, factor, stars, plusPercent, plusPerCost);
+        } else {
+            System.out.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, stars);
+        }
     }
 
     private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating) {

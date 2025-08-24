@@ -17,9 +17,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class InputGearParser {
-    public static List<EquippedItem> readInput(Path file) throws IOException {
+    public static List<EquippedItem> readInput(Path file) {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             return parseReader(reader);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 

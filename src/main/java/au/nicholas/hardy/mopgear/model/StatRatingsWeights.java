@@ -21,9 +21,11 @@ public class StatRatingsWeights extends StatRatings {
     private EnumMap<SocketType, StatBlock> standardGems;
     private StatType bestNonHit;
 
-    public StatRatingsWeights(Path weightFile, boolean includeHit) throws IOException {
+    public StatRatingsWeights(Path weightFile, boolean includeHit) {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
             weight = parseReader(reader);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
         this.includeHit = includeHit;
         chooseGems();

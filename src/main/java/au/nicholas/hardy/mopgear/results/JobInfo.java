@@ -14,6 +14,7 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class JobInfo {
     public final List<String> prints = new ArrayList<>();
+    public boolean outputImmediate;
     public Optional<ItemSet> resultSet;
     public boolean hackAllow;
     public int hackCount;
@@ -35,18 +36,27 @@ public class JobInfo {
 
     public void println(String str) {
         prints.add(str);
+        if (outputImmediate)
+            outputNow(str);
     }
 
     public void printf(String format, Object... args) {
-        prints.add(String.format(format, args));
+        String str = String.format(format, args);
+        prints.add(str);
+        if (outputImmediate)
+            outputNow(str);
     }
 
     public void outputNow() {
         for (String str : prints) {
-            if (str.endsWith("\n"))
-                System.out.print(str);
-            else
-                System.out.println(str);
+            outputNow(str);
         }
+    }
+
+    private static void outputNow(String str) {
+        if (str.endsWith("\n"))
+            System.out.print(str);
+        else
+            System.out.println(str);
     }
 }
