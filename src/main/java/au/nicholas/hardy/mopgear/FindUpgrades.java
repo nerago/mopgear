@@ -21,11 +21,11 @@ public class FindUpgrades {
     private ItemCache itemCache;
 
     //    private static final Long runSize = null; // full search
-    private static final long runSize = 10000000; // quick runs
-//    private static final long runSize = 50000000; // 2 min total runs
-//    private static final long runSize = 100000000; // 4 min total runs
-//    private static final long runSize = 300000000; // 12 min total runs
-//    private static final long runSize = 1000000000; // 40 min runs
+//    private static final long runSize = 10000000; // <1 min runs
+    private static final long runSize = 50000000; // 4 min total runs
+//    private static final long runSize = 100000000; // 10 min total runs
+//    private static final long runSize = 300000000; // 25 min total runs
+//    private static final long runSize = 1000000000; // 60 min runs
 
     public FindUpgrades(ItemCache itemCache, ModelCombined model, boolean hackAllow) {
         this.itemCache = itemCache;
@@ -102,7 +102,7 @@ public class FindUpgrades {
 
         ItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
         items.put(slot, extraOptions);
-        ArrayUtil.mapInPlace(items.get(slot), enchanting);
+        ArrayUtil.mapInPlace(items.get(slot), enchanting); // redundant?
 
         StatBlock adjustment = null;
         if (hackAllow) {

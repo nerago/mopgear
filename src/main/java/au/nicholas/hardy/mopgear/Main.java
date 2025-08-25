@@ -56,8 +56,8 @@ public class Main {
 //            multiSpecSequential(startTime);
 
 //            reforgeRet(startTime);
-            reforgeProt(startTime);
-//            reforgeBoom(startTime);
+//            reforgeProt(startTime);
+            reforgeBoom(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -142,10 +142,10 @@ public class Main {
 //        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
 //        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model);
-        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, true);
+//        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, true);
 //        findUpgradeSetup(items, strengthPlateValorArray(), model);
 //        findUpgradeSetup(items, strengthPlateCrafted(), model);
-//        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, strengthPlateValorCelestialP1(itemCache));
+        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialP1(itemCache));
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
@@ -158,10 +158,11 @@ public class Main {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearBoomFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime, true);
-//        reforgeProcessPlus(items, model, startTime, true, 86783, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, true, 89089, true, true, null, null);
+        new FindUpgrades(itemCache, model, true).run(items, new Tuple.Tuple2[]{Tuple.create(89089,0)});
 
-        Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 476);
-       new FindUpgrades(itemCache, model, false).run(items, ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray()));
+//        Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 476);
+//       new FindUpgrades(itemCache, model, true).run(items, ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray()));
 
 //        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
 //        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);

@@ -48,4 +48,9 @@ public final class ItemSet {
         System.out.println(getTotals().toStringExtended() + " " + model.calcRating(getTotals()));
         getItems().forEachValue(it -> System.out.println(it + " " + model.calcRating(it.totalStatCopy())));
     }
+
+    @Override
+    public String toString() {
+        return totals.toString();
+    }
 }

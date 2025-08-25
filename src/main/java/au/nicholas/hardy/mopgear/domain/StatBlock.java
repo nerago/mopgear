@@ -27,6 +27,15 @@ public final class StatBlock {
         this.spirit = spirit;
     }
 
+    public static StatBlock add(StatBlock a, StatBlock b) {
+        if (a != null && b != null)
+            return a.plus(b);
+        else if (a != null)
+            return a;
+        else
+            return b;
+    }
+
     public StatBlock plus(StatBlock other) {
         return new StatBlock(
                 primary + other.primary,
@@ -132,17 +141,46 @@ public final class StatBlock {
         }
     }
 
-    public StatBlock withChange(StatType a_stat, int a_value) {
-        int primary = this.primary;
-        int stam = this.stam;
-        int mastery = this.mastery;
-        int crit = this.crit;
-        int hit = this.hit;
-        int haste = this.haste;
-        int expertise = this.expertise;
-        int dodge = this.dodge;
-        int parry = this.parry;
-        int spirit = this.spirit;
+    public static StatBlock of(StatType stat, int value) {
+        int primary = 0;
+        int stam = 0;
+        int mastery = 0;
+        int crit = 0;
+        int hit = 0;
+        int haste = 0;
+        int expertise = 0;
+        int dodge = 0;
+        int parry = 0;
+        int spirit = 0;
+        switch (stat) {
+            case Primary -> primary = value;
+            case Stam -> stam = value;
+            case Mastery -> mastery = value;
+            case Crit -> crit = value;
+            case Hit -> hit = value;
+            case Haste -> haste = value;
+            case Expertise -> expertise = value;
+            case Dodge -> dodge = value;
+            case Parry -> parry = value;
+            case Spirit -> spirit = value;
+            default -> throw new IllegalArgumentException();
+        }
+        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+    }
+
+    public static StatBlock of(StatType a_stat, int a_value, StatType b_stat, int b_value) {
+        int primary = 0;
+        int stam = 0;
+        int mastery = 0;
+        int crit = 0;
+        int hit = 0;
+        int haste = 0;
+        int expertise = 0;
+        int dodge = 0;
+        int parry = 0;
+        int spirit = 0;
+        if (a_stat == b_stat)
+            throw new IllegalArgumentException();
         switch (a_stat) {
             case Primary -> primary = a_value;
             case Stam -> stam = a_value;
@@ -154,6 +192,46 @@ public final class StatBlock {
             case Dodge -> dodge = a_value;
             case Parry -> parry = a_value;
             case Spirit -> spirit = a_value;
+            default -> throw new IllegalArgumentException();
+        }
+        switch (b_stat) {
+            case Primary -> primary = b_value;
+            case Stam -> stam = b_value;
+            case Mastery -> mastery = b_value;
+            case Crit -> crit = b_value;
+            case Hit -> hit = b_value;
+            case Haste -> haste = b_value;
+            case Expertise -> expertise = b_value;
+            case Dodge -> dodge = b_value;
+            case Parry -> parry = b_value;
+            case Spirit -> spirit = b_value;
+            default -> throw new IllegalArgumentException();
+        }
+        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+    }
+
+    public StatBlock withChange(StatType stat, int value) {
+        int primary = this.primary;
+        int stam = this.stam;
+        int mastery = this.mastery;
+        int crit = this.crit;
+        int hit = this.hit;
+        int haste = this.haste;
+        int expertise = this.expertise;
+        int dodge = this.dodge;
+        int parry = this.parry;
+        int spirit = this.spirit;
+        switch (stat) {
+            case Primary -> primary = value;
+            case Stam -> stam = value;
+            case Mastery -> mastery = value;
+            case Crit -> crit = value;
+            case Hit -> hit = value;
+            case Haste -> haste = value;
+            case Expertise -> expertise = value;
+            case Dodge -> dodge = value;
+            case Parry -> parry = value;
+            case Spirit -> spirit = value;
             default -> throw new IllegalArgumentException();
         }
         return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);

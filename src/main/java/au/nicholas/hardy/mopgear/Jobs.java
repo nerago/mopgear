@@ -151,7 +151,7 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants) {
+    public static void reforgeProcessPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants, StatBlock adjustment) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
         Function<ItemData, ItemData> enchanting =
                 extraItemEnchants != null ? x -> x.changeFixed(extraItemEnchants) :
@@ -160,15 +160,15 @@ public class Jobs {
 
         SlotEquip slot = extraItem.slot.toSlotEquip();
         EquipOptionsMap runItems = reforgedItems.deepClone();
-        ItemData extraItem1 = addExtra(runItems, model, extraItemId, slot, enchanting, null, replace, true);
+        extraItem = addExtra(runItems, model, extraItemId, slot, enchanting, null, replace, true);
         ArrayUtil.mapInPlace(runItems.get(slot), enchanting);
 
         if (detailedOutput) {
-            System.out.println("EXTRA " + extraItem1);
+            System.out.println("EXTRA " + extraItem);
         }
 
         long runSize = BILLION;
-        JobInfo job = chooseEngineAndRunAsJob(model, runItems, startTime, runSize, null);
+        JobInfo job = chooseEngineAndRunAsJob(model, runItems, startTime, runSize, adjustment);
         Optional<ItemSet> bestSet = job.resultSet;
         outputResultSimple(bestSet, model, detailedOutput);
         if (bestSet.isEmpty() && detailedOutput) {
