@@ -5,10 +5,8 @@ import au.nicholas.hardy.mopgear.domain.ItemSet;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.results.JobInfo;
-import au.nicholas.hardy.mopgear.util.BestHolder;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 public class EngineUtil {
@@ -23,14 +21,20 @@ public class EngineUtil {
         Optional<ItemSet> proposed;
         if (runSize != null && estimate > runSize) {
             job.printf("COMBINATIONS estimate=%,d RANDOM SAMPLE %,d\n", estimate, runSize);
-            proposed = EngineRandom.runSolver(model, itemOptions, adjustment, startTime, runSize);
+            if (job.singleThread)
+                proposed = EngineRandom.runSolverSingleThread(model, itemOptions, adjustment, runSize);
+            else
+                proposed = EngineRandom.runSolver(model, itemOptions, adjustment, startTime, runSize);
         } else {
             job.printf("COMBINATIONS estimate=%,d FULL RUN\n", estimate);
-            proposed = EngineStream.runSolver(model, itemOptions, adjustment, startTime, estimate);
+            if (job.singleThread)
+                proposed = new EngineStack(model, itemOptions, adjustment).runSolver();
+            else
+                proposed = EngineStream.runSolver(model, itemOptions, adjustment, startTime, estimate);
         }
 
         if (proposed.isEmpty() && job.hackAllow) {
-            proposed = fallbackLimits(model, itemOptions, adjustment, job);
+            proposed = FindStatRange.fallbackLimits(model, itemOptions, adjustment, job);
         }
 
         job.resultSet = proposed.map(itemSet -> Tweaker.tweak(itemSet, model, itemOptions));
@@ -41,7 +45,7 @@ public class EngineUtil {
         JobInfo job = new JobInfo();
         job.config(model, itemOptions, startTime, runSize, adjustment);
         runJob(job);
-        job.outputNow();
+        job.printRecorder.outputNow();
         return job.resultSet;
     }
 
@@ -50,41 +54,4 @@ public class EngineUtil {
         job.config(model, itemOptions, startTime, runSize, adjustment);
         return runJob(job);
     }
-
-    private static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobInfo job) {
-        List<ItemSet> proposedList = FindStatRange.setsAtLimits(itemOptions, adjustment);
-        BestHolder<ItemSet> bestHolder = new BestHolder<>(null, 0);
-        job.println("FALLBACK SET CHECKING");
-        for (ItemSet set : proposedList) {
-            if (model.statRequirements().filter(set)) {
-                long rating = model.calcRating(set);
-                bestHolder.add(set, rating);
-            }
-        }
-        if (bestHolder.get() != null) {
-            job.println("FALLBACK SET FOUND USING MIN/MAX ONLY");
-            job.hackCount++;
-            return Optional.ofNullable(bestHolder.get());
-        } else {
-            job.println("FALLBACK SET FAILED WITHIN HIT/EXP CAP");
-
-            for (ItemSet set : proposedList) {
-                set = FindStatRange.adjustForCapsFinalSet(set, model, job);
-                if (!model.statRequirements().filter(set)) {
-                    throw new IllegalStateException("adjust didn't fix caps");
-                }
-                long rating = model.calcRating(set);
-                bestHolder.add(set, rating);
-            }
-
-            if (bestHolder.get() == null) {
-                return Optional.empty();
-            } else {
-                job.println("FALLBACK SET FOUND FORCING CAPS");
-                job.hackCount += 2;
-                return Optional.ofNullable(bestHolder.get());
-            }
-        }
-    }
-
 }

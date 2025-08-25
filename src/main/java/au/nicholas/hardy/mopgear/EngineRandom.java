@@ -2,7 +2,9 @@ package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.model.StatRequirements;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
+import au.nicholas.hardy.mopgear.util.BestHolder;
 import au.nicholas.hardy.mopgear.util.BigStreamUtil;
 
 import java.time.Instant;
@@ -26,8 +28,25 @@ public class EngineRandom {
         return model.filterSets(setStream);
     }
 
+    public static Optional<ItemSet> runSolverSingleThread(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, long count) {
+        Random random = ThreadLocalRandom.current();
+        StatRequirements require = model.statRequirements();
+        BestHolder<ItemSet> best = new BestHolder<>(null, 0);
+        for (int i = 0; i < count; ++i) {
+            ItemSet set = makeSet(items, adjustment, random);
+            if (require.filter(set)) {
+                best.add(set, model.calcRating(set));
+            }
+        }
+        return Optional.ofNullable(best.get());
+    }
+
     private static ItemSet makeSet(EquipOptionsMap items, StatBlock adjustment) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
+        return makeSet(items, adjustment, random);
+    }
+
+    private static ItemSet makeSet(EquipOptionsMap items, StatBlock adjustment, Random random) {
         EquipMap chosen = EquipMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] itemList = items.get(slot);

@@ -44,7 +44,7 @@ public class Jobs {
     }
 
     public static void findUpgradeSetup(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItems, ModelCombined model, boolean allowHacks) {
-        new FindUpgrades(itemCache, model, allowHacks).findUpgradeSetup(baseItems, extraItems);
+        new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems);
     }
 
     public static void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {
@@ -141,7 +141,7 @@ public class Jobs {
     @SuppressWarnings("SameParameterValue")
     public static void reforgeProcess(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput) {
         JobInfo job = new JobInfo();
-        job.outputImmediate = true;
+        job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
         job.config(model, reforgedItems, startTime, BILLION/10, null);
         EngineUtil.runJob(job);
@@ -174,7 +174,7 @@ public class Jobs {
         if (bestSet.isEmpty() && detailedOutput) {
             outputFailureDetails(model, runItems, job);
         }
-        job.outputNow();
+        job.printRecorder.outputNow();
     }
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot) {

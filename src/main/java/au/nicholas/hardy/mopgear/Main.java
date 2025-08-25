@@ -140,9 +140,9 @@ public class Main {
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
 //        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
-        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
+//        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model);
-//        findUpgradeSetup(items, strengthPlateHeartOfFear(), model);
+        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, true);
 //        findUpgradeSetup(items, strengthPlateValorArray(), model);
 //        findUpgradeSetup(items, strengthPlateCrafted(), model);
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, strengthPlateValorCelestialP1(itemCache));
@@ -161,7 +161,7 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, true, 86783, false, true, null);
 
         Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 476);
-       new FindUpgrades(itemCache, model, false).findUpgradeSetup(items, ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray()));
+       new FindUpgrades(itemCache, model, false).run(items, ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray()));
 
 //        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
 //        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);
@@ -172,7 +172,7 @@ public class Main {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime, true);
-        new FindUpgrades(itemCache, model, false).findUpgradeSetup(items, intellectClothValorCelestialP1Array());
+        new FindUpgrades(itemCache, model, false).run(items, intellectClothValorCelestialP1Array());
     }
 
     private static EnumMap<SlotEquip, ReforgeRecipe> commonFixedItems() {

@@ -3,13 +3,12 @@ package au.nicholas.hardy.mopgear;
 import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.results.JobInfo;
-import au.nicholas.hardy.mopgear.util.Holder;
-import au.nicholas.hardy.mopgear.util.LongHolder;
-import au.nicholas.hardy.mopgear.util.LowHighHolder;
-import au.nicholas.hardy.mopgear.util.Tuple;
+import au.nicholas.hardy.mopgear.results.PrintRecorder;
+import au.nicholas.hardy.mopgear.util.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class FindStatRange {
     public static void checkSetReport(ModelCombined model, EquipOptionsMap items, JobInfo job) {
@@ -92,8 +91,8 @@ public class FindStatRange {
     }
 
     @SuppressWarnings("ConditionCoveredByFurtherCondition")
-    public static ItemSet adjustForCapsFinalSet(ItemSet set, ModelCombined model, JobInfo job) {
-        StatBlock itemTotal = StatBlock.sum(set.items);
+    public static ItemSet adjustForCapsFinalSet(EquipMap setItems, ModelCombined model, PrintRecorder print) {
+        StatBlock itemTotal = StatBlock.sum(setItems);
         StatBlock adjust = StatBlock.empty;
         StatType takeStat = model.statRatings().bestNonHit();
 
@@ -103,22 +102,22 @@ public class FindStatRange {
         int effectiveHit = model.statRequirements().effectiveHit(itemTotal);
         if (minHit != 0 && effectiveHit < minHit) {
             int need = minHit - effectiveHit;
-            job.printf("ADJUST Hit Low %d NEED %d STEALING %d %s\n", effectiveHit, minHit, need, takeStat);
+            print.printf("ADJUST Hit Low %d NEED %d STEALING %d %s\n", effectiveHit, minHit, need, takeStat);
             adjust = adjust.withChange(StatType.Hit, need, takeStat, -need);
         } else if (minHit != 0 && maxHit != Integer.MAX_VALUE && effectiveHit > maxHit) {
             int excess = effectiveHit - maxHit;
-            job.printf("ADJUST Hit High %d LIMIT %d GIFTING %d %s\n", effectiveHit, maxHit, excess, takeStat);
+            print.printf("ADJUST Hit High %d LIMIT %d GIFTING %d %s\n", effectiveHit, maxHit, excess, takeStat);
             adjust = adjust.withChange(StatType.Hit, -excess, takeStat, excess);
         }
 
         int minExp = model.statRequirements().getMinimumExpertise(), maxExp = model.statRequirements().getMaximumExpertise();
         if (minExp != 0 && itemTotal.expertise < minExp) {
             int need = minExp - itemTotal.expertise;
-            job.printf("ADJUST Expertise Low %d NEED %d STEALING %d %s\n", itemTotal.expertise, minExp, need, takeStat);
+            print.printf("ADJUST Expertise Low %d NEED %d STEALING %d %s\n", itemTotal.expertise, minExp, need, takeStat);
             adjust = adjust.withChange(StatType.Expertise, need, takeStat, -need);
         } else if (minExp != 0 && maxExp != Integer.MAX_VALUE && itemTotal.expertise > maxExp) {
             int excess = itemTotal.expertise - maxExp;
-            job.printf("ADJUST Expertise High %d LIMIT %d GIFTING %d %s\n", itemTotal.expertise, maxExp, excess, takeStat);
+            print.printf("ADJUST Expertise High %d LIMIT %d GIFTING %d %s\n", itemTotal.expertise, maxExp, excess, takeStat);
             adjust = adjust.withChange(StatType.Expertise, -excess, takeStat, excess);
         }
 
@@ -126,7 +125,7 @@ public class FindStatRange {
             throw new IllegalStateException("expected to need adjust");
         }
 
-        return ItemSet.manyItems(set.items, adjust);
+        return ItemSet.manyItems(setItems, adjust);
     }
 
     private static Tuple.Tuple2<Integer, Integer> findRange(EquipOptionsMap itemOptions, StatType statType) {
@@ -162,5 +161,63 @@ public class FindStatRange {
             holder.add(item, value);
         }
         return holder;
+    }
+
+    public static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobInfo job) {
+        job.println("FALLBACK SET SEARCHING");
+
+        List<ItemSet> proposedList = setsAtLimits(itemOptions, adjustment);
+        Optional<ItemSet> result = fallbackSimpleLimits(model, job, proposedList);
+        if (result.isPresent()) {
+            return result;
+        } else {
+            job.println("FALLBACK SET FAILED WITHIN HIT/EXP CAP");
+            return fallbackLimitsWithAdjustment(model, job, proposedList);
+        }
+    }
+
+    private static Optional<ItemSet> fallbackSimpleLimits(ModelCombined model, JobInfo job, List<ItemSet> proposedList) {
+        BestHolder<ItemSet> bestHolder = new BestHolder<>(null, 0);
+
+        for (ItemSet set : proposedList) {
+            if (model.statRequirements().filter(set)) {
+                long rating = model.calcRating(set);
+                bestHolder.add(set, rating);
+            }
+        }
+
+        if (bestHolder.get() != null) {
+            job.println("FALLBACK SET FOUND USING MIN/MAX ONLY");
+            job.hackCount++;
+            return Optional.ofNullable(bestHolder.get());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<ItemSet> fallbackLimitsWithAdjustment(ModelCombined model, JobInfo job, List<ItemSet> proposedList) {
+        BestHolder<Tuple.Tuple2<ItemSet, PrintRecorder>> bestHolder = new BestHolder<>(null, 0);
+
+        for (ItemSet set : proposedList) {
+            PrintRecorder print = new PrintRecorder();
+
+            ItemSet adjustedSet = adjustForCapsFinalSet(set.items.shallowClone(), model, print);
+            if (!model.statRequirements().filter(adjustedSet)) {
+                throw new IllegalStateException("adjust didn't fix caps");
+            }
+
+            long rating = model.calcRating(adjustedSet);
+            bestHolder.add(Tuple.create(adjustedSet, print), rating);
+        }
+
+        if (bestHolder.get() != null) {
+            Tuple.Tuple2<ItemSet, PrintRecorder> result = bestHolder.get();
+            job.printRecorder.append(result.b());
+            job.println("FALLBACK SET FOUND FORCING CAPS");
+            job.hackCount += 2;
+            return Optional.ofNullable(result.a());
+        } else {
+            throw new IllegalStateException("adjust didn't create any usable set somehow");
+        }
     }
 }

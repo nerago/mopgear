@@ -6,6 +6,7 @@ import au.nicholas.hardy.mopgear.util.Tuple;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -228,7 +229,7 @@ public final class EquipOptionsMap {
     }
 
     @Deprecated(since = "avoid bad performance")
-    public Collection<Tuple.Tuple2<SlotEquip, ItemData[]>> entrySet() {
+    public List<Tuple.Tuple2<SlotEquip, ItemData[]>> entrySet() {
         ArrayList<Tuple.Tuple2<SlotEquip, ItemData[]>> list = new ArrayList<>();
         forEachPair((slot, array) -> list.add(Tuple.create(slot, array)));
         return list;

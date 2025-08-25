@@ -48,7 +48,7 @@ public class StatRequirements {
     private static final int TARGET_RATING_CAST = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_CAST); // 5100
     private static final int TARGET_RATING_CAST_DUNGEON = (int) Math.ceil(RATING_PER_PERCENT * 12); // 4080
 
-    private static final int DEFAULT_CAP_ALLOW_EXCEED = 100;
+    private static final int DEFAULT_CAP_ALLOW_EXCEED = 250;
 
     private final int requiredHit;
     private final int requiredExpertise;

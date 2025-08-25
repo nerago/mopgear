@@ -1,38 +1,40 @@
 package au.nicholas.hardy.mopgear;
 
-import au.nicholas.hardy.mopgear.domain.ItemData;
-import au.nicholas.hardy.mopgear.domain.ItemSet;
-import au.nicholas.hardy.mopgear.domain.SlotEquip;
-import au.nicholas.hardy.mopgear.model.StatRatings;
+import au.nicholas.hardy.mopgear.domain.*;
+import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.util.BestHolder;
+import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.util.*;
 
 public class EngineStack {
-    private final List<Map.Entry<SlotEquip, List<ItemData>>> slotItems;
+    private final List<Tuple.Tuple2<SlotEquip, ItemData[]>> slotItems;
     private final ArrayDeque<Step> queue;
-    private ItemSet best;
-    private long bestRating;
-    private StatRatings statRatings;
+    private BestHolder<ItemSet> best;
+    private ModelCombined model;
+    private StatBlock adjustment;
 
-    public EngineStack(Map<SlotEquip, List<ItemData>> items) {
-        slotItems = items.entrySet().stream().toList();
-        queue = new ArrayDeque<>();
+    public EngineStack(ModelCombined model, EquipOptionsMap items, StatBlock adjustment) {
+        this.slotItems = items.entrySet();
+        this.model = model;
+        this.adjustment = adjustment;
+        this.queue = new ArrayDeque<>();
     }
 
-    public Collection<ItemSet> runSolver() {
+    public Optional<ItemSet> runSolver() {
         addFirstItem();
         mainLoop();
 
         if (best != null)
-            return Collections.singleton(best);
+            return Optional.ofNullable(best.get());
         else
-            return Collections.emptySet();
+            return Optional.empty();
     }
 
     private void addFirstItem() {
-        Map.Entry<SlotEquip, List<ItemData>> first = slotItems.getFirst();
-        for (ItemData item : first.getValue()) {
-            queue.addLast(new Step(1, ItemSet.singleItem(first.getKey(), item, null)));
+        Tuple.Tuple2<SlotEquip, ItemData[]> first = slotItems.getFirst();
+        for (ItemData item : first.b()) {
+            queue.addLast(new Step(1, ItemSet.singleItem(first.a(), item, adjustment)));
         }
     }
 
@@ -43,17 +45,14 @@ public class EngineStack {
             ItemSet prevSet = prev.set;
             int index = prev.nextIndex();
             if (index < itemsSize) {
-                Map.Entry<SlotEquip, List<ItemData>> nextItems = slotItems.get(index);
+                Tuple.Tuple2<SlotEquip, ItemData[]> nextEntry = slotItems.get(index);
                 int nextIndex = index + 1;
-                for (ItemData item : nextItems.getValue()) {
-                    queue.addLast(new Step(nextIndex, prevSet.copyWithAddedItem(nextItems.getKey(), item)));
+                for (ItemData item : nextEntry.b()) {
+                    queue.addLast(new Step(nextIndex, prevSet.copyWithAddedItem(nextEntry.a(), item)));
                 }
             } else {
-                long rating = statRatings.calcRating(prevSet.totals);
-                if (best == null || bestRating < rating) {
-                    best = prevSet;
-                    bestRating = rating;
-                }
+                long rating = model.calcRating(prevSet.totals);
+                best.add(prevSet, rating);
             }
         }
     }

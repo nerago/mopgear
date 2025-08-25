@@ -128,7 +128,7 @@ public class ArrayUtil {
     }
 
     public static <T> Stream<T> arrayStream(T[] initialSets) {
-        final Spliterator<T> split = Spliterators.spliterator(initialSets, SIZED | SUBSIZED | ORDERED | DISTINCT | NONNULL | IMMUTABLE);
+        final Spliterator<T> split = Spliterators.spliterator(initialSets, SIZED | SUBSIZED | DISTINCT | NONNULL | IMMUTABLE);
         return StreamSupport.stream(split, true);
     }
 

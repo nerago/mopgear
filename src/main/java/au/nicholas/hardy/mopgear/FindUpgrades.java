@@ -5,16 +5,14 @@ import au.nicholas.hardy.mopgear.io.ItemCache;
 import au.nicholas.hardy.mopgear.io.SourcesOfItems;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.results.JobInfo;
-import au.nicholas.hardy.mopgear.results.UpgradeResultItem;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.BestCollection;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType"})
 public class FindUpgrades {
@@ -22,10 +20,10 @@ public class FindUpgrades {
     private boolean hackAllow;
     private ItemCache itemCache;
 
-//    private static final Long runSize = null; // full search
-//    private static final long runSize = 10000000; // quick runs
+    //    private static final Long runSize = null; // full search
+    private static final long runSize = 10000000; // quick runs
 //    private static final long runSize = 50000000; // 2 min total runs
-    private static final long runSize = 100000000; // 4 min total runs
+//    private static final long runSize = 100000000; // 4 min total runs
 //    private static final long runSize = 300000000; // 12 min total runs
 //    private static final long runSize = 1000000000; // 40 min runs
 
@@ -35,19 +33,18 @@ public class FindUpgrades {
         this.hackAllow = hackAllow;
     }
 
-    public void findUpgradeSetup(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
+    public void run(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
         ItemSet baseSet = EngineUtil.chooseEngineAndRun(model, baseItems, null, runSize, null).orElseThrow();
         double baseRating = model.calcRating(baseSet);
         System.out.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.totals, baseRating);
 
         Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
 
-        List<JobInfo> jobList = makeJobs(model, baseItems, extraItemArray, enchanting, baseRating);
-
-        jobList = jobList.parallelStream().unordered()
+        List<JobInfo> jobList =
+                makeJobs(model, baseItems, extraItemArray, enchanting, baseRating)
                 .map(EngineUtil::runJob)
                 .peek(job -> handleResult(job, baseRating))
-                .collect(Collectors.toList());
+                .toList();
 
         BestCollection<JobInfo> bestCollection = new BestCollection<>();
         jobList.forEach(job -> bestCollection.add(job, job.factor));
@@ -56,30 +53,25 @@ public class FindUpgrades {
         bestCollection.forEach((item, factor) -> reportItem(item, extraItemArray));
     }
 
-    private ArrayList<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, Function<ItemData, ItemData> enchanting, double baseRating) {
-        ArrayList<JobInfo> jobList = new ArrayList<>();
-        for (Tuple.Tuple2<Integer, Integer> extraItemInfo : extraItemArray) {
-            JobInfo job = new JobInfo();
-
+    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, Function<ItemData, ItemData> enchanting, double baseRating) {
+        return ArrayUtil.arrayStream(extraItemArray).mapMulti((extraItemInfo, submitJob) -> {
             int extraItemId = extraItemInfo.a();
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             SlotEquip slot = extraItem.slot.toSlotEquip();
 
-            if (canSkipUpgradeCheck(extraItem, slot, baseItems))
-                continue;
+            if (!canSkipUpgradeCheck(extraItem, slot, baseItems)) {
+                System.out.println("JOB " + extraItem.toStringExtended() + " $" + extraItemInfo.b());
 
-            System.out.println("JOB " + extraItem.toStringExtended() + " $" + extraItemInfo.b());
+                submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, slot, baseRating));
 
-            jobList.add(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, slot, baseRating));
-
-            if (slot == SlotEquip.Trinket1) {
-                jobList.add(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Trinket2, baseRating));
+                if (slot == SlotEquip.Trinket1) {
+                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Trinket2, baseRating));
+                }
+                if (slot == SlotEquip.Ring1) {
+                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Ring2, baseRating));
+                }
             }
-            if (slot == SlotEquip.Ring1) {
-                jobList.add(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Ring2, baseRating));
-            }
-        }
-        return jobList;
+        });
     }
 
     private static void reportItem(JobInfo resultItem, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
@@ -89,8 +81,12 @@ public class FindUpgrades {
         int cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
         if (factor > 1.0) {
             double plusPercent = (factor - 1.0) * 100;
-            double plusPerCost = cost != 0 ? plusPercent / cost : 0;
-            System.out.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f\t %1.4f\n", item.slot, item.name, cost, factor, stars, plusPercent, plusPerCost);
+            if (cost >= 10) {
+                double plusPerCost = plusPercent / cost;
+                System.out.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f\t %1.4f\n", item.slot, item.name, cost, factor, stars, plusPercent, plusPerCost);
+            } else {
+                System.out.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f\n", item.slot, item.name, cost, factor, stars, plusPercent);
+            }
         } else {
             System.out.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, stars);
         }
@@ -98,6 +94,7 @@ public class FindUpgrades {
 
     private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating) {
         JobInfo job = new JobInfo();
+        job.singleThread = true;
 
         extraItem = enchanting.apply(extraItem);
         job.println("OFFER " + extraItem);
@@ -122,7 +119,7 @@ public class FindUpgrades {
 
     private void handleResult(JobInfo job, double baseRating) {
         Optional<ItemSet> resultSet = job.resultSet;
-        job.outputNow();
+        job.printRecorder.outputNow();
         if (resultSet.isPresent()) {
             System.out.println("SET STATS " + resultSet.get().totals);
             double extraRating = job.model.calcRating(resultSet.get());
