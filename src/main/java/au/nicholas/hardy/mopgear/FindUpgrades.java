@@ -10,8 +10,10 @@ import au.nicholas.hardy.mopgear.util.BestCollection;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType"})
@@ -46,11 +48,51 @@ public class FindUpgrades {
                 .peek(job -> handleResult(job, baseRating))
                 .toList();
 
+        reportResults(extraItemArray, jobList);
+    }
+
+    private void reportResults(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
+        reportBySlot(extraItemArray, jobList);
+        reportCostUpgradeRank(extraItemArray, jobList);
+        reportOverallRank(extraItemArray, jobList);
+    }
+
+    private void reportCostUpgradeRank(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
+        BestCollection<JobInfo> bestCollection = new BestCollection<>();
+
+        jobList.forEach(job -> {
+            ItemData item = job.extraItem;
+            int cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
+            if (cost >= 10) {
+                double plusPerCost = (job.factor - 1.0) * 100 / cost;
+                bestCollection.add(job, plusPerCost);
+            }
+        });
+
+        System.out.println("RANKING COST PER UPGRADE");
+        bestCollection.forEach((item, factor) -> reportItem(item, extraItemArray));
+    }
+
+    private static void reportOverallRank(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
         BestCollection<JobInfo> bestCollection = new BestCollection<>();
         jobList.forEach(job -> bestCollection.add(job, job.factor));
 
-        System.out.println("RANKING RANKING");
+        System.out.println("RANKING PERCENT UPGRADE");
         bestCollection.forEach((item, factor) -> reportItem(item, extraItemArray));
+    }
+
+    private static void reportBySlot(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
+        Map<Object, BestCollection<JobInfo>> grouped = jobList.stream().collect(
+                Collectors.groupingBy(j -> j.extraItem.slot,
+                        BestCollection.collector(job -> job.factor)));
+        for (SlotItem slot : SlotItem.values()) {
+            BestCollection<JobInfo> best = grouped.get(slot);
+            if (best != null) {
+                System.out.println("RANKING " + slot);
+                best.forEach((item, factor) -> reportItem(item, extraItemArray));
+                System.out.println();
+            }
+        }
     }
 
     private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, Function<ItemData, ItemData> enchanting, double baseRating) {
@@ -83,9 +125,9 @@ public class FindUpgrades {
             double plusPercent = (factor - 1.0) * 100;
             if (cost >= 10) {
                 double plusPerCost = plusPercent / cost;
-                System.out.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f\t %1.4f\n", item.slot, item.name, cost, factor, stars, plusPercent, plusPerCost);
+                System.out.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f%%\t %1.4f\n", item.slot, item.name, cost, factor, stars, plusPercent, plusPerCost);
             } else {
-                System.out.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f\n", item.slot, item.name, cost, factor, stars, plusPercent);
+                System.out.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f%%\n", item.slot, item.name, cost, factor, stars, plusPercent);
             }
         } else {
             System.out.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, stars);
@@ -141,7 +183,10 @@ public class FindUpgrades {
             System.out.println("SLOT NOT USED IN CURRENT SET " + extraItem.toStringExtended());
             return true;
         }
-        if (reforgedItems.get(slot)[0].id == extraItem.id) {
+
+        SlotEquip pairedSlot = slot.pairedSlot();
+        if (reforgedItems.get(slot)[0].id == extraItem.id ||
+                (pairedSlot != null && reforgedItems.get(pairedSlot)[0].id == extraItem.id)) {
             System.out.println("SAME ITEM " + extraItem.toStringExtended());
             return true;
         }

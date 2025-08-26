@@ -8,6 +8,7 @@ import au.nicholas.hardy.mopgear.model.ItemLevel;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.results.JobInfo;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
+import au.nicholas.hardy.mopgear.util.BestHolder;
 import au.nicholas.hardy.mopgear.util.TopCollectorReporting;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
@@ -68,6 +69,29 @@ public class Jobs {
         for (ItemData item : reforgedItems) {
             System.out.println(item + " " + model.calcRating(item.totalStatCopy()));
         }
+    }
+
+    public static void rankAlternativeCombos(EquipOptionsMap baseOptions, ModelCombined model, Instant startTime, List<List<Integer>> comboListList) {
+        BestHolder<List<ItemData>> best = new BestHolder<>(null, 0);
+        for (List<Integer> combo : comboListList) {
+            Function<ItemData, ItemData> enchants = t -> ItemUtil.defaultEnchants(t, model, true);
+            EquipOptionsMap submitMap = baseOptions.deepClone();
+            List<ItemData> optionItems = new ArrayList<>();
+            for (int extraId : combo) {
+                ItemData item = addExtra(submitMap, model, extraId, enchants, null, true, true);
+                optionItems.add(item);
+            }
+
+            ItemSet set = chooseEngineAndRun(model, submitMap, null, BILLION/1000, null).orElseThrow();
+            set.outputSet(model);
+            long rating = model.calcRating(set);
+            System.out.println("RATING " + rating);
+            System.out.println();
+
+            best.add(optionItems, rating);
+        }
+
+        System.out.println(best.get());
     }
 
     public static void multiSpecSequential(Instant startTime) throws IOException {
@@ -143,7 +167,7 @@ public class Jobs {
         JobInfo job = new JobInfo();
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
-        job.config(model, reforgedItems, startTime, BILLION/10, null);
+        job.config(model, reforgedItems, startTime, BILLION, null);
         EngineUtil.runJob(job);
 
         outputResultSimple(job.resultSet, model, detailedOutput);
@@ -151,14 +175,15 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants, StatBlock adjustment) {
+    public static void reforgeProcessPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, SlotEquip slot, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants, StatBlock adjustment) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
         Function<ItemData, ItemData> enchanting =
                 extraItemEnchants != null ? x -> x.changeFixed(extraItemEnchants) :
                         defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) :
                                 Function.identity();
 
-        SlotEquip slot = extraItem.slot.toSlotEquip();
+        if (slot == null)
+            slot = extraItem.slot.toSlotEquip();
         EquipOptionsMap runItems = reforgedItems.deepClone();
         extraItem = addExtra(runItems, model, extraItemId, slot, enchanting, null, replace, true);
         ArrayUtil.mapInPlace(runItems.get(slot), enchanting);
@@ -167,7 +192,7 @@ public class Jobs {
             System.out.println("EXTRA " + extraItem);
         }
 
-        long runSize = BILLION;
+        long runSize = BILLION/4;
         JobInfo job = chooseEngineAndRunAsJob(model, runItems, startTime, runSize, adjustment);
         Optional<ItemSet> bestSet = job.resultSet;
         outputResultSimple(bestSet, model, detailedOutput);
@@ -345,6 +370,6 @@ public class Jobs {
     }
 
     private static void outputFailureDetails(ModelCombined model, EquipOptionsMap runItems, JobInfo job) {
-        FindStatRange.checkSetReport(model, runItems, job);
+        FindStatRange.checkSetReportOnly(model, runItems, job);
     }
 }

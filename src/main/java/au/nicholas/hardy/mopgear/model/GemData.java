@@ -64,6 +64,7 @@ public class GemData {
     }
 
     private static void gemsStandard(Map<Integer, StatBlock> map) {
+        map.put(76628, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76694, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76618, new StatBlock(80, 0, 0, 0, 160, 0, 0, 0, 0, 0));
         map.put(76669, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
@@ -101,7 +102,7 @@ public class GemData {
 
     private static Map<Integer, StatBlock> buildEnchant() {
         Map<Integer, StatBlock> map = new HashMap<>();
-        map.put(4419, new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 0)); // chest stats
+        map.put(4419, new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 80)); // chest stats
         map.put(4411, new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0)); // bracer
         map.put(4432, new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 0)); // glove
         map.put(4426, new StatBlock(0, 0, 0, 0, 0, 175, 0, 0, 0, 0)); // foot
@@ -127,7 +128,9 @@ public class GemData {
         map.put(4414, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int bracer
         map.put(4415, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// str bracer
         map.put(4892, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));// lightweave
-        map.put(4895, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
+//        map.put(4895, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
+        map.put(4826, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
+        map.put(4434, new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int offhand
         return map;
     }
 

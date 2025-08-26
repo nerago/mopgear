@@ -9,29 +9,30 @@ import au.nicholas.hardy.mopgear.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.ToIntFunction;
 
 public class FindStatRange {
-    public static void checkSetReport(ModelCombined model, EquipOptionsMap items, JobInfo job) {
+    public static void checkSetReportOnly(ModelCombined model, EquipOptionsMap items, JobInfo job) {
         for (StatType statType : StatType.values()) {
-            Tuple.Tuple2<Integer, Integer> range = findRange(items, statType);
+            Tuple.Tuple2<Integer, Integer> range = findRange(model, items, statType);
             report(statType, range, model, job);
         }
     }
 
     public static StatBlock checkSetAdjust(ModelCombined model, EquipOptionsMap items, JobInfo job) {
-        Tuple.Tuple2<Integer, Integer> hitRange = findRange(items, StatType.Hit);
+        Tuple.Tuple2<Integer, Integer> hitRange = findRange(model, items, StatType.Hit);
         StatBlock hitAdjust = reportAndAdjustHit(model, job, hitRange);
 
-        Tuple.Tuple2<Integer, Integer> expRange = findRange(items, StatType.Expertise);
+        Tuple.Tuple2<Integer, Integer> expRange = findRange(model, items, StatType.Expertise);
         StatBlock expAdjust = reportAndAdjustExpertise(model, job, expRange);
 
         return StatBlock.add(hitAdjust, expAdjust);
     }
 
-    public static List<ItemSet> setsAtLimits(EquipOptionsMap itemOptions, StatBlock adjustment) {
+    private static List<ItemSet> setsAtLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment) {
         List<ItemSet> setList = new ArrayList<>();
         for (StatType statType : StatType.values()) {
-            findSets(itemOptions, adjustment, statType, setList);
+            findSets(model, itemOptions, adjustment, statType, setList);
         }
         return setList;
     }
@@ -61,7 +62,7 @@ public class FindStatRange {
         int lowAvailable = range.a(), highAvailable = range.b();
         int minTarget = model.statRequirements().getMinimumHit(), maxTarget = model.statRequirements().getMaximumHit();
         if (highAvailable >= minTarget && lowAvailable <= maxTarget) {
-            // ok
+            return null; // ok
         } else if (highAvailable < minTarget) {
             StatType takeStat = model.statRatings().bestNonHit();
             int need = minTarget - highAvailable;
@@ -71,14 +72,13 @@ public class FindStatRange {
             job.printf("BAD Hit %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
             throw new RuntimeException("not yet supported");
         }
-        return null;
     }
 
     private static StatBlock reportAndAdjustExpertise(ModelCombined model, JobInfo job, Tuple.Tuple2<Integer, Integer> range) {
         int lowAvailable = range.a(), highAvailable = range.b();
         int minTarget = model.statRequirements().getMinimumExpertise(), maxTarget = model.statRequirements().getMaximumExpertise();
         if (highAvailable >= minTarget && lowAvailable <= maxTarget) {
-            // ok
+            return null; // ok
         } else if (highAvailable < minTarget) {
             StatType takeStat = model.statRatings().bestNonHit();
             int need = minTarget - highAvailable;
@@ -88,11 +88,10 @@ public class FindStatRange {
             job.printf("BAD Expertise %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
             throw new RuntimeException("not yet supported");
         }
-        return null;
     }
 
     @SuppressWarnings("ConditionCoveredByFurtherCondition")
-    public static ItemSet adjustForCapsFinalSet(EquipMap setItems, ModelCombined model, PrintRecorder print) {
+    private static ItemSet adjustForCapsFinalSet(EquipMap setItems, ModelCombined model, PrintRecorder print) {
         StatBlock itemTotal = StatBlock.sum(setItems);
         StatBlock adjust = StatBlock.empty;
         StatType takeStat = model.statRatings().bestNonHit();
@@ -128,20 +127,20 @@ public class FindStatRange {
         return ItemSet.manyItems(setItems, adjust);
     }
 
-    private static Tuple.Tuple2<Integer, Integer> findRange(EquipOptionsMap itemOptions, StatType statType) {
+    private static Tuple.Tuple2<Integer, Integer> findRange(ModelCombined model, EquipOptionsMap itemOptions, StatType statType) {
         LongHolder low = new LongHolder(), high = new LongHolder();
         itemOptions.forEachValue(array -> {
-            LowHighHolder<ItemData> statRange = findMinMax(array, statType);
+            LowHighHolder<ItemData> statRange = findMinMax(model, array, statType);
             low.value += statRange.getLowRating();
             high.value += statRange.getHighRating();
         });
         return Tuple.create((int) low.value, (int) high.value);
     }
 
-    private static void findSets(EquipOptionsMap itemOptions, StatBlock adjustment, StatType statType, List<ItemSet> setList) {
+    private static void findSets(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, StatType statType, List<ItemSet> setList) {
         Holder<ItemSet> lowSet = new Holder<>(), highSet = new Holder<>();
         itemOptions.forEachPair((slot, array) -> {
-            LowHighHolder<ItemData> statRange = findMinMax(array, statType);
+            LowHighHolder<ItemData> statRange = findMinMax(model, array, statType);
             if (lowSet.value == null) {
                 lowSet.value = ItemSet.singleItem(slot, statRange.getLow(), adjustment);
                 highSet.value = ItemSet.singleItem(slot, statRange.getHigh(), adjustment);
@@ -154,7 +153,14 @@ public class FindStatRange {
         setList.add(highSet.value);
     }
 
-    private static LowHighHolder<ItemData> findMinMax(ItemData[] itemArray, StatType statType) {
+    private static LowHighHolder<ItemData> findMinMax(ModelCombined model, ItemData[] itemArray, StatType statType) {
+        if (statType == StatType.Hit)
+            return findMinMaxHit(itemArray, x -> model.statRequirements().effectiveHit(x));
+        else
+            return findMinMaxGeneric(itemArray, statType);
+    }
+
+    private static LowHighHolder<ItemData> findMinMaxGeneric(ItemData[] itemArray, StatType statType) {
         LowHighHolder<ItemData> holder = new LowHighHolder<>();
         for (ItemData item : itemArray) {
             int value = item.totalStatCopy().get(statType);
@@ -163,10 +169,19 @@ public class FindStatRange {
         return holder;
     }
 
+    private static LowHighHolder<ItemData> findMinMaxHit(ItemData[] itemArray, ToIntFunction<StatBlock> effectiveHit) {
+        LowHighHolder<ItemData> holder = new LowHighHolder<>();
+        for (ItemData item : itemArray) {
+            int value = effectiveHit.applyAsInt(item.totalStatCopy());
+            holder.add(item, value);
+        }
+        return holder;
+    }
+
     public static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobInfo job) {
         job.println("FALLBACK SET SEARCHING");
 
-        List<ItemSet> proposedList = setsAtLimits(itemOptions, adjustment);
+        List<ItemSet> proposedList = setsAtLimits(model, itemOptions, adjustment);
         Optional<ItemSet> result = fallbackSimpleLimits(model, job, proposedList);
         if (result.isPresent()) {
             return result;

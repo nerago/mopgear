@@ -195,7 +195,7 @@ public class SourcesOfItems {
                 Tuple.create(89965,40 ),
                 Tuple.create(89971,25 ),
                 Tuple.create(86796,25 ),
-                Tuple.create(86829,15 ),
+//                Tuple.create(86829,15 ),
                 Tuple.create(86754,25 ),
                 Tuple.create(86810,25 ),
                 Tuple.create(86767,25 ),
@@ -339,11 +339,15 @@ public class SourcesOfItems {
     public static Tuple.Tuple2<Integer, Integer>[] strengthPlateCrafted() {
         // skipping neck cloak offhand weaps
         return (Tuple.Tuple2<Integer, Integer>[]) new Tuple.Tuple2[]{
-
                 Tuple.create(87402,0 ),
                 Tuple.create(87406,0 ),
                 Tuple.create(87405,0 ),
                 Tuple.create(87407,0 ),
+
+                Tuple.create(82979,0 ),
+                Tuple.create(82980,0 ),
+                Tuple.create(82976,0 ),
+                Tuple.create(82975,0 ),
         };
     }
 
@@ -374,5 +378,10 @@ public class SourcesOfItems {
     public static Tuple.Tuple2<Integer, Integer>[] strengthPlateValorCelestialP1(ItemCache itemCache) {
         Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 476);
         return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray());
+    }
+
+    public static Tuple.Tuple2<Integer, Integer>[] intellectLeatherValorCelestialP1(ItemCache itemCache) {
+        Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 476);
+        return ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray());
     }
 }
