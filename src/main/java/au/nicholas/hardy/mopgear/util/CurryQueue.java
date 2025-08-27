@@ -1,5 +1,7 @@
 package au.nicholas.hardy.mopgear.util;
 
+import au.nicholas.hardy.mopgear.SolverHitCaps;
+
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
@@ -26,7 +28,6 @@ public final class CurryQueue<T> {
         return new CurryQueue<>(v, this);
     }
 
-    @Deprecated
     public static <R> CurryQueue<R> prepend(R v, CurryQueue<R> queue) {
         if (queue != null) {
             return queue.prepend(v);
@@ -256,7 +257,11 @@ public final class CurryQueue<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CurryQueue<?> that = (CurryQueue<?>) o;
+        return equalsOther((CurryQueue<?>) o);
+    }
+
+    public boolean equalsOther(CurryQueue<?> o) {
+        CurryQueue<?> that = o;
         if (!item.equals(that.item))
             return false;
         CurryQueue<?> n = right, x = that.right;
@@ -267,6 +272,10 @@ public final class CurryQueue<T> {
             x = x.right;
         }
         return x == n;
+    }
+
+    public static boolean equalsOther(CurryQueue<?> a, CurryQueue<?> b) {
+        return a.equalsOther(b);
     }
 
     @Override

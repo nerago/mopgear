@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
-public class EngineRandom {
+public class SolverRandom {
     public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
         Stream<ItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
         return finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));

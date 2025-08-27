@@ -4,11 +4,11 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collector;
 
-public class TopCollector1<T> implements Collector<T, TopCollector1.State<T>, Collection<T>> {
+public class TopCollectorN<T> implements Collector<T, TopCollectorN.State<T>, Collection<T>> {
     private final int size;
     private final ToLongFunction<T> getValue;
 
-    public TopCollector1(int size, ToLongFunction<T> getValue) {
+    public TopCollectorN(int size, ToLongFunction<T> getValue) {
         this.size = size;
         this.getValue = getValue;
     }

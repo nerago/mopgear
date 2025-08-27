@@ -6,9 +6,7 @@ import au.nicholas.hardy.mopgear.domain.StatType;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -30,6 +28,14 @@ public class ArrayUtil {
 
     public static <T> T[] mapAsNew(T[] input, Function<T, T> function) {
         T[] result = createGeneric(input, input.length);
+        for (int i = 0; i < input.length; ++i) {
+            result[i] = function.apply(input[i]);
+        }
+        return result;
+    }
+
+    public static <T, R> R[] mapAsNew(T[] input, Function<T, R> function, IntFunction<R[]> makeArray) {
+        R[] result = makeArray.apply(input.length);
         for (int i = 0; i < input.length; ++i) {
             result[i] = function.apply(input[i]);
         }

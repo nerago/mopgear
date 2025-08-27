@@ -9,7 +9,7 @@ import au.nicholas.hardy.mopgear.results.JobInfo;
 import java.time.Instant;
 import java.util.Optional;
 
-public class EngineUtil {
+public class SolverEntry {
     public static JobInfo runJob(JobInfo job) {
         ModelCombined model = job.model;
         EquipOptionsMap itemOptions = job.itemOptions;
@@ -22,15 +22,15 @@ public class EngineUtil {
         if (runSize != null && estimate > runSize) {
             job.printf("COMBINATIONS estimate=%,d RANDOM SAMPLE %,d\n", estimate, runSize);
             if (job.singleThread)
-                proposed = EngineRandom.runSolverSingleThread(model, itemOptions, adjustment, runSize);
+                proposed = SolverRandom.runSolverSingleThread(model, itemOptions, adjustment, runSize);
             else
-                proposed = EngineRandom.runSolver(model, itemOptions, adjustment, startTime, runSize);
+                proposed = SolverRandom.runSolver(model, itemOptions, adjustment, startTime, runSize);
         } else {
             job.printf("COMBINATIONS estimate=%,d FULL RUN\n", estimate);
             if (job.singleThread)
-                proposed = new EngineStack(model, itemOptions, adjustment).runSolver();
+                proposed = new SolverLocalStack(model, itemOptions, adjustment).runSolver();
             else
-                proposed = EngineStream.runSolver(model, itemOptions, adjustment, startTime, estimate);
+                proposed = SolverCompleteStreams.runSolver(model, itemOptions, adjustment, startTime, estimate);
         }
 
         if (proposed.isEmpty() && job.hackAllow) {

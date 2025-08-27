@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class EngineStream {
+public class SolverCompleteStreams {
     public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long estimate) {
         Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, adjustment, estimate);
         return BigStreamUtil.findBest(model, finalSets);

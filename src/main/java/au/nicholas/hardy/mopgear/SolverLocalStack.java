@@ -7,14 +7,14 @@ import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.util.*;
 
-public class EngineStack {
+public class SolverLocalStack {
     private final List<Tuple.Tuple2<SlotEquip, ItemData[]>> slotItems;
     private final ArrayDeque<Step> queue;
     private BestHolder<ItemSet> best;
-    private ModelCombined model;
-    private StatBlock adjustment;
+    private final ModelCombined model;
+    private final StatBlock adjustment;
 
-    public EngineStack(ModelCombined model, EquipOptionsMap items, StatBlock adjustment) {
+    public SolverLocalStack(ModelCombined model, EquipOptionsMap items, StatBlock adjustment) {
         this.slotItems = items.entrySet();
         this.model = model;
         this.adjustment = adjustment;

@@ -4,13 +4,11 @@ import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.io.DataLocation;
 import au.nicholas.hardy.mopgear.io.InputGearParser;
 import au.nicholas.hardy.mopgear.io.ItemCache;
-import au.nicholas.hardy.mopgear.io.SourcesOfItems;
 import au.nicholas.hardy.mopgear.model.ItemLevel;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.model.StatRequirements;
 import au.nicholas.hardy.mopgear.results.OutputText;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
-import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -21,7 +19,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static au.nicholas.hardy.mopgear.EngineUtil.chooseEngineAndRun;
+import static au.nicholas.hardy.mopgear.SolverEntry.chooseEngineAndRun;
 import static au.nicholas.hardy.mopgear.Jobs.*;
 import static au.nicholas.hardy.mopgear.domain.StatType.*;
 import static au.nicholas.hardy.mopgear.io.SourcesOfItems.*;
@@ -99,6 +97,7 @@ public class Main {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
 //        reforgeProcess(items, model, startTime);
+        new SolverHitCaps(model).solveHitCaps(items);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
 //        reforgeProcessPlus(items, model, startTime, true, 89981, true, true, null);
@@ -114,7 +113,7 @@ public class Main {
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model);
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
-        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialP1(itemCache));
+//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialP1(itemCache));
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);

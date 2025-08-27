@@ -21,8 +21,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static au.nicholas.hardy.mopgear.EngineUtil.chooseEngineAndRun;
-import static au.nicholas.hardy.mopgear.EngineUtil.chooseEngineAndRunAsJob;
+import static au.nicholas.hardy.mopgear.SolverEntry.chooseEngineAndRun;
+import static au.nicholas.hardy.mopgear.SolverEntry.chooseEngineAndRunAsJob;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class Jobs {
@@ -124,7 +124,7 @@ public class Jobs {
 
         OutputText.println("COMMON COMBOS " + ItemUtil.estimateSets(commonMap));
 
-        Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null, 0);
+        Stream<ItemSet> commonStream = SolverCompleteStreams.runSolverPartial(modelNull, commonMap, startTime, null, 0);
 //        long initialSize = 50000;
 //        Stream<ItemSet> commonStream = EngineRandom.runSolverPartial(modelNull, commonMap, startTime, null, initialSize);
 
@@ -173,7 +173,7 @@ public class Jobs {
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
         job.config(model, reforgedItems, startTime, BILLION, null);
-        EngineUtil.runJob(job);
+        SolverEntry.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
         outputTweaked(job.resultSet, reforgedItems, model);
@@ -194,7 +194,7 @@ public class Jobs {
         long runSize = BILLION;
         JobInfo job = new JobInfo();
         job.config(model, runItems, startTime, runSize, adjustment);
-        EngineUtil.runJob(job);
+        SolverEntry.runJob(job);
 
         job.printRecorder.outputNow();
         outputResultSimple(job.resultSet, model, true);
@@ -244,7 +244,7 @@ public class Jobs {
         for (int extraItemId : alternateItems) {
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             EquipOptionsMap itemMap = reforgedItems.copyWithReplaceSingle(extraItem.slot.toSlotEquip(), extraItem);
-            Optional<ItemSet> bestSets = EngineStream.runSolver(model, itemMap, null, null, 0);
+            Optional<ItemSet> bestSets = SolverCompleteStreams.runSolver(model, itemMap, null, null, 0);
             outputResultSimple(bestSets, model, false);
         }
     }
