@@ -4,6 +4,7 @@ import au.nicholas.hardy.mopgear.domain.ItemData;
 import au.nicholas.hardy.mopgear.domain.SlotItem;
 import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
+import au.nicholas.hardy.mopgear.results.OutputText;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 
@@ -19,7 +20,7 @@ public class WowHead {
         String url = "https://www.wowhead.com/mop-classic/item=" + itemId;
         String htmlContent = fetchHTML(url);
 
-//        System.out.println(htmlContent);
+//        OutputText.println(htmlContent);
 
         int startIndex = 0;
 
@@ -37,7 +38,7 @@ public class WowHead {
                 if (je.has("reqlevel")) {
                     int level = je.get("reqlevel").getAsInt();
                     if (level > 1 && level < 85) {
-                        System.out.println("Skipping " + itemId + " version for level " + level);
+                        OutputText.println("Skipping " + itemId + " version for level " + level);
                         startIndex = startDataSection + 1;
                         continue;
                     }
@@ -46,20 +47,20 @@ public class WowHead {
                 startIndex = startDataSection + 1;
                 continue;
             }
-            System.out.println("Fetched " + itemId);
+            OutputText.println("Fetched " + itemId);
             JsonObject itemObject = json.get(String.valueOf(itemId)).getAsJsonObject();
-            System.out.println(itemObject);
+            OutputText.println(itemObject.toString());
 
             int itemLevel = readItemLevel(htmlContent);
 
             ItemData item = buildItem(itemObject, itemId, itemLevel);
-            System.out.println(item);
+            OutputText.println(item.toString());
             if (item.stat.isEmpty())
-                System.out.println("WARNWARNWARN item has no stats " + item);
+                OutputText.println("WARNWARNWARN item has no stats " + item);
             return item;
         }
 
-        System.out.println("Failed " + itemId);
+        OutputText.println("Failed " + itemId);
         return null;
     }
 

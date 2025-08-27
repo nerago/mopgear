@@ -15,6 +15,10 @@ public record ReforgeRecipe(StatType source, StatType dest) {
         return that != null && source == that.source && dest == that.dest;
     }
 
+    public boolean isNull() {
+        return source == null && dest == null;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(source, dest);

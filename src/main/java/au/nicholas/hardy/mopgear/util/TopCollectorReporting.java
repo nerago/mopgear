@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collector;
 
-public class TopCollectorReporting<T> implements Collector<T, TopCollectorReporting.State<T>, Collection<T>> {
+public class TopCollectorReporting<T> implements Collector<T, TopCollectorReporting.State<T>, Optional<T>> {
     private final ToLongFunction<T> getValue;
     private final Consumer<T> reportBetter;
 
@@ -29,7 +29,7 @@ public class TopCollectorReporting<T> implements Collector<T, TopCollectorReport
     }
 
     @Override
-    public Function<State<T>, Collection<T>> finisher() {
+    public Function<State<T>, Optional<T>> finisher() {
         return State::finish;
     }
 
@@ -71,11 +71,11 @@ public class TopCollectorReporting<T> implements Collector<T, TopCollectorReport
             }
         }
 
-        public Collection<T> finish() {
+        public Optional<T> finish() {
             if (best != null)
-                return Collections.singletonList(best);
+                return Optional.of(best);
             else
-                return Collections.emptyList();
+                return Optional.empty();
         }
     }
 }

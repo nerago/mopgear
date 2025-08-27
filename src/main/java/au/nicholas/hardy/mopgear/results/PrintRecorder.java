@@ -10,27 +10,33 @@ public class PrintRecorder {
     public void println(String str) {
         prints.add(str);
         if (outputImmediate)
-            outputNow(str);
+            outputLine(str);
     }
 
     public void printf(String format, Object... args) {
         String str = String.format(format, args);
         prints.add(str);
         if (outputImmediate)
-            outputNow(str);
+            outputLine(str);
+    }
+
+    public void printfAndEcho(String format, Object[] args) {
+        String str = String.format(format, args);
+        prints.add(str);
+        outputLine(str);
     }
 
     public void outputNow() {
         for (String str : prints) {
-            outputNow(str);
+            outputLine(str);
         }
     }
 
-    private static void outputNow(String str) {
+    private static void outputLine(String str) {
         if (str.endsWith("\n"))
-            System.out.print(str);
+            OutputText.print(str);
         else
-            System.out.println(str);
+            OutputText.println(str);
     }
 
     public void append(PrintRecorder other) {

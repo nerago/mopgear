@@ -41,4 +41,8 @@ public class JobInfo {
     public void printf(String format, Object... args) {
         printRecorder.printf(format, args);
     }
+
+    public void printfAndEcho(String format, Object... args) {
+        printRecorder.printfAndEcho(format, args);
+    }
 }

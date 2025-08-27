@@ -8,9 +8,11 @@ import au.nicholas.hardy.mopgear.io.SourcesOfItems;
 import au.nicholas.hardy.mopgear.model.ItemLevel;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.model.StatRequirements;
+import au.nicholas.hardy.mopgear.results.OutputText;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -31,8 +33,13 @@ public class Main {
 
     public ItemCache itemCache;
 
-    public static void main(String[] arg) throws ExecutionException, InterruptedException {
-        new Main().run();
+    public static void main(String[] arg) throws InterruptedException, IOException {
+        try {
+            new Main().run();
+        } catch (Throwable ex) {
+            OutputText.printException(ex);
+        }
+        OutputText.finish();
     }
 
     private void run() throws ExecutionException, InterruptedException {
@@ -64,12 +71,6 @@ public class Main {
 //            multiSpecSpecifiedRating();
     }
 
-    // protmit	21523312
-    // protdps	38197350
-    // ret	    15526158
-    // SEE SPREADSHEET
-    // mults: miti*33 prot_dps*8 ret*32
-
     private void rankSomething() {
         ModelCombined model = ModelCombined.standardRetModel();
 //        ModelCombined model = standardProtModel();
@@ -97,7 +98,7 @@ public class Main {
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
-//        reforgeProcess(items, model, startTime, true);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
 //        reforgeProcessPlus(items, model, startTime, true, 89981, true, true, null);
@@ -106,6 +107,7 @@ public class Main {
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new int[]{77530,89075,81262,87607,89823}));
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new ArrayList<>()));
+//          reforgeProcessPlusMany(items, model, startTime, new Tuple.Tuple2[]{Tuple.create(86794,0), Tuple.create(86753,0)});
 //            reforgeProcessRetFixed(model, startTime, true);
 //            reforgeProcessRetFixedAlone(model, startTime, true);
 //        reforgeProcessRetChallenge(model, startTime);
@@ -124,20 +126,21 @@ public class Main {
 
     private void reforgeProt(Instant startTime) {
         ModelCombined model = ModelCombined.standardProtModel();
+
 //        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
         EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, model.reforgeRules(), commonItems);
 
-        // TODO check crafted/boes
 
-//        reforgeProcess(items, model, startTime, true);
+
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessProtFixedPlus(model, startTime, 86789, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
 //        reforgeProcessPlus(items, model, startTime, true,84950, false, true, null);
-//        reforgeProcessPlus(items, model, startTime, true,85991, false, true, null);
-//        reforgeProcessPlusPlus(items, model, startTime, 89280, 86752);
+//        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
+//        reforgeProcessPlusPlus(items, model, startTime, 85320, 86219);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
@@ -160,7 +163,7 @@ public class Main {
         ModelCombined model = ModelCombined.standardBoomModel();
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearBoomFile, model.reforgeRules(), null);
 
-        reforgeProcess(items, model, startTime, true);
+        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, true, null,86783, false, true, null, null);
 //        reforgeProcessPlus(items, model, startTime, true, SlotEquip.Ring2,89968, false, true, null, null);
 //        new FindUpgrades(itemCache, model, true).run(items, new Tuple.Tuple2[]{Tuple.create(89089,0)});
@@ -188,7 +191,7 @@ public class Main {
         ModelCombined model = ModelCombined.standardWarlockModel();
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
 
-        reforgeProcess(items, model, startTime, true);
+        reforgeProcess(items, model, startTime);
 //        new FindUpgrades(itemCache, model, true).groupBySlot().run(items, intellectClothValorCelestialP1Array());
 
 //               Jobs.rankAlternativeCombos(items, model, startTime, List.of(
@@ -200,6 +203,18 @@ public class Main {
     }
 
     private static EnumMap<SlotEquip, ReforgeRecipe> commonFixedItems() {
+        EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
+        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(Crit, Haste));
+        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(Hit, Expertise));
+        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(Hit, Expertise));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
+        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
+        return presetReforge;
+    }
+
+    private static EnumMap<SlotEquip, ReforgeRecipe> commonFixedItemsOld() {
         EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
         presetReforge.put(SlotEquip.Head, new ReforgeRecipe(Crit, Hit));
         presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(Hit, Expertise));
@@ -273,7 +288,7 @@ public class Main {
 
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
         extraItem = addExtra(map, model, extraItemId, extraItem.slot.toSlotEquip(), enchanting, null, replace, true);
-        System.out.println("EXTRA " + extraItem);
+        OutputText.println("EXTRA " + extraItem);
 
         Optional<ItemSet> bestSet = chooseEngineAndRun(model, map, startTime, null, null);
         outputResultSimple(bestSet, model, true);
@@ -379,7 +394,7 @@ public class Main {
             } else if (extraItem.slot == SlotItem.Back) {
                 return extraItem.changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else {
-                System.out.println("DEFAULT ENCHANT " + extraItem);
+                OutputText.println("DEFAULT ENCHANT " + extraItem);
                 return ItemUtil.defaultEnchants(extraItem, model, false);
             }
         };
@@ -389,14 +404,14 @@ public class Main {
             if (extraId == 86794)
                 reforge = new ReforgeRecipe(Hit, Expertise);
             ItemData extraItem = addExtra(map, model, extraId, customiseItem, reforge, false, true);
-            System.out.println("EXTRA " + extraItem);
+            OutputText.println("EXTRA " + extraItem);
         }
 
         EquipOptionsMap scaledMap = ItemLevel.scaleForChallengeMode(map);
 
         ItemSet bestScaledSet = chooseEngineAndRun(model, scaledMap, startTime, null, null).orElseThrow();
 
-        System.out.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
+        OutputText.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
         outputResultSimple(Optional.of(bestScaledSet), model, true);
 
         for (SlotEquip slot : SlotEquip.values()) {
@@ -422,7 +437,7 @@ public class Main {
         ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirements.retWideCapRange(), model.reforgeRules(), model.enchants());
         Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null, null);
 
-        System.out.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
+        OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
         outputResultSimple(bestSetFinal, model, true);
     }
 
@@ -430,9 +445,9 @@ public class Main {
         ModelCombined modelRet = ModelCombined.standardRetModel();
         ModelCombined modelProt = ModelCombined.standardProtModel();
 
-        System.out.println("RET GEAR CURRENT");
+        OutputText.println("RET GEAR CURRENT");
         List<ItemData> retItems = ItemUtil.loadItems(itemCache, InputGearParser.readInput(DataLocation.gearRetFile), true);
-        System.out.println("PROT GEAR CURRENT");
+        OutputText.println("PROT GEAR CURRENT");
         List<ItemData> protItems = ItemUtil.loadItems(itemCache, InputGearParser.readInput(DataLocation.gearProtFile), true);
 
         Map<SlotEquip, ReforgeRecipe> reforgeRet = new EnumMap<>(SlotEquip.class);
@@ -477,12 +492,12 @@ public class Main {
         ItemSet protSet = ItemSet.manyItems(protForgedItems, null);
 
         retSet.outputSet(modelRet);
-        System.out.println("---------------------" + (modelRet.calcRating(retSet) + modelProt.calcRating(protSet)));
+        OutputText.println("---------------------" + (modelRet.calcRating(retSet) + modelProt.calcRating(protSet)));
         protSet.outputSet(modelProt);
     }
 
     private void printElapsed(Instant startTime) {
         Duration duration = Duration.between(startTime, Instant.now());
-        System.out.println("elapsed = " + duration.toString());
+        OutputText.println("elapsed = " + duration.toString());
     }
 }

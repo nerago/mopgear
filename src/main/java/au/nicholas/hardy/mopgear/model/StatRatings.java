@@ -10,8 +10,8 @@ import java.util.EnumMap;
 import static au.nicholas.hardy.mopgear.domain.StatType.*;
 
 public abstract class StatRatings {
-    private EnumMap<SocketType, StatBlock> standardGems;
-    private StatType bestNonHit;
+    protected EnumMap<SocketType, StatBlock> standardGems;
+    protected StatType bestNonHit;
 
     public abstract long calcRating(StatBlock totals);
 
@@ -23,7 +23,10 @@ public abstract class StatRatings {
         GemData.chooseGem(standardGems, SocketType.Blue, this::calcRating);
         GemData.chooseGem(standardGems, SocketType.Yellow, this::calcRating);
         GemData.chooseGem(standardGems, SocketType.General, this::calcRating);
+        standardGems.put(SocketType.Meta, StatBlock.of(StatType.Primary, 216));
+    }
 
+    protected void chooseBestStats() {
         BestHolder<StatType> bestStat = new BestHolder<>(null, 0);
         for (StatType stat : StatType.values()) {
             if (stat != Primary && stat != Hit && stat != Expertise) {

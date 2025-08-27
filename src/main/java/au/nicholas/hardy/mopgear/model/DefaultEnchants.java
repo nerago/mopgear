@@ -58,7 +58,8 @@ public class DefaultEnchants {
                     return new StatBlock(0, 0, 0, 0, 0, 0, 170, 0, 0, 0);
                 }
                 case Leg -> {
-                    return new StatBlock(0, 430, 0, 0, 0, 0, 0, 165, 0, 0);
+                    return new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0);
+//                    return new StatBlock(0, 430, 0, 0, 0, 0, 0, 165, 0, 0);
                 }
                 case Foot -> {
                     return new StatBlock(0, 0, 0, 0, 175, 0, 0, 0, 0, 0);

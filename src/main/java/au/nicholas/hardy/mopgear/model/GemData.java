@@ -131,6 +131,7 @@ public class GemData {
 //        map.put(4895, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
         map.put(4826, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
         map.put(4434, new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int offhand
+        map.put(4424, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));// int offhand
         return map;
     }
 

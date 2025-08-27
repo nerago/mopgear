@@ -3,6 +3,7 @@ package au.nicholas.hardy.mopgear.model;
 import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.io.DataLocation;
 
+import java.util.EnumMap;
 import java.util.stream.Stream;
 
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
@@ -43,10 +44,20 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return enchants.standardEnchant(slot);
     }
 
+    private static EnumMap<SocketType, StatBlock> protGems() {
+        EnumMap<SocketType, StatBlock> gems = new EnumMap<>(SocketType.class);
+        gems.put(SocketType.Red, StatBlock.of(StatType.Haste, 160, StatType.Expertise, 160));
+        gems.put(SocketType.Blue, StatBlock.of(StatType.Haste, 160, StatType.Hit, 160));
+        gems.put(SocketType.Yellow, StatBlock.of(StatType.Haste, 320));
+        gems.put(SocketType.General, StatBlock.of(StatType.Haste, 320));
+        gems.put(SocketType.Meta, StatBlock.of(StatType.Primary, 216));
+        return gems;
+    }
+
     public static ModelCombined standardProtModel() {
         StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false);
         StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false);
-        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13);
+        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13, protGems());
         StatRequirements statRequirements = StatRequirements.prot();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt);
         ReforgeRules reforge = ReforgeRules.prot();

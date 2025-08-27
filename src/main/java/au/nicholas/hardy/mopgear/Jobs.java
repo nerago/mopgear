@@ -7,6 +7,7 @@ import au.nicholas.hardy.mopgear.io.SourcesOfItems;
 import au.nicholas.hardy.mopgear.model.ItemLevel;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.results.JobInfo;
+import au.nicholas.hardy.mopgear.results.OutputText;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.BestHolder;
 import au.nicholas.hardy.mopgear.util.TopCollectorReporting;
@@ -31,7 +32,7 @@ public class Jobs {
     public static void combinationDumb(EquipOptionsMap items, ModelCombined model, Instant startTime) {
         for (int extraId : new int[]{89503, 81129, 89649, 87060, 89665, 82812, 90910, 81284, 82814, 84807, 84870, 84790, 82822}) {
             ItemData extraItem = addExtra(items, model, extraId, Function.identity(), null, false, true);
-            System.out.println("EXTRA " + extraItem);
+            OutputText.println("EXTRA " + extraItem);
         }
         //        ItemUtil.disenchant(items);
         ItemUtil.defaultEnchants(items, model, true);
@@ -67,7 +68,7 @@ public class Jobs {
                 .sorted(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))
                 .toList();
         for (ItemData item : reforgedItems) {
-            System.out.println(item + " " + model.calcRating(item.totalStatCopy()));
+            OutputText.println(item + " " + model.calcRating(item.totalStatCopy()));
         }
     }
 
@@ -85,31 +86,34 @@ public class Jobs {
             ItemSet set = chooseEngineAndRun(model, submitMap, null, BILLION/1000, null).orElseThrow();
             set.outputSet(model);
             long rating = model.calcRating(set);
-            System.out.println("RATING " + rating);
-            System.out.println();
+            OutputText.println("RATING " + rating);
+            OutputText.println();
 
             best.add(optionItems, rating);
         }
 
-        System.out.println(best.get());
+        OutputText.println(best.get().toString());
     }
 
-    public static void multiSpecSequential(Instant startTime) throws IOException {
+    public static void multiSpecSequential(Instant startTime) {
         ModelCombined modelNull = ModelCombined.nullMixedModel();
         ModelCombined modelRet = ModelCombined.extendedRetModel(true, false);
         ModelCombined modelProt = ModelCombined.standardProtModel();
 
-        System.out.println("RET GEAR CURRENT");
+        OutputText.println("RET GEAR CURRENT");
         EquipOptionsMap retMap = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, modelRet.reforgeRules(), null);
-        System.out.println("PROT GEAR CURRENT");
+        OutputText.println("PROT GEAR CURRENT");
         EquipOptionsMap protMap = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, modelProt.reforgeRules(), null);
         ItemUtil.validateDualSets(retMap, protMap);
         EquipOptionsMap commonMap = ItemUtil.commonInDualSet(retMap, protMap);
 
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, modelRet, true);
+
 //        addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
 //        addExtra(retMap, modelRet, 89075, enchant, null, false, false); // yi's cloak
-//        addExtra(retMap, modelRet, 81694, enchant, null, false, false); // command bracer
+        addExtra(retMap, modelRet, 81694, enchant, null, false, false); // command bracer
+        addExtra(retMap, modelRet, 82856, enchant, null, false, false); // dark blaze gloves
+//        addExtra(retMap, modelRet, 86742, enchant, null, false, false); // jasper clawfeet
 
 //        commonMap.replaceWithFirstOption(SlotEquip.Neck);
 //        commonMap.replaceWithFirstOption(SlotEquip.Hand);
@@ -118,7 +122,7 @@ public class Jobs {
 //        commonMap.replaceWithSpecificForge(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
 //        commonMap.replaceWithSpecificForge(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
 
-        System.out.println("COMMON COMBOS " + ItemUtil.estimateSets(commonMap));
+        OutputText.println("COMMON COMBOS " + ItemUtil.estimateSets(commonMap));
 
         Stream<ItemSet> commonStream = EngineStream.runSolverPartial(modelNull, commonMap, startTime, null, 0);
 //        long initialSize = 50000;
@@ -126,14 +130,15 @@ public class Jobs {
 
 //        Long runSize = BILLION / 1000;
         Long runSize = 200000L;
+//        Long runSize = 2000L;
         Stream<Tuple.Tuple2<ItemSet, ItemSet>> resultStream = commonStream
                 .map(r -> subSolveBoth(r, retMap, modelRet, protMap, modelProt, runSize))
                 .filter(Objects::nonNull);
 
-        Collection<Tuple.Tuple2<ItemSet, ItemSet>> best = resultStream.collect(
+        Optional<Tuple.Tuple2<ItemSet, ItemSet>> best = resultStream.collect(
                 new TopCollectorReporting<>(s -> dualRating(s, modelRet, modelProt),
                         s -> reportBetter(s, modelRet, modelProt, retMap, protMap)));
-        outputResultTwins(best, modelRet, modelProt, true);
+        outputResultTwins(best, modelRet, modelProt);
 
         // TODO solve for challenge dps too
     }
@@ -163,43 +168,39 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcess(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput) {
+    public static void reforgeProcess(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime) {
         JobInfo job = new JobInfo();
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
         job.config(model, reforgedItems, startTime, BILLION, null);
         EngineUtil.runJob(job);
 
-        outputResultSimple(job.resultSet, model, detailedOutput);
+        outputResultSimple(job.resultSet, model, true);
         outputTweaked(job.resultSet, reforgedItems, model);
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, boolean detailedOutput, SlotEquip slot, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock extraItemEnchants, StatBlock adjustment) {
+    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        Function<ItemData, ItemData> enchanting =
-                extraItemEnchants != null ? x -> x.changeFixed(extraItemEnchants) :
-                        defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) :
-                                Function.identity();
 
+        Function<ItemData, ItemData> enchanting = defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) : Function.identity();
         if (slot == null)
             slot = extraItem.slot.toSlotEquip();
-        EquipOptionsMap runItems = reforgedItems.deepClone();
+
+        EquipOptionsMap runItems = itemOptions.deepClone();
         extraItem = addExtra(runItems, model, extraItemId, slot, enchanting, null, replace, true);
-        ArrayUtil.mapInPlace(runItems.get(slot), enchanting);
+        OutputText.println("EXTRA " + extraItem);
 
-        if (detailedOutput) {
-            System.out.println("EXTRA " + extraItem);
-        }
+        long runSize = BILLION;
+        JobInfo job = new JobInfo();
+        job.config(model, runItems, startTime, runSize, adjustment);
+        EngineUtil.runJob(job);
 
-        long runSize = BILLION/4;
-        JobInfo job = chooseEngineAndRunAsJob(model, runItems, startTime, runSize, adjustment);
-        Optional<ItemSet> bestSet = job.resultSet;
-        outputResultSimple(bestSet, model, detailedOutput);
-        if (bestSet.isEmpty() && detailedOutput) {
+        job.printRecorder.outputNow();
+        outputResultSimple(job.resultSet, model, true);
+        if (job.resultSet.isEmpty()) {
             outputFailureDetails(model, runItems, job);
         }
-        job.printRecorder.outputNow();
     }
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot) {
@@ -214,7 +215,7 @@ public class Jobs {
                 new ItemData[]{Reforger.presetReforge(extraItem, reforge)} :
                 Reforger.reforgeItem(model.reforgeRules(), extraItem);
         if (replace) {
-            System.out.println("REPLACING " + (reforgedItems.get(slot) != null ? reforgedItems.get(slot)[0] : "NOTHING"));
+            OutputText.println("REPLACING " + (reforgedItems.get(slot) != null ? reforgedItems.get(slot)[0] : "NOTHING"));
             reforgedItems.put(slot, extraForged);
         } else {
             ItemData[] existing = reforgedItems.get(slot);
@@ -229,10 +230,10 @@ public class Jobs {
         HashSet<Integer> seen = new HashSet<>();
         ArrayUtil.forEach(slotArray, it -> {
             if (seen.add(it.id)) {
-                System.out.println("NEW " + slot + " " + it);
+                OutputText.println("NEW " + slot + " " + it);
             }
         });
-        System.out.println();
+        OutputText.println();
         return extraItem;
     }
 
@@ -249,14 +250,14 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlusPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2) throws IOException {
+    public static void reforgeProcessPlusPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2) {
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, model, true);
 
         ItemData extraItem1 = addExtra(reforgedItems, model, extraItemId1, enchant, null, false, true);
-        System.out.println("EXTRA " + extraItem1);
+        OutputText.println("EXTRA " + extraItem1);
 
         ItemData extraItem2 = addExtra(reforgedItems, model, extraItemId2, enchant, null, false, true);
-        System.out.println("EXTRA " + extraItem2);
+        OutputText.println("EXTRA " + extraItem2);
 
         Optional<ItemSet> best = chooseEngineAndRun(model, reforgedItems, startTime, BILLION * 3, null);
         outputResultSimple(best, model, true);
@@ -272,9 +273,9 @@ public class Jobs {
             SlotEquip slot = extraItem.slot.toSlotEquip();
             ItemData[] existing = items.get(slot);
             if (existing == null) {
-                System.out.println("SKIP SLOT NOT NEEDED " + extraItem);
+                OutputText.println("SKIP SLOT NOT NEEDED " + extraItem);
             } else if (ArrayUtil.anyMatch(existing, item -> item.id == extraItemId)) {
-                System.out.println("SKIP DUP " + extraItem);
+                OutputText.println("SKIP DUP " + extraItem);
             } else {
                 if (slot == SlotEquip.Trinket1) {
                     addExtra(items, model, extraItemId, SlotEquip.Trinket1, enchant, null, false, true);
@@ -295,23 +296,27 @@ public class Jobs {
         outputResultSimple(best, model, true);
     }
 
-    public static void outputResultTwins(Collection<Tuple.Tuple2<ItemSet, ItemSet>> bestSets, ModelCombined modelA, ModelCombined modelB, boolean detailedOutput) {
-        if (detailedOutput) {
-            System.out.println("@@@@@@@@@ Set count " + bestSets.size() + " @@@@@@@@@");
-            bestSets.forEach(s -> {
-                System.out.println("RET " + s.a().getTotals());
-                System.out.println("PROT " + s.b().getTotals());
-                System.out.println();
-            });
-            bestSets.forEach(s -> {
-                System.out.println("#######################################");
-                s.a().outputSet(modelA);
-                s.b().outputSet(modelB);
+    public static void outputResultTwins(Optional<Tuple.Tuple2<ItemSet, ItemSet>> bestSets, ModelCombined modelA, ModelCombined modelB) {
+        if (bestSets.isPresent()) {
+            ItemSet a = bestSets.get().a();
+            ItemSet b = bestSets.get().b();
+            OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
+            OutputText.println("################# RET ######################");
+            a.outputSet(modelA);
+            OutputText.println("------------------ PROT --------------------");
+            b.outputSet(modelB);
+            OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
+            EquipMap common = ItemUtil.commonInDualSet(a.items, b.items);
+            common.forEachValue(item -> OutputText.println(item.toString()));
+            OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
+            common.forEachPair((slot, item) -> {
+                if (item.reforge == null || item.reforge.isNull())
+                    OutputText.printf("presetReforge.put(SlotEquip.%s, new ReforgeRecipe(null, null));\n", slot);
+                else
+                    OutputText.printf("presetReforge.put(SlotEquip.%s, new ReforgeRecipe(%s, %s));\n", slot, item.reforge.source(), item.reforge.dest());
             });
         } else {
-            Tuple.Tuple2<ItemSet, ItemSet> last = bestSets.stream().reduce((a, b) -> b).orElseThrow();
-            last.a().outputSet(modelA);
-            last.b().outputSet(modelB);
+            OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
         }
     }
 
@@ -319,7 +324,7 @@ public class Jobs {
         if (bestSet.isPresent()) {
             bestSet.get().outputSet(model);
         } else {
-            System.out.println("@@@@@@@@@ NO VALID SET RESULTS @@@@@@@@@");
+            OutputText.println("@@@@@@@@@ NO VALID SET RESULTS @@@@@@@@@");
         }
     }
 
@@ -330,15 +335,15 @@ public class Jobs {
     public static void outputTweaked(ItemSet bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
         ItemSet tweakSet = Tweaker.tweak(bestSet, model, reforgedItems);
         if (bestSet != tweakSet) {
-            System.out.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
+            OutputText.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
 
-            System.out.println(tweakSet.getTotals().toStringExtended() + " " + model.calcRating(tweakSet.getTotals()));
+            OutputText.println(tweakSet.getTotals().toStringExtended() + " " + model.calcRating(tweakSet.getTotals()));
             for (SlotEquip slot : SlotEquip.values()) {
                 ItemData orig = bestSet.items.get(slot);
                 ItemData change = tweakSet.items.get(slot);
                 if (orig != null && change != null) {
                     if (!ItemData.isIdenticalItem(orig, change)) {
-                        System.out.println(change + " " + model.calcRating(change.totalStatCopy()));
+                        OutputText.println(change + " " + model.calcRating(change.totalStatCopy()));
                     }
                 } else if (orig != null || change != null) {
                     throw new IllegalStateException();
@@ -350,22 +355,22 @@ public class Jobs {
     private static void reportBetter(Tuple.Tuple2<ItemSet, ItemSet> pair, ModelCombined modelRet, ModelCombined modelProt, EquipOptionsMap itemsRet, EquipOptionsMap itemsProt) {
         ItemSet retSet = pair.a(), protSet = pair.b();
         long rating = modelProt.calcRating(protSet) + modelRet.calcRating(retSet);
-        synchronized (System.out) {
-            System.out.println(LocalDateTime.now());
-            System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        synchronized (OutputText.class) {
+            OutputText.println(LocalDateTime.now().toString());
+            OutputText.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
             protSet.outputSet(modelProt);
             outputTweaked(protSet, itemsProt, modelProt);
-            System.out.println("--------------------------------------- " + rating);
+            OutputText.println("--------------------------------------- " + rating);
             retSet.outputSet(modelRet);
             outputTweaked(retSet, itemsRet, modelRet);
-            System.out.println("#######################################");
+            OutputText.println("#######################################");
         }
     }
 
     private void reportBetter(ItemSet itemSet, ModelCombined model) {
         long rating = model.calcRating(itemSet);
-        System.out.println(LocalDateTime.now());
-        System.out.println("#######################################");
+        OutputText.println(LocalDateTime.now().toString());
+        OutputText.println("#######################################");
         itemSet.outputSet(model);
     }
 

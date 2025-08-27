@@ -29,6 +29,7 @@ public class StatRatingsWeights extends StatRatings {
         }
         this.includeHit = includeHit;
         chooseGems();
+        chooseBestStats();
     }
 
     private StatRatingsWeights(StatBlock weight) {

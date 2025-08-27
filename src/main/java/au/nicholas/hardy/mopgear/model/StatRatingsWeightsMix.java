@@ -1,9 +1,10 @@
 package au.nicholas.hardy.mopgear.model;
 
+import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.domain.StatType;
 
-import java.io.IOException;
+import java.util.EnumMap;
 
 public class StatRatingsWeightsMix extends StatRatings {
     private final StatRatings weightA;
@@ -17,6 +18,16 @@ public class StatRatingsWeightsMix extends StatRatings {
         this.multiplyA = multiplyA;
         this.multiplyB = multiplyB;
         chooseGems();
+        chooseBestStats();
+    }
+
+    public StatRatingsWeightsMix(StatRatings weightA, int multiplyA, StatRatings weightB, int multiplyB, EnumMap<SocketType, StatBlock> standardGems) {
+        this.weightA = weightA;
+        this.weightB = weightB;
+        this.multiplyA = multiplyA;
+        this.multiplyB = multiplyB;
+        this.standardGems = standardGems;
+        chooseBestStats();
     }
 
     @Override

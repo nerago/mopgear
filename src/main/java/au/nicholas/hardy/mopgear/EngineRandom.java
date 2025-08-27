@@ -61,5 +61,4 @@ public class EngineRandom {
     private static Stream<Long> generateDumbStream(long count) {
         return Stream.iterate(0L, x -> x < count, x -> x + 1);
     }
-
 }

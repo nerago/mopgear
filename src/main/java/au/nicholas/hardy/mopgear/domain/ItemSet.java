@@ -1,6 +1,7 @@
 package au.nicholas.hardy.mopgear.domain;
 
 import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.results.OutputText;
 
 public final class ItemSet {
     public final EquipMap items;
@@ -45,8 +46,8 @@ public final class ItemSet {
     }
 
     public void outputSet(ModelCombined model) {
-        System.out.println(getTotals().toStringExtended() + " " + model.calcRating(getTotals()));
-        getItems().forEachValue(it -> System.out.println(it + " " + model.calcRating(it.totalStatCopy())));
+        OutputText.println(getTotals().toStringExtended() + " " + model.calcRating(getTotals()));
+        getItems().forEachValue(it -> OutputText.println(it + " " + model.calcRating(it.totalStatCopy())));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package au.nicholas.hardy.mopgear.model;
 
 import au.nicholas.hardy.mopgear.domain.*;
+import au.nicholas.hardy.mopgear.results.OutputText;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 
 import java.util.HashMap;
@@ -92,7 +93,7 @@ public class ItemLevel {
             }
 
         }
-        System.out.println("SCALED " + item.name + " " + stats);
+        OutputText.println("SCALED " + item.name + " " + stats);
         return item.changeStats(stats);
     }
 }

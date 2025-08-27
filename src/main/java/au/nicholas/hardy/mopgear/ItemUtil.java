@@ -7,6 +7,7 @@ import au.nicholas.hardy.mopgear.io.WowHead;
 import au.nicholas.hardy.mopgear.model.GemData;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.model.ReforgeRules;
+import au.nicholas.hardy.mopgear.results.OutputText;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 
@@ -64,12 +65,12 @@ public class ItemUtil {
         if (detailedOutput) {
             if (expectedEnchant.contains(item.slot)) {
                 if (equippedItem.enchant() != null) {
-                    System.out.println(id + ": " + item + " ENCHANT=" + equippedItem.enchant());
+                    OutputText.println(id + ": " + item + " ENCHANT=" + equippedItem.enchant());
                 } else {
-                    System.out.println(id + ": " + item + " MISSING EXPECTED ENCHANT");
+                    OutputText.println(id + ": " + item + " MISSING EXPECTED ENCHANT");
                 }
             } else {
-                System.out.println(id + ": " + item);
+                OutputText.println(id + ": " + item);
             }
         }
         return item;
@@ -214,7 +215,7 @@ public class ItemUtil {
                 continue;
 
             if (ItemData.isSameEquippedItem(aaa[0], bbb[0])) {
-                System.out.println("COMMON " + aaa[0].name);
+                OutputText.println("COMMON " + aaa[0].name);
 
                 ArrayList<ItemData> commonForges = new ArrayList<>();
                 for (ItemData a : aaa) {
@@ -224,6 +225,21 @@ public class ItemUtil {
                     }
                 }
                 common.put(slot, commonForges.toArray(ItemData[]::new));
+            }
+        }
+        return common;
+    }
+
+    static EquipMap commonInDualSet(EquipMap retMap, EquipMap protMap) {
+        EquipMap common = EquipMap.empty();
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData a = retMap.get(slot);
+            ItemData b = protMap.get(slot);
+            if (a == null || b == null)
+                continue;
+
+            if (ItemData.isIdenticalItem(a, b)) {
+                common.put(slot, a);
             }
         }
         return common;

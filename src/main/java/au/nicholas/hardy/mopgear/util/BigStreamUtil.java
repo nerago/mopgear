@@ -2,6 +2,7 @@ package au.nicholas.hardy.mopgear.util;
 
 import au.nicholas.hardy.mopgear.domain.ItemSet;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
+import au.nicholas.hardy.mopgear.results.OutputText;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,7 +27,7 @@ public class BigStreamUtil {
                     System.out.printf("%.2f", percent);
                     Duration estimateRemain = estimateRemain(startTime, percent);
                     System.out.print(" ");
-                    System.out.print(estimateRemain);
+                    System.out.print(estimateRemain.toString());
                     System.out.println();
                 }
             }
