@@ -76,7 +76,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) {
 //        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
         StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
-        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0);
+        statRatings = new StatRatingsWeightsMix(statRatings, 18, null, 0);
         StatRequirements statRequirements = wideHitRange ? StatRequirements.retWideCapRange() : StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
         ReforgeRules reforge = extraReforge ? ReforgeRules.retExtended() : ReforgeRules.ret();

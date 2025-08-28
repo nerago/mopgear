@@ -36,15 +36,15 @@ public class FindUpgrades {
         this.hackAllow = hackAllow;
     }
 
-    public void run(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
-        ItemSet baseSet = SolverEntry.chooseEngineAndRun(model, baseItems, null, runSize, null).orElseThrow();
+    public void run(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, StatBlock adjustment) {
+        ItemSet baseSet = SolverEntry.chooseEngineAndRun(model, baseItems, null, runSize, adjustment).orElseThrow();
         double baseRating = model.calcRating(baseSet);
         OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.totals, baseRating);
 
         Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
 
         List<JobInfo> jobList =
-                makeJobs(model, baseItems, extraItemArray, enchanting, baseRating)
+                makeJobs(model, baseItems, extraItemArray, enchanting, adjustment, baseRating)
                 .map(SolverEntry::runJob)
                 .peek(job -> handleResult(job, baseRating))
                 .toList();
@@ -96,7 +96,7 @@ public class FindUpgrades {
         }
     }
 
-    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, Function<ItemData, ItemData> enchanting, double baseRating) {
+    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, Function<ItemData, ItemData> enchanting, StatBlock adjustment, double baseRating) {
         return ArrayUtil.arrayStream(extraItemArray).mapMulti((extraItemInfo, submitJob) -> {
             int extraItemId = extraItemInfo.a();
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
@@ -105,13 +105,13 @@ public class FindUpgrades {
             if (!canSkipUpgradeCheck(extraItem, slot, baseItems)) {
                 OutputText.println("JOB " + extraItem.toStringExtended() + " $" + extraItemInfo.b());
 
-                submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, slot, baseRating));
+                submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating));
 
                 if (slot == SlotEquip.Trinket1) {
-                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Trinket2, baseRating));
+                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, SlotEquip.Trinket2, baseRating));
                 }
                 if (slot == SlotEquip.Ring1) {
-                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, SlotEquip.Ring2, baseRating));
+                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, SlotEquip.Ring2, baseRating));
                 }
             }
         });
@@ -135,7 +135,7 @@ public class FindUpgrades {
         }
     }
 
-    private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, SlotEquip slot, double baseRating) {
+    private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, StatBlock adjustment, SlotEquip slot, double baseRating) {
         JobInfo job = new JobInfo();
         job.singleThread = true;
 
@@ -147,7 +147,6 @@ public class FindUpgrades {
         items.put(slot, extraOptions);
         ArrayUtil.mapInPlace(items.get(slot), enchanting); // redundant?
 
-        StatBlock adjustment = null;
         if (hackAllow) {
             adjustment = FindStatRange.checkSetAdjust(model, items, job);
             if (adjustment != null)

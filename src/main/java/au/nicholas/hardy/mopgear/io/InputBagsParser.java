@@ -16,9 +16,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class InputBagsParser {
-    static Tuple.Tuple2<Integer, Integer>[] readInput(Path file) throws IOException {
+    static Tuple.Tuple2<Integer, Integer>[] readInput(Path file) {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             return parseReader(reader);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 

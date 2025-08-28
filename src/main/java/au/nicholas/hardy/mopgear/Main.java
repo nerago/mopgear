@@ -60,8 +60,8 @@ public class Main {
 
 //            multiSpecSequential(startTime);
 
-            reforgeRet(startTime);
-//            reforgeProt(startTime);
+//            reforgeRet(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
@@ -88,21 +88,22 @@ public class Main {
 
     private void reforgeRet(Instant startTime) {
 //        ModelCombined model = ModelCombined.standardRetModel();
+//        ModelCombined model = ModelCombined.extendedRetModel(true, true);
         ModelCombined model = ModelCombined.extendedRetModel(true, true);
 //        ModelCombined model = ModelCombined.priorityRetModel();
 
-//        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
-        EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
+        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
+//        EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
-//        reforgeProcess(items, model, startTime);
-        new SolverHitCaps(model).solveHitCaps(items);
+        reforgeProcess(items, model, startTime);
+//        new SolverHitCaps(model).solveHitCaps(items);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
 //        reforgeProcessPlus(items, model, startTime, true, 89981, true, true, null);
 //        reforgeProcessPlus(items, model, startTime, true,86145, false, true, new StatBlock(285+80+120,0,0,165,160,160+160,0,0,0));
-//        reforgeProcessPlus(items, model, startTime, true, 89280, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, null, 86145, false, true, null);
 //        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new int[]{77530,89075,81262,87607,89823}));
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new ArrayList<>()));
@@ -111,13 +112,13 @@ public class Main {
 //            reforgeProcessRetFixedAlone(model, startTime, true);
 //        reforgeProcessRetChallenge(model, startTime);
 
-//                        findUpgradeSetup(items, strengthPlateMsvArray(), model);
+//                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialP1(itemCache));
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
-//        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model);
+//        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model, true, null);
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
 
 //        combinationDumb(items, model, startTime);
@@ -126,30 +127,32 @@ public class Main {
     private void reforgeProt(Instant startTime) {
         ModelCombined model = ModelCombined.standardProtModel();
 
-//        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
-        EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
+        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
+//        EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, model.reforgeRules(), commonItems);
 
 
 
-//        reforgeProcess(items, model, startTime);
-//        reforgeProcessProtFixedPlus(model, startTime, 86789, false, true);
+        reforgeProcess(items, model, startTime);
+//        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
 //        reforgeProcessPlus(items, model, startTime, true,84950, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
-//        reforgeProcessPlusPlus(items, model, startTime, 85320, 86219);
+//        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
+//          reforgeProcessPlusPlus(items, model, startTime, 86753, 89075, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
 //        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
 //        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
-//        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model);
-//        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, true);
+//        findUpgradeSetup(items, strengthPlateMsvArray(), model, false);
+//        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
+//        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model);
-//        findUpgradeSetup(items, strengthPlateCrafted(), model);
-        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialP1(itemCache));
+//        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model, false, null);
+//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialP1(itemCache), null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
@@ -204,10 +207,10 @@ public class Main {
     private static EnumMap<SlotEquip, ReforgeRecipe> commonFixedItems() {
         EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
         presetReforge.put(SlotEquip.Head, new ReforgeRecipe(Crit, Haste));
-        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(Hit, Expertise));
-        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(Hit, Expertise));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(Expertise, Hit));
+        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(Haste, Hit));
         presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
         presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
         return presetReforge;

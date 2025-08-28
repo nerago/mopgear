@@ -1,7 +1,5 @@
 package au.nicholas.hardy.mopgear.util;
 
-import au.nicholas.hardy.mopgear.SolverHitCaps;
-
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;

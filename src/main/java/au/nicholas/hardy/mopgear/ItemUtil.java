@@ -11,7 +11,6 @@ import au.nicholas.hardy.mopgear.results.OutputText;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -84,7 +83,7 @@ public class ItemUtil {
                 itemCache.put(id, item);
                 itemCache.cacheSave();
             } else {
-                throw new RuntimeException("missing item");
+                throw new RuntimeException("missing item " + id);
             }
         }
         return item;
@@ -326,7 +325,7 @@ public class ItemUtil {
         return reforgedItems.entrySet().stream().mapToLong((x) -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
     }
 
-    public static long estimateSets(List<SolverHitCaps.SkinnyItem[]> options) {
+    public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> options) {
         return options.stream().mapToLong(x -> x.length).reduce((a, b) -> a * b).orElse(0);
     }
 }

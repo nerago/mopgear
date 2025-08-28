@@ -351,7 +351,7 @@ public class SourcesOfItems {
         };
     }
 
-    public static Tuple.Tuple2<Integer, Integer>[] bagItemsArray(ModelCombined model, List<Integer> skip) throws IOException {
+    public static Tuple.Tuple2<Integer, Integer>[] bagItemsArray(ModelCombined model, List<Integer> skip) {
         Tuple.Tuple2<Integer, Integer>[] bagArray = InputBagsParser.readInput(DataLocation.bagsFile);
         if (skip == null)
             return bagArray;

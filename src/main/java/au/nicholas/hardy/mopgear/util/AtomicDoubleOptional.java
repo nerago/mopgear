@@ -3,10 +3,10 @@ package au.nicholas.hardy.mopgear.util;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class AtomicDouble {
+public class AtomicDoubleOptional {
     private final AtomicReference<Optional<Double>> ref;
 
-    public AtomicDouble() {
+    public AtomicDoubleOptional() {
         ref = new AtomicReference<>(Optional.empty());
     }
 

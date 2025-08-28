@@ -3,32 +3,73 @@ package au.nicholas.hardy.mopgear;
 import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
+import au.nicholas.hardy.mopgear.util.BigStreamUtil;
 import au.nicholas.hardy.mopgear.util.CurryQueue;
-import au.nicholas.hardy.mopgear.util.TopCollectorN;
+import au.nicholas.hardy.mopgear.util.TopNFilter;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
-public class SolverHitCaps {
+public class SolverCapPhased {
     private final ModelCombined model;
 
     // work out hit in a first pass
     // per item work out values it can contribute, solve on that
     // then remaining stats
 
-    public SolverHitCaps(ModelCombined model) {
+    public SolverCapPhased(ModelCombined model) {
         this.model = model;
     }
 
-    public Stream<SkinnySet> solveHitCaps(EquipOptionsMap items) {
+    public Optional<ItemSet> runSolver(EquipOptionsMap items) {
+        Stream<ItemSet> finalSets = runSolverPartial(items);
+        return BigStreamUtil.findBest(model, finalSets);
+    }
+
+
+    private Stream<ItemSet> runSolverPartial(EquipOptionsMap items) {
+        Stream<EquipOptionsMap> options = runSolverOptions(items);
+        return null;
+    }
+
+    private Stream<EquipOptionsMap> runSolverOptions(EquipOptionsMap items) {
+        Stream<SkinnyItemSet> skinnyStream = solveHitCaps(items);
+        return skinnyStream.map(skin -> convertFromSkinny(skin, items));
+    }
+
+    private EquipOptionsMap convertFromSkinny(SkinnyItemSet skinnySet, EquipOptionsMap fullItemOptions) {
+        EquipOptionsMap resultMap = EquipOptionsMap.empty();
+        CurryQueue<SkinnyItem> itemQueue = skinnySet.items;
+        while (itemQueue != null) {
+            SkinnyItem skinny = itemQueue.item();
+            SlotEquip slot = skinny.slot;
+            resultMap.put(slot, matchingHitItems(skinny, fullItemOptions.get(slot)));
+            itemQueue = itemQueue.tail();
+        }
+        return resultMap;
+    }
+
+    private ItemData[] matchingHitItems(SkinnyItem skinny, ItemData[] itemArray) {
+        ArrayList<ItemData> matches = new ArrayList<>();
+        for (ItemData fullItem : itemArray) {
+            int hit = fullItem.totalStat(StatType.Hit);
+            int exp = fullItem.totalStat(StatType.Expertise);
+            if (skinny.hit == hit && skinny.expertise == exp) {
+                matches.add(fullItem);
+            }
+        }
+        return matches.toArray(ItemData[]::new);
+    }
+
+    public Stream<SkinnyItemSet> solveHitCaps(EquipOptionsMap items) {
         System.out.println("COMBINATION-RAW "+ ItemUtil.estimateSets(items));
 
         List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
         System.out.println("COMBINATION-HIT "+ ItemUtil.estimateSets(skinnyOptions));
 
-        Stream<SkinnySet> initialSets = generateSkinnyComboStream(skinnyOptions);
-        Stream<SkinnySet> filteredSets = filterSets(initialSets);
+        Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions);
+        Stream<SkinnyItemSet> filteredSets = filterSets(initialSets);
 
 //        Optional<SkinnySet> best = filteredSets.min(Comparator.comparingInt(ss -> ss.totalHit + ss.totalExpertise));
 //        System.out.printf("%d %d\n", best.get().totalExpertise, best.get().totalHit);
@@ -40,14 +81,16 @@ public class SolverHitCaps {
 //        filteredSets.sorted(Comparator.comparingInt(ss -> ss.totalHit + ss.totalExpertise))
 //                .limit(100)
 //                .forEach(ss -> System.out.printf("%d %d\n", ss.totalExpertise, ss.totalHit));
+        ToLongFunction<? super SkinnyItemSet> ratingFunc = ss -> (ss.totalHit + ss.totalExpertise) * -1;
+        Stream<SkinnyItemSet> topStream = filteredSets.filter(new TopNFilter<>(100, ratingFunc));
 
-        filteredSets.collect(new TopCollectorN<>(100, ss -> -(ss.totalHit + ss.totalExpertise)))
-                .forEach(ss -> System.out.printf("%d %d\n", ss.totalExpertise, ss.totalHit));
+//        filteredSets.collect(new TopCollectorN<>(100, ss -> -(ss.totalHit + ss.totalExpertise)))
+//                .forEach(ss -> System.out.printf("%d %d\n", ss.totalExpertise, ss.totalHit));
 
-        return null;
+        return topStream;
     }
 
-    private Stream<SkinnySet> filterSets(Stream<SkinnySet> setStream) {
+    private Stream<SkinnyItemSet> filterSets(Stream<SkinnyItemSet> setStream) {
         final int minHit = model.statRequirements().getMinimumHit(), maxHit = model.statRequirements().getMaximumHit();
         final int minExp = model.statRequirements().getMinimumExpertise(), maxExp = model.statRequirements().getMaximumExpertise();
         if (minExp != 0 && maxExp != Integer.MAX_VALUE) {
@@ -76,8 +119,8 @@ public class SolverHitCaps {
         return optionsList;
     }
 
-    private Stream<SkinnySet> generateSkinnyComboStream(List<SkinnyItem[]> optionsList) {
-        Stream<SkinnySet> stream = null;
+    private Stream<SkinnyItemSet> generateSkinnyComboStream(List<SkinnyItem[]> optionsList) {
+        Stream<SkinnyItemSet> stream = null;
 
         for (SkinnyItem[] slotOptions : optionsList) {
             if (stream == null) {
@@ -89,10 +132,10 @@ public class SolverHitCaps {
         return stream;
     }
 
-    private Stream<SkinnySet> addSlotToCombination(Stream<SkinnySet> stream, SkinnyItem[] slotOptions) {
+    private Stream<SkinnyItemSet> addSlotToCombination(Stream<SkinnyItemSet> stream, SkinnyItem[] slotOptions) {
         return stream.mapMulti((set, next) -> {
             for (SkinnyItem item : slotOptions) {
-                next.accept(new SkinnySet(
+                next.accept(new SkinnyItemSet(
                         set.totalHit + item.hit,
                         set.totalExpertise + item.expertise,
                         set.items().prepend(item)));
@@ -100,11 +143,11 @@ public class SolverHitCaps {
         });
     }
 
-    private Stream<SkinnySet> newCombinationStream(SkinnyItem[] slotOptions) {
-        final SkinnySet[] initialSets = new SkinnySet[slotOptions.length];
+    private Stream<SkinnyItemSet> newCombinationStream(SkinnyItem[] slotOptions) {
+        final SkinnyItemSet[] initialSets = new SkinnyItemSet[slotOptions.length];
         for (int i = 0; i < slotOptions.length; ++i) {
             SkinnyItem item = slotOptions[i];
-            initialSets[i] = new SkinnySet(item.hit, item.expertise, CurryQueue.single(item));
+            initialSets[i] = new SkinnyItemSet(item.hit, item.expertise, CurryQueue.single(item));
         }
         return ArrayUtil.arrayStream(initialSets);
     }
@@ -128,13 +171,12 @@ public class SolverHitCaps {
         }
     }
 
-    public record SkinnySet(int totalHit, int totalExpertise, CurryQueue<SkinnyItem> items) {
+    public record SkinnyItemSet(int totalHit, int totalExpertise, CurryQueue<SkinnyItem> items) {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            SkinnySet skinnySet = (SkinnySet) o;
-//            return totalHit == skinnySet.totalHit && totalExpertise == skinnySet.totalExpertise && CurryQueue.equalsOther(items, skinnySet.items);
+            SkinnyItemSet skinnySet = (SkinnyItemSet) o;
             return totalHit == skinnySet.totalHit && totalExpertise == skinnySet.totalExpertise;
         }
 

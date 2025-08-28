@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import static au.nicholas.hardy.mopgear.SolverEntry.chooseEngineAndRun;
 import static au.nicholas.hardy.mopgear.SolverEntry.chooseEngineAndRunAsJob;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue"})
 public class Jobs {
     public static final long BILLION = 1000 * 1000 * 1000;
     public static ItemCache itemCache;
@@ -45,8 +45,8 @@ public class Jobs {
         outputResultSimple(bestSet, model, true);
     }
 
-    public static void findUpgradeSetup(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItems, ModelCombined model, boolean allowHacks) {
-        new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems);
+    public static void findUpgradeSetup(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
+        new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems, adjustment);
     }
 
     public static void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {
@@ -109,7 +109,7 @@ public class Jobs {
 
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, modelRet, true);
 
-//        addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
+        addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
 //        addExtra(retMap, modelRet, 89075, enchant, null, false, false); // yi's cloak
         addExtra(retMap, modelRet, 81694, enchant, null, false, false); // command bracer
         addExtra(retMap, modelRet, 82856, enchant, null, false, false); // dark blaze gloves
@@ -167,16 +167,28 @@ public class Jobs {
         return chooseEngineAndRunAsJob(model, submitMap, null, runSize, null);
     }
 
-    @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcess(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime) {
+    public static void reforgeProcess(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime) {
         JobInfo job = new JobInfo();
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
-        job.config(model, reforgedItems, startTime, BILLION, null);
+        job.config(model, itemOptions, startTime, BILLION, null);
         SolverEntry.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
-        outputTweaked(job.resultSet, reforgedItems, model);
+        outputTweaked(job.resultSet, itemOptions, model);
+    }
+
+    public static void reforgeProcess2(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime) {
+//        JobInfo job = new JobInfo();
+//        job.printRecorder.outputImmediate = true;
+//        job.hackAllow = true;
+//        job.config(model, itemOptions, startTime, BILLION, null);
+//        SolverEntry.runJob(job);
+//
+//        outputResultSimple(job.resultSet, model, true);
+//        outputTweaked(job.resultSet, itemOptions, model);
+
+        new SolverCapPhased(model).runSolver(itemOptions);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -233,7 +245,6 @@ public class Jobs {
                 OutputText.println("NEW " + slot + " " + it);
             }
         });
-        OutputText.println();
         return extraItem;
     }
 
@@ -250,17 +261,28 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlusPlus(EquipOptionsMap reforgedItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2) {
+    public static void reforgeProcessPlusPlus(EquipOptionsMap runItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2, boolean replace, StatBlock adjustment) {
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, model, true);
+//        Function<ItemData, ItemData> enchant2 = x -> x.changeFixed(new StatBlock(285,90,0,165,0,0,320,0,0,0));
 
-        ItemData extraItem1 = addExtra(reforgedItems, model, extraItemId1, enchant, null, false, true);
+        ItemData extraItem1 = addExtra(runItems, model, extraItemId1, enchant, null, replace, true);
         OutputText.println("EXTRA " + extraItem1);
+        OutputText.println();
 
-        ItemData extraItem2 = addExtra(reforgedItems, model, extraItemId2, enchant, null, false, true);
+        ItemData extraItem2 = addExtra(runItems, model, extraItemId2, enchant, null, replace, true);
         OutputText.println("EXTRA " + extraItem2);
+        OutputText.println();
 
-        Optional<ItemSet> best = chooseEngineAndRun(model, reforgedItems, startTime, BILLION * 3, null);
-        outputResultSimple(best, model, true);
+        JobInfo job = new JobInfo();
+        job.config(model, runItems, startTime, BILLION, adjustment);
+        job.printRecorder.outputImmediate = true;
+        SolverEntry.runJob(job);
+
+        outputResultSimple(job.resultSet, model, true);
+        if (job.resultSet.isEmpty()) {
+            outputFailureDetails(model, runItems, job);
+        }
+        job.printRecorder.outputNow();
     }
 
     public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, Tuple.Tuple2<Integer, Integer>[] extraItems) {
