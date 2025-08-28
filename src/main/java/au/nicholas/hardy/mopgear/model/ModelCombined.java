@@ -10,11 +10,11 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
                             DefaultEnchants enchants) {
 
     public long calcRating(ItemSet set) {
-        return calcRating(set.getTotals());
+        return statRatings.calcRating(set.getTotals());
     }
 
-    public long calcRating(StatBlock totals) {
-        return statRatings.calcRating(totals);
+    public long calcRating(ItemData it) {
+        return statRatings.calcRating(it.stat, it.statFixed);
     }
 
     public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {

@@ -127,14 +127,14 @@ public class Main {
     private void reforgeProt(Instant startTime) {
         ModelCombined model = ModelCombined.standardProtModel();
 
-        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
-//        EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
+//        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
+        EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, model.reforgeRules(), commonItems);
 
 
-
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
+        reforgeProcess2(items, model, startTime);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);

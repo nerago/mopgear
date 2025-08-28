@@ -46,8 +46,8 @@ public final class ItemSet {
     }
 
     public void outputSet(ModelCombined model) {
-        OutputText.println(getTotals().toStringExtended() + " " + model.calcRating(getTotals()));
-        getItems().forEachValue(it -> OutputText.println(it + " " + model.calcRating(it.totalStatCopy())));
+        OutputText.println(getTotals().toStringExtended() + " " + model.calcRating(this));
+        getItems().forEachValue(it -> OutputText.println(it + " " + model.calcRating(it)));
     }
 
     @Override

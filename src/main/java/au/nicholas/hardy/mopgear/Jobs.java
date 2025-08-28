@@ -65,10 +65,10 @@ public class Jobs {
             stream = stream.map(ItemLevel::scaleForChallengeMode);
         }
         List<ItemData> reforgedItems = stream
-                .sorted(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))
+                .sorted(Comparator.comparingLong(model::calcRating))
                 .toList();
         for (ItemData item : reforgedItems) {
-            OutputText.println(item + " " + model.calcRating(item.totalStatCopy()));
+            OutputText.println(item + " " + model.calcRating(item));
         }
     }
 
@@ -179,16 +179,8 @@ public class Jobs {
     }
 
     public static void reforgeProcess2(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime) {
-//        JobInfo job = new JobInfo();
-//        job.printRecorder.outputImmediate = true;
-//        job.hackAllow = true;
-//        job.config(model, itemOptions, startTime, BILLION, null);
-//        SolverEntry.runJob(job);
-//
-//        outputResultSimple(job.resultSet, model, true);
-//        outputTweaked(job.resultSet, itemOptions, model);
-
-        new SolverCapPhased(model).runSolver(itemOptions);
+        Optional<ItemSet> bestSet = new SolverCapPhased(model, null).runSolver(itemOptions);
+        bestSet.orElseThrow().outputSet(model);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -359,13 +351,13 @@ public class Jobs {
         if (bestSet != tweakSet) {
             OutputText.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
 
-            OutputText.println(tweakSet.getTotals().toStringExtended() + " " + model.calcRating(tweakSet.getTotals()));
+            OutputText.println(tweakSet.getTotals().toStringExtended() + " " + model.calcRating(tweakSet));
             for (SlotEquip slot : SlotEquip.values()) {
                 ItemData orig = bestSet.items.get(slot);
                 ItemData change = tweakSet.items.get(slot);
                 if (orig != null && change != null) {
                     if (!ItemData.isIdenticalItem(orig, change)) {
-                        OutputText.println(change + " " + model.calcRating(change.totalStatCopy()));
+                        OutputText.println(change + " " + model.calcRating(change));
                     }
                 } else if (orig != null || change != null) {
                     throw new IllegalStateException();

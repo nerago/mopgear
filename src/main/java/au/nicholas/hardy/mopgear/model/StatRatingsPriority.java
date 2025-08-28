@@ -46,6 +46,17 @@ public class StatRatingsPriority extends StatRatings {
     }
 
     @Override
+    public long calcRating(StatBlock partA, StatBlock partB) {
+        long result = 0;
+        long multiply = 1000;
+        for (StatType stat : priority) {
+            result += (partA.get(stat) + partB.get(stat)) * multiply;
+            multiply /= 10;
+        }
+        return result * DEFAULT_MULTIPLY;
+    }
+
+    @Override
     public long calcRating(StatType queryStat, int value) {
         long multiply = 1000;
         for (StatType stat : priority) {

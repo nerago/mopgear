@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class SolverRandom {
     public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
         Stream<ItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
-        return finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
+        return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 
     public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {

@@ -60,6 +60,6 @@ public class BigStreamUtil {
     }
 
     public static Optional<ItemSet> findBest(ModelCombined model, Stream<ItemSet> finalSets) {
-        return finalSets.max(Comparator.comparingLong(x -> model.calcRating(x.totals)));
+        return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 }

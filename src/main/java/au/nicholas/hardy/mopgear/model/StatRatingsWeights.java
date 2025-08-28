@@ -3,7 +3,6 @@ package au.nicholas.hardy.mopgear.model;
 import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.domain.StatType;
-import au.nicholas.hardy.mopgear.util.BestHolder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class StatRatingsWeights extends StatRatings {
     public static StatRatingsWeights hardCodeRetWeight() {
         // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.762,CritRating=0.375,HasteRating=0.561,ExpertiseRating=0.530,MasteryRating=0.369,Ap=0.436,MeleeDps=1.632 )
         // this was initial sim value at approx 6700 haste
-         return new StatRatingsWeights(new StatBlock(1000,0,375,369,0,561,0,0,0,0));
+        return new StatRatingsWeights(new StatBlock(1000, 0, 375, 369, 0, 561, 0, 0, 0, 0));
         // however haste isn't always that good, so dropped a bit to round number
         // also crit is valued higher than I'd like so moved some value from crit->mastery
 //        return new StatRatingsWeights(new StatBlock(1000,0,389,355,0,500,0,0,0,0));
@@ -95,7 +94,7 @@ public class StatRatingsWeights extends StatRatings {
         total += value.mastery * weight.mastery;
         total += value.crit * weight.crit;
         total += value.parry * weight.parry;
-        total += hasteValue(value);
+        total += value.haste * weight.haste;
         total += value.dodge * weight.dodge;
         if (includeHit) {
             total += value.hit * weight.hit;
@@ -106,12 +105,26 @@ public class StatRatingsWeights extends StatRatings {
     }
 
     @Override
+    public long calcRating(StatBlock aaa, StatBlock bbb) {
+        int total = 0;
+        total += (aaa.primary + bbb.primary) * weight.primary;
+        total += (aaa.stam + bbb.stam) * weight.stam;
+        total += (aaa.mastery + bbb.mastery) * weight.mastery;
+        total += (aaa.crit + bbb.crit) * weight.crit;
+        total += (aaa.parry + bbb.parry) * weight.parry;
+        total += (aaa.haste + bbb.haste) * weight.haste;
+        total += (aaa.dodge + bbb.dodge) * weight.dodge;
+        if (includeHit) {
+            total += (aaa.hit + bbb.hit) * weight.hit;
+            total += (aaa.expertise + bbb.expertise) * weight.expertise;
+            total += (aaa.spirit + bbb.spirit) * weight.spirit;
+        }
+        return total;
+    }
+
+    @Override
     public long calcRating(StatType stat, int value) {
         return (long) value * weight.get(stat);
     }
 
-    private int hasteValue(StatBlock value) {
-        // TODO breakpoints
-        return value.haste * weight.haste;
-    }
 }

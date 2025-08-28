@@ -272,8 +272,8 @@ public class ItemUtil {
             ItemData[] items = itemMap.get(slot);
             if (items != null) {
                 ItemData[] bestByItemId = Arrays.stream(items)
-                        .collect(Collectors.groupingBy(x -> x.id,
-                                Collectors.maxBy(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())))))
+                        .collect(Collectors.groupingBy(it -> it.id,
+                                Collectors.maxBy(Comparator.comparingLong(model::calcRating))))
                         .values().stream().map(Optional::orElseThrow)
                         .toArray(ItemData[]::new);
 //                Optional<ItemData> best = Arrays.stream(items).max(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())));

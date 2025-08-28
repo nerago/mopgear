@@ -40,6 +40,16 @@ public class StatRatingsWeightsMix extends StatRatings {
         return total;
     }
 
+    @Override
+    public long calcRating(StatBlock part1, StatBlock part2) {
+        long total = 0;
+        if (multiplyA > 0)
+            total += weightA.calcRating(part1, part2) * multiplyA;
+        if (multiplyB > 0)
+            total += weightB.calcRating(part1, part2) * multiplyB;
+        return total;
+    }
+
     public long calcRating(StatType stat, int value) {
         long total = 0;
         if (multiplyA > 0)
@@ -48,5 +58,4 @@ public class StatRatingsWeightsMix extends StatRatings {
             total += weightB.calcRating(stat, value) * multiplyB;
         return total;
     }
-
 }
