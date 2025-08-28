@@ -28,6 +28,7 @@ public class BestCollection<T> {
         );
     }
 
+    @Deprecated(since = "not sure this works as planned")
     public static <T> Collector<T, BestCollection<T>, BestCollection<T>> collector(ToDoubleFunction<T> valueFunc) {
         return Collector.of(BestCollection::new,
                 (coll, obj) -> coll.add(obj, valueFunc.applyAsDouble(obj)),

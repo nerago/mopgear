@@ -9,7 +9,10 @@ import au.nicholas.hardy.mopgear.results.JobInfo;
 import java.time.Instant;
 import java.util.Optional;
 
-public class SolverEntry {
+public class Solver {
+
+    public static final int THREHOLD_PHASED = 7500;
+
     public static JobInfo runJob(JobInfo job) {
         ModelCombined model = job.model;
         EquipOptionsMap itemOptions = job.itemOptions;
@@ -19,7 +22,7 @@ public class SolverEntry {
 
         long estimate = ItemUtil.estimateSets(itemOptions);
         Optional<ItemSet> proposed;
-        if (runSize != null && estimate > runSize) {
+        if (runSize != null && estimate / THREHOLD_PHASED > runSize) {
             job.printf("COMBINATIONS estimate=%,d RANDOM SAMPLE %,d\n", estimate, runSize);
             if (job.singleThread)
                 proposed = SolverRandom.runSolverSingleThread(model, itemOptions, adjustment, runSize);
@@ -28,9 +31,9 @@ public class SolverEntry {
         } else {
             job.printf("COMBINATIONS estimate=%,d FULL RUN\n", estimate);
             if (job.singleThread)
-                proposed = new SolverLocalStack(model, itemOptions, adjustment).runSolver();
+                proposed = new SolverCapPhased(model, adjustment).runSolverSingleThread(itemOptions);
             else
-                proposed = SolverCompleteStreams.runSolver(model, itemOptions, adjustment, startTime, estimate);
+                proposed = new SolverCapPhased(model, adjustment).runSolver(itemOptions);
         }
 
         if (proposed.isEmpty() && job.hackAllow) {

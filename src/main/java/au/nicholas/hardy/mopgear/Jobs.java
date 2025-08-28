@@ -21,8 +21,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static au.nicholas.hardy.mopgear.SolverEntry.chooseEngineAndRun;
-import static au.nicholas.hardy.mopgear.SolverEntry.chooseEngineAndRunAsJob;
+import static au.nicholas.hardy.mopgear.Solver.chooseEngineAndRun;
+import static au.nicholas.hardy.mopgear.Solver.chooseEngineAndRunAsJob;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue"})
 public class Jobs {
@@ -172,7 +172,7 @@ public class Jobs {
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
         job.config(model, itemOptions, startTime, BILLION, null);
-        SolverEntry.runJob(job);
+        Solver.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
         outputTweaked(job.resultSet, itemOptions, model);
@@ -198,7 +198,7 @@ public class Jobs {
         long runSize = BILLION;
         JobInfo job = new JobInfo();
         job.config(model, runItems, startTime, runSize, adjustment);
-        SolverEntry.runJob(job);
+        Solver.runJob(job);
 
         job.printRecorder.outputNow();
         outputResultSimple(job.resultSet, model, true);
@@ -268,7 +268,7 @@ public class Jobs {
         JobInfo job = new JobInfo();
         job.config(model, runItems, startTime, BILLION, adjustment);
         job.printRecorder.outputImmediate = true;
-        SolverEntry.runJob(job);
+        Solver.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
         if (job.resultSet.isEmpty()) {

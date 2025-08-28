@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BigStreamUtil {
@@ -60,6 +61,7 @@ public class BigStreamUtil {
     }
 
     public static Optional<ItemSet> findBest(ModelCombined model, Stream<ItemSet> finalSets) {
-        return finalSets.max(Comparator.comparingLong(model::calcRating));
+        return finalSets.collect(new TopCollector1<>(model::calcRating));
+//        return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 }

@@ -37,7 +37,7 @@ public class FindUpgrades {
     }
 
     public void run(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, StatBlock adjustment) {
-        ItemSet baseSet = SolverEntry.chooseEngineAndRun(model, baseItems, null, runSize, adjustment).orElseThrow();
+        ItemSet baseSet = Solver.chooseEngineAndRun(model, baseItems, null, runSize, adjustment).orElseThrow();
         double baseRating = model.calcRating(baseSet);
         OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.totals, baseRating);
 
@@ -45,7 +45,7 @@ public class FindUpgrades {
 
         List<JobInfo> jobList =
                 makeJobs(model, baseItems, extraItemArray, enchanting, adjustment, baseRating)
-                .map(SolverEntry::runJob)
+                .map(Solver::runJob)
                 .peek(job -> handleResult(job, baseRating))
                 .toList();
 

@@ -19,10 +19,9 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static au.nicholas.hardy.mopgear.SolverEntry.chooseEngineAndRun;
+import static au.nicholas.hardy.mopgear.Solver.chooseEngineAndRun;
 import static au.nicholas.hardy.mopgear.Jobs.*;
 import static au.nicholas.hardy.mopgear.domain.StatType.*;
-import static au.nicholas.hardy.mopgear.io.SourcesOfItems.*;
 
 @SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType", "ConstantValue"})
 public class Main {
