@@ -32,7 +32,14 @@ public class SolverCapPhased {
     }
 
     private Stream<ItemSet> runSolverPartial(EquipOptionsMap items, boolean parallel) {
-        return findBestHitCapSetups(items, parallel)
+        List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
+
+        Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
+//        initialSets = initialSets.peek(ss -> System.out.println(ss.totalExpertise + " " + ss.totalHit));
+        Stream<SkinnyItemSet> filteredSets = filterSets(initialSets);
+
+        ToLongFunction<? super SkinnyItemSet> ratingFunc = ss -> (ss.totalHit + ss.totalExpertise) * -1;
+        return filteredSets.filter(new TopNFilter<>(1000, ratingFunc))
                 .map(skin -> makeFromSkinny(skin, items));
     }
 
@@ -46,8 +53,8 @@ public class SolverCapPhased {
 
             BestHolder<ItemData> bestSlotItem = new BestHolder<>(null, 0);
             for (ItemData item : fullSlotItems) {
-                int hit = item.totalStat(StatType.Hit);
-                int exp = item.totalStat(StatType.Expertise);
+                int hit = model.statRequirements().effectiveHit(item);
+                int exp = model.statRequirements().effectiveExpertise(item);
                 if (skinny.hit == hit && skinny.expertise == exp) {
                     long rating = model.statRatings().calcRating(item.stat, item.statFixed);
                     bestSlotItem.add(item, rating);
@@ -58,17 +65,6 @@ public class SolverCapPhased {
             itemQueue = itemQueue.tail();
         }
         return ItemSet.manyItems(chosenItems, adjustment);
-    }
-
-    private Stream<SkinnyItemSet> findBestHitCapSetups(EquipOptionsMap items, boolean parallel) {
-        List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
-//        System.out.printf("COMBINATION REDUCTION %,d-%,d\n", ItemUtil.estimateSets(items), ItemUtil.estimateSets(skinnyOptions));
-
-        Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
-        Stream<SkinnyItemSet> filteredSets = filterSets(initialSets);
-
-        ToLongFunction<? super SkinnyItemSet> ratingFunc = ss -> (ss.totalHit + ss.totalExpertise) * -1;
-        return filteredSets.filter(new TopNFilter<>(1000, ratingFunc));
     }
 
     private Stream<SkinnyItemSet> filterSets(Stream<SkinnyItemSet> setStream) {
@@ -90,7 +86,9 @@ public class SolverCapPhased {
             if (fullOptions != null) {
                 HashSet<SkinnyItem> slotSet = new HashSet<>();
                 for (ItemData item : fullOptions) {
-                    SkinnyItem skinny = new SkinnyItem(slot, item);
+                    int hit = model.statRequirements().effectiveHit(item);
+                    int expertise = model.statRequirements().effectiveExpertise(item);
+                    SkinnyItem skinny = new SkinnyItem(slot, hit, expertise);
                     slotSet.add(skinny);
                 }
                 SkinnyItem[] slotArray = slotSet.toArray(SkinnyItem[]::new);
@@ -134,10 +132,6 @@ public class SolverCapPhased {
     }
 
     public record SkinnyItem(SlotEquip slot, int hit, int expertise) {
-        public SkinnyItem(SlotEquip slot, ItemData item) {
-            this(slot, item.totalStat(StatType.Hit), item.totalStat(StatType.Expertise));
-        }
-
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

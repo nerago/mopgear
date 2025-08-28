@@ -22,6 +22,7 @@ import java.util.function.Function;
 import static au.nicholas.hardy.mopgear.Solver.chooseEngineAndRun;
 import static au.nicholas.hardy.mopgear.Jobs.*;
 import static au.nicholas.hardy.mopgear.domain.StatType.*;
+import static au.nicholas.hardy.mopgear.io.SourcesOfItems.intellectLeatherValorCelestialP1;
 
 @SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType", "ConstantValue"})
 public class Main {
@@ -60,8 +61,8 @@ public class Main {
 //            multiSpecSequential(startTime);
 
 //            reforgeRet(startTime);
-            reforgeProt(startTime);
-//            reforgeBoom(startTime);
+//            reforgeProt(startTime);
+            reforgeBoom(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -164,12 +165,12 @@ public class Main {
         ModelCombined model = ModelCombined.standardBoomModel();
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearBoomFile, model.reforgeRules(), null);
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, true, null,86783, false, true, null, null);
 //        reforgeProcessPlus(items, model, startTime, true, SlotEquip.Ring2,89968, false, true, null, null);
 //        new FindUpgrades(itemCache, model, true).run(items, new Tuple.Tuple2[]{Tuple.create(89089,0)});
 
-//       new FindUpgrades(itemCache, model, true).run(items, intellectLeatherValorCelestialP1(itemCache));
+       new FindUpgrades(itemCache, model, true).run(items, intellectLeatherValorCelestialP1(itemCache), null);
 
 //       Jobs.rankAlternativeCombos(items, model, startTime, List.of(
 //               List.of(81140),

@@ -23,9 +23,9 @@ public class FindUpgrades {
     private boolean hackAllow;
     private ItemCache itemCache;
 
-    //    private static final Long runSize = null; // full search
+        private static final Long runSize = null; // full search
 //    private static final long runSize = 10000000; // <1 min runs
-    private static final long runSize = 50000000; // 4 min total runs
+//    private static final long runSize = 50000000; // 4 min total runs
 //    private static final long runSize = 100000000; // 10 min total runs
 //    private static final long runSize = 300000000; // 25 min total runs
 //    private static final long runSize = 1000000000; // 60 min runs

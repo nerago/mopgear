@@ -59,6 +59,24 @@ public class StatRequirements {
         return combineHitLike ? totals.hit + totals.expertise + totals.spirit : totals.hit;
     }
 
+    public int effectiveHit(ItemData item) {
+        if (combineHitLike) {
+            return item.stat.hit + item.statFixed.hit +
+                   item.stat.expertise + item.statFixed.expertise +
+                   item.stat.spirit + item.statFixed.spirit;
+        } else {
+            return item.stat.hit + item.statFixed.hit;
+        }
+    }
+
+    public int effectiveExpertise(ItemData item) {
+        if (combineHitLike) {
+            return 0;
+        } else {
+            return item.stat.expertise + item.statFixed.expertise;
+        }
+    }
+
     public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
         return stream.filter(this::filter);
     }
