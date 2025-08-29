@@ -29,7 +29,7 @@ public class Solver {
             else
                 proposed = SolverRandom.runSolver(model, itemOptions, adjustment, startTime, runSize);
         } else {
-            job.printf("COMBINATIONS estimate=%,d FULL RUN\n", estimate);
+            job.printf("COMBINATIONS estimate=%,d FULL RUN (phased)\n", estimate);
             if (job.singleThread)
                 proposed = new SolverCapPhased(model, adjustment).runSolverSingleThread(itemOptions);
             else

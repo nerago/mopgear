@@ -5,12 +5,18 @@ import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.util.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class SolverCapPhased {
+    public static final int TOP_HIT_COMBO_FILTER = 1000;
     private final ModelCombined model;
     private final StatBlock adjustment;
+//    private AtomicLong initCount;
+//    private AtomicLong filterCount;
+//    private AtomicLong filter2Count;
+    private long estimate;
 
     // work out hit in a first pass
     // per item work out values it can contribute, solve on that
@@ -22,25 +28,47 @@ public class SolverCapPhased {
     }
 
     public Optional<ItemSet> runSolver(EquipOptionsMap items) {
-        Stream<ItemSet> finalSets = runSolverPartial(items, true);
-        return BigStreamUtil.findBest(model, finalSets);
+        try {
+            Stream<ItemSet> finalSets = runSolverPartial(items, true);
+            return BigStreamUtil.findBest(model, finalSets);
+        } finally {
+            postSolve();
+        }
     }
 
     public Optional<ItemSet> runSolverSingleThread(EquipOptionsMap items) {
-        Stream<ItemSet> finalSets = runSolverPartial(items, false);
-        return BigStreamUtil.findBest(model, finalSets);
+        try {
+            Stream<ItemSet> finalSets = runSolverPartial(items, false);
+            return BigStreamUtil.findBest(model, finalSets);
+        } finally {
+            postSolve();
+        }
+    }
+
+    private void postSolve() {
+//        System.out.printf("PHASED COUNTS est=%d init=%d filter=%d filter2=%d\n", estimate, initCount.get(), filterCount.get(), filter2Count.get());
     }
 
     private Stream<ItemSet> runSolverPartial(EquipOptionsMap items, boolean parallel) {
         List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
 
-        Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
-//        initialSets = initialSets.peek(ss -> System.out.println(ss.totalExpertise + " " + ss.totalHit));
-        Stream<SkinnyItemSet> filteredSets = filterSets(initialSets);
+        estimate = ItemUtil.estimateSets(skinnyOptions);
+//        initCount = new AtomicLong();
+//        filterCount = new AtomicLong();
+//        filter2Count = new AtomicLong();
 
-        ToLongFunction<? super SkinnyItemSet> ratingFunc = ss -> (ss.totalHit + ss.totalExpertise) * -1;
-        return filteredSets.filter(new TopNFilter<>(1000, ratingFunc))
-                .map(skin -> makeFromSkinny(skin, items));
+        Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
+//        initialSets = initialSets.peek(x -> initCount.incrementAndGet());
+
+        Stream<SkinnyItemSet> filteredSets = filterSetsInCapRange(initialSets);
+//        filteredSets = filteredSets.peek(x -> filterCount.incrementAndGet());
+
+//        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> 1000000 - (ss.totalHit + ss.totalExpertise);
+//        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
+//        filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
+//        filteredSets = filteredSets.peek(x -> filter2Count.incrementAndGet());
+
+        return filteredSets.map(skin -> makeFromSkinny(skin, items));
     }
 
     private ItemSet makeFromSkinny(SkinnyItemSet skinnySet, EquipOptionsMap fullItemOptions) {
@@ -67,7 +95,7 @@ public class SolverCapPhased {
         return ItemSet.manyItems(chosenItems, adjustment);
     }
 
-    private Stream<SkinnyItemSet> filterSets(Stream<SkinnyItemSet> setStream) {
+    private Stream<SkinnyItemSet> filterSetsInCapRange(Stream<SkinnyItemSet> setStream) {
         final int minHit = model.statRequirements().getMinimumHit(), maxHit = model.statRequirements().getMaximumHit();
         final int minExp = model.statRequirements().getMinimumExpertise(), maxExp = model.statRequirements().getMaximumExpertise();
         if (minExp != 0 && maxExp != Integer.MAX_VALUE) {
