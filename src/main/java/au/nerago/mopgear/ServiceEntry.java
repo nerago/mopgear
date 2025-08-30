@@ -6,7 +6,12 @@ import au.nerago.mopgear.util.Tuple;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.SourcesOfItems;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.List;
@@ -14,29 +19,21 @@ import java.util.Map;
 
 
 public class ServiceEntry {
-//    private final ItemCache itemCache;
-//    private final ModelCombined model;
-//
-//    public ServiceEntry() throws IOException {
-//        itemCache = new ItemCache(cacheFile);
-//        StatRatingsWeights ratings = new StatRatingsWeights(null, true, 1, 1);
-//        StatRequirements requirements = StatRequirements.ret();
-//        model = new ModelCombined(ratings, requirements, ReforgeRules.ret());
-//    }
-//
-//    public ItemSet run(String jsonString) {
-//        return reforgeProcess(jsonString).orElse(null);
-//    }
-//
-//    private Optional<ItemSet> reforgeProcess(String jsonString) {
-//        List<EquippedItem> itemIds = InputParser.readString(jsonString);
-//        List<ItemData> items;
-//        synchronized (itemCache) {
-//            items = ItemUtil.loadItems(itemCache, itemIds, false);
-//        }
-//        EnumMap<SlotEquip, ItemData[]> reforgedItems = ItemUtil.standardItemsReforgedToMap(model.reforgeRules(), items);
-//        return EngineStream.runSolver(model, reforgedItems, null, null);
-//    }
+    public static void main(String[] args) {
+        if (args.length != 1 || args[0].isEmpty()) {
+            System.out.println("MISSING FILENAME");
+            return;
+        }
+
+        Path file = Path.of(args[0]);
+        try (BufferedReader reader = Files.newBufferedReader(file)) {
+            TypeToken<ServiceParam> typeToken = new TypeToken<>() { };
+            ServiceParam param = new Gson().fromJson(reader, typeToken);
+            new ServiceEntry().run(param);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     public void run(ServiceParam params) {
         ItemCache itemCache = new ItemCache(DataLocation.cacheFile);
