@@ -359,7 +359,7 @@ public class SourcesOfItems {
             return filterExclude(bagArray, skip);
     }
 
-    public static Tuple.Tuple2<Integer, Integer>[] strengthPlateCurrentItemsRet(ItemCache itemCache, ModelCombined model) throws IOException {
+    public static Tuple.Tuple2<Integer, Integer>[] strengthPlateCurrentItemsRet(ItemCache itemCache, ModelCombined model) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         Stream<Tuple.Tuple2<Integer, Integer>> itemStream = items.entrySet().stream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
@@ -367,7 +367,7 @@ public class SourcesOfItems {
         return itemStream.toArray(Tuple.Tuple2[]::new);
     }
 
-    public static Tuple.Tuple2<Integer, Integer>[] strengthPlateCurrentItemsProt(ItemCache itemCache, ModelCombined model) throws IOException {
+    public static Tuple.Tuple2<Integer, Integer>[] strengthPlateCurrentItemsProt(ItemCache itemCache, ModelCombined model) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, ReforgeRules.ret(), null);
         Stream<Tuple.Tuple2<Integer, Integer>> itemStream = items.entrySet().stream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)

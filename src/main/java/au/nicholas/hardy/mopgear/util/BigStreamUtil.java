@@ -2,14 +2,11 @@ package au.nicholas.hardy.mopgear.util;
 
 import au.nicholas.hardy.mopgear.domain.ItemSet;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
-import au.nicholas.hardy.mopgear.results.OutputText;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BigStreamUtil {

@@ -2,21 +2,18 @@ package au.nicholas.hardy.mopgear;
 
 import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
-import au.nicholas.hardy.mopgear.util.*;
+import au.nicholas.hardy.mopgear.util.ArrayUtil;
+import au.nicholas.hardy.mopgear.util.BestHolder;
+import au.nicholas.hardy.mopgear.util.BigStreamUtil;
+import au.nicholas.hardy.mopgear.util.CurryQueue;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class SolverCapPhased {
-    public static final int TOP_HIT_COMBO_FILTER = 1000;
+//    public static final int TOP_HIT_COMBO_FILTER = 1000;
     private final ModelCombined model;
     private final StatBlock adjustment;
-//    private AtomicLong initCount;
-//    private AtomicLong filterCount;
-//    private AtomicLong filter2Count;
-    private long estimate;
 
     // work out hit in a first pass
     // per item work out values it can contribute, solve on that
@@ -52,21 +49,12 @@ public class SolverCapPhased {
     private Stream<ItemSet> runSolverPartial(EquipOptionsMap items, boolean parallel) {
         List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
 
-        estimate = ItemUtil.estimateSets(skinnyOptions);
-//        initCount = new AtomicLong();
-//        filterCount = new AtomicLong();
-//        filter2Count = new AtomicLong();
-
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
-//        initialSets = initialSets.peek(x -> initCount.incrementAndGet());
 
         Stream<SkinnyItemSet> filteredSets = filterSetsInCapRange(initialSets);
-//        filteredSets = filteredSets.peek(x -> filterCount.incrementAndGet());
 
-//        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> 1000000 - (ss.totalHit + ss.totalExpertise);
 //        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
 //        filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
-//        filteredSets = filteredSets.peek(x -> filter2Count.incrementAndGet());
 
         return filteredSets.map(skin -> makeFromSkinny(skin, items));
     }
@@ -98,12 +86,20 @@ public class SolverCapPhased {
     private Stream<SkinnyItemSet> filterSetsInCapRange(Stream<SkinnyItemSet> setStream) {
         final int minHit = model.statRequirements().getMinimumHit(), maxHit = model.statRequirements().getMaximumHit();
         final int minExp = model.statRequirements().getMinimumExpertise(), maxExp = model.statRequirements().getMaximumExpertise();
-        if (minExp != 0 && maxExp != Integer.MAX_VALUE) {
-            return setStream.filter(set ->
-                    set.totalHit >= minHit && set.totalHit <= maxHit &&
-                            set.totalExpertise >= minExp && set.totalExpertise <= maxExp);
-        } else {
+        if (minExp != 0 && maxExp != Integer.MAX_VALUE && minHit != 0 && maxHit != Integer.MAX_VALUE) {
+            return setStream.filter(set -> set.totalHit >= minHit && set.totalHit <= maxHit && set.totalExpertise >= minExp && set.totalExpertise <= maxExp);
+        } else if (minHit != 0 && maxHit != Integer.MAX_VALUE) {
             return setStream.filter(set -> set.totalHit >= minHit && set.totalHit <= maxHit);
+        } else if (minExp != 0 && maxExp != Integer.MAX_VALUE) {
+            return setStream.filter(set -> set.totalExpertise >= minExp && set.totalExpertise <= maxExp);
+        } else if (minExp != 0 && minHit != 0) {
+            return setStream.filter(set -> set.totalHit >= minHit && set.totalExpertise >= minExp);
+        } else if (minExp != 0) {
+            return setStream.filter(set -> set.totalExpertise >= minExp);
+        } else if (minHit != 0) {
+            return setStream.filter(set -> set.totalHit >= minHit);
+        } else {
+            return setStream;
         }
     }
 

@@ -22,6 +22,7 @@ public class SolverLocalStack {
     }
 
     public Optional<ItemSet> runSolver() {
+        best = new BestHolder<>(null, 0);
         addFirstItem();
         mainLoop();
 

@@ -7,8 +7,6 @@ import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.model.ModelCombined;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

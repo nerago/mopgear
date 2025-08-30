@@ -10,8 +10,8 @@ public class TopNFilter<T> implements Predicate<T> {
     private final int size;
     private final ToLongFunction<T> getValue;
     private final NavigableSet<T> sortedSet;
+    private final AtomicLong worstValueAtomic;
     private boolean isFull;
-    private AtomicLong worstValueAtomic;
 
     public TopNFilter(int size, ToLongFunction<T> getValue) {
         this.size = size;

@@ -1,6 +1,5 @@
 package au.nicholas.hardy.mopgear.model;
 
-import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.domain.StatType;
 
@@ -8,17 +7,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.EnumMap;
 
 import static au.nicholas.hardy.mopgear.domain.StatType.*;
 
 public class StatRatingsWeights extends StatRatings {
-    public static final int PROT_MULTIPLY = 17;
-
     private final StatBlock weight;
     private final boolean includeHit;
-    private EnumMap<SocketType, StatBlock> standardGems;
-    private StatType bestNonHit;
 
     public StatRatingsWeights(Path weightFile, boolean includeHit) {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {

@@ -24,14 +24,14 @@ import static au.nicholas.hardy.mopgear.Jobs.*;
 import static au.nicholas.hardy.mopgear.domain.StatType.*;
 import static au.nicholas.hardy.mopgear.io.SourcesOfItems.intellectLeatherValorCelestialP1;
 
-@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut", "SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType", "ConstantValue"})
+@SuppressWarnings({"SameParameterValue", "unused", "ConstantValue"})
 public class Main {
 
     public static final long BILLION = 1000 * 1000 * 1000;
 
     public ItemCache itemCache;
 
-    public static void main(String[] arg) throws InterruptedException, IOException {
+    public static void main(String[] arg) throws IOException {
         try {
             new Main().run();
         } catch (Throwable ex) {

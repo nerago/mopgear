@@ -20,7 +20,7 @@ public class ItemLevel {
         return map;
     }
 
-    private static Map<Integer, Integer> levelLookup = buildLookup();
+    private static final Map<Integer, Integer> levelLookup = buildLookup();
 
     private static Map<Integer, Integer> buildLookup() {
         Map<Integer, Integer> map = new HashMap<>();

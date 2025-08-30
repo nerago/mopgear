@@ -1,7 +1,5 @@
 package au.nicholas.hardy.mopgear.util;
 
-import au.nicholas.hardy.mopgear.results.JobInfo;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -9,8 +7,8 @@ import java.util.function.BiConsumer;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collector;
 
-public class BestCollection<T> {
-    private TreeMap<Double, List<T>> map = new TreeMap<>();
+public class RankedGroupsCollection<T> {
+    private final TreeMap<Double, List<T>> map = new TreeMap<>();
 
     public void add(T object, double rating) {
         map.compute(rating, (k, list) -> {
@@ -28,16 +26,15 @@ public class BestCollection<T> {
         );
     }
 
-    @Deprecated(since = "not sure this works as planned")
-    public static <T> Collector<T, BestCollection<T>, BestCollection<T>> collector(ToDoubleFunction<T> valueFunc) {
-        return Collector.of(BestCollection::new,
+    public static <T> Collector<T, RankedGroupsCollection<T>, RankedGroupsCollection<T>> collector(ToDoubleFunction<T> valueFunc) {
+        return Collector.of(RankedGroupsCollection::new,
                 (coll, obj) -> coll.add(obj, valueFunc.applyAsDouble(obj)),
-                BestCollection::combine,
+                RankedGroupsCollection::combine,
                 Collector.Characteristics.IDENTITY_FINISH);
     }
 
-    private static <T> BestCollection<T> combine(BestCollection<T> a, BestCollection<T> b) {
-        a.map.putAll(b.map);
-        return a;
+    private RankedGroupsCollection<T> combine(RankedGroupsCollection<T> other) {
+        this.map.putAll(other.map);
+        return this;
     }
 }

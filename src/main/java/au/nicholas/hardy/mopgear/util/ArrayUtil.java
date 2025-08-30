@@ -1,12 +1,14 @@
 package au.nicholas.hardy.mopgear.util;
 
 import au.nicholas.hardy.mopgear.domain.ItemData;
-import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatType;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 

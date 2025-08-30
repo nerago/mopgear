@@ -7,7 +7,7 @@ import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.results.JobInfo;
 import au.nicholas.hardy.mopgear.results.OutputText;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
-import au.nicholas.hardy.mopgear.util.BestCollection;
+import au.nicholas.hardy.mopgear.util.RankedGroupsCollection;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
 import java.util.List;
@@ -17,11 +17,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"SameParameterValue", "unused", "OptionalUsedAsFieldOrParameterType"})
+@SuppressWarnings({"SameParameterValue", "unused"})
 public class FindUpgrades {
     private final ModelCombined model;
-    private boolean hackAllow;
-    private ItemCache itemCache;
+    private final boolean hackAllow;
+    private final ItemCache itemCache;
 
         private static final Long runSize = null; // full search
 //    private static final long runSize = 10000000; // <1 min runs
@@ -59,23 +59,23 @@ public class FindUpgrades {
     }
 
     private void reportCostUpgradeRank(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
-        BestCollection<JobInfo> bestCollection = new BestCollection<>();
+        RankedGroupsCollection<JobInfo> grouped = new RankedGroupsCollection<>();
 
         jobList.forEach(job -> {
             ItemData item = job.extraItem;
             int cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
             if (cost >= 10) {
                 double plusPerCost = (job.factor - 1.0) * 100 / cost;
-                bestCollection.add(job, plusPerCost);
+                grouped.add(job, plusPerCost);
             }
         });
 
         OutputText.println("RANKING COST PER UPGRADE");
-        bestCollection.forEach((item, factor) -> reportItem(item, extraItemArray));
+        grouped.forEach((item, factor) -> reportItem(item, extraItemArray));
     }
 
     private static void reportOverallRank(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
-        BestCollection<JobInfo> bestCollection = new BestCollection<>();
+        RankedGroupsCollection<JobInfo> bestCollection = new RankedGroupsCollection<>();
         jobList.forEach(job -> bestCollection.add(job, job.factor));
 
         OutputText.println("RANKING PERCENT UPGRADE");
@@ -83,11 +83,11 @@ public class FindUpgrades {
     }
 
     private static void reportBySlot(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
-        Map<Object, BestCollection<JobInfo>> grouped = jobList.stream().collect(
+        Map<Object, RankedGroupsCollection<JobInfo>> grouped = jobList.stream().collect(
                 Collectors.groupingBy(j -> j.extraItem.slot,
-                        BestCollection.collector(job -> job.factor)));
+                        RankedGroupsCollection.collector(job -> job.factor)));
         for (SlotItem slot : SlotItem.values()) {
-            BestCollection<JobInfo> best = grouped.get(slot);
+            RankedGroupsCollection<JobInfo> best = grouped.get(slot);
             if (best != null) {
                 OutputText.println("RANKING " + slot);
                 best.forEach((item, factor) -> reportItem(item, extraItemArray));

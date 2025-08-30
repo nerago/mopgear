@@ -129,7 +129,6 @@ public final class EquipMap {
         return other;
     }
 
-//    @Deprecated(since = "avoid bad performance")
     public void forEachValue(Consumer<ItemData> func) {
         if (head != null) func.accept(head);
         if (neck != null) func.accept(neck);
@@ -149,7 +148,6 @@ public final class EquipMap {
         if (offhand != null) func.accept(offhand);
     }
 
-    @Deprecated(since = "avoid bad performance")
     public void forEachPair(BiConsumer<SlotEquip, ItemData> func) {
         if (head != null) func.accept(SlotEquip.Head, head);
         if (neck != null) func.accept(SlotEquip.Neck, neck);

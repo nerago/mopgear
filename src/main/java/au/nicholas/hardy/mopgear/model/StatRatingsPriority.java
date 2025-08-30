@@ -1,14 +1,9 @@
 package au.nicholas.hardy.mopgear.model;
 
-import au.nicholas.hardy.mopgear.domain.SocketType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 import au.nicholas.hardy.mopgear.domain.StatType;
-import au.nicholas.hardy.mopgear.util.BestHolder;
 
 import java.util.Arrays;
-import java.util.EnumMap;
-
-import static au.nicholas.hardy.mopgear.domain.StatType.*;
 
 public class StatRatingsPriority extends StatRatings {
     private final StatType[] priority;

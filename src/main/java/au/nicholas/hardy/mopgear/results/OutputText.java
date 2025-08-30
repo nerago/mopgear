@@ -61,11 +61,12 @@ public class OutputText {
         }
     }
 
+    @SuppressWarnings("ThrowablePrintedToSystemOut")
     public static void printException(Throwable ex) throws IOException {
         currentWriter().write(ex.toString());
         ex.printStackTrace(writer);
 
-        System.out.println(ex.toString());
+        System.out.println(ex);
         ex.printStackTrace(System.out);
     }
 }

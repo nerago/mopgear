@@ -12,8 +12,9 @@ public class BottomNFilter<T> implements Predicate<T> {
     private final int size;
     private final ToLongFunction<T> getValue;
     private final NavigableSet<T> sortedSet;
+    private final AtomicLong highestValueAtomic;
     private boolean isFull;
-    private AtomicLong highestValueAtomic;
+
 
     public BottomNFilter(int size, ToLongFunction<T> getValue) {
         this.size = size;

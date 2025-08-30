@@ -9,7 +9,6 @@ import au.nicholas.hardy.mopgear.model.ModelCombined;
 import au.nicholas.hardy.mopgear.model.ReforgeRules;
 import au.nicholas.hardy.mopgear.results.OutputText;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
-import au.nicholas.hardy.mopgear.util.CurryQueue;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -142,20 +141,6 @@ public class ItemUtil {
         return map;
     }
 
-    static void buildJobWithCommonItemsFixed(EnumMap<SlotEquip, ItemData> chosenMap, EnumMap<SlotEquip, ItemData[]> submitMap) {
-        for (SlotEquip slot : SlotEquip.values()) {
-            ItemData chosenItem = chosenMap.get(slot);
-            ItemData[] slotOptions = submitMap.get(slot);
-            if (chosenItem == null || slotOptions == null || slotOptions.length == 0)
-                continue;
-
-            ItemData example = slotOptions[0];
-            if (ItemData.isSameEquippedItem(example, chosenItem)) {
-                submitMap.put(slot, new ItemData[] { chosenItem });
-            }
-        }
-    }
-
     static void buildJobWithSpecifiedItemsFixed(EquipMap chosenMap, EquipOptionsMap submitMap) {
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData chosenItem = chosenMap.get(slot);
@@ -182,11 +167,6 @@ public class ItemUtil {
                     submitMap.put(slot, replace.toArray(ItemData[]::new));
                 }
             }
-
-//            ItemData chosenItem = chosenMap.get(slot);
-//            if (chosenItem != null) {
-//                submitMap.put(slot, chosenItem);
-//            }
         }
     }
 
@@ -244,29 +224,6 @@ public class ItemUtil {
         return common;
     }
 
-    private static boolean hasNoDuplicate(CurryQueue<ItemData> items) {
-        ItemData ring = null, trink = null;
-        do {
-            ItemData item = items.item();
-            switch (item.slot) {
-                case Ring -> {
-                    if (ring == null)
-                        ring = item;
-                    else if (ring.id == item.id)
-                        return false;
-                }
-                case Trinket -> {
-                    if (trink == null)
-                        trink = item;
-                    else if (trink.id == item.id)
-                        return false;
-                }
-            }
-            items = items.tail();
-        } while (items != null);
-        return true;
-    }
-
     public static void bestForgesOnly(EquipOptionsMap itemMap, ModelCombined model) {
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] items = itemMap.get(slot);
@@ -280,10 +237,6 @@ public class ItemUtil {
                 itemMap.put(slot, bestByItemId);
             }
         }
-    }
-
-    public static void disenchant(EnumMap<SlotEquip, ItemData[]> itemMap) {
-        itemMap.forEach((s, array) -> ArrayUtil.mapInPlace(array, ItemData::withoutFixed));
     }
 
     public static void defaultEnchants(EquipOptionsMap itemMap, ModelCombined model, boolean force) {
@@ -323,9 +276,5 @@ public class ItemUtil {
 
     static long estimateSets(EquipOptionsMap reforgedItems) {
         return reforgedItems.entrySet().stream().mapToLong((x) -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
-    }
-
-    public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> options) {
-        return options.stream().mapToLong(x -> x.length).reduce((a, b) -> a * b).orElse(0);
     }
 }

@@ -241,7 +241,7 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeAlternatives(Path file, ModelCombined model, Instant startTime, int[] alternateItems) throws IOException {
+    public static void reforgeAlternatives(Path file, ModelCombined model, Instant startTime, int[] alternateItems) {
         EquipOptionsMap reforgedItems = ItemUtil.readAndLoad(itemCache, false, file, model.reforgeRules(), null);
 
         for (int extraItemId : alternateItems) {
@@ -312,16 +312,20 @@ public class Jobs {
 
     public static void outputResultTwins(Optional<Tuple.Tuple2<ItemSet, ItemSet>> bestSets, ModelCombined modelA, ModelCombined modelB) {
         if (bestSets.isPresent()) {
-            ItemSet a = bestSets.get().a();
-            ItemSet b = bestSets.get().b();
             OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
+
             OutputText.println("################# RET ######################");
+            ItemSet a = bestSets.get().a();
             a.outputSet(modelA);
+
             OutputText.println("------------------ PROT --------------------");
+            ItemSet b = bestSets.get().b();
             b.outputSet(modelB);
+
             OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
             EquipMap common = ItemUtil.commonInDualSet(a.items, b.items);
             common.forEachValue(item -> OutputText.println(item.toString()));
+
             OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
             common.forEachPair((slot, item) -> {
                 if (item.reforge == null || item.reforge.isNull())

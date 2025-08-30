@@ -57,71 +57,6 @@ public final class CurryQueue<T> {
         return first;
     }
 
-//    @Deprecated
-//    public static <T> CurryQueue<T> build(Stream<T> stream) {
-//        return stream.collect(new CurryCollector<>());
-//    }
-
-//    @Deprecated
-//    private static class CurryCollector<T> implements Collector<T, CurryCollector.CollectState<T>, CurryQueue<T>> {
-//        public static class CollectState<T> {
-//            CurryQueue<T> first, prev;
-//
-//            public CurryQueue<T> finish() {
-//                return first;
-//            }
-//
-//            public void accumulate(T val) {
-//                if (prev == null) {
-//                    first = new CurryQueue<>();
-//                    first.item = val;
-//                    prev = first;
-//                } else {
-//                    CurryQueue<T> entry = new CurryQueue<>();
-//                    entry.item = val;
-//                    prev.right = entry;
-//                    prev = entry;
-//                }
-//            }
-//
-//            public static <T> CollectState<T> combine(CollectState<T> a, CollectState<T> b) {
-//                if (a.prev == null) {
-//                    return b;
-//                } else if (b.prev == null) {
-//                    return a;
-//                } else {
-//                    a.prev = b.first;
-//                    return a;
-//                }
-//            }
-//        }
-//
-//        @Override
-//        public Supplier<CollectState<T>> supplier() {
-//            return CollectState::new;
-//        }
-//
-//        @Override
-//        public BiConsumer<CollectState<T>, T> accumulator() {
-//            return CollectState::accumulate;
-//        }
-//
-//        @Override
-//        public BinaryOperator<CollectState<T>> combiner() {
-//            return CollectState::combine;
-//        }
-//
-//        @Override
-//        public Function<CollectState<T>, CurryQueue<T>> finisher() {
-//            return CollectState::finish;
-//        }
-//
-//        @Override
-//        public Set<Characteristics> characteristics() {
-//            return Collections.emptySet();
-//        }
-//    }
-
     @Deprecated
     public Iterator<T> iterator() {
         return new QIterator<>(this);
@@ -258,8 +193,7 @@ public final class CurryQueue<T> {
         return equalsOther((CurryQueue<?>) o);
     }
 
-    public boolean equalsOther(CurryQueue<?> o) {
-        CurryQueue<?> that = o;
+    public boolean equalsOther(CurryQueue<?> that) {
         if (!item.equals(that.item))
             return false;
         CurryQueue<?> n = right, x = that.right;
@@ -270,10 +204,6 @@ public final class CurryQueue<T> {
             x = x.right;
         }
         return x == n;
-    }
-
-    public static boolean equalsOther(CurryQueue<?> a, CurryQueue<?> b) {
-        return a.equalsOther(b);
     }
 
     @Override

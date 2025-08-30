@@ -9,7 +9,6 @@ import au.nicholas.hardy.mopgear.util.BestHolder;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.LongFunction;
 import java.util.function.ToLongFunction;
 
 public class GemData {
