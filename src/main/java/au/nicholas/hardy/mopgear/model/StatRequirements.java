@@ -1,5 +1,6 @@
 package au.nicholas.hardy.mopgear.model;
 
+import au.nicholas.hardy.mopgear.ServiceEntry;
 import au.nicholas.hardy.mopgear.domain.EquipMap;
 import au.nicholas.hardy.mopgear.domain.ItemData;
 import au.nicholas.hardy.mopgear.domain.ItemSet;
@@ -37,6 +38,10 @@ public class StatRequirements {
 
     public static StatRequirements zero() {
         return new StatRequirements(0, 0, DEFAULT_CAP_ALLOW_EXCEED, false);
+    }
+
+    public static StatRequirements load(ServiceEntry.ServiceRequiredStats param) {
+        return new StatRequirements(param.hit(), param.expertise(), param.allowedExceed(), param.combinedHit());
     }
 
     private static final double RATING_PER_PERCENT = 339.9534;

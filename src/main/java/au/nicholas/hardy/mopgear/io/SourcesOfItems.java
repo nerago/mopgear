@@ -8,7 +8,8 @@ import au.nicholas.hardy.mopgear.model.ReforgeRules;
 import au.nicholas.hardy.mopgear.util.ArrayUtil;
 import au.nicholas.hardy.mopgear.util.Tuple;
 
-import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -359,6 +360,14 @@ public class SourcesOfItems {
             return filterExclude(bagArray, skip);
     }
 
+    public static Tuple.Tuple2<Integer, Integer>[] bagItemsArray(ModelCombined model, Path file, List<Integer> skip) {
+        Tuple.Tuple2<Integer, Integer>[] bagArray = InputBagsParser.readInput(file);
+        if (skip == null)
+            return bagArray;
+        else
+            return filterExclude(bagArray, skip);
+    }
+
     public static Tuple.Tuple2<Integer, Integer>[] strengthPlateCurrentItemsRet(ItemCache itemCache, ModelCombined model) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         Stream<Tuple.Tuple2<Integer, Integer>> itemStream = items.entrySet().stream()
@@ -383,5 +392,13 @@ public class SourcesOfItems {
     public static Tuple.Tuple2<Integer, Integer>[] intellectLeatherValorCelestialP1(ItemCache itemCache) {
         Tuple.Tuple2<Integer, Integer>[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 476);
         return ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray());
+    }
+
+    public static Tuple.Tuple2<Integer, Integer>[] get(String param) {
+        try {
+            return (Tuple.Tuple2<Integer, Integer>[]) SourcesOfItems.class.getMethod(param).invoke(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -4,105 +4,58 @@ import au.nicholas.hardy.mopgear.domain.SlotItem;
 import au.nicholas.hardy.mopgear.domain.SpecType;
 import au.nicholas.hardy.mopgear.domain.StatBlock;
 
+import java.util.EnumMap;
+import java.util.Map;
+
+import static au.nicholas.hardy.mopgear.domain.SlotItem.*;
+
 public class DefaultEnchants {
-    private final SpecType spec;
+    private final Map<SlotItem, StatBlock> map;
 
     public DefaultEnchants(SpecType spec) {
-        this.spec = spec;
+        this.map = known(spec);
     }
 
-    @SuppressWarnings("DuplicateBranchesInSwitch")
+    public DefaultEnchants(Map<SlotItem, StatBlock> map) {
+        this.map = map;
+    }
+
     public StatBlock standardEnchant(SlotItem slot) {
+        return map.get(slot);
+    }
+
+    public static EnumMap<SlotItem, StatBlock> known(SpecType spec) {
+        EnumMap<SlotItem, StatBlock> map = new EnumMap<>(SlotItem.class);
         if (spec == SpecType.PaladinRet) {
-            switch (slot) {
-                case Shoulder -> {
-                    return new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0);
-                }
-                case Back -> {
-                    return new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0);
-                }
-                case Chest -> {
-                    return new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Wrist -> {
-                    return new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Hand -> {
-                    return new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Leg -> {
-                    return new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0);
-                }
-                case Foot -> {
-                    return new StatBlock(0, 0, 0, 0, 0, 175, 0, 0, 0, 0);
-                }
-                default -> {
-                    return null;
-                }
-            }
+            map.put(Shoulder, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0));
+            map.put(Back, new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0));
+            map.put(Chest, new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Wrist, new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Hand, new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Leg, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));
+            map.put(Foot, new StatBlock(0, 0, 0, 0, 0, 175, 0, 0, 0, 0));
         } else if (spec == SpecType.PaladinProt) {
-            switch (slot) {
-                case Shoulder -> {
-                    return new StatBlock(0, 300, 0, 0, 0, 0, 0, 100, 0, 0);
-                }
-                case Back -> {
-                    return new StatBlock(0, 200, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Chest -> {
-                    return new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Wrist -> {
-                    return new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Hand -> {
-                    return new StatBlock(0, 0, 0, 0, 0, 0, 170, 0, 0, 0);
-                }
-                case Leg -> {
-                    return new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0);
-//                    return new StatBlock(0, 430, 0, 0, 0, 0, 0, 165, 0, 0);
-                }
-                case Foot -> {
-                    return new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Offhand -> {
-                    return new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 175, 0);
-                }
-                default -> {
-                    return null;
-                }
-            }
+            map.put(Shoulder, new StatBlock(0, 300, 0, 0, 0, 0, 0, 100, 0, 0));
+            map.put(Back, new StatBlock(0, 200, 0, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Chest, new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Wrist, new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Hand, new StatBlock(0, 0, 0, 0, 0, 0, 170, 0, 0, 0));
+            map.put(Leg, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));
+            map.put(Foot, new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Offhand, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 175, 0));
         } else if (spec == SpecType.DruidBoom) {
-            switch (slot) {
-                case Shoulder -> {
-                    return new StatBlock(120, 0, 0, 80, 0, 0, 0, 0, 0, 0);
-                }
-                case Back -> {
-                    return new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Chest -> {
-                    return new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 80);
-                }
-                case Wrist -> {
-                    return new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Hand -> {
-                    return new StatBlock(0, 0, 0, 0, 0, 170, 0, 0, 0, 0);
-                }
-                case Leg -> {
-                    return new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 100);
-                }
-                case Foot -> {
-                    return new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0);
-                }
-                case Offhand -> {
-                    return new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-                }
-                default -> {
-                    return null;
-                }
-            }
+            map.put(Shoulder, new StatBlock(120, 0, 0, 80, 0, 0, 0, 0, 0, 0));
+            map.put(Back, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Chest, new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 80));
+            map.put(Wrist, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Hand, new StatBlock(0, 0, 0, 0, 0, 170, 0, 0, 0, 0));
+            map.put(Leg, new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 100));
+            map.put(Foot, new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0));
+            map.put(Offhand, new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         } else {
             throw new IllegalArgumentException("need enchants");
         }
+
+        return map;
     }
 }

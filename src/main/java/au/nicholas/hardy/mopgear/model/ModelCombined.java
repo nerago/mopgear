@@ -1,9 +1,12 @@
 package au.nicholas.hardy.mopgear.model;
 
+import au.nicholas.hardy.mopgear.ServiceEntry;
 import au.nicholas.hardy.mopgear.domain.*;
 import au.nicholas.hardy.mopgear.io.DataLocation;
 
+import java.nio.file.Path;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.stream.Stream;
 
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
@@ -103,6 +106,29 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRequirements statRequirements = StatRequirements.warlockDungeon();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.warlock(), enchants);
+    }
+
+    public static ModelCombined load(ServiceEntry.ServiceModel modelParam) {
+        StatRatings rating;
+        if (modelParam.weight().size() == 1) {
+            ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
+            rating = new StatRatingsWeights(Path.of(a.file()), false);
+            rating = new StatRatingsWeightsMix(rating, a.scale(), null, 0);
+        } else if (modelParam.weight().size() == 2) {
+            ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
+            StatRatingsWeights ratingA = new StatRatingsWeights(Path.of(a.file()), false);
+
+            ServiceEntry.ServiceWeightStats b = modelParam.weight().get(1);
+            StatRatingsWeights ratingB = new StatRatingsWeights(Path.of(b.file()), false);
+
+            rating = new StatRatingsWeightsMix(ratingA, a.scale(), ratingB, b.scale());
+        } else {
+            throw new IllegalArgumentException("expected one or two weights only");
+        }
+
+        StatRequirements statRequirements = StatRequirements.load(modelParam.required());
+        DefaultEnchants enchants = new DefaultEnchants(modelParam.defaultEnchants());
+        return new ModelCombined(rating, statRequirements, ReforgeRules.warlock(), enchants);
     }
 
     public static ModelCombined nullMixedModel() {
