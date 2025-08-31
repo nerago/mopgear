@@ -23,6 +23,7 @@ public class JobInfo {
     public StatBlock adjustment;
     public ItemData extraItem;
     public double factor;
+    public int cost;
 
     public void config(ModelCombined model, EquipOptionsMap itemOptions, Instant startTime, Long runSize, StatBlock adjustment) {
         this.model = model;

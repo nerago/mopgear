@@ -41,5 +41,8 @@ public class PrintRecorder {
 
     public void append(PrintRecorder other) {
         this.prints.addAll(other.prints);
+        if (outputImmediate) {
+            other.outputNow();
+        }
     }
 }

@@ -10,6 +10,7 @@ import au.nerago.mopgear.util.RankedGroupsCollection;
 import au.nerago.mopgear.util.Tuple;
 import au.nerago.mopgear.util.ArrayUtil;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,21 +50,22 @@ public class FindUpgrades {
                 .peek(job -> handleResult(job, baseRating))
                 .toList();
 
-        reportResults(extraItemArray, jobList);
+        reportResults(jobList);
     }
 
-    private void reportResults(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
-        reportBySlot(extraItemArray, jobList);
-        reportCostUpgradeRank(extraItemArray, jobList);
-        reportOverallRank(extraItemArray, jobList);
+    private void reportResults(List<JobInfo> jobList) {
+        reportByCost(jobList);
+        reportBySlot(jobList);
+        reportCostUpgradeRank(jobList);
+        reportOverallRank(jobList);
     }
 
-    private void reportCostUpgradeRank(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
+    private void reportCostUpgradeRank(List<JobInfo> jobList) {
         RankedGroupsCollection<JobInfo> grouped = new RankedGroupsCollection<>();
 
         jobList.forEach(job -> {
             ItemData item = job.extraItem;
-            int cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
+            int cost = job.cost;
             if (cost >= 10) {
                 double plusPerCost = (job.factor - 1.0) * 100 / cost;
                 grouped.add(job, plusPerCost);
@@ -71,26 +73,37 @@ public class FindUpgrades {
         });
 
         OutputText.println("RANKING COST PER UPGRADE");
-        grouped.forEach((item, factor) -> reportItem(item, extraItemArray));
+        grouped.forEach((item, factor) -> reportItem(item));
     }
 
-    private static void reportOverallRank(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
+    private static void reportOverallRank(List<JobInfo> jobList) {
         RankedGroupsCollection<JobInfo> bestCollection = new RankedGroupsCollection<>();
         jobList.forEach(job -> bestCollection.add(job, job.factor));
 
         OutputText.println("RANKING PERCENT UPGRADE");
-        bestCollection.forEach((item, factor) -> reportItem(item, extraItemArray));
+        bestCollection.forEach((item, factor) -> reportItem(item));
     }
 
-    private static void reportBySlot(Tuple.Tuple2<Integer, Integer>[] extraItemArray, List<JobInfo> jobList) {
-        Map<Object, RankedGroupsCollection<JobInfo>> grouped = jobList.stream().collect(
+    private void reportByCost(List<JobInfo> jobList) {
+        Map<Integer, RankedGroupsCollection<JobInfo>> grouped = jobList.stream().collect(
+                Collectors.groupingBy(j -> j.cost,
+                        RankedGroupsCollection.collector(job -> job.factor)));
+        for (Integer cost : grouped.keySet().stream().sorted(Comparator.naturalOrder()).toList()) {
+            RankedGroupsCollection<JobInfo> best = grouped.get(cost);
+            best.forEach((item, factor) -> reportItem(item));
+            System.out.println();
+        }
+    }
+
+    private static void reportBySlot(List<JobInfo> jobList) {
+        Map<SlotItem, RankedGroupsCollection<JobInfo>> grouped = jobList.stream().collect(
                 Collectors.groupingBy(j -> j.extraItem.slot,
                         RankedGroupsCollection.collector(job -> job.factor)));
         for (SlotItem slot : SlotItem.values()) {
             RankedGroupsCollection<JobInfo> best = grouped.get(slot);
             if (best != null) {
                 OutputText.println("RANKING " + slot);
-                best.forEach((item, factor) -> reportItem(item, extraItemArray));
+                best.forEach((item, factor) -> reportItem(item));
                 OutputText.println();
             }
         }
@@ -99,48 +112,49 @@ public class FindUpgrades {
     private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, Function<ItemData, ItemData> enchanting, StatBlock adjustment, double baseRating) {
         return ArrayUtil.arrayStream(extraItemArray).mapMulti((extraItemInfo, submitJob) -> {
             int extraItemId = extraItemInfo.a();
+            int cost = extraItemInfo.b();
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             SlotEquip slot = extraItem.slot.toSlotEquip();
 
             if (!canSkipUpgradeCheck(extraItem, slot, baseItems)) {
                 OutputText.println("JOB " + extraItem.toStringExtended() + " $" + extraItemInfo.b());
 
-                submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating));
+                submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating, cost));
 
                 if (slot == SlotEquip.Trinket1) {
-                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, SlotEquip.Trinket2, baseRating));
+                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, SlotEquip.Trinket2, baseRating, cost));
                 }
                 if (slot == SlotEquip.Ring1) {
-                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, SlotEquip.Ring2, baseRating));
+                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, SlotEquip.Ring2, baseRating, cost));
                 }
             }
         });
     }
 
-    private static void reportItem(JobInfo resultItem, Tuple.Tuple2<Integer, Integer>[] extraItemArray) {
+    private static void reportItem(JobInfo resultItem) {
         ItemData item = resultItem.extraItem;
         double factor = resultItem.factor;
+        int cost = resultItem.cost;
         String stars = ArrayUtil.repeat('*', resultItem.hackCount);
-        int cost = ArrayUtil.findAny(extraItemArray, x -> x.a() == item.id).b();
         if (factor > 1.0) {
             double plusPercent = (factor - 1.0) * 100;
             if (cost >= 10) {
                 double plusPerCost = plusPercent / cost;
-                OutputText.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f%%\t %1.4f\n", item.slot, item.name, cost, factor, stars, plusPercent, plusPerCost);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t%1.3f%s \t+%2.1f%%\t %1.4f\n", item.slot, item.itemLevel, item.name, cost, factor, stars, plusPercent, plusPerCost);
             } else {
-                OutputText.printf("%10s \t%35s \t$%d \t%1.3f%s \t+%2.1f%%\n", item.slot, item.name, cost, factor, stars, plusPercent);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t%1.3f%s \t+%2.1f%%\n", item.slot, item.itemLevel, item.name, cost, factor, stars, plusPercent);
             }
         } else {
-            OutputText.printf("%10s \t%35s \t$%d \t%1.3f%s\n", item.slot, item.name, cost, factor, stars);
+            OutputText.printf("%10s \t%d \t%35s \t$%d \t%1.3f%s\n", item.slot, item.itemLevel, item.name, cost, factor, stars);
         }
     }
 
-    private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, StatBlock adjustment, SlotEquip slot, double baseRating) {
+    private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
         JobInfo job = new JobInfo();
         job.singleThread = true;
 
         extraItem = enchanting.apply(extraItem);
-        job.println("OFFER " + extraItem);
+        job.println("OFFER " + extraItem.toStringExtended());
         job.println("REPLACING " + (items.get(slot) != null ? items.get(slot)[0] : "NOTHING"));
 
         ItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
@@ -156,6 +170,7 @@ public class FindUpgrades {
 
         job.config(model, items, null, runSize, adjustment);
         job.extraItem = extraItem;
+        job.cost = cost;
         return job;
     }
 

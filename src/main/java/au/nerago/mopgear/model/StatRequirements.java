@@ -28,11 +28,11 @@ public class StatRequirements {
         return new StatRequirements(TARGET_RATING_MELEE, TARGET_RATING_TANK, DEFAULT_CAP_ALLOW_EXCEED, false);
     }
 
-    public static StatRequirements caster() {
+    public static StatRequirements druidBalance() {
         return new StatRequirements(TARGET_RATING_CAST, 0, DEFAULT_CAP_ALLOW_EXCEED, true);
     }
 
-    public static StatRequirements warlockDungeon() {
+    public static StatRequirements warlock() {
         return new StatRequirements(TARGET_RATING_CAST_DUNGEON, 0, DEFAULT_CAP_ALLOW_EXCEED, false);
     }
 

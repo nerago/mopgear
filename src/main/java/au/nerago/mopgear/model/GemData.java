@@ -66,6 +66,7 @@ public class GemData {
         map.put(76628, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76694, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76618, new StatBlock(80, 0, 0, 0, 160, 0, 0, 0, 0, 0));
+        map.put(76682, new StatBlock(80, 0, 0, 0, 160, 0, 0, 0, 0, 0));
         map.put(76669, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
         map.put(76603, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
         map.put(76700, new StatBlock(0, 0, 320, 0, 0, 0, 0, 0, 0, 0));

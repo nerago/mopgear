@@ -7,11 +7,8 @@ import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
-import au.nerago.mopgear.util.TopCollectorReporting;
-import au.nerago.mopgear.util.Tuple;
+import au.nerago.mopgear.util.*;
 import au.nerago.mopgear.io.ItemCache;
-import au.nerago.mopgear.util.ArrayUtil;
-import au.nerago.mopgear.util.BestHolder;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -105,9 +102,9 @@ public class Jobs {
 
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, modelRet, true);
 
-        addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
+//        addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
 //        addExtra(retMap, modelRet, 89075, enchant, null, false, false); // yi's cloak
-        addExtra(retMap, modelRet, 81694, enchant, null, false, false); // command bracer
+//        addExtra(retMap, modelRet, 81694, enchant, null, false, false); // command bracer
         addExtra(retMap, modelRet, 82856, enchant, null, false, false); // dark blaze gloves
 //        addExtra(retMap, modelRet, 86742, enchant, null, false, false); // jasper clawfeet
 
@@ -118,11 +115,14 @@ public class Jobs {
 //        commonMap.replaceWithSpecificForge(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
 //        commonMap.replaceWithSpecificForge(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
 
-        OutputText.println("COMMON COMBOS " + ItemUtil.estimateSets(commonMap));
+        long commonCombos = ItemUtil.estimateSets(commonMap);
+        OutputText.println("COMMON COMBOS " + commonCombos);
 
         Stream<ItemSet> commonStream = SolverCompleteStreams.runSolverPartial(modelNull, commonMap, startTime, null, 0);
 //        long initialSize = 50000;
 //        Stream<ItemSet> commonStream = EngineRandom.runSolverPartial(modelNull, commonMap, startTime, null, initialSize);
+
+        commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
 
 //        Long runSize = BILLION / 1000;
         Long runSize = 200000L;

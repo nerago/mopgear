@@ -10,12 +10,21 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class BigStreamUtil {
-    public static <T> Stream<T> countProgress(final long estimate, Instant startTime, Stream<T> sets) {
+    public static <T> Stream<T> countProgress(long estimate, Instant startTime, Stream<T> inputStream) {
         final double percentMultiply = 100.0 / estimate;
         final long reportFrequency = chooseReportFrequency(estimate);
+        return coreCount(reportFrequency, percentMultiply, startTime, inputStream);
+    }
 
+    public static Stream<ItemSet> countProgressSmall(long estimate, Instant startTime, Stream<ItemSet> inputStream) {
+        final double percentMultiply = 100.0 / estimate;
+        final long reportFrequency = 1000;
+        return coreCount(reportFrequency, percentMultiply, startTime, inputStream);
+    }
+
+    private static <T> Stream<T> coreCount(long reportFrequency, double percentMultiply, Instant startTime, Stream<T> inputStream) {
         AtomicLong count = new AtomicLong();
-        return sets.peek(set -> {
+        return inputStream.peek(set -> {
             long curr = count.incrementAndGet();
             if (curr % reportFrequency == 0) {
                 double percent = ((double) curr) * percentMultiply;
@@ -61,4 +70,5 @@ public class BigStreamUtil {
         return finalSets.collect(new TopCollector1<>(model::calcRating));
 //        return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
+
 }

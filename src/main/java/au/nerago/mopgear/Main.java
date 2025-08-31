@@ -21,7 +21,8 @@ import java.util.function.Function;
 
 import static au.nerago.mopgear.Solver.chooseEngineAndRun;
 import static au.nerago.mopgear.Jobs.*;
-import static au.nerago.mopgear.io.SourcesOfItems.intellectLeatherValorCelestialP1;
+import static au.nerago.mopgear.domain.StatType.*;
+import static au.nerago.mopgear.io.SourcesOfItems.*;
 
 @SuppressWarnings({"SameParameterValue", "unused", "ConstantValue"})
 public class Main {
@@ -57,11 +58,11 @@ public class Main {
     private void launchpad(Instant startTime) {
 //            WowHead.fetchItem(86145);
 
-//            multiSpecSequential(startTime);
+            multiSpecSequential(startTime);
 
 //            reforgeRet(startTime);
 //            reforgeProt(startTime);
-            reforgeBoom(startTime);
+//            reforgeBoom(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -133,11 +134,11 @@ public class Main {
 
 
 //        reforgeProcess(items, model, startTime);
-        reforgeProcess2(items, model, startTime);
+//        reforgeProcess2(items, model, startTime);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
-//        reforgeProcessPlus(items, model, startTime, true,84950, false, true, null);
+        reforgeProcessPlus(items, model, startTime, null,89934, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
 //          reforgeProcessPlusPlus(items, model, startTime, 86753, 89075, false, null);
@@ -145,8 +146,9 @@ public class Main {
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
 //        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
-//        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
+//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray()), model, true, null);
 //        findUpgradeSetup(items, strengthPlateMsvArray(), model, false);
+//        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model);
@@ -206,20 +208,21 @@ public class Main {
 
     private static EnumMap<SlotEquip, ReforgeRecipe> commonFixedItems() {
         EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
-        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(StatType.Crit, StatType.Haste));
+        // 2025-09-01T02:09:07.676264400
+        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(Crit, Haste));
         presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Expertise, StatType.Hit));
-        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Haste, StatType.Hit));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(StatType.Haste, StatType.Expertise));
+        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(Haste, Expertise));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(null, null));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
+        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(null, null));
         return presetReforge;
     }
 
     private static EnumMap<SlotEquip, ReforgeRecipe> commonFixedItemsOld() {
         EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
-        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(StatType.Crit, StatType.Hit));
-        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Hit, StatType.Expertise));
+        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(Crit, StatType.Hit));
+        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Hit, Expertise));
         //presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Crit, StatType.Haste));
 //        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
 //        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(Crit, Expertise));
@@ -228,9 +231,9 @@ public class Main {
 //        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(Dodge, Expertise));
 //        presetReforge.put(SlotEquip.Leg, new ReforgeRecipe(Haste, Expertise));
 //        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(Mastery, Expertise));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Haste, StatType.Hit));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(StatType.Haste, StatType.Expertise));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(Haste, StatType.Hit));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
+        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
 //        presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
 //        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
 //        presetReforge.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
@@ -265,9 +268,9 @@ public class Main {
 //        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(Dodge, Expertise));
 //        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(Haste, Expertise));
 //        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(Mastery, Expertise));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Haste, StatType.Hit));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(StatType.Haste, StatType.Expertise));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(Haste, StatType.Hit));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
+        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
 //        presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
 //        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
 //        presetReforge.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
@@ -317,18 +320,18 @@ public class Main {
         List<ItemData> items = ItemUtil.loadItems(itemCache, itemIds, detailedOutput);
 
         EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
-        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Haste, StatType.Expertise));
+        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(Crit, Haste));
+        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(Haste, Expertise));
         //presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(StatType.Haste, StatType.Expertise));
+        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(Haste, Expertise));
         //        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
         presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(null, null));
 //        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(Haste, Expertise));
-        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Dodge, StatType.Expertise));
-        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Mastery, StatType.Expertise));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Haste, StatType.Hit));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(StatType.Haste, StatType.Expertise));
+        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Dodge, Expertise));
+        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Mastery, Expertise));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(Haste, StatType.Hit));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
+        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
 //        presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
 //        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
 //        presetReforge.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
@@ -350,20 +353,20 @@ public class Main {
 
         EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
         presetReforge.put(SlotEquip.Head, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Hit, StatType.Expertise));
-        presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Expertise, StatType.Hit));
-        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Mastery, StatType.Haste));
-        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Haste, StatType.Hit));
-        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(StatType.Crit, StatType.Hit));
-        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Dodge, StatType.Expertise));
-        presetReforge.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Crit, StatType.Hit));
-        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Mastery, StatType.Expertise));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Haste, StatType.Hit));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(StatType.Haste, StatType.Expertise));
+        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Hit, Expertise));
+        presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(Expertise, StatType.Hit));
+        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(Crit, Expertise));
+        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Mastery, Haste));
+        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(Haste, StatType.Hit));
+        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(Crit, StatType.Hit));
+        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Dodge, Expertise));
+        presetReforge.put(SlotEquip.Leg, new ReforgeRecipe(Crit, StatType.Hit));
+        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Mastery, Expertise));
+        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(Haste, StatType.Hit));
+        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
+        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
         presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(null, null));
-        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(StatType.Crit, StatType.Hit));
+        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(Crit, StatType.Hit));
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
 
@@ -404,7 +407,7 @@ public class Main {
         for (int extraId : extraItems) {
             ReforgeRecipe reforge = null;
             if (extraId == 86794)
-                reforge = new ReforgeRecipe(StatType.Hit, StatType.Expertise);
+                reforge = new ReforgeRecipe(StatType.Hit, Expertise);
             ItemData extraItem = addExtra(map, model, extraId, customiseItem, reforge, false, true);
             OutputText.println("EXTRA " + extraItem);
         }
@@ -454,36 +457,36 @@ public class Main {
 
         Map<SlotEquip, ReforgeRecipe> reforgeRet = new EnumMap<>(SlotEquip.class);
         reforgeRet.put(SlotEquip.Head, new ReforgeRecipe(null, null));
-        reforgeRet.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Expertise, StatType.Haste));
-        reforgeRet.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Hit, StatType.Haste));
-        reforgeRet.put(SlotEquip.Hand, new ReforgeRecipe(StatType.Crit, StatType.Hit));
-        reforgeRet.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Mastery, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Crit, StatType.Mastery));
-        reforgeRet.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Mastery, StatType.Expertise));
-        reforgeRet.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        reforgeRet.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Mastery));
+        reforgeRet.put(SlotEquip.Neck, new ReforgeRecipe(Crit, Expertise));
+        reforgeRet.put(SlotEquip.Shoulder, new ReforgeRecipe(Expertise, Haste));
+        reforgeRet.put(SlotEquip.Back, new ReforgeRecipe(Crit, Expertise));
+        reforgeRet.put(SlotEquip.Chest, new ReforgeRecipe(Crit, Expertise));
+        reforgeRet.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Hit, Haste));
+        reforgeRet.put(SlotEquip.Hand, new ReforgeRecipe(Crit, StatType.Hit));
+        reforgeRet.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Mastery, Expertise));
+        reforgeRet.put(SlotEquip.Leg, new ReforgeRecipe(Crit, StatType.Mastery));
+        reforgeRet.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Mastery, Expertise));
+        reforgeRet.put(SlotEquip.Ring1, new ReforgeRecipe(Crit, Haste));
+        reforgeRet.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, StatType.Mastery));
         reforgeRet.put(SlotEquip.Trinket1, new ReforgeRecipe(null, null));
-        reforgeRet.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
-        reforgeRet.put(SlotEquip.Weapon, new ReforgeRecipe(StatType.Hit, StatType.Haste));
+        reforgeRet.put(SlotEquip.Trinket2, new ReforgeRecipe(Expertise, StatType.Mastery));
+        reforgeRet.put(SlotEquip.Weapon, new ReforgeRecipe(StatType.Hit, Haste));
 
         Map<SlotEquip, ReforgeRecipe> reforgeProt = new EnumMap<>(SlotEquip.class);
         reforgeProt.put(SlotEquip.Head, new ReforgeRecipe(null, null));
-        reforgeProt.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+        reforgeProt.put(SlotEquip.Neck, new ReforgeRecipe(Crit, Expertise));
         reforgeProt.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Dodge, StatType.Hit));
-        reforgeProt.put(SlotEquip.Back, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-        reforgeProt.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
+        reforgeProt.put(SlotEquip.Back, new ReforgeRecipe(Crit, Expertise));
+        reforgeProt.put(SlotEquip.Chest, new ReforgeRecipe(Crit, Expertise));
         reforgeProt.put(SlotEquip.Wrist, new ReforgeRecipe(StatType.Dodge, StatType.Mastery));
         reforgeProt.put(SlotEquip.Hand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
         reforgeProt.put(SlotEquip.Belt, new ReforgeRecipe(StatType.Dodge, StatType.Hit));
         reforgeProt.put(SlotEquip.Leg, new ReforgeRecipe(StatType.Dodge, StatType.Mastery));
-        reforgeProt.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Parry, StatType.Expertise));
-        reforgeProt.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Parry, StatType.Expertise));
-        reforgeProt.put(SlotEquip.Ring2, new ReforgeRecipe(StatType.Crit, StatType.Mastery));
+        reforgeProt.put(SlotEquip.Foot, new ReforgeRecipe(StatType.Parry, Expertise));
+        reforgeProt.put(SlotEquip.Ring1, new ReforgeRecipe(StatType.Parry, Expertise));
+        reforgeProt.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, StatType.Mastery));
         reforgeProt.put(SlotEquip.Trinket1, new ReforgeRecipe(null, null));
-        reforgeProt.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
+        reforgeProt.put(SlotEquip.Trinket2, new ReforgeRecipe(Expertise, StatType.Mastery));
         reforgeProt.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
         reforgeProt.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
 

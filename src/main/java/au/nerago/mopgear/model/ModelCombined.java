@@ -95,14 +95,14 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
 
     public static ModelCombined standardBoomModel() {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBoomFile, false);
-        StatRequirements statRequirements = StatRequirements.caster();
+        StatRequirements statRequirements = StatRequirements.druidBalance();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom); // TODO check same
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants);
     }
 
     public static ModelCombined standardWarlockModel() {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightWarlockFile, false);
-        StatRequirements statRequirements = StatRequirements.warlockDungeon();
+        StatRequirements statRequirements = StatRequirements.warlock();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.warlock(), enchants);
     }
