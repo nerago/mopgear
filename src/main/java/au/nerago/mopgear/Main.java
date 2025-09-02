@@ -2,6 +2,7 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.InputGearParser;
+import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.results.OutputText;
@@ -61,9 +62,9 @@ public class Main {
 //            multiSpecSequential(startTime);
 
 //            reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
-                    reforgeBear(startTime);
+//                    reforgeBear(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -134,7 +135,6 @@ public class Main {
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, model.reforgeRules(), commonItems);
 
-
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcess2(items, model, startTime);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
@@ -154,7 +154,7 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model);
-        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model, true, null);
+//        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model, true, null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialP1(itemCache), null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
@@ -195,9 +195,11 @@ public class Main {
 
     private void reforgeBear(Instant startTime) {
         ModelCombined model = ModelCombined.standardBearModel();
+//        ItemUtil.forceReload(itemCache, DataLocation.gearBearFile);
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearBearFile, model.reforgeRules(), null);
 
         reforgeProcess(items, model, startTime);
+        findUpgradeSetup(items, ArrayUtil.concat(SourcesOfItems.agilityLeatherCelestialArray(), SourcesOfItems.agilityLeatherValorArray()), model, true, null);
     }
 
     private void reforgeWarlock(Instant startTime) {

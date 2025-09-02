@@ -167,7 +167,7 @@ public class Jobs {
         JobInfo job = new JobInfo();
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
-        job.config(model, itemOptions, startTime, BILLION, null);
+        job.config(model, itemOptions, startTime, null, null);
         Solver.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
@@ -191,9 +191,8 @@ public class Jobs {
         extraItem = addExtra(runItems, model, extraItemId, slot, enchanting, null, replace, true);
         OutputText.println("EXTRA " + extraItem);
 
-        long runSize = BILLION;
         JobInfo job = new JobInfo();
-        job.config(model, runItems, startTime, runSize, adjustment);
+        job.config(model, runItems, startTime, BILLION, adjustment);
         Solver.runJob(job);
 
         job.printRecorder.outputNow();

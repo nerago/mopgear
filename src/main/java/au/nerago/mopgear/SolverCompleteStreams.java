@@ -35,7 +35,7 @@ public class SolverCompleteStreams {
         List<Tuple.Tuple2<SlotEquip, ItemData[]>> sortedEntries =
                 itemsBySlot.entrySet()
                         .stream()
-                        .sorted(Comparator.comparingInt(x -> -x.b().length)).toList();
+                        .sorted(Comparator.comparingInt(x -> x.b().length)).toList();
         for (Tuple.Tuple2<SlotEquip, ItemData[]> slotEntry : sortedEntries) {
             if (stream == null) {
                 stream = newCombinationStream(slotEntry.a(), slotEntry.b(), adjustment);

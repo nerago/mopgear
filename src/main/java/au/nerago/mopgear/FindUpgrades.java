@@ -37,9 +37,7 @@ public class FindUpgrades {
     }
 
     public void run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment) {
-        ItemSet baseSet = Solver.chooseEngineAndRun(model, baseItems, null, runSize, adjustment).orElseThrow();
-        double baseRating = model.calcRating(baseSet);
-        OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.totals, baseRating);
+        double baseRating = findBase(baseItems, adjustment);
 
         Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
 
@@ -50,6 +48,27 @@ public class FindUpgrades {
                 .toList();
 
         reportResults(jobList);
+    }
+
+    private double findBase(EquipOptionsMap baseItems, StatBlock adjustment) {
+        JobInfo job = new JobInfo();
+        job.model = model;
+        job.itemOptions = baseItems;
+        job.runSize = runSize;
+        job.adjustment = adjustment;
+        job.hackAllow = hackAllow;
+        Solver.runJob(job);
+        job.printRecorder.outputNow();
+
+        Optional<ItemSet> baseSet = job.resultSet;
+        if (baseSet.isPresent()) {
+            double baseRating = model.calcRating(baseSet.get());
+            OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.get().totals, baseRating);
+
+            return baseRating;
+        } else {
+            throw new IllegalStateException("couldn't find valid baseline set");
+        }
     }
 
     private void reportResults(List<JobInfo> jobList) {
@@ -73,6 +92,7 @@ public class FindUpgrades {
 
         OutputText.println("RANKING COST PER UPGRADE");
         grouped.forEach((item, factor) -> reportItem(item));
+        OutputText.println();
     }
 
     private static void reportOverallRank(List<JobInfo> jobList) {

@@ -35,7 +35,7 @@ public class ItemCache {
     public void cacheSave() {
         synchronized (writeSync) {
             try (BufferedWriter writer = Files.newBufferedWriter(file)) {
-                new Gson().toJson(itemCache, writer);
+                new Gson().newBuilder().setPrettyPrinting().create().toJson(itemCache, writer);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

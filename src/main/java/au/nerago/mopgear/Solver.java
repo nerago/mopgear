@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class Solver {
 
-    public static final int THREHOLD_PHASED = 7500;
+    public static final int THRESHOLD_PHASED = 7500;
 
     public static JobInfo runJob(JobInfo job) {
         ModelCombined model = job.model;
@@ -22,7 +22,7 @@ public class Solver {
 
         long estimate = ItemUtil.estimateSets(itemOptions);
         Optional<ItemSet> proposed;
-        if (runSize != null && estimate / THREHOLD_PHASED > runSize) {
+        if (runSize != null && estimate / THRESHOLD_PHASED > runSize) {
             job.printf("COMBINATIONS estimate=%,d RANDOM SAMPLE %,d\n", estimate, runSize);
             if (job.singleThread)
                 proposed = SolverRandom.runSolverSingleThread(model, itemOptions, adjustment, runSize);

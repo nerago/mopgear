@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class SolverCapPhased {
-//    public static final int TOP_HIT_COMBO_FILTER = 1000;
+    //    public static final int TOP_HIT_COMBO_FILTER = 1000;
     private final ModelCombined model;
     private final StatBlock adjustment;
 
@@ -50,6 +50,9 @@ public class SolverCapPhased {
     private Stream<ItemSet> runSolverPartial(EquipOptionsMap items, boolean parallel) {
         List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
 
+        long estimate = ItemUtil.estimateSets(skinnyOptions);
+        System.out.printf("SKINNY COMBO %,d\n", estimate);
+
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 
         Stream<SkinnyItemSet> filteredSets = model.statRequirements().filterSetsSkinny(initialSets);
@@ -86,14 +89,15 @@ public class SolverCapPhased {
     }
 
     private List<SkinnyItem[]> convertToSkinny(EquipOptionsMap items) {
+        StatRequirements statRequirements = model.statRequirements();
         List<SkinnyItem[]> optionsList = new ArrayList<>();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] fullOptions = items.get(slot);
             if (fullOptions != null) {
                 HashSet<SkinnyItem> slotSet = new HashSet<>();
                 for (ItemData item : fullOptions) {
-                    int hit = model.statRequirements().effectiveHit(item);
-                    int expertise = model.statRequirements().effectiveExpertise(item);
+                    int hit = statRequirements.effectiveHit(item);
+                    int expertise = statRequirements.effectiveExpertise(item);
                     SkinnyItem skinny = new SkinnyItem(slot, hit, expertise);
                     slotSet.add(skinny);
                 }
@@ -107,13 +111,17 @@ public class SolverCapPhased {
     private Stream<SkinnyItemSet> generateSkinnyComboStream(List<SkinnyItem[]> optionsList, boolean parallel) {
         Stream<SkinnyItemSet> stream = null;
 
+//        optionsList.sort(Comparator.comparingInt(array -> array.length));
+
         for (SkinnyItem[] slotOptions : optionsList) {
             if (stream == null) {
                 stream = newCombinationStream(slotOptions, parallel);
             } else {
                 stream = addSlotToCombination(stream, slotOptions);
             }
+            stream = model.statRequirements().filterSetsMaxSkinny(stream);
         }
+
         return stream;
     }
 

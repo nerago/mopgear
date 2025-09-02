@@ -42,6 +42,16 @@ public class ItemUtil {
         return result;
     }
 
+    public static void forceReload(ItemCache itemCache, Path file) {
+        List<EquippedItem> itemIds = InputGearParser.readInput(file);
+        for (EquippedItem equippedItem : itemIds) {
+            int id = equippedItem.id();
+            ItemData item = WowHead.fetchItem(id);
+            itemCache.put(id, item);
+        }
+        itemCache.cacheSave();
+    }
+
     public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
@@ -69,6 +79,9 @@ public class ItemUtil {
                 }
             } else {
                 OutputText.println(id + ": " + item);
+            }
+            if (item.stat.isEmpty()) {
+                OutputText.println("MISSING STATS MISSING STATS MISSING STATS MISSING STATS");
             }
         }
         return item;
@@ -276,5 +289,9 @@ public class ItemUtil {
 
     static long estimateSets(EquipOptionsMap reforgedItems) {
         return reforgedItems.entrySet().stream().mapToLong((x) -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
+    }
+
+    public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> skinnyOptions) {
+        return skinnyOptions.stream().mapToLong((x) -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
     }
 }

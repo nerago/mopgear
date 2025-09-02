@@ -100,7 +100,7 @@ public class WowHead {
         int socketBonus = objectGetInt(equipObject, "socketbonus");
 
         StatBlock statBlock = new StatBlock(
-                objectGetIntOneOf(equipObject, "str", "int"),
+                objectGetIntOneOf(equipObject, "str", "int", "agi"),
                 objectGetInt(equipObject, "sta"),
                 objectGetInt(equipObject, "mastrtng"),
                 objectGetInt(equipObject, "critstrkrtng"),
@@ -139,15 +139,18 @@ public class WowHead {
             return 0;
     }
 
-    private static int objectGetIntOneOf(JsonObject object, String fieldA, String fieldB) {
-        if (object.has(fieldA) && object.has(fieldB))
-            throw new IllegalArgumentException("primary stat conflict, both " + fieldA + " and " + fieldB);
-        else if (object.has(fieldA))
-            return object.get(fieldA).getAsInt();
-        else if (object.has(fieldB))
-            return object.get(fieldB).getAsInt();
-        else
-            return 0;
+    private static int objectGetIntOneOf(JsonObject object, String... fields) {
+        boolean found = false;
+        int value = 0;
+        for (String field : fields) {
+            if (object.has(field)) {
+                if (found)
+                    throw new IllegalArgumentException("primary stat conflict");
+                value = object.get(field).getAsInt();
+                found = true;
+            }
+        }
+        return value;
     }
 
     private static JsonElement parseJson(String str) throws JsonIOException, JsonSyntaxException {

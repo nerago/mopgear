@@ -200,6 +200,21 @@ public class StatRequirements {
         return setStream;
     }
 
+    public Stream<SolverCapPhased.SkinnyItemSet> filterSetsMaxSkinny(Stream<SolverCapPhased.SkinnyItemSet> setStream) {
+        final int maxHit = hitMax;
+        final int maxExp = expertiseMax;
+
+        if (maxExp != Integer.MAX_VALUE && maxHit != Integer.MAX_VALUE) {
+            return setStream.filter(set -> set.totalHit() <= maxHit && set.totalExpertise() <= maxExp);
+        } else if (maxHit != Integer.MAX_VALUE) {
+            return setStream.filter(set -> set.totalHit() <= maxHit);
+        } else if (maxExp != Integer.MAX_VALUE) {
+            return setStream.filter(set -> set.totalExpertise() <= maxExp);
+        } else {
+            return setStream;
+        }
+    }
+
     private boolean noDuplicates(EquipMap items) {
         ItemData t1 = items.getTrinket1(), t2 = items.getTrinket2();
         ItemData r1 = items.getRing1(), r2 = items.getRing2();

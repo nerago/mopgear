@@ -112,7 +112,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
 
     public static ModelCombined standardBearModel() {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBearFile);
-        StatRequirements statRequirements = StatRequirements.druidBalance();
+        StatRequirements statRequirements = StatRequirements.druidBear();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet); // TODO check same
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.bear(), enchants);
     }
