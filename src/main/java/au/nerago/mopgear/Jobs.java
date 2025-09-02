@@ -38,7 +38,7 @@ public class Jobs {
         outputResultSimple(bestSet, model, true);
     }
 
-    public static void findUpgradeSetup(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
+    public static void findUpgradeSetup(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
         new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems, adjustment);
     }
 
@@ -273,11 +273,11 @@ public class Jobs {
         job.printRecorder.outputNow();
     }
 
-    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, Tuple.Tuple2<Integer, Integer>[] extraItems) {
+    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems) {
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, model, true);
 
-        for (Tuple.Tuple2<Integer, Integer> entry : extraItems) {
-            int extraItemId = entry.a();
+        for (CostedItem entry : extraItems) {
+            int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             SlotEquip slot = extraItem.slot.toSlotEquip();

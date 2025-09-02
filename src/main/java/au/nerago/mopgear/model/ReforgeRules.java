@@ -10,8 +10,9 @@ public class ReforgeRules {
 
     private static final StatType[] reforgeTargetsRetExtended = new StatType[]{Hit, Expertise, Haste, Mastery};
     private static final StatType[] reforgeTargetsRet = new StatType[]{Hit, Expertise, Mastery, Haste};
-    private static final StatType[] reforgeTargetsProt = new StatType[]{Hit, Expertise, Mastery, Haste};
+    private static final StatType[] reforgeTargetsProt = new StatType[]{Hit, Expertise, Mastery, Haste, Crit, Parry};
     private static final StatType[] reforgeTargetsBoom = new StatType[]{Spirit, Hit, Mastery, Haste, Crit};
+    private static final StatType[] reforgeTargetsBear = new StatType[]{Hit, Mastery, Haste, Crit, Dodge};
     private static final StatType[] reforgeTargetsWarlock = new StatType[]{Hit, Mastery, Haste, Crit};
 
     private final StatType[] reforgeTargets;
@@ -33,6 +34,9 @@ public class ReforgeRules {
 
     public static ReforgeRules boom() {
         return new ReforgeRules(reforgeTargetsBoom);
+    }
+    public static ReforgeRules bear() {
+        return new ReforgeRules(reforgeTargetsBear);
     }
 
     public static ReforgeRules warlock() {

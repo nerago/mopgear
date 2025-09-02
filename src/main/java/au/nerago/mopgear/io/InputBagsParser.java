@@ -1,5 +1,6 @@
 package au.nerago.mopgear.io;
 
+import au.nerago.mopgear.domain.CostedItem;
 import au.nerago.mopgear.util.Tuple;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputBagsParser {
-    static Tuple.Tuple2<Integer, Integer>[] readInput(Path file) {
+    static CostedItem[] readInput(Path file) {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             return parseReader(reader);
         } catch (IOException ex) {
@@ -24,17 +25,17 @@ public class InputBagsParser {
     }
 
     @SuppressWarnings("unchecked")
-    private static Tuple.Tuple2<Integer, Integer>[] parseReader(Reader reader) {
-        List<Tuple.Tuple2<Integer, Integer>> result = new ArrayList<>();
+    private static CostedItem[] parseReader(Reader reader) {
+        List<CostedItem> result = new ArrayList<>();
         JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
         JsonArray items = root.getAsJsonArray("items");
         for (JsonElement element : items) {
             if (element.isJsonObject()) {
                 JsonObject elementObject = element.getAsJsonObject();
                 int id = elementObject.get("id").getAsInt();
-                result.add(Tuple.create(id, 0));
+                result.add(new CostedItem(id, 0));
             }
         }
-        return (Tuple.Tuple2<Integer, Integer>[]) result.toArray(Tuple.Tuple2[]::new);
+        return result.toArray(CostedItem[]::new);
     }
 }

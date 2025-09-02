@@ -61,8 +61,9 @@ public class Main {
 //            multiSpecSequential(startTime);
 
 //            reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
+                    reforgeBear(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
 //        multiSpecReforge(startTime);
@@ -190,6 +191,13 @@ public class Main {
 
 //        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
 //        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);
+    }
+
+    private void reforgeBear(Instant startTime) {
+        ModelCombined model = ModelCombined.standardBearModel();
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearBearFile, model.reforgeRules(), null);
+
+        reforgeProcess(items, model, startTime);
     }
 
     private void reforgeWarlock(Instant startTime) {

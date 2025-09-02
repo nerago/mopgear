@@ -54,7 +54,7 @@ public class ServiceEntry {
                 Jobs.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(model, bagsFile, SourcesOfItems.ignoredItems));
             }
             case FIND_UPGRADE -> {
-                Tuple.Tuple2<Integer, Integer>[] extraItems = params.extraItems();
+                CostedItem[] extraItems = params.extraItems();
                 if (extraItems == null && params.sourceOfItems != null) {
                     extraItems = SourcesOfItems.get(params.sourceOfItems());
                 } else {
@@ -71,7 +71,7 @@ public class ServiceEntry {
                                 Map<SlotEquip, ReforgeRecipe> fixedForges,
                                 boolean challengeModeScaling,
                                 ServiceJobType jobType,
-                                Tuple.Tuple2<Integer, Integer>[] extraItems,
+                                CostedItem[] extraItems,
                                 String sourceOfItems
                                ) {
     }

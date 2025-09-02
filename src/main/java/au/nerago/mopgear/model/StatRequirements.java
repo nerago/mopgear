@@ -71,6 +71,13 @@ public class StatRequirements {
                 true);
     }
 
+    public static StatRequirements druidBear() {
+        return new StatRequirements(
+                TARGET_RATING_MELEE, TARGET_RATING_MELEE + DEFAULT_CAP_ALLOW_EXCEED,
+                TARGET_RATING_MELEE, TARGET_RATING_TANK + DEFAULT_CAP_ALLOW_EXCEED,
+                false);
+    }
+
     public static StatRequirements warlock() {
         return new StatRequirements(TARGET_RATING_CAST_DUNGEON, TARGET_RATING_CAST_DUNGEON + DEFAULT_CAP_ALLOW_EXCEED,
                 false);

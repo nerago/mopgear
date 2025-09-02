@@ -7,7 +7,6 @@ import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.RankedGroupsCollection;
-import au.nerago.mopgear.util.Tuple;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.util.Comparator;
@@ -37,7 +36,7 @@ public class FindUpgrades {
         this.hackAllow = hackAllow;
     }
 
-    public void run(EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, StatBlock adjustment) {
+    public void run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment) {
         ItemSet baseSet = Solver.chooseEngineAndRun(model, baseItems, null, runSize, adjustment).orElseThrow();
         double baseRating = model.calcRating(baseSet);
         OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.totals, baseRating);
@@ -109,15 +108,15 @@ public class FindUpgrades {
         }
     }
 
-    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, Tuple.Tuple2<Integer, Integer>[] extraItemArray, Function<ItemData, ItemData> enchanting, StatBlock adjustment, double baseRating) {
+    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, CostedItem[] extraItemArray, Function<ItemData, ItemData> enchanting, StatBlock adjustment, double baseRating) {
         return ArrayUtil.arrayStream(extraItemArray).mapMulti((extraItemInfo, submitJob) -> {
-            int extraItemId = extraItemInfo.a();
-            int cost = extraItemInfo.b();
+            int extraItemId = extraItemInfo.itemId();
+            int cost = extraItemInfo.cost();
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
             SlotEquip slot = extraItem.slot.toSlotEquip();
 
             if (!canSkipUpgradeCheck(extraItem, slot, baseItems)) {
-                OutputText.println("JOB " + extraItem.toStringExtended() + " $" + extraItemInfo.b());
+                OutputText.println("JOB " + extraItem.toStringExtended() + " $" + extraItemInfo.cost());
 
                 submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating, cost));
 

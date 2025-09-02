@@ -110,6 +110,13 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants);
     }
 
+    public static ModelCombined standardBearModel() {
+        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBearFile);
+        StatRequirements statRequirements = StatRequirements.druidBalance();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet); // TODO check same
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.bear(), enchants);
+    }
+
     public static ModelCombined standardWarlockModel() {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightWarlockFile);
         StatRequirements statRequirements = StatRequirements.warlock();
