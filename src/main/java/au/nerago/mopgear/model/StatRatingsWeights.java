@@ -12,22 +12,30 @@ import static au.nerago.mopgear.domain.StatType.*;
 
 public class StatRatingsWeights extends StatRatings {
     private final StatBlock weight;
-    private final boolean includeHit;
 
-    public StatRatingsWeights(Path weightFile, boolean includeHit) {
+    public StatRatingsWeights(Path weightFile) {
+        this(weightFile, false, false, false);
+    }
+
+    public StatRatingsWeights(Path weightFile, boolean includeHit, boolean includeExpertise, boolean includeSpirit) {
         try (BufferedReader reader = Files.newBufferedReader(weightFile)) {
-            weight = parseReader(reader);
+            StatBlock proposedWeight = parseReader(reader);
+            if (!includeHit)
+                proposedWeight = proposedWeight.withChange(Hit, 0);
+            if (!includeExpertise)
+                proposedWeight = proposedWeight.withChange(Expertise, 0);
+            if (!includeSpirit)
+                proposedWeight = proposedWeight.withChange(Spirit, 0);
+            this.weight = proposedWeight;
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        this.includeHit = includeHit;
         chooseGems();
         chooseBestStats();
     }
 
     private StatRatingsWeights(StatBlock weight) {
         this.weight = weight;
-        this.includeHit = false;
     }
 
     // because a sim value doesn't understand breakpoints
@@ -90,11 +98,9 @@ public class StatRatingsWeights extends StatRatings {
         total += value.parry * weight.parry;
         total += value.haste * weight.haste;
         total += value.dodge * weight.dodge;
-        if (includeHit) {
             total += value.hit * weight.hit;
             total += value.expertise * weight.expertise;
             total += value.spirit * weight.spirit;
-        }
         return total;
     }
 
@@ -108,11 +114,9 @@ public class StatRatingsWeights extends StatRatings {
         total += (aaa.parry + bbb.parry) * weight.parry;
         total += (aaa.haste + bbb.haste) * weight.haste;
         total += (aaa.dodge + bbb.dodge) * weight.dodge;
-        if (includeHit) {
             total += (aaa.hit + bbb.hit) * weight.hit;
             total += (aaa.expertise + bbb.expertise) * weight.expertise;
             total += (aaa.spirit + bbb.spirit) * weight.spirit;
-        }
         return total;
     }
 

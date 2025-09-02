@@ -58,10 +58,10 @@ public class Main {
     private void launchpad(Instant startTime) {
 //            WowHead.fetchItem(86145);
 
-            multiSpecSequential(startTime);
+//            multiSpecSequential(startTime);
 
 //            reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
@@ -126,6 +126,7 @@ public class Main {
 
     private void reforgeProt(Instant startTime) {
         ModelCombined model = ModelCombined.standardProtModel();
+//        ModelCombined model = ModelCombined.uncappedProtModel();
 
 //        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
         EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
@@ -138,7 +139,7 @@ public class Main {
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
-        reforgeProcessPlus(items, model, startTime, null,89934, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, null,89934, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
 //          reforgeProcessPlusPlus(items, model, startTime, 86753, 89075, false, null);
@@ -152,7 +153,7 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model);
-//        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model, false, null);
+        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model, true, null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialP1(itemCache), null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 

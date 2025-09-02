@@ -2,6 +2,7 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BestHolder;
 import au.nerago.mopgear.util.BigStreamUtil;
@@ -51,7 +52,7 @@ public class SolverCapPhased {
 
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 
-        Stream<SkinnyItemSet> filteredSets = filterSetsInCapRange(initialSets);
+        Stream<SkinnyItemSet> filteredSets = model.statRequirements().filterSetsSkinny(initialSets);
 
 //        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
 //        filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
@@ -60,6 +61,7 @@ public class SolverCapPhased {
     }
 
     private ItemSet makeFromSkinny(SkinnyItemSet skinnySet, EquipOptionsMap fullItemOptions) {
+        StatRequirements statReq = model.statRequirements();
         EquipMap chosenItems = EquipMap.empty();
         CurryQueue<SkinnyItem> itemQueue = skinnySet.items;
         while (itemQueue != null) {
@@ -69,8 +71,8 @@ public class SolverCapPhased {
 
             BestHolder<ItemData> bestSlotItem = new BestHolder<>(null, 0);
             for (ItemData item : fullSlotItems) {
-                int hit = model.statRequirements().effectiveHit(item);
-                int exp = model.statRequirements().effectiveExpertise(item);
+                int hit = statReq.effectiveHit(item);
+                int exp = statReq.effectiveExpertise(item);
                 if (skinny.hit == hit && skinny.expertise == exp) {
                     long rating = model.statRatings().calcRating(item.stat, item.statFixed);
                     bestSlotItem.add(item, rating);
@@ -81,26 +83,6 @@ public class SolverCapPhased {
             itemQueue = itemQueue.tail();
         }
         return ItemSet.manyItems(chosenItems, adjustment);
-    }
-
-    private Stream<SkinnyItemSet> filterSetsInCapRange(Stream<SkinnyItemSet> setStream) {
-        final int minHit = model.statRequirements().getMinimumHit(), maxHit = model.statRequirements().getMaximumHit();
-        final int minExp = model.statRequirements().getMinimumExpertise(), maxExp = model.statRequirements().getMaximumExpertise();
-        if (minExp != 0 && maxExp != Integer.MAX_VALUE && minHit != 0 && maxHit != Integer.MAX_VALUE) {
-            return setStream.filter(set -> set.totalHit >= minHit && set.totalHit <= maxHit && set.totalExpertise >= minExp && set.totalExpertise <= maxExp);
-        } else if (minHit != 0 && maxHit != Integer.MAX_VALUE) {
-            return setStream.filter(set -> set.totalHit >= minHit && set.totalHit <= maxHit);
-        } else if (minExp != 0 && maxExp != Integer.MAX_VALUE) {
-            return setStream.filter(set -> set.totalExpertise >= minExp && set.totalExpertise <= maxExp);
-        } else if (minExp != 0 && minHit != 0) {
-            return setStream.filter(set -> set.totalHit >= minHit && set.totalExpertise >= minExp);
-        } else if (minExp != 0) {
-            return setStream.filter(set -> set.totalExpertise >= minExp);
-        } else if (minHit != 0) {
-            return setStream.filter(set -> set.totalHit >= minHit);
-        } else {
-            return setStream;
-        }
     }
 
     private List<SkinnyItem[]> convertToSkinny(EquipOptionsMap items) {

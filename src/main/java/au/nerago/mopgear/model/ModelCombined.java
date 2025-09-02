@@ -57,8 +57,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined standardProtModel() {
-        StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false);
-        StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false);
+        StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile);
+        StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile);
         StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13, protGems());
         StatRequirements statRequirements = StatRequirements.prot();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt);
@@ -66,9 +66,19 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statMix, statRequirements, reforge, enchants);
     }
 
+    public static ModelCombined uncappedProtModel() {
+        StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
+        StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
+        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13, protGems());
+        StatRequirements statRequirements = StatRequirements.protFlexibleParry();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt);
+        ReforgeRules reforge = ReforgeRules.prot();
+        return new ModelCombined(statMix, statRequirements, reforge, enchants);
+    }
+
     public static ModelCombined standardRetModel() {
-//        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
-        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
+        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
+//        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
         statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0);
         StatRequirements statRequirements = StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
@@ -76,8 +86,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) {
-//        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile, false, gem);
-        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
+        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
+//        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
         statRatings = new StatRatingsWeightsMix(statRatings, 18, null, 0);
         StatRequirements statRequirements = wideHitRange ? StatRequirements.retWideCapRange() : StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
@@ -94,14 +104,14 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined standardBoomModel() {
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBoomFile, false);
+        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBoomFile);
         StatRequirements statRequirements = StatRequirements.druidBalance();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom); // TODO check same
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants);
     }
 
     public static ModelCombined standardWarlockModel() {
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightWarlockFile, false);
+        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightWarlockFile);
         StatRequirements statRequirements = StatRequirements.warlock();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.warlock(), enchants);
@@ -111,14 +121,14 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRatings rating;
         if (modelParam.weight().size() == 1) {
             ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
-            rating = new StatRatingsWeights(Path.of(a.file()), false);
+            rating = new StatRatingsWeights(Path.of(a.file()));
             rating = new StatRatingsWeightsMix(rating, a.scale(), null, 0);
         } else if (modelParam.weight().size() == 2) {
             ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
-            StatRatingsWeights ratingA = new StatRatingsWeights(Path.of(a.file()), false);
+            StatRatingsWeights ratingA = new StatRatingsWeights(Path.of(a.file()));
 
             ServiceEntry.ServiceWeightStats b = modelParam.weight().get(1);
-            StatRatingsWeights ratingB = new StatRatingsWeights(Path.of(b.file()), false);
+            StatRatingsWeights ratingB = new StatRatingsWeights(Path.of(b.file()));
 
             rating = new StatRatingsWeightsMix(ratingA, a.scale(), ratingB, b.scale());
         } else {
