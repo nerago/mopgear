@@ -14,6 +14,7 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Spliterator.*;
 
+@SuppressWarnings("unused")
 public class ArrayUtil {
 
     public static <T> void forEach(T[] array, Consumer<T> function) {

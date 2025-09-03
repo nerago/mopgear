@@ -1,7 +1,6 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.CostedItem;
-import au.nerago.mopgear.util.Tuple;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -24,7 +23,6 @@ public class InputBagsParser {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static CostedItem[] parseReader(Reader reader) {
         List<CostedItem> result = new ArrayList<>();
         JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();

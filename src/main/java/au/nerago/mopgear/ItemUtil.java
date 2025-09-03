@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class ItemUtil {
     private static final Set<SlotItem> expectedEnchant = buildExpectedEnchant();
 

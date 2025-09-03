@@ -10,7 +10,7 @@ import java.util.Map;
 import static au.nerago.mopgear.domain.StatType.*;
 
 public class Trinkets {
-    private static Map<Integer, TrinketData> knownTrinkets = buildKnown();
+    private static final Map<Integer, TrinketData> knownTrinkets = buildKnown();
 
     private static Map<Integer, TrinketData> buildKnown() {
         Map<Integer, TrinketData> map = new HashMap<>();

@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "unused"})
 public class SourcesOfItems {
     public static final List<Integer> ignoredItems = List.of(
             63207, // org port cloak
@@ -403,7 +403,7 @@ public class SourcesOfItems {
         };
     }
 
-    public static CostedItem[] bagItemsArray(ModelCombined model, List<Integer> skip) {
+    public static CostedItem[] bagItemsArray(List<Integer> skip) {
         CostedItem[] bagArray = InputBagsParser.readInput(DataLocation.bagsFile);
         if (skip == null)
             return bagArray;
@@ -411,7 +411,7 @@ public class SourcesOfItems {
             return filterExclude(bagArray, skip);
     }
 
-    public static CostedItem[] bagItemsArray(ModelCombined model, Path file, List<Integer> skip) {
+    public static CostedItem[] bagItemsArray(Path file, List<Integer> skip) {
         CostedItem[] bagArray = InputBagsParser.readInput(file);
         if (skip == null)
             return bagArray;

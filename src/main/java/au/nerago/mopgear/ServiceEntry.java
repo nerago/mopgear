@@ -1,11 +1,10 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.util.Tuple;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.SourcesOfItems;
+import au.nerago.mopgear.model.ModelCombined;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -35,6 +34,7 @@ public class ServiceEntry {
         }
     }
 
+    @SuppressWarnings("RedundantLabeledSwitchRuleCodeBlock")
     public void run(ServiceParam params) {
         ItemCache itemCache = new ItemCache(DataLocation.cacheFile);
         Path gearFile = Path.of(params.gearFile);

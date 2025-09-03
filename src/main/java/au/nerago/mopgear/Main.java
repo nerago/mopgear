@@ -1,14 +1,13 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.InputGearParser;
-import au.nerago.mopgear.io.SourcesOfItems;
+import au.nerago.mopgear.io.ItemCache;
+import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.results.OutputText;
-import au.nerago.mopgear.io.DataLocation;
-import au.nerago.mopgear.io.ItemCache;
-import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.io.IOException;
@@ -20,8 +19,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static au.nerago.mopgear.Solver.chooseEngineAndRun;
 import static au.nerago.mopgear.Jobs.*;
+import static au.nerago.mopgear.Solver.chooseEngineAndRun;
 import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.io.SourcesOfItems.*;
 

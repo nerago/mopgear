@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
                             DefaultEnchants enchants) {
 

@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue"})
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Jobs {
     public static final long BILLION = 1000 * 1000 * 1000;
     public static ItemCache itemCache;
@@ -172,11 +172,6 @@ public class Jobs {
 
         outputResultSimple(job.resultSet, model, true);
         outputTweaked(job.resultSet, itemOptions, model);
-    }
-
-    public static void reforgeProcess2(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime) {
-        Optional<ItemSet> bestSet = new SolverCapPhased(model, null).runSolver(itemOptions);
-        bestSet.orElseThrow().outputSet(model);
     }
 
     @SuppressWarnings("SameParameterValue")
