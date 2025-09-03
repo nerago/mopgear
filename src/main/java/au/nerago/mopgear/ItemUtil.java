@@ -289,7 +289,7 @@ public class ItemUtil {
     }
 
     static long estimateSets(EquipOptionsMap reforgedItems) {
-        return reforgedItems.entrySet().stream().mapToLong((x) -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
+        return reforgedItems.entryStream().mapToLong((x) -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
     }
 
     public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> skinnyOptions) {

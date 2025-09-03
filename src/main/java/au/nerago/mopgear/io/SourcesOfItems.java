@@ -421,7 +421,7 @@ public class SourcesOfItems {
 
     public static CostedItem[] strengthPlateCurrentItemsRet(ItemCache itemCache, ModelCombined model) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
-        Stream<CostedItem> itemStream = items.entrySet().stream()
+        Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].id, 0));
         return itemStream.toArray(CostedItem[]::new);
@@ -429,7 +429,7 @@ public class SourcesOfItems {
 
     public static CostedItem[] strengthPlateCurrentItemsProt(ItemCache itemCache, ModelCombined model) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, ReforgeRules.ret(), null);
-        Stream<CostedItem> itemStream = items.entrySet().stream()
+        Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].id, 0));
         return itemStream.toArray(CostedItem[]::new);

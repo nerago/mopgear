@@ -51,7 +51,7 @@ public class ServiceEntry {
             }
             case EXTRA_BAGS -> {
                 Path bagsFile = Path.of(params.bagFile);
-                Jobs.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(model, bagsFile, SourcesOfItems.ignoredItems));
+                Jobs.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(bagsFile, SourcesOfItems.ignoredItems));
             }
             case FIND_UPGRADE -> {
                 CostedItem[] extraItems = params.extraItems();

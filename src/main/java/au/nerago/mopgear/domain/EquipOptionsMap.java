@@ -6,8 +6,11 @@ import au.nerago.mopgear.util.ArrayUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public final class EquipOptionsMap {
     private ItemData[] head;
@@ -227,11 +230,8 @@ public final class EquipOptionsMap {
         if (offhand != null) func.accept(SlotEquip.Offhand, offhand);
     }
 
-    @Deprecated(since = "avoid bad performance")
-    public List<Tuple.Tuple2<SlotEquip, ItemData[]>> entrySet() {
-        ArrayList<Tuple.Tuple2<SlotEquip, ItemData[]>> list = new ArrayList<>();
-        forEachPair((slot, array) -> list.add(Tuple.create(slot, array)));
-        return list;
+    public Stream<Tuple.Tuple2<SlotEquip, ItemData[]>> entryStream() {
+        return StreamSupport.stream(new OptionsSpliterator(), true);
     }
 
     @Override
@@ -261,5 +261,37 @@ public final class EquipOptionsMap {
         result = 31 * result + Arrays.hashCode(weapon);
         result = 31 * result + Arrays.hashCode(offhand);
         return result;
+    }
+
+    private class OptionsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, ItemData[]>> {
+        static final SlotEquip[] slotArray = SlotEquip.values();
+        int index = 0;
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, ItemData[]>> action) {
+            if (index < slotArray.length) {
+                SlotEquip slot = slotArray[index];
+                ItemData[] value = EquipOptionsMap.this.get(slot);
+                action.accept(Tuple.create(slot, value));
+                index++;
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public Spliterator<Tuple.Tuple2<SlotEquip, ItemData[]>> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return 16; // might be lower, but good enough
+        }
+
+        @Override
+        public int characteristics() {
+            return Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE;
+        }
     }
 }

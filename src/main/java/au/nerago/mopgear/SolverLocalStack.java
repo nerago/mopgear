@@ -15,7 +15,7 @@ public class SolverLocalStack {
     private final StatBlock adjustment;
 
     public SolverLocalStack(ModelCombined model, EquipOptionsMap items, StatBlock adjustment) {
-        this.slotItems = items.entrySet();
+        this.slotItems = items.entryStream().toList();
         this.model = model;
         this.adjustment = adjustment;
         this.queue = new ArrayDeque<>();
