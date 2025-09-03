@@ -179,7 +179,7 @@ public class FindStatRange {
     }
 
     public static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobInfo job) {
-        job.println("FALLBACK SET SEARCHING");
+        job.println("NO SET FOUND USING NORMAL PROCESS");
 
         List<ItemSet> proposedList = setsAtLimits(model, itemOptions, adjustment);
         Optional<ItemSet> result = fallbackSimpleLimits(model, job, proposedList);
@@ -230,7 +230,7 @@ public class FindStatRange {
         if (bestHolder.get() != null) {
             Tuple.Tuple2<ItemSet, PrintRecorder> result = bestHolder.get();
             job.printRecorder.append(result.b());
-            job.println("FALLBACK SET FOUND FORCING CAPS");
+            job.println("FALLBACK SET FUDGED TOGETHER WITH HACKED STATS");
             job.hackCount += 2;
             return Optional.ofNullable(result.a());
         } else {

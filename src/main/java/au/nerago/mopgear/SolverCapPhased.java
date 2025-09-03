@@ -50,8 +50,8 @@ public class SolverCapPhased {
     private Stream<ItemSet> runSolverPartial(EquipOptionsMap items, boolean parallel) {
         List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
 
-        long estimate = ItemUtil.estimateSets(skinnyOptions);
-        System.out.printf("SKINNY COMBO %,d\n", estimate);
+//        long estimate = ItemUtil.estimateSets(skinnyOptions);
+//        System.out.printf("SKINNY COMBO %,d\n", estimate);
 
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 

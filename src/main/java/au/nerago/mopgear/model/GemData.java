@@ -48,6 +48,8 @@ public class GemData {
         map.put(4863, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(4834, new StatBlock(0, 0, 60, 0, 0, 0, 0, 0, 0, 0));
         map.put(4850, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 120, 0));
+        map.put(4843, new StatBlock(0, 0, 0, 120, 0, 0, 0, 0, 0, 0));
+        map.put(4837, new StatBlock(0, 0, 0, 0, 0, 0, 60, 0, 0, 0));
         return map;
     }
 
@@ -86,6 +88,7 @@ public class GemData {
         map.put(76585, new StatBlock(0, 0, 0, 0, 0, 160, 0, 0, 0, 160));
         map.put(76627, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
         map.put(76693, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
+        map.put(76593, new StatBlock(0, 0, 0, 160, 0, 0, 160, 0, 0, 0));
     }
 
     private static void gemsEngineering(Map<Integer, StatBlock> map) {
@@ -98,6 +101,7 @@ public class GemData {
     }
 
     private static void gemsMeta(Map<Integer, StatBlock> map) {
+        map.put(68778, new StatBlock(54, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76886, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76885, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76895, new StatBlock(0, 324, 0, 0, 0, 0, 0, 0, 0, 0)); // tank meta, stam
@@ -132,7 +136,7 @@ public class GemData {
         map.put(4415, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// str bracer
         map.put(4892, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));// lightweave
 //        map.put(4895, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
-        map.put(4826, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
+        map.put(4826, new StatBlock(285, 0, 0, 0, 0, 0, 0, 0, 0, 165));// int leg
         map.put(4434, new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int offhand
         map.put(4424, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));// int offhand
         return map;

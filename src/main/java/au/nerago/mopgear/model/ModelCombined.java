@@ -35,8 +35,10 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatBlock choice = statRatings.gemChoice(socket);
         if (choice == null && socket == SocketType.Meta)
             return StatBlock.empty;
-        if (choice == null && socket == SocketType.Engineer)
+        else if (choice == null && socket == SocketType.Engineer)
             return new StatBlock(0, 0, 0, 0, 0, 600, 0, 0, 0, 0);
+        else if (choice == null && socket == SocketType.Sha)
+            return new StatBlock(500, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         else if (choice == null)
             throw new RuntimeException("no gem choice for " + socket);
         return choice;

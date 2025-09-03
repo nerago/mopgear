@@ -23,7 +23,8 @@ public class FindUpgrades {
     private final boolean hackAllow;
     private final ItemCache itemCache;
 
-        private static final Long runSize = null; // full search
+    private static final Long runSize = null; // full search
+//    private static final long runSize = 100000; // dummy
 //    private static final long runSize = 10000000; // <1 min runs
 //    private static final long runSize = 50000000; // 4 min total runs
 //    private static final long runSize = 100000000; // 10 min total runs
@@ -110,7 +111,7 @@ public class FindUpgrades {
         for (Integer cost : grouped.keySet().stream().sorted(Comparator.naturalOrder()).toList()) {
             RankedGroupsCollection<JobInfo> best = grouped.get(cost);
             best.forEach((item, factor) -> reportItem(item));
-            System.out.println();
+            OutputText.println();
         }
     }
 

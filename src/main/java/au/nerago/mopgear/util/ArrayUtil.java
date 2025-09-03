@@ -52,6 +52,22 @@ public class ArrayUtil {
         return result;
     }
 
+    public static <T> T[] concat(T[]... components) {
+        if (components.length == 0)
+            throw new IllegalArgumentException();
+        int newLen = 0;
+        for (T[] array : components) {
+            newLen += array.length;
+        }
+        T[] result = createGeneric(components[0], newLen);
+        int index = 0;
+        for (T[] array : components) {
+            System.arraycopy(array, 0, result, index, array.length);
+            index += array.length;
+        }
+        return result;
+    }
+
     public static <T> T[] append(T[] array, T item) {
         int newLen = array.length + 1;
         T[] result = createGeneric(array, newLen);

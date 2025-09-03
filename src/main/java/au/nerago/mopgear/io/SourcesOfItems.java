@@ -25,59 +25,59 @@ public class SourcesOfItems {
     public static CostedItem[] strengthPlateMsvArray() {
         return new CostedItem[]{
                 // stone
-                new CostedItem(85922, 1),
-                new CostedItem(85925, 1),
-//                new CostedItem(86134, 1), got heroic
+                new CostedItem(85922, 101),
+                new CostedItem(85925, 101),
+//                new CostedItem(86134, 101), got heroic
                 // feng
-//                new CostedItem(85983, 2), got norm
-                new CostedItem(85984, 2),
-                new CostedItem(85985, 2),
+//                new CostedItem(85983, 102), got norm
+                new CostedItem(85984, 102),
+                new CostedItem(85985, 102),
                 // garaj
-//                new CostedItem(85991, 3), got norm
-                new CostedItem(85992, 3),
-                new CostedItem(89817, 3),
+//                new CostedItem(85991, 103), got norm
+                new CostedItem(85992, 103),
+                new CostedItem(89817, 103),
                 // kings
-                new CostedItem(86075, 4),
-                new CostedItem(86076, 4),
-                new CostedItem(86080, 4),
+                new CostedItem(86075, 104),
+                new CostedItem(86076, 104),
+                new CostedItem(86080, 104),
                 // elegon
-                new CostedItem(86130, 5), // prot weapon
-                new CostedItem(86140, 5), // ret weapon
-                new CostedItem(86135, 5), // got celestial
+                new CostedItem(86130, 105), // prot weapon
+                new CostedItem(86140, 105), // ret weapon
+                new CostedItem(86135, 105), // got celestial
                 // will
-                new CostedItem(86144, 6),
-                new CostedItem(86145, 6),
-//                new CostedItem(89823, 6) // got norm
+                new CostedItem(86144, 106),
+                new CostedItem(86145, 106),
+//                new CostedItem(89823, 106) // got norm
         };
     }
 
     public static CostedItem[] strengthPlateMsvHeroicArray() {
         return new CostedItem[]{
                 // stone
-                new CostedItem(87016, 1),
-                new CostedItem(87015, 1),
+                new CostedItem(87016, 201),
+                new CostedItem(87015, 201),
 //                new CostedItem(87060, 1), got heroic
                 // feng
-                new CostedItem(87026, 2),
-                new CostedItem(87024, 2),
-                new CostedItem(87025, 2),
+                new CostedItem(87026, 202),
+                new CostedItem(87024, 202),
+                new CostedItem(87025, 202),
                 // garaj
-                new CostedItem(89934, 3),
-                new CostedItem(87035, 3),
-                new CostedItem(87036, 3),
+                new CostedItem(89934, 203),
+                new CostedItem(87035, 203),
+                new CostedItem(87036, 203),
                 // kings
-                new CostedItem(87049, 4),
-                new CostedItem(87048, 4),
-                new CostedItem(87050, 4),
+                new CostedItem(87049, 204),
+                new CostedItem(87048, 204),
+                new CostedItem(87050, 204),
                 // elegon
-                new CostedItem(87062, 5), // prot weapon
-//                new CostedItem(87061, 5), // ret weapon
-                new CostedItem(87059, 5), // starcrusher
-                new CostedItem(89937, 5),
+                new CostedItem(87062, 205), // prot weapon
+//                new CostedItem(87061, 205), // ret weapon
+                new CostedItem(87059, 205), // starcrusher
+                new CostedItem(89937, 205),
                 // will
-                new CostedItem(89941, 6),
-                new CostedItem(87071, 6),
-                new CostedItem(87072, 6)
+                new CostedItem(89941, 206),
+                new CostedItem(87071, 206),
+                new CostedItem(87072, 206)
         };
     }
 
@@ -144,34 +144,34 @@ public class SourcesOfItems {
 
     public static CostedItem[] agilityLeatherValorArray() {
         return new CostedItem[]{
-                new CostedItem(89341  ,  1750),
-                new CostedItem( 89060 ,   1750),
-                new CostedItem( 88884 ,   1250),
-                new CostedItem( 89300 ,   2500),
-                new CostedItem( 88744 ,   1750),
-                new CostedItem( 88868 ,   1750),
-                new CostedItem( 89090 ,   2500),
-                new CostedItem( 89431 ,   2500),
+                new CostedItem(89341, 1750),
+                new CostedItem(89060, 1750),
+                new CostedItem(88884, 1250),
+                new CostedItem(89300, 2500),
+                new CostedItem(88744, 1750),
+                new CostedItem(88868, 1750),
+                new CostedItem(89090, 2500),
+                new CostedItem(89431, 2500),
 
-                new CostedItem( 89067 ,   1250),
-                new CostedItem( 89065 ,   1250),
-                new CostedItem( 89070 ,   1250),
-                new CostedItem( 89082 ,   1750),
+                new CostedItem(89067, 1250),
+                new CostedItem(89065, 1250),
+                new CostedItem(89070, 1250),
+                new CostedItem(89082, 1750),
         };
     }
 
     public static CostedItem[] agilityLeatherCelestialArray() {
         return new CostedItem[]{
-                new CostedItem(86804   ,     40),
-                new CostedItem( 86743  ,      40),
-                new CostedItem( 86750  ,      40),
-                new CostedItem( 86795  ,      40),
-                new CostedItem( 86763  ,      25),
-                new CostedItem( 89970  ,      25),
-                new CostedItem( 86782  ,      25),
-                new CostedItem( 89967  ,      25),
-                new CostedItem( 86776  ,      25),
-                new CostedItem( 86772  ,      40),
+                new CostedItem(86804, 40),
+                new CostedItem(86743, 40),
+                new CostedItem(86750, 40),
+                new CostedItem(86795, 40),
+                new CostedItem(86763, 25),
+                new CostedItem(89970, 25),
+                new CostedItem(86782, 25),
+                new CostedItem(89967, 25),
+                new CostedItem(86776, 25),
+                new CostedItem(86772, 40),
         };
     }
 
@@ -209,33 +209,33 @@ public class SourcesOfItems {
 
     public static CostedItem[] intellectClothValorCelestialP1Array() {
         return new CostedItem[]{
-                new CostedItem(89337,2500 ),
-                new CostedItem(89340,1750 ),
-                new CostedItem(89433,2500 ),
-                new CostedItem(88893,1250 ),
-                new CostedItem(88742,1750 ),
-                new CostedItem(89062,1750 ),
-                new CostedItem(89088,2500 ),
-                new CostedItem(88878,1750 ),
-                new CostedItem(89077,1250 ),
-                new CostedItem(89068,1250 ),
-                new CostedItem(89072,1250 ),
-                new CostedItem(89081,1750 ),
-                new CostedItem(86809,40 ),
-                new CostedItem(86770,25 ),
-                new CostedItem(86758,40 ),
-                new CostedItem(86787,25 ),
-                new CostedItem(89966,25 ),
-                new CostedItem(86798,40 ),
-                new CostedItem(89965,40 ),
-                new CostedItem(89971,25 ),
-                new CostedItem(86796,25 ),
+                new CostedItem(89337, 2500),
+                new CostedItem(89340, 1750),
+                new CostedItem(89433, 2500),
+                new CostedItem(88893, 1250),
+                new CostedItem(88742, 1750),
+                new CostedItem(89062, 1750),
+                new CostedItem(89088, 2500),
+                new CostedItem(88878, 1750),
+                new CostedItem(89077, 1250),
+                new CostedItem(89068, 1250),
+                new CostedItem(89072, 1250),
+                new CostedItem(89081, 1750),
+                new CostedItem(86809, 40),
+                new CostedItem(86770, 25),
+                new CostedItem(86758, 40),
+                new CostedItem(86787, 25),
+                new CostedItem(89966, 25),
+                new CostedItem(86798, 40),
+                new CostedItem(89965, 40),
+                new CostedItem(89971, 25),
+                new CostedItem(86796, 25),
 //                new CostedItem(86829,15 ),
-                new CostedItem(86754,25 ),
-                new CostedItem(86810,25 ),
-                new CostedItem(86767,25 ),
-                new CostedItem(86773,40 ),
-                new CostedItem(86792,40 )
+                new CostedItem(86754, 25),
+                new CostedItem(86810, 25),
+                new CostedItem(86767, 25),
+                new CostedItem(86773, 40),
+                new CostedItem(86792, 40)
         };
     }
 
@@ -314,53 +314,92 @@ public class SourcesOfItems {
         };
     }
 
+    public static CostedItem[] strengthPallyTankSetCelestial() {
+        return new CostedItem[]{
+//                new CostedItem(86661, 75), // head
+//                new CostedItem(86659, 75), // shoulder
+                new CostedItem(86663, 55),
+                new CostedItem(86662, 45),
+                new CostedItem(86660, 55),
+        };
+    }
+
+    public static CostedItem[] strengthPallyRetSetCelestial() {
+        return new CostedItem[]{
+//                new CostedItem(86681, 75), // head
+//                new CostedItem(86679, 75), // shoulder
+                new CostedItem(86683, 55),
+                new CostedItem(86682, 45),
+                new CostedItem(86680, 55),
+        };
+    }
+
     public static CostedItem[] strengthPlateHeartOfFear() {
         // skipping neck cloak offhand weaps
         return new CostedItem[]{
-                new CostedItem(86154,1 ),
-                new CostedItem(89826,1 ),
-                new CostedItem(86203,1 ),
-                new CostedItem(86155,1 ),
-                new CostedItem(89828,2 ),
-                new CostedItem(86165,2 ),
-                new CostedItem(86164,2 ),
-                new CostedItem(86162,2 ),
-                new CostedItem(86174,3 ),
-                new CostedItem(89832,3 ),
-                new CostedItem(86177,3 ),
-                new CostedItem(86172,3 ),
-                new CostedItem(86202,4 ),
-                new CostedItem(86201,4 ),
-                new CostedItem(85322,4 ),
-                new CostedItem(86213,5 ),
-                new CostedItem(86219,5 ),
-                new CostedItem(85320,5 ),
-                new CostedItem(89837,6 ),
-                new CostedItem(85323,6 ),
-                new CostedItem(86191,0 ),
-                new CostedItem(86190,0 )
+                new CostedItem(86154, 301),
+                new CostedItem(89826, 301),
+                new CostedItem(86203, 301),
+                new CostedItem(86155, 301),
+                new CostedItem(89828, 302),
+                new CostedItem(86165, 302),
+                new CostedItem(86164, 302),
+                new CostedItem(86162, 302),
+                new CostedItem(86174, 303),
+                new CostedItem(89832, 303),
+                new CostedItem(86177, 303),
+                new CostedItem(86172, 303),
+                new CostedItem(86202, 304),
+                new CostedItem(86201, 304),
+                new CostedItem(85322, 304),
+                new CostedItem(86213, 305),
+                new CostedItem(86219, 305),
+                new CostedItem(85320, 305),
+                new CostedItem(89837, 306),
+                new CostedItem(85323, 306),
+                new CostedItem(86191, 300),
+                new CostedItem(86190, 300)
         };
     }
 
     public static CostedItem[] strengthPlateHeartOfFearHeroic() {
         // skipping neck cloak offhand weaps
         return new CostedItem[]{
-                new CostedItem(86966,3 ),
+                new CostedItem(86945, 401),
+                new CostedItem(89919, 401),
+                new CostedItem(86944, 401),
+                new CostedItem(86946, 401),
+                new CostedItem(89921, 402),
+                new CostedItem(86956, 402),
+                new CostedItem(86955, 402),
+                new CostedItem(86957, 402),
+                new CostedItem(86966, 403),
+                new CostedItem(89923, 403),
+                new CostedItem(86967, 403),
+                new CostedItem(86968, 403),
+                new CostedItem(86980, 404),
+                new CostedItem(86979, 404),
+                new CostedItem(87110, 404),
+                new CostedItem(86986, 405),
+                new CostedItem(86987, 405),
+                new CostedItem(87112, 405),
+                new CostedItem(89928, 406),
+                new CostedItem(87109, 406),
         };
     }
 
     public static CostedItem[] strengthPlateCrafted() {
         // skipping neck cloak offhand weaps
         return new CostedItem[]{
-                new CostedItem(87402,0 ),
-                new CostedItem(87406,0 ),
-                new CostedItem(87405,0 ),
-                new CostedItem(87407,0 ),
+                new CostedItem(87402, 0),
+                new CostedItem(87406, 0),
+                new CostedItem(87405, 0),
+                new CostedItem(87407, 0),
 
-                new CostedItem(82979,0 ),
-                new CostedItem(82980,0 ),
-                new CostedItem(82976,0 ),
-                new CostedItem(82975,0 ),
+                new CostedItem(82979, 0),
+                new CostedItem(82980, 0),
+                new CostedItem(82976, 0),
+                new CostedItem(82975, 0),
         };
     }
 
@@ -396,13 +435,18 @@ public class SourcesOfItems {
         return itemStream.toArray(CostedItem[]::new);
     }
 
-    public static CostedItem[] strengthPlateValorCelestialP1(ItemCache itemCache) {
-        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 476);
-        return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray());
+    public static CostedItem[] strengthPlateValorCelestialTank(ItemCache itemCache) {
+        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
+        return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetCelestial());
     }
 
-    public static CostedItem[] intellectLeatherValorCelestialP1(ItemCache itemCache) {
-        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 476);
+    public static CostedItem[] strengthPlateValorCelestialRet(ItemCache itemCache) {
+        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
+        return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyRetSetCelestial());
+    }
+
+    public static CostedItem[] intellectLeatherValorCelestial(ItemCache itemCache) {
+        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 483);
         return ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray());
     }
 
