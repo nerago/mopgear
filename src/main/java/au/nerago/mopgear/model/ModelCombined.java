@@ -60,8 +60,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined defenceProtModel() {
-        StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile);
-        StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile);
+        StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
+        StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
         StatRatings statMix = StatRatingsWeights.mix(statMitigation, 28, statDps, 1, standardGems);
 //        StatRequirements statRequirements = StatRequirements.protFullExpertise();

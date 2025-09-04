@@ -18,7 +18,7 @@ public class BigStreamUtil {
 
     public static <T> Stream<T> countProgressSmall(long estimate, Instant startTime, Stream<T> inputStream) {
         final double percentMultiply = 100.0 / estimate;
-        final long reportFrequency = 1000000;
+        final long reportFrequency = 100000;
         return coreCount(reportFrequency, percentMultiply, startTime, inputStream);
     }
 

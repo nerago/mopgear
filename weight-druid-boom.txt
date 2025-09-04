@@ -1,1 +1,1 @@
-( Pawn: v1: "Balance WoWSims Weights": Class=Druid,Intellect=1.262,Spirit=0.537,HitRating=0.537,CritRating=0.492,HasteRating=0.678,MasteryRating=0.399,SpellDamage=1.000 )
+( Pawn: v1: "Balance WoWSims Weights": Class=Druid,Intellect=1.325,Spirit=0.801,HitRating=0.801,CritRating=0.538,HasteRating=0.809,MasteryRating=0.458,SpellDamage=1.000 )

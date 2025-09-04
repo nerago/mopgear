@@ -55,8 +55,8 @@ public class SolverCapPhased {
 
         Stream<SkinnyItemSet> filteredSets = model.statRequirements().filterSetsSkinny(initialSets);
 
-        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
-        filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
+//        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
+//        filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
 
         return filteredSets.map(skin -> makeFromSkinny(skin, items));
     }

@@ -1,18 +1,17 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.model.ModelCombined;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-public class SolverCompleteStreams {
-    public static Stream<Map<Integer, ItemData>> runSolverPartial(ModelCombined model, Map<Integer, List<ItemData>> items) {
-        Stream<Map<Integer, ItemData>> initialSets = generateItemCombinations(items, model);
+public class PossibleStreams {
+    public static Stream<Map<Integer, ItemData>> runSolverPartial(Map<Integer, List<ItemData>> items) {
+        Stream<Map<Integer, ItemData>> initialSets = generateItemCombinations(items);
         return initialSets.parallel();
     }
 
-    private static Stream<Map<Integer, ItemData>> generateItemCombinations(Map<Integer, List<ItemData>> items, ModelCombined model) {
+    private static Stream<Map<Integer, ItemData>> generateItemCombinations(Map<Integer, List<ItemData>> items) {
         Stream<Map<Integer, ItemData>> stream = null;
 
 //        List<Map.Entry<Integer, List<ItemData>>> sortedEntries =

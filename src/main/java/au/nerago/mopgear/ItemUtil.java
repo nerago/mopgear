@@ -169,7 +169,7 @@ public class ItemUtil {
             throw new IllegalArgumentException("unexpected shield");
     }
 
-    static void validateDualSets(EquipOptionsMap... mapsParam) {
+    static void validateDualSets(List<EquipOptionsMap> mapsParam) {
         Map<Integer, SlotEquip> seen = new HashMap<>();
         for (EquipOptionsMap map : mapsParam) {
             map.forEachPair((slot, array) -> {

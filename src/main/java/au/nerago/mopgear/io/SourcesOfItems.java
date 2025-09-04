@@ -204,6 +204,37 @@ public class SourcesOfItems {
                 new CostedItem(86810, 25),
                 new CostedItem(86767, 25),
                 new CostedItem(89968, 25),
+                new CostedItem(86838, 45),
+                new CostedItem(86845, 30),
+                new CostedItem(86912, 30),
+                new CostedItem(86817, 30),
+                new CostedItem(86878, 50),
+
+                // int back
+                new CostedItem(86874, 30),
+                new CostedItem(86827, 30),
+                new CostedItem(86840, 30),
+
+                // int weap
+                new CostedItem(86865, 30),
+                new CostedItem(86909, 30),
+                new CostedItem(86862, 30),
+                new CostedItem(86829, 15),
+
+                // int neck
+                new CostedItem(86856, 30),
+                new CostedItem(86814, 30),
+                new CostedItem(86858, 30),
+                new CostedItem(86873, 30),
+
+                // trink
+                new CostedItem(86773, 40),
+
+                // teir
+                new CostedItem(86645, 55),
+                new CostedItem(86646, 55),
+                new CostedItem(86648, 45),
+
         };
     }
 

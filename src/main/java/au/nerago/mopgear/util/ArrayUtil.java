@@ -108,6 +108,13 @@ public class ArrayUtil {
             return itemList[0];
     }
 
+    public static ItemData rand(List<ItemData> itemList, Random random) {
+        if (itemList.size() > 1)
+            return itemList.get(random.nextInt(itemList.size()));
+        else
+            return itemList.getFirst();
+    }
+
     public static <T> boolean anyMatch(T[] existing, Predicate<T> predicate) {
         for (T item : existing) {
             if (predicate.test(item))

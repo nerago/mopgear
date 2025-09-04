@@ -1,11 +1,11 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
+import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BigStreamUtil;
 import au.nerago.mopgear.util.TopCollectorReporting;
 
@@ -18,10 +18,15 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class FindMultiSpec {
+    public static final int RANDOM_COMBOS = 1000000;
     private final ItemCache itemCache;
     //        Long runSize = 200000L;
     private final long runSize = 2000L;
+    private final boolean hackAllow = true;
+
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
+    private final List<SpecDetails> specs = new ArrayList<>();
+
 
     public FindMultiSpec(ItemCache itemCache) {
         this.itemCache = itemCache;
@@ -31,60 +36,25 @@ public class FindMultiSpec {
         fixedForge.put(id, reforge);
     }
 
-//        Jobs.addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
-//        Jobs.addExtra(retMap, modelRet, 88862, enchant, null, false, false); // tankiss
-//        Jobs.addExtra(retMap, modelRet, 86742, enchant, null, false, false); // jasper clawfeet
-////        Jobs.addExtra(retMap, modelRet, 89075, enchant, null, false, false); // yi's cloak
-////        Jobs.addExtra(retMap, modelRet, 81694, enchant, null, false, false); // command bracer
-//        Jobs.addExtra(retMap, modelRet, 82856, enchant, null, false, false); // dark blaze gloves
+    public void addSpec(SpecDetails spec) {
+        specs.add(spec);
+    }
 
-    public void multiSpecSequential(Instant startTime) {
+    public void solve(Instant startTime) {
         ModelCombined modelNull = ModelCombined.nullMixedModel();
 
-        SpecDetails ret = new SpecDetails(
-                "RET",
-                DataLocation.gearRetFile,
-                ModelCombined.extendedRetModel(true, false),
-                new int[]{
-//                        81113, // spike-soled stompers
-//                        88862, // tankiss
-////                        86742, // jasper clawfeet
-////                        81694, // command bracers
-//                        82856, // dark blaze gauntlets
-//                        84950 // pvp belt
-                },
-                false);
-
-        SpecDetails protDamage = new SpecDetails(
-                "PROT-DAMAGE",
-                DataLocation.gearProtFile,
-                ModelCombined.damageProtModel(),
-                new int[]{},
-                false);
-
-        SpecDetails protDefence = new SpecDetails(
-                "PROT-DEFENCE",
-                DataLocation.gearProtDefenceFile,
-                ModelCombined.defenceProtModel(),
-                new int[]{},
-                false);
-
-
-//        List<SpecDetails> specs = List.of(protDamage, protDefence);
-        List<SpecDetails> specs = List.of(ret, protDamage);
-//        List<SpecDetails> specs = List.of(ret, protDamage, protDefence);
-
-        ItemUtil.validateRet(ret.itemOptions);
-        ItemUtil.validateProt(protDamage.itemOptions);
-        ItemUtil.validateProt(protDefence.itemOptions);
-        ItemUtil.validateDualSets(ret.itemOptions, protDamage.itemOptions, protDefence.itemOptions);
+        for (SpecDetails spec : specs) {
+            spec.prepare(itemCache);
+        }
+        ItemUtil.validateDualSets(specs.stream().map(s -> s.itemOptions).toList());
 
         Map<Integer, List<ItemData>> commonMap = commonInMultiSet(specs);
 
         long commonCombos = ItemUtil.estimateSets(commonMap);
         OutputText.println("COMMON COMBOS " + commonCombos);
 
-        Stream<Map<Integer, ItemData>> commonStream = SolverCompleteStreams.runSolverPartial(modelNull, commonMap);
+//        Stream<Map<Integer, ItemData>> commonStream = SolverPossibleStreams.runSolverPartial(commonMap);
+        Stream<Map<Integer, ItemData>> commonStream = PossibleRandom.runSolverPartial(commonMap, RANDOM_COMBOS);
 
         commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
 
@@ -93,11 +63,9 @@ public class FindMultiSpec {
                 .filter(Objects::nonNull);
 
         Optional<ProposedResults> best = resultStream.collect(
-                new TopCollectorReporting<>(s -> multiRating(s.resultsSets(), specs),
-                        s -> reportBetter(s.resultsSets(), specs)));
+                new TopCollectorReporting<>(s -> multiRating(s.resultJobs, specs),
+                        s -> reportBetter(s.resultJobs, specs)));
         outputResultTwins(best, specs);
-
-        // TODO solve for challenge dps too
     }
 
     private Map<Integer, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
@@ -175,13 +143,14 @@ public class FindMultiSpec {
     }
 
     private ProposedResults subSolveEach(Map<Integer, ItemData> commonChoices, List<SpecDetails> specList) {
-        List<ItemSet> results = new ArrayList<>();
+        List<JobInfo> results = new ArrayList<>();
         for (SpecDetails spec : specList) {
             JobInfo job = subSolvePart(spec.itemOptions, spec.model, commonChoices);
-            if (job.resultSet.isEmpty() || job.hackCount > 0) {
+//                if (job.resultSet.isEmpty() || job.hackCount > 0) {
+            if (job.resultSet.isEmpty()) {
                 return null;
             }
-            results.add(job.resultSet.get());
+            results.add(job);
         }
         return new ProposedResults(results, commonChoices);
     }
@@ -189,7 +158,13 @@ public class FindMultiSpec {
     private JobInfo subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, Map<Integer, ItemData> chosenMap) {
         EquipOptionsMap submitMap = fullItemMap.shallowClone();
         buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
-        return Solver.chooseEngineAndRunAsJob(model, submitMap, null, runSize, null);
+
+        JobInfo job = new JobInfo();
+        job.model = model;
+        job.itemOptions = submitMap;
+        job.runSize = runSize;
+        job.hackAllow = hackAllow;
+        return Solver.runJob(job);
     }
 
     static void buildJobWithSpecifiedItemsFixed(Map<Integer, ItemData> chosenMap, EquipOptionsMap submitMap) {
@@ -229,24 +204,26 @@ public class FindMultiSpec {
         }
     }
 
-    private long multiRating(List<ItemSet> resultSets, List<SpecDetails> specList) {
+    private long multiRating(List<JobInfo> resultJobs, List<SpecDetails> specList) {
         long total = 0;
-        for (int i = 0; i < resultSets.size(); ++i) {
-            ItemSet set = resultSets.get(i);
+        for (int i = 0; i < resultJobs.size(); ++i) {
+            ItemSet set = resultJobs.get(i).resultSet.orElseThrow();
             SpecDetails spec = specList.get(i);
             total += spec.model.calcRating(set);
         }
         return total;
     }
 
-    private void reportBetter(List<ItemSet> resultSets, List<SpecDetails> specList) {
-        long rating = multiRating(resultSets, specList);
+    private void reportBetter(List<JobInfo> resultJobs, List<SpecDetails> specList) {
+        long rating = multiRating(resultJobs, specList);
         synchronized (OutputText.class) {
             OutputText.printf("^^^^^^^^^ %s ^^^^^^^ %d ^^^^^^^^^\n", LocalDateTime.now(), rating);
-            for (int i = 0; i < resultSets.size(); ++i) {
-                ItemSet set = resultSets.get(i);
+            for (int i = 0; i < resultJobs.size(); ++i) {
+                JobInfo job = resultJobs.get(i);
+                ItemSet set = job.resultSet.orElseThrow();
                 SpecDetails spec = specList.get(i);
-                OutputText.printf("-------------- %s --------------\n", spec.label);
+                OutputText.printf("-------------- %s -------------- %s\n", spec.label, "<HACK>".repeat(job.hackCount));
+                job.printRecorder.outputNow();
                 set.outputSet(spec.model);
             }
             OutputText.println("#######################################");
@@ -255,16 +232,18 @@ public class FindMultiSpec {
 
     private void outputResultTwins(Optional<ProposedResults> bestSets, List<SpecDetails> specList) {
         if (bestSets.isPresent()) {
-            List<ItemSet> resultSets = bestSets.get().resultsSets;
+            List<JobInfo> resultJobs = bestSets.get().resultJobs;
             Map<Integer, ItemData> common = bestSets.get().chosenMap;
 
             OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
 
-            for (int i = 0; i < resultSets.size(); ++i) {
-                ItemSet set = resultSets.get(i);
+            for (int i = 0; i < resultJobs.size(); ++i) {
+                JobInfo job = resultJobs.get(i);
+                ItemSet set = job.resultSet.orElseThrow();
                 SpecDetails spec = specList.get(i);
                 OutputText.printf("-------------- %s --------------\n", spec.label);
                 set.outputSet(spec.model);
+                job.printRecorder.outputNow();
             }
 
             OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
@@ -282,13 +261,13 @@ public class FindMultiSpec {
         }
     }
 
-    private class SpecDetails {
+    public static class SpecDetails {
         final String label;
         final Path gearFile;
         final ModelCombined model;
         final int[] extraItems; // TODO use this
         final boolean challengeScale;
-        final EquipOptionsMap itemOptions;
+        EquipOptionsMap itemOptions;
 
         public SpecDetails(String label, Path gearFile, ModelCombined model, int[] extraItems, boolean challengeScale) {
             this.label = label;
@@ -296,10 +275,37 @@ public class FindMultiSpec {
             this.model = model;
             this.extraItems = extraItems;
             this.challengeScale = challengeScale;
+        }
+
+        public void prepare(ItemCache itemCache) {
             itemOptions = ItemUtil.readAndLoad(itemCache, false, gearFile, model.reforgeRules(), null);
+            for (int itemId : extraItems) {
+                addExtra(itemId);
+            }
+        }
+
+        private void addExtra(int itemId) {
+            ItemData extraItem = ItemUtil.loadItemBasic(Jobs.itemCache, itemId);
+            extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
+            ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
+
+            SlotEquip slot = extraItem.slot.toSlotEquip(); // no smarts for rings/trinkets here
+            ItemData[] existing = itemOptions.get(slot);
+            if (ArrayUtil.anyMatch(existing, item -> item.id == itemId))
+                throw new IllegalArgumentException("item already included " + itemId + " " + extraItem);
+
+            itemOptions.put(slot, ArrayUtil.concat(existing, extraForged));
+
+            ItemData[] slotArray = itemOptions.get(slot);
+            HashSet<Integer> seen = new HashSet<>();
+            ArrayUtil.forEach(slotArray, it -> {
+                if (seen.add(it.id)) {
+                    OutputText.println("NEW " + slot + " " + it);
+                }
+            });
         }
     }
 
-    private record ProposedResults(List<ItemSet> resultsSets, Map<Integer, ItemData> chosenMap) {
+    private record ProposedResults(List<JobInfo> resultJobs, Map<Integer, ItemData> chosenMap) {
     }
 }

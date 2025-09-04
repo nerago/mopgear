@@ -1,6 +1,7 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
@@ -248,10 +249,59 @@ public class Jobs {
 
     public static void multiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec(itemCache);
-        multi.addFixedForge(86802, ReforgeRecipe.empty());
-        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Expertise, StatType.Haste));
-        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste));
-        multi.multiSpecSequential(startTime);
+        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+//        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Expertise, StatType.Haste)); // ring golden stair
+//        multi.addFixedForge(89954, new ReforgeRecipe(StatType.Expertise, StatType.Haste));// warbelt
+
+//        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
+//        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
+
+        FindMultiSpec.SpecDetails ret = new FindMultiSpec.SpecDetails(
+                "RET",
+                DataLocation.gearRetFile,
+                ModelCombined.extendedRetModel(true, false),
+                new int[]{
+//                        81113, // spike-soled stompers
+//                        88862, // tankiss
+////                        86742, // jasper clawfeet
+////                        81694, // command bracers
+//                        82856, // dark blaze gauntlets
+//                        84950 // pvp belt
+                },
+                false);
+
+        FindMultiSpec.SpecDetails protDamage = new FindMultiSpec.SpecDetails(
+                "PROT-DAMAGE",
+                DataLocation.gearProtFile,
+                ModelCombined.damageProtModel(),
+                new int[]{},
+                false);
+
+        FindMultiSpec.SpecDetails protDefence = new FindMultiSpec.SpecDetails(
+                "PROT-DEFENCE",
+                DataLocation.gearProtDefenceFile,
+                ModelCombined.defenceProtModel(),
+                new int[]{},
+                false);
+
+//        ItemUtil.validateRet(ret.itemOptions);
+//        ItemUtil.validateProt(protDamage.itemOptions);
+//        ItemUtil.validateProt(protDefence.itemOptions);
+
+//        multi.addSpec(ret);
+        multi.addSpec(protDamage);
+        multi.addSpec(protDefence);
+
+        // TODO solve for challenge dps too
+
+        multi.solve(startTime);
     }
+
+//        Jobs.addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
+//        Jobs.addExtra(retMap, modelRet, 88862, enchant, null, false, false); // tankiss
+//        Jobs.addExtra(retMap, modelRet, 86742, enchant, null, false, false); // jasper clawfeet
+////        Jobs.addExtra(retMap, modelRet, 89075, enchant, null, false, false); // yi's cloak
+////        Jobs.addExtra(retMap, modelRet, 81694, enchant, null, false, false); // command bracer
+//        Jobs.addExtra(retMap, modelRet, 82856, enchant, null, false, false); // dark blaze gloves
+
 }
