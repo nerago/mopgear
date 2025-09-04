@@ -72,7 +72,7 @@ public class SolverCapPhased {
             SlotEquip slot = skinny.slot;
             ItemData[] fullSlotItems = fullItemOptions.get(slot);
 
-            BestHolder<ItemData> bestSlotItem = new BestHolder<>(null, 0);
+            BestHolder<ItemData> bestSlotItem = new BestHolder<>();
             for (ItemData item : fullSlotItems) {
                 int hit = statReq.effectiveHit(item);
                 int exp = statReq.effectiveExpertise(item);

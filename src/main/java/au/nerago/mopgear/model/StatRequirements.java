@@ -52,7 +52,7 @@ public class StatRequirements {
                 false);
     }
 
-    public static StatRequirements prot() {
+    public static StatRequirements protFullExpertise() {
         return new StatRequirements(
                 TARGET_RATING_MELEE, TARGET_RATING_MELEE + DEFAULT_CAP_ALLOW_EXCEED,
                 TARGET_RATING_TANK, TARGET_RATING_TANK + DEFAULT_CAP_ALLOW_EXCEED,

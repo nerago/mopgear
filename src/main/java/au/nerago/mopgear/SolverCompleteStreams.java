@@ -2,68 +2,52 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.util.Tuple;
-import au.nerago.mopgear.util.ArrayUtil;
-import au.nerago.mopgear.util.BigStreamUtil;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
 public class SolverCompleteStreams {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long estimate) {
-        Stream<ItemSet> finalSets = runSolverPartial(model, items, startTime, adjustment, estimate);
-        return BigStreamUtil.findBest(model, finalSets);
+    public static Stream<Map<Integer, ItemData>> runSolverPartial(ModelCombined model, Map<Integer, List<ItemData>> items) {
+        Stream<Map<Integer, ItemData>> initialSets = generateItemCombinations(items, model);
+        return initialSets.parallel();
     }
 
-    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, Instant startTime, StatBlock adjustment, long estimate) {
-        if (estimate == 0)
-            estimate = ItemUtil.estimateSets(items);
+    private static Stream<Map<Integer, ItemData>> generateItemCombinations(Map<Integer, List<ItemData>> items, ModelCombined model) {
+        Stream<Map<Integer, ItemData>> stream = null;
 
-        Stream<ItemSet> initialSets = generateItemCombinations(items, model, adjustment);
+//        List<Map.Entry<Integer, List<ItemData>>> sortedEntries =
+//                itemsBySlot
+//                        .entrySet()
+//                        .stream()
+//                        .sorted(Comparator.comparingInt(x -> x.getValue().size()))
+//                        .toList();
 
-        if (startTime != null)
-            initialSets = BigStreamUtil.countProgress(estimate, startTime, initialSets);
-
-        return model.filterSets(initialSets).parallel();
-    }
-
-    // NOTES: we could dig right down a path to find its max/min hit/exp limits, then know if we're on a bad path
-    private static Stream<ItemSet> generateItemCombinations(EquipOptionsMap itemsBySlot, ModelCombined model, StatBlock adjustment) {
-        Stream<ItemSet> stream = null;
-
-        List<Tuple.Tuple2<SlotEquip, ItemData[]>> sortedEntries =
-                itemsBySlot
-                        .entryStream()
-                        .sorted(Comparator.comparingInt(x -> x.b().length))
-                        .toList();
-        for (Tuple.Tuple2<SlotEquip, ItemData[]> slotEntry : sortedEntries) {
+        for (Map.Entry<Integer, List<ItemData>> slotEntry : items.entrySet()) {
             if (stream == null) {
-                stream = newCombinationStream(slotEntry.a(), slotEntry.b(), adjustment);
+                stream = newCombinationStream(slotEntry.getValue());
             } else {
-                stream = applyItemsToCombination(stream, slotEntry.a(), slotEntry.b());
+                stream = applyItemsToCombination(stream, slotEntry.getValue());
             }
-            stream = model.filterSetsMax(stream);
         }
+
         return stream;
     }
 
-    private static Stream<ItemSet> newCombinationStream(SlotEquip slot, ItemData[] slotItems, StatBlock adjustment) {
-        final ItemSet[] initialSets = new ItemSet[slotItems.length];
-        for (int i = 0; i < slotItems.length; ++i) {
-            initialSets[i] = ItemSet.singleItem(slot, slotItems[i], adjustment);
-        }
-        return ArrayUtil.arrayStream(initialSets);
+    private static Stream<Map<Integer, ItemData>> newCombinationStream(List<ItemData> options) {
+        return options.parallelStream().map(forgedItem -> Map.of(forgedItem.id, forgedItem));
     }
 
-    private static Stream<ItemSet> applyItemsToCombination(Stream<ItemSet> stream, SlotEquip slot, ItemData[] slotItems) {
-//        return stream.flatMap(upstream -> ArrayUtil.arrayStream(slotItems).map(add -> upstream.copyWithAddedItem(slot, add)));
-
-        Stream<ItemSet> n = stream.mapMulti((set, sink) -> {
-            for (ItemData add : slotItems) {
-                sink.accept(set.copyWithAddedItem(slot, add));
+    private static Stream<Map<Integer, ItemData>> applyItemsToCombination(Stream<Map<Integer, ItemData>> stream, List<ItemData> options) {
+        return stream.mapMulti((map, sink) -> {
+            for (ItemData add : options) {
+                sink.accept(copyWithAddedItem(map, add));
             }
         });
-        return n.parallel();
+    }
+
+    private static Map<Integer, ItemData> copyWithAddedItem(Map<Integer, ItemData> oldMap, ItemData add) {
+        Map<Integer, ItemData> map = new HashMap<>(oldMap);
+        map.put(add.id, add);
+        return map;
     }
 }

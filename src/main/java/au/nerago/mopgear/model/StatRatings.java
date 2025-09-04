@@ -29,7 +29,7 @@ public abstract class StatRatings {
     }
 
     protected void chooseBestStats() {
-        BestHolder<StatType> bestStat = new BestHolder<>(null, 0);
+        BestHolder<StatType> bestStat = new BestHolder<>();
         for (StatType stat : StatType.values()) {
             if (stat != Primary && stat != Hit && stat != Expertise) {
                 bestStat.add(stat, calcRating(stat, 1));

@@ -4,6 +4,11 @@ public class BestHolder<T> {
     private T bestObject;
     private long bestRating;
 
+    public BestHolder() {
+        bestObject = null;
+        bestRating = Long.MIN_VALUE;
+    }
+
     public BestHolder(T object, long rating) {
         bestObject = object;
         bestRating = rating;

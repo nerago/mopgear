@@ -59,20 +59,23 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return gems;
     }
 
-    public static ModelCombined standardProtModel() {
+    public static ModelCombined defenceProtModel() {
         StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile);
         StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile);
-        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13, protGems());
-        StatRequirements statRequirements = StatRequirements.prot();
+        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 28, statDps, 1, protGems());
+        StatRequirements statRequirements = StatRequirements.protFullExpertise();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt);
         ReforgeRules reforge = ReforgeRules.prot();
         return new ModelCombined(statMix, statRequirements, reforge, enchants);
     }
 
-    public static ModelCombined uncappedProtModel() {
+    public static ModelCombined damageProtModel() {
         StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
         StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
-        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 9, statDps, 13, protGems());
+//        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 3, statDps, 17, protGems()); // 90% dps
+        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 15, statDps, 10, protGems()); // 50% dps
+//        StatRatings statMix = new StatRatingsPriority(new StatType[] {StatType.Haste, StatType.Mastery, StatType.Dodge, StatType.Crit});
+//        StatRatings statMix = new StatRatingsPriority(new StatType[] {StatType.Haste, StatType.Crit, StatType.Mastery, StatType.Dodge});
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt);
         ReforgeRules reforge = ReforgeRules.prot();

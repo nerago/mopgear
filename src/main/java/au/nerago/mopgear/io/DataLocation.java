@@ -15,6 +15,7 @@ public class DataLocation {
     public static final Path gearBearFile = directory.resolve("gear-druid-bear.json");
     public static final Path gearWarlockFile = directory.resolve("gear-warlock-destro.json");
     public static final Path gearProtFile = directory.resolve("gear-prot.json");
+    public static final Path gearProtDefenceFile = directory.resolve("gear-prot-defence.json");
     public static final Path gearRetFile = directory.resolve("gear-ret.json");
     public static final Path cacheFile = directory.resolve("cache.json");
     public static final Path resultsDir = directory.resolve("results");

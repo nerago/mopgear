@@ -192,7 +192,7 @@ public class FindStatRange {
     }
 
     private static Optional<ItemSet> fallbackSimpleLimits(ModelCombined model, JobInfo job, List<ItemSet> proposedList) {
-        BestHolder<ItemSet> bestHolder = new BestHolder<>(null, 0);
+        BestHolder<ItemSet> bestHolder = new BestHolder<>();
 
         for (ItemSet set : proposedList) {
             if (model.statRequirements().filter(set)) {
@@ -211,7 +211,7 @@ public class FindStatRange {
     }
 
     private static Optional<ItemSet> fallbackLimitsWithAdjustment(ModelCombined model, JobInfo job, List<ItemSet> proposedList) {
-        BestHolder<Tuple.Tuple2<ItemSet, PrintRecorder>> bestHolder = new BestHolder<>(null, 0);
+        BestHolder<Tuple.Tuple2<ItemSet, PrintRecorder>> bestHolder = new BestHolder<>();
 
         for (ItemSet set : proposedList) {
             PrintRecorder print = new PrintRecorder();

@@ -37,6 +37,10 @@ public class StatRatingsWeightsMix extends StatRatings {
             total += weightA.calcRating(value) * multiplyA;
         if (multiplyB > 0)
             total += weightB.calcRating(value) * multiplyB;
+
+        long other = StatRatingsWeights.mix((StatRatingsWeights) weightA, multiplyA, (StatRatingsWeights) weightB, multiplyB).calcRating(value);
+        System.out.println("compare RATES " + total + " " + other);
+
         return total;
     }
 

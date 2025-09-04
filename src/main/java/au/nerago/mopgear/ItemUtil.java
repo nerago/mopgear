@@ -5,6 +5,7 @@ import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.model.GemData;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.ReforgeRules;
+import au.nerago.mopgear.model.Trinkets;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.WowHead;
@@ -99,6 +100,9 @@ public class ItemUtil {
                 throw new RuntimeException("missing item " + id);
             }
         }
+        if (item.slot == SlotItem.Trinket) {
+            item = Trinkets.updateTrinket(item);
+        }
         return item;
     }
 
@@ -118,7 +122,7 @@ public class ItemUtil {
     }
 
     public static EquipOptionsMap limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
-                                                                       EnumMap<SlotEquip, ReforgeRecipe> presetForge) {
+                                                            EnumMap<SlotEquip, ReforgeRecipe> presetForge) {
         EquipOptionsMap map = EquipOptionsMap.empty();
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
@@ -129,7 +133,7 @@ public class ItemUtil {
             }
             if (presetForge.containsKey(slot)) {
                 ItemData forged = Reforger.presetReforge(item, presetForge.get(slot));
-                map.put(slot, new ItemData[] { forged });
+                map.put(slot, new ItemData[]{forged});
             } else {
                 map.put(slot, Reforger.reforgeItem(rules, item));
             }
@@ -155,87 +159,31 @@ public class ItemUtil {
         return map;
     }
 
-    static void buildJobWithSpecifiedItemsFixed(EquipMap chosenMap, EquipOptionsMap submitMap) {
-        for (SlotEquip slot : SlotEquip.values()) {
-            ItemData chosenItem = chosenMap.get(slot);
-            if (chosenItem != null) {
-                ItemData[] options = submitMap.get(slot);
-                boolean justThat = true;
-                for (ItemData item : options) {
-                    if (item.id != chosenItem.id) {
-                        justThat = false;
-                        break;
-                    }
-                }
-
-                if (justThat) {
-                    submitMap.put(slot, chosenItem);
-                } else {
-                    ArrayList<ItemData> replace = new ArrayList<>();
-                    replace.add(chosenItem);
-                    for (ItemData item : options) {
-                        if (item.id != chosenItem.id) {
-                            replace.add(item);
-                        }
-                    }
-                    submitMap.put(slot, replace.toArray(ItemData[]::new));
-                }
-            }
-        }
-    }
-
-    static void validateDualSets(EquipOptionsMap retMap, EquipOptionsMap protMap) {
+    static void validateProt(EquipOptionsMap protMap) {
         if (protMap.get(SlotEquip.Offhand) == null || protMap.get(SlotEquip.Offhand).length == 0)
             throw new IllegalArgumentException("no shield");
+    }
+
+    static void validateRet(EquipOptionsMap retMap) {
         if (retMap.get(SlotEquip.Offhand) != null)
             throw new IllegalArgumentException("unexpected shield");
-        if (protMap.get(SlotEquip.Ring1)[0].id == retMap.get(SlotEquip.Ring2)[0].id)
-            throw new IllegalArgumentException("duplicate in non matching slot");
-        if (protMap.get(SlotEquip.Ring2)[0].id == retMap.get(SlotEquip.Ring1)[0].id)
-            throw new IllegalArgumentException("duplicate in non matching slot");
-        if (protMap.get(SlotEquip.Trinket1)[0].id == retMap.get(SlotEquip.Trinket2)[0].id)
-            throw new IllegalArgumentException("duplicate in non matching slot");
-        if (protMap.get(SlotEquip.Trinket2)[0].id == retMap.get(SlotEquip.Trinket1)[0].id)
-            throw new IllegalArgumentException("duplicate in non matching slot");
     }
 
-    static EquipOptionsMap commonInDualSet(EquipOptionsMap retMap, EquipOptionsMap protMap) {
-        EquipOptionsMap common = EquipOptionsMap.empty();
-        for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] aaa = retMap.get(slot);
-            ItemData[] bbb = protMap.get(slot);
-            if (aaa == null || bbb == null || aaa.length == 0 || bbb.length == 0)
-                continue;
-
-            if (ItemData.isSameEquippedItem(aaa[0], bbb[0])) {
-                OutputText.println("COMMON " + aaa[0].name);
-
-                ArrayList<ItemData> commonForges = new ArrayList<>();
-                for (ItemData a : aaa) {
-                    for (ItemData b : bbb) {
-                        if (ItemData.isIdenticalItem(a, b))
-                            commonForges.add(a);
+    static void validateDualSets(EquipOptionsMap... mapsParam) {
+        Map<Integer, SlotEquip> seen = new HashMap<>();
+        for (EquipOptionsMap map : mapsParam) {
+            map.forEachPair((slot, array) -> {
+                for (ItemData item : array) {
+                    int itemId = item.id;
+                    SlotEquip val = seen.get(itemId);
+                    if (val == null) {
+                        seen.put(itemId, slot);
+                    } else if (val != slot) {
+                        throw new IllegalArgumentException("duplicate in non matching slot");
                     }
                 }
-                common.put(slot, commonForges.toArray(ItemData[]::new));
-            }
+            });
         }
-        return common;
-    }
-
-    static EquipMap commonInDualSet(EquipMap retMap, EquipMap protMap) {
-        EquipMap common = EquipMap.empty();
-        for (SlotEquip slot : SlotEquip.values()) {
-            ItemData a = retMap.get(slot);
-            ItemData b = protMap.get(slot);
-            if (a == null || b == null)
-                continue;
-
-            if (ItemData.isIdenticalItem(a, b)) {
-                common.put(slot, a);
-            }
-        }
-        return common;
     }
 
     public static void bestForgesOnly(EquipOptionsMap itemMap, ModelCombined model) {
@@ -263,9 +211,9 @@ public class ItemUtil {
 
             // TODO blacksmith only
             if (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand)
-                socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[] { SocketType.General };
+                socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
             else if (item.slot == SlotItem.Belt)
-                socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[] { SocketType.General };
+                socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
 
             StatBlock total = StatBlock.empty;
             if (socketSlots != null) {
@@ -289,10 +237,14 @@ public class ItemUtil {
     }
 
     static long estimateSets(EquipOptionsMap reforgedItems) {
-        return reforgedItems.entryStream().mapToLong((x) -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
+        return reforgedItems.entryStream().mapToLong(x -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
     }
 
     public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> skinnyOptions) {
-        return skinnyOptions.stream().mapToLong((x) -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
+        return skinnyOptions.stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
+    }
+
+    public static long estimateSets(Map<Integer, List<ItemData>> commonMap) {
+        return commonMap.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
     }
 }

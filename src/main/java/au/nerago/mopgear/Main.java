@@ -11,6 +11,7 @@ import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -58,10 +59,10 @@ public class Main {
     private void launchpad(Instant startTime) {
 //            WowHead.fetchItem(86145);
 
-//            multiSpecSequential(startTime);
+            new FindMultiSpec(itemCache).multiSpecSequential(startTime);
 
-//            reforgeRet(startTime);
-            reforgeProt(startTime);
+            reforgeRet(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //                    reforgeBear(startTime);
 //            reforgeWarlock(startTime);
@@ -115,24 +116,27 @@ public class Main {
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
-        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
+//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
-//        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model, true, null);
+        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
 
 //        combinationDumb(items, model, startTime);
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = ModelCombined.standardProtModel();
-//        ModelCombined model = ModelCombined.uncappedProtModel();
+//        ModelCombined model = ModelCombined.damageProtModel();
+        ModelCombined model = ModelCombined.defenceProtModel();
+
+//        Path file = DataLocation.gearProtFile;
+        Path file = DataLocation.gearProtDefenceFile;
 
 //        EnumMap<SlotEquip, ReforgeRecipe> commonItems = commonFixedItems();
         EnumMap<SlotEquip, ReforgeRecipe> commonItems = null;
 
-        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, model.reforgeRules(), commonItems);
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonItems);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcess2(items, model, startTime);
@@ -148,13 +152,13 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
 //        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray()), model, true, null);
-        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
+//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
 //        findUpgradeSetup(items, strengthPlateMsvArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model);
-//        findUpgradeSetup(items, bagItemsArray(model, ignoredItems), model, true, null);
+        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
@@ -459,7 +463,7 @@ public class Main {
 
     private void multiSpecSpecifiedRating() {
         ModelCombined modelRet = ModelCombined.standardRetModel();
-        ModelCombined modelProt = ModelCombined.standardProtModel();
+        ModelCombined modelProt = ModelCombined.defenceProtModel();
 
         OutputText.println("RET GEAR CURRENT");
         List<ItemData> retItems = ItemUtil.loadItems(itemCache, InputGearParser.readInput(DataLocation.gearRetFile), true);

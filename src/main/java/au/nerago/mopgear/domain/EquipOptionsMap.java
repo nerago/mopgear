@@ -143,7 +143,7 @@ public final class EquipOptionsMap {
     }
 
     public void put(SlotEquip slot, ItemData item) {
-        put(slot, new ItemData[] { item });
+        put(slot, new ItemData[]{item});
     }
 
     public void replaceWithFirstOption(SlotEquip slot) {
@@ -157,12 +157,12 @@ public final class EquipOptionsMap {
         put(slot, choice);
     }
 
-//    @Deprecated(since = "avoid extra allocation")
+    //    @Deprecated(since = "avoid extra allocation")
     public EquipOptionsMap shallowClone() {
         return new EquipOptionsMap(this);
     }
 
-//    @Deprecated(since = "avoid extra allocation")
+    //    @Deprecated(since = "avoid extra allocation")
     public EquipOptionsMap deepClone() {
         return new EquipOptionsMap(
                 ArrayUtil.clone(head),
@@ -186,11 +186,11 @@ public final class EquipOptionsMap {
 
     public EquipOptionsMap copyWithReplaceSingle(SlotEquip slot, ItemData replace) {
         EquipOptionsMap other = new EquipOptionsMap(this);
-        other.put(slot, new ItemData[] { replace });
+        other.put(slot, new ItemData[]{replace});
         return other;
     }
 
-//    @Deprecated(since = "avoid bad performance")
+    //    @Deprecated(since = "avoid bad performance")
     public void forEachValue(Consumer<ItemData[]> func) {
         if (head != null) func.accept(head);
         if (neck != null) func.accept(neck);
@@ -210,7 +210,7 @@ public final class EquipOptionsMap {
         if (offhand != null) func.accept(offhand);
     }
 
-//    @Deprecated(since = "avoid bad performance")
+    //    @Deprecated(since = "avoid bad performance")
     public void forEachPair(BiConsumer<SlotEquip, ItemData[]> func) {
         if (head != null) func.accept(SlotEquip.Head, head);
         if (neck != null) func.accept(SlotEquip.Neck, neck);
@@ -269,12 +269,13 @@ public final class EquipOptionsMap {
 
         @Override
         public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, ItemData[]>> action) {
-            if (index < slotArray.length) {
-                SlotEquip slot = slotArray[index];
+            while (index < slotArray.length) {
+                SlotEquip slot = slotArray[index++];
                 ItemData[] value = EquipOptionsMap.this.get(slot);
-                action.accept(Tuple.create(slot, value));
-                index++;
-                return true;
+                if (value != null) {
+                    action.accept(Tuple.create(slot, value));
+                    return true;
+                }
             }
             return false;
         }

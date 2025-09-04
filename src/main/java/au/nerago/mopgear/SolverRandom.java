@@ -31,7 +31,7 @@ public class SolverRandom {
     public static Optional<ItemSet> runSolverSingleThread(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, long count) {
         Random random = ThreadLocalRandom.current();
         StatRequirements require = model.statRequirements();
-        BestHolder<ItemSet> best = new BestHolder<>(null, 0);
+        BestHolder<ItemSet> best = new BestHolder<>();
         for (int i = 0; i < count; ++i) {
             ItemSet set = makeSet(items, adjustment, random);
             if (require.filter(set)) {

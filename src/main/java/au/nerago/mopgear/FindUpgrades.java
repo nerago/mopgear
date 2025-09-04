@@ -137,7 +137,7 @@ public class FindUpgrades {
             SlotEquip slot = extraItem.slot.toSlotEquip();
 
             if (!canSkipUpgradeCheck(extraItem, slot, baseItems)) {
-                OutputText.println("JOB " + extraItem.toStringExtended() + " $" + extraItemInfo.cost());
+                OutputText.printf("JOB %s\n\n", extraItem.toStringExtended());
 
                 submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating, cost));
 

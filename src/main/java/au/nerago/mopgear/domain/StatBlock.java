@@ -64,6 +64,20 @@ public final class StatBlock {
                 spirit + first.spirit + second.spirit);
     }
 
+    public StatBlock multiply(int multiply) {
+        return new StatBlock(
+                primary * multiply,
+                stam * multiply,
+                mastery * multiply,
+                crit * multiply,
+                hit * multiply,
+                haste * multiply,
+                expertise * multiply,
+                dodge * multiply,
+                parry * multiply,
+                spirit * multiply);
+    }
+
     public static StatBlock sum(EquipMap items) {
         int primary = 0;
         int stam = 0;

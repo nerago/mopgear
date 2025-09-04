@@ -18,6 +18,7 @@ public class Trinkets {
         map.put(79329, new TrinketData(Dodge, 8871, 10, 60, null)); // relic of niuzao
         map.put(86131, new TrinketData(Dodge, 3236, 20, 55, 15)); // vial of dragon's 489
         map.put(86042, new TrinketData(Haste, 3595, 15, 60, null)); // jade charioteer 489
+        map.put(81138, new TrinketData(Crit, 3386, 30, 115, 15)); // carbonic carbuncle
         return map;
     }
 

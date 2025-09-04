@@ -38,6 +38,14 @@ public class StatRatingsWeights extends StatRatings {
         this.weight = weight;
     }
 
+    public static StatRatingsWeights mix(StatRatingsWeights weightA, int multiplyA, StatRatingsWeights weightB, int multiplyB) {
+        StatBlock mixed = weightA.weight.multiply(multiplyA);
+        if (weightB != null) {
+            mixed = mixed.plus(weightB.weight.multiply(multiplyB));
+        }
+        return new StatRatingsWeights(mixed);
+    }
+
     // because a sim value doesn't understand breakpoints
 //    public static StatRatingsWeights hardCodeRetWeight() {
 //        // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.762,CritRating=0.375,HasteRating=0.561,ExpertiseRating=0.530,MasteryRating=0.369,Ap=0.436,MeleeDps=1.632 )
