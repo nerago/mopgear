@@ -60,20 +60,23 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined defenceProtModel() {
-        StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile);
-        StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile);
-        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 28, statDps, 1, protGems());
-        StatRequirements statRequirements = StatRequirements.protFullExpertise();
+        StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile);
+        StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile);
+        EnumMap<SocketType, StatBlock> standardGems = protGems();
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 28, statDps, 1, standardGems);
+//        StatRequirements statRequirements = StatRequirements.protFullExpertise();
+        StatRequirements statRequirements = StatRequirements.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt);
         ReforgeRules reforge = ReforgeRules.prot();
         return new ModelCombined(statMix, statRequirements, reforge, enchants);
     }
 
     public static ModelCombined damageProtModel() {
-        StatRatings statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
-        StatRatings statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
-//        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 3, statDps, 17, protGems()); // 90% dps
-        StatRatings statMix = new StatRatingsWeightsMix(statMitigation, 15, statDps, 10, protGems()); // 50% dps
+        StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
+        StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
+//        StatRatings statMix = StatRatingsWeightsMix.mix(statMitigation, 3, statDps, 17, protGems()); // 90% dps
+        EnumMap<SocketType, StatBlock> standardGems = protGems();
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 15, statDps, 10, standardGems); // 50% dps
 //        StatRatings statMix = new StatRatingsPriority(new StatType[] {StatType.Haste, StatType.Mastery, StatType.Dodge, StatType.Crit});
 //        StatRatings statMix = new StatRatingsPriority(new StatType[] {StatType.Haste, StatType.Crit, StatType.Mastery, StatType.Dodge});
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
@@ -83,18 +86,18 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined standardRetModel() {
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
+        StatRatingsWeights statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
 //        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
-        statRatings = new StatRatingsWeightsMix(statRatings, 22, null, 0);
+        statRatings = StatRatingsWeights.mix(statRatings, 22, null, 0, null);
         StatRequirements statRequirements = StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret(), enchants);
     }
 
     public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) {
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
+        StatRatingsWeights statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
 //        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
-        statRatings = new StatRatingsWeightsMix(statRatings, 18, null, 0);
+        statRatings = StatRatingsWeights.mix(statRatings, 18, null, 0, null);
         StatRequirements statRequirements = wideHitRange ? StatRequirements.retWideCapRange() : StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet);
         ReforgeRules reforge = extraReforge ? ReforgeRules.retExtended() : ReforgeRules.ret();
@@ -131,11 +134,11 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined load(ServiceEntry.ServiceModel modelParam) {
-        StatRatings rating;
+        StatRatingsWeights rating;
         if (modelParam.weight().size() == 1) {
             ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
             rating = new StatRatingsWeights(Path.of(a.file()));
-            rating = new StatRatingsWeightsMix(rating, a.scale(), null, 0);
+            rating = StatRatingsWeights.mix(rating, a.scale(), null, 0, null);
         } else if (modelParam.weight().size() == 2) {
             ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
             StatRatingsWeights ratingA = new StatRatingsWeights(Path.of(a.file()));
@@ -143,7 +146,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
             ServiceEntry.ServiceWeightStats b = modelParam.weight().get(1);
             StatRatingsWeights ratingB = new StatRatingsWeights(Path.of(b.file()));
 
-            rating = new StatRatingsWeightsMix(ratingA, a.scale(), ratingB, b.scale());
+            rating = StatRatingsWeights.mix(ratingA, a.scale(), ratingB, b.scale(), null);
         } else {
             throw new IllegalArgumentException("expected one or two weights only");
         }

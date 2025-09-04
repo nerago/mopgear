@@ -201,6 +201,21 @@ public class ItemUtil {
         }
     }
 
+    public static List<ItemData> onlyMatchingForge(List<ItemData> forgeList, ReforgeRecipe recipe) {
+        if (recipe == null || recipe.isNull()) {
+            for (ItemData item : forgeList) {
+                if (item.reforge == null || item.reforge.isNull())
+                    return List.of(item);
+            }
+        } else {
+            for (ItemData item : forgeList) {
+                if (recipe.equalsTyped(item.reforge))
+                    return List.of(item);
+            }
+        }
+        throw new IllegalArgumentException("specified forge not found " + forgeList.getFirst().id + " " + recipe);
+    }
+
     public static void defaultEnchants(EquipOptionsMap itemMap, ModelCombined model, boolean force) {
         itemMap.forEachValue(array -> ArrayUtil.mapInPlace(array, item -> defaultEnchants(item, model, force)));
     }

@@ -3,16 +3,14 @@ package au.nerago.mopgear;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
-import au.nerago.mopgear.util.ArrayUtil;
-import au.nerago.mopgear.util.BestHolder;
-import au.nerago.mopgear.util.BigStreamUtil;
-import au.nerago.mopgear.util.CurryQueue;
+import au.nerago.mopgear.util.*;
 
 import java.util.*;
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class SolverCapPhased {
-    //    public static final int TOP_HIT_COMBO_FILTER = 1000;
+    public static final int TOP_HIT_COMBO_FILTER = 100;
     private final ModelCombined model;
     private final StatBlock adjustment;
 
@@ -57,8 +55,8 @@ public class SolverCapPhased {
 
         Stream<SkinnyItemSet> filteredSets = model.statRequirements().filterSetsSkinny(initialSets);
 
-//        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
-//        filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
+        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
+        filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
 
         return filteredSets.map(skin -> makeFromSkinny(skin, items));
     }

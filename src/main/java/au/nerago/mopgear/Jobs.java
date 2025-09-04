@@ -1,7 +1,6 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
@@ -10,9 +9,7 @@ import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.*;
 import au.nerago.mopgear.io.ItemCache;
 
-import java.nio.file.Path;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -247,5 +244,14 @@ public class Jobs {
 
     private static void outputFailureDetails(ModelCombined model, EquipOptionsMap runItems, JobInfo job) {
         FindStatRange.checkSetReportOnly(model, runItems, job);
+    }
+
+    public static void multiSpecSolve(Instant startTime) {
+        FindMultiSpec multi = new FindMultiSpec(itemCache);
+        multi.addFixedForge(86802, ReforgeRecipe.empty());
+        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Expertise, StatType.Haste));
+        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste));
+        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste));
+        multi.multiSpecSequential(startTime);
     }
 }

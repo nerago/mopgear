@@ -21,9 +21,14 @@ public class FindMultiSpec {
     private final ItemCache itemCache;
     //        Long runSize = 200000L;
     private final long runSize = 2000L;
+    private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
 
     public FindMultiSpec(ItemCache itemCache) {
         this.itemCache = itemCache;
+    }
+
+    public void addFixedForge(int id, ReforgeRecipe reforge) {
+        fixedForge.put(id, reforge);
     }
 
 //        Jobs.addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
@@ -40,13 +45,13 @@ public class FindMultiSpec {
                 "RET",
                 DataLocation.gearRetFile,
                 ModelCombined.extendedRetModel(true, false),
-                new int[] {
-                        81113, // spike-soled stompers
-                        88862, // tankiss
-                        86742, // jasper clawfeet
-                        81694, // command bracers
-                        82856, // dark blaze gauntlets
-                        84950 // pvp belt
+                new int[]{
+//                        81113, // spike-soled stompers
+//                        88862, // tankiss
+////                        86742, // jasper clawfeet
+////                        81694, // command bracers
+//                        82856, // dark blaze gauntlets
+//                        84950 // pvp belt
                 },
                 false);
 
@@ -54,17 +59,20 @@ public class FindMultiSpec {
                 "PROT-DAMAGE",
                 DataLocation.gearProtFile,
                 ModelCombined.damageProtModel(),
-                new int[] {},
+                new int[]{},
                 false);
 
         SpecDetails protDefence = new SpecDetails(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 ModelCombined.defenceProtModel(),
-                new int[] {},
+                new int[]{},
                 false);
 
-        List<SpecDetails> specs = List.of(ret, protDamage, protDefence);
+
+//        List<SpecDetails> specs = List.of(protDamage, protDefence);
+        List<SpecDetails> specs = List.of(ret, protDamage);
+//        List<SpecDetails> specs = List.of(ret, protDamage, protDefence);
 
         ItemUtil.validateRet(ret.itemOptions);
         ItemUtil.validateProt(protDamage.itemOptions);
@@ -78,7 +86,7 @@ public class FindMultiSpec {
 
         Stream<Map<Integer, ItemData>> commonStream = SolverCompleteStreams.runSolverPartial(modelNull, commonMap);
 
-//        commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
+        commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
 
         Stream<ProposedResults> resultStream = commonStream
                 .map(r -> subSolveEach(r, specs))
@@ -92,7 +100,7 @@ public class FindMultiSpec {
         // TODO solve for challenge dps too
     }
 
-    private static Map<Integer, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
+    private Map<Integer, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
         Map<Integer, List<ItemData>> commonOptions = new HashMap<>();
         Map<Integer, Set<String>> seenIn = new HashMap<>();
         for (SlotEquip slot : SlotEquip.values()) {
@@ -109,16 +117,27 @@ public class FindMultiSpec {
             }
         }
 
+        for (Map.Entry<Integer, ReforgeRecipe> entry : fixedForge.entrySet()) {
+            int id = entry.getKey();
+            List<ItemData> forgeList = commonOptions.get(id);
+            if (forgeList == null)
+                throw new IllegalArgumentException("fixed forge for " + id + " but not in sets");
+            forgeList = ItemUtil.onlyMatchingForge(forgeList, entry.getValue());
+            commonOptions.put(id, forgeList);
+            OutputText.println("FIXED " + forgeList.getFirst().name);
+        }
+
         for (Map.Entry<Integer, Set<String>> seenEntry : seenIn.entrySet()) {
-            if (seenEntry.getValue().size() <= 1) {
-                commonOptions.remove(seenEntry.getKey());
+            Integer id = seenEntry.getKey();
+            if (seenEntry.getValue().size() <= 1 && !fixedForge.containsKey(id)) {
+                commonOptions.remove(id);
             }
         }
 
         for (List<ItemData> lst : commonOptions.values()) {
             ItemData item = lst.getFirst();
             Set<String> specs = seenIn.get(item.id);
-            OutputText.println("COMMON " + item.name + " " + specs.stream().reduce(String::concat));
+            OutputText.println("COMMON " + item.name + " " + String.join(" ", specs));
         }
 
         return commonOptions;
@@ -224,7 +243,6 @@ public class FindMultiSpec {
         long rating = multiRating(resultSets, specList);
         synchronized (OutputText.class) {
             OutputText.printf("^^^^^^^^^ %s ^^^^^^^ %d ^^^^^^^^^\n", LocalDateTime.now(), rating);
-            resultSets.getFirst().outputSet(specList.getFirst().model);
             for (int i = 0; i < resultSets.size(); ++i) {
                 ItemSet set = resultSets.get(i);
                 SpecDetails spec = specList.get(i);
@@ -268,7 +286,7 @@ public class FindMultiSpec {
         final String label;
         final Path gearFile;
         final ModelCombined model;
-        final int[] extraItems;
+        final int[] extraItems; // TODO use this
         final boolean challengeScale;
         final EquipOptionsMap itemOptions;
 

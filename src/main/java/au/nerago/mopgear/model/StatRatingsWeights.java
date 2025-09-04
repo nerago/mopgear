@@ -1,5 +1,6 @@
 package au.nerago.mopgear.model;
 
+import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 
@@ -7,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EnumMap;
 
 import static au.nerago.mopgear.domain.StatType.*;
 
@@ -34,27 +36,23 @@ public class StatRatingsWeights extends StatRatings {
         chooseBestStats();
     }
 
-    private StatRatingsWeights(StatBlock weight) {
+    private StatRatingsWeights(StatBlock weight, EnumMap<SocketType, StatBlock> standardGems) {
         this.weight = weight;
+        if (standardGems != null) {
+            this.standardGems = standardGems;
+        } else {
+            chooseGems();
+        }
+        chooseBestStats();
     }
 
-    public static StatRatingsWeights mix(StatRatingsWeights weightA, int multiplyA, StatRatingsWeights weightB, int multiplyB) {
+    public static StatRatingsWeights mix(StatRatingsWeights weightA, int multiplyA, StatRatingsWeights weightB, int multiplyB, EnumMap<SocketType, StatBlock> standardGems) {
         StatBlock mixed = weightA.weight.multiply(multiplyA);
         if (weightB != null) {
             mixed = mixed.plus(weightB.weight.multiply(multiplyB));
         }
-        return new StatRatingsWeights(mixed);
+        return new StatRatingsWeights(mixed, standardGems);
     }
-
-    // because a sim value doesn't understand breakpoints
-//    public static StatRatingsWeights hardCodeRetWeight() {
-//        // ( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.762,CritRating=0.375,HasteRating=0.561,ExpertiseRating=0.530,MasteryRating=0.369,Ap=0.436,MeleeDps=1.632 )
-//        // this was initial sim value at approx 6700 haste
-//        return new StatRatingsWeights(new StatBlock(1000, 0, 375, 369, 0, 561, 0, 0, 0, 0));
-//        // however haste isn't always that good, so dropped a bit to round number
-//        // also crit is valued higher than I'd like so moved some value from crit->mastery
-////        return new StatRatingsWeights(new StatBlock(1000,0,389,355,0,500,0,0,0,0));
-//    }
 
     private static StatBlock parseReader(BufferedReader reader) throws IOException {
         StringBuilder build = new StringBuilder();
