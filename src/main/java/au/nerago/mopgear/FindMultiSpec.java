@@ -18,11 +18,11 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class FindMultiSpec {
-    public static final int RANDOM_COMBOS = 1000000;
+    public static final int RANDOM_COMBOS = 100000;
     private final ItemCache itemCache;
     //        Long runSize = 200000L;
     private final long runSize = 2000L;
-    private final boolean hackAllow = true;
+    private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
     private final List<SpecDetails> specs = new ArrayList<>();
@@ -53,14 +53,22 @@ public class FindMultiSpec {
         long commonCombos = ItemUtil.estimateSets(commonMap);
         OutputText.println("COMMON COMBOS " + commonCombos);
 
-//        Stream<Map<Integer, ItemData>> commonStream = SolverPossibleStreams.runSolverPartial(commonMap);
-        Stream<Map<Integer, ItemData>> commonStream = PossibleRandom.runSolverPartial(commonMap, RANDOM_COMBOS);
+//        Stream<Map<Integer, ItemData>> commonStream = PossibleStreams.runSolverPartial(commonMap);
+//        commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
 
-        commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
+        int skip = 15;
+        Stream<Map<Integer, ItemData>> commonStream = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
+        commonStream = BigStreamUtil.countProgressSmall(commonCombos / skip, startTime, commonStream);
+
+//        Stream<Map<Integer, ItemData>> commonStream = PossibleRandom.runSolverPartial(commonMap, RANDOM_COMBOS);
+//        commonStream = BigStreamUtil.countProgressSmall(RANDOM_COMBOS, startTime, commonStream);
+//        commonStream = BigStreamUtil.randomSkipper(commonStream, 20);
 
         Stream<ProposedResults> resultStream = commonStream
                 .map(r -> subSolveEach(r, specs))
-                .filter(Objects::nonNull);
+                .filter(Objects::nonNull)
+                .unordered()
+                .parallel();
 
         Optional<ProposedResults> best = resultStream.collect(
                 new TopCollectorReporting<>(s -> multiRating(s.resultJobs, specs),
@@ -105,7 +113,7 @@ public class FindMultiSpec {
         for (List<ItemData> lst : commonOptions.values()) {
             ItemData item = lst.getFirst();
             Set<String> specs = seenIn.get(item.id);
-            OutputText.println("COMMON " + item.name + " " + String.join(" ", specs));
+            OutputText.println("COMMON " + item.id + " " + item.name + " " + String.join(" ", specs));
         }
 
         return commonOptions;
@@ -174,34 +182,30 @@ public class FindMultiSpec {
                 continue;
             }
 
-            boolean needUpdate = false;
-            for (ItemData item : options) {
-                if (chosenMap.containsKey(item.id)) {
-                    needUpdate = true;
-                    break;
-                }
-            }
+            ItemData[] newOptions = makeSlotFixed(chosenMap, options);
+            submitMap.put(slot, newOptions);
+        }
+    }
 
-            if (needUpdate) {
-                ArrayList<ItemData> list = new ArrayList<>();
-                for (ItemData item : options) {
-                    if (chosenMap.containsKey(item.id)) {
-                        boolean alreadyAdded = false;
-                        for (ItemData x : list) {
-                            if (x.id == item.id) {
-                                alreadyAdded = true;
-                                break;
-                            }
-                        }
-                        if (!alreadyAdded)
-                            list.add(item);
-                    } else {
-                        list.add(item);
-                    }
-                }
-                submitMap.put(slot, list.toArray(ItemData[]::new));
+    private static ItemData[] makeSlotFixed(Map<Integer, ItemData> chosenMap, ItemData[] options) {
+        ArrayList<ItemData> list = new ArrayList<>();
+        HashSet<Integer> chosenToAdd = new HashSet<>();
+
+        for (ItemData item : options) {
+            int id = item.id;
+            if (chosenMap.containsKey(id)) {
+                chosenToAdd.add(item.id);
+            } else {
+                // not a common/fixed item
+                list.add(item);
             }
         }
+
+        for (int id : chosenToAdd) {
+            list.add(chosenMap.get(id));
+        }
+
+        return list.toArray(ItemData[]::new);
     }
 
     private long multiRating(List<JobInfo> resultJobs, List<SpecDetails> specList) {
@@ -209,7 +213,7 @@ public class FindMultiSpec {
         for (int i = 0; i < resultJobs.size(); ++i) {
             ItemSet set = resultJobs.get(i).resultSet.orElseThrow();
             SpecDetails spec = specList.get(i);
-            total += spec.model.calcRating(set);
+            total += spec.model.calcRating(set) * spec.ratingMultiply;
         }
         return total;
     }
@@ -234,8 +238,10 @@ public class FindMultiSpec {
         if (bestSets.isPresent()) {
             List<JobInfo> resultJobs = bestSets.get().resultJobs;
             Map<Integer, ItemData> common = bestSets.get().chosenMap;
+            long rating = multiRating(resultJobs, specList);
 
             OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
+            OutputText.printf("^^^^^^^^^^^^^ %d ^^^^^^^^^^^^^\n", rating);
 
             for (int i = 0; i < resultJobs.size(); ++i) {
                 JobInfo job = resultJobs.get(i);
@@ -265,14 +271,16 @@ public class FindMultiSpec {
         final String label;
         final Path gearFile;
         final ModelCombined model;
-        final int[] extraItems; // TODO use this
+        final int ratingMultiply;
+        final int[] extraItems;
         final boolean challengeScale;
         EquipOptionsMap itemOptions;
 
-        public SpecDetails(String label, Path gearFile, ModelCombined model, int[] extraItems, boolean challengeScale) {
+        public SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, boolean challengeScale) {
             this.label = label;
             this.gearFile = gearFile;
             this.model = model;
+            this.ratingMultiply = ratingMultiply;
             this.extraItems = extraItems;
             this.challengeScale = challengeScale;
         }

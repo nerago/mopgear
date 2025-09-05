@@ -6,6 +6,7 @@ import au.nerago.mopgear.model.ModelCombined;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -18,7 +19,7 @@ public class BigStreamUtil {
 
     public static <T> Stream<T> countProgressSmall(long estimate, Instant startTime, Stream<T> inputStream) {
         final double percentMultiply = 100.0 / estimate;
-        final long reportFrequency = 100000;
+        final long reportFrequency = 1000;
         return coreCount(reportFrequency, percentMultiply, startTime, inputStream);
     }
 
@@ -52,7 +53,7 @@ public class BigStreamUtil {
             freq *= 10;
         }
         freq = Math.max(freq, 1000000);
-        freq = Math.max(freq, 100000000);
+        freq = Math.min(freq, 100000000);
         return freq;
     }
 
@@ -71,4 +72,24 @@ public class BigStreamUtil {
 //        return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 
+    public static <T> Stream<T> randomSkipper(Stream<T> stream, int range) {
+        AtomicLong countDown = new AtomicLong(ThreadLocalRandom.current().nextInt(0, range) + 1);
+        return stream.filter(item -> {
+            if (countDown.decrementAndGet() == 0) {
+                countDown.setRelease(ThreadLocalRandom.current().nextInt(0, range) + 1);
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+//    <T> Stream<T> dropWhile(Predicate<? super T> predicate) {
+//        Objects.requireNonNull(predicate);
+//        // Reuses the unordered spliterator, which, when encounter is present,
+//        // is safe to use as long as it configured not to split
+//        return StreamSupport.stream(
+//                new WhileOps.UnorderedWhileSpliterator.OfRef.Dropping<>(spliterator(), true, predicate),
+//                isParallel()).onClose(this::close);
+//    }
 }

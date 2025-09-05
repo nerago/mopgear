@@ -250,22 +250,28 @@ public class Jobs {
     public static void multiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec(itemCache);
         multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
-//        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Expertise, StatType.Haste)); // ring golden stair
+        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
+        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
+
+//        multi.addFixedForge(85991, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Soulgrasp Choker
+//        multi.addFixedForge(86794, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Starcrusher Gauntlets
+
+        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // ring golden stair
 //        multi.addFixedForge(89954, new ReforgeRecipe(StatType.Expertise, StatType.Haste));// warbelt
 
-//        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
 //        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
 
         FindMultiSpec.SpecDetails ret = new FindMultiSpec.SpecDetails(
                 "RET",
                 DataLocation.gearRetFile,
                 ModelCombined.extendedRetModel(true, false),
+                1,
                 new int[]{
 //                        81113, // spike-soled stompers
-//                        88862, // tankiss
-////                        86742, // jasper clawfeet
-////                        81694, // command bracers
-//                        82856, // dark blaze gauntlets
+                        88862, // tankiss
+//                        86742, // jasper clawfeet
+//                        81694, // command bracers
+                        82856, // dark blaze gauntlets
 //                        84950 // pvp belt
                 },
                 false);
@@ -274,21 +280,21 @@ public class Jobs {
                 "PROT-DAMAGE",
                 DataLocation.gearProtFile,
                 ModelCombined.damageProtModel(),
-                new int[]{},
-                false);
+                3,
+                new int[]{}, false);
 
         FindMultiSpec.SpecDetails protDefence = new FindMultiSpec.SpecDetails(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 ModelCombined.defenceProtModel(),
-                new int[]{},
-                false);
+                1,
+                new int[]{}, false);
 
 //        ItemUtil.validateRet(ret.itemOptions);
 //        ItemUtil.validateProt(protDamage.itemOptions);
 //        ItemUtil.validateProt(protDefence.itemOptions);
 
-//        multi.addSpec(ret);
+        multi.addSpec(ret);
         multi.addSpec(protDamage);
         multi.addSpec(protDefence);
 

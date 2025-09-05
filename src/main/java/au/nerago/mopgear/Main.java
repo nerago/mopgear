@@ -59,9 +59,9 @@ public class Main {
     private void launchpad(Instant startTime) {
 //            WowHead.fetchItem(86145);
 
-        multiSpecSolve(startTime);
+//        multiSpecSolve(startTime);
 
-//            reforgeRet(startTime);
+            reforgeRet(startTime);
 //            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //                    reforgeBear(startTime);

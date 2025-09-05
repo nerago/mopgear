@@ -62,7 +62,7 @@ public class StatRequirements {
     public static StatRequirements protFlexibleParry() {
         return new StatRequirements(
                 TARGET_RATING_MELEE, TARGET_RATING_MELEE + DEFAULT_CAP_ALLOW_EXCEED,
-                TARGET_RATING_MELEE, TARGET_RATING_TANK + DEFAULT_CAP_ALLOW_EXCEED,
+                TARGET_RATING_MELEE, TARGET_RATING_TANK,
                 false);
     }
 
@@ -104,7 +104,7 @@ public class StatRequirements {
     private static final int TARGET_RATING_CAST = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_CAST); // 5100
     private static final int TARGET_RATING_CAST_DUNGEON = (int) Math.ceil(RATING_PER_PERCENT * 12); // 4080
 
-    private static final int DEFAULT_CAP_ALLOW_EXCEED = 800;
+    private static final int DEFAULT_CAP_ALLOW_EXCEED = 400;
 
     private final int hitMin, hitMax;
     private final int expertiseMin, expertiseMax;

@@ -1,6 +1,7 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.util.ArrayUtil;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -27,13 +28,21 @@ public class PossibleStreams {
             } else {
                 stream = applyItemsToCombination(stream, slotEntry.getValue());
             }
+            stream = stream.parallel().unordered();
         }
 
         return stream;
     }
 
+    @SuppressWarnings("unchecked")
     private static Stream<Map<Integer, ItemData>> newCombinationStream(List<ItemData> options) {
-        return options.parallelStream().map(forgedItem -> Map.of(forgedItem.id, forgedItem));
+        Map<Integer, ItemData>[] array = (Map<Integer, ItemData>[]) new Map[options.size()];
+        for (int i = 0; i < options.size(); ++i) {
+            ItemData item = options.get(i);
+            array[i] = Map.of(item.id, item);
+        }
+        return ArrayUtil.arrayStream(array);
+//        return options.parallelStream().map(forgedItem -> Map.of(forgedItem.id, forgedItem));
     }
 
     private static Stream<Map<Integer, ItemData>> applyItemsToCombination(Stream<Map<Integer, ItemData>> stream, List<ItemData> options) {
