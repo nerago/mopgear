@@ -31,7 +31,7 @@ public class DefaultEnchants {
             map.put(SlotItem.Wrist, new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0));
             map.put(SlotItem.Hand, new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 0));
             map.put(SlotItem.Leg, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));
-            map.put(SlotItem.Foot, new StatBlock(0, 0, 0, 0, 0, 175, 0, 0, 0, 0));
+            map.put(SlotItem.Foot, new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0));
         } else if (spec == SpecType.PaladinProt) {
             map.put(SlotItem.Shoulder, new StatBlock(0, 300, 0, 0, 0, 0, 0, 100, 0, 0));
             map.put(SlotItem.Back, new StatBlock(0, 200, 0, 0, 0, 0, 0, 0, 0, 0));

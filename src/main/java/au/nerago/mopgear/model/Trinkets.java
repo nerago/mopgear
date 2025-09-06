@@ -19,6 +19,7 @@ public class Trinkets {
         map.put(86131, new TrinketData(Dodge, 3236, 20, 55, 15)); // vial of dragon's 489
         map.put(86042, new TrinketData(Haste, 3595, 15, 60, null)); // jade charioteer 489
         map.put(81138, new TrinketData(Crit, 3386, 30, 115, 15)); // carbonic carbuncle
+        map.put(81268, new TrinketData(Primary, 4232, 20, 120, null)); // lessons of darkmaster
 
         map.put(83731, new TrinketData(Mastery, 1852, 20, 115, 15)); // dunno the details, druid green
         map.put(86792, new TrinketData(Primary, 2866, 20, 55, 15)); // light cosmos 476

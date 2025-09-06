@@ -22,7 +22,7 @@ public class Jobs {
 
     public static void combinationDumb(EquipOptionsMap items, ModelCombined model, Instant startTime) {
         for (int extraId : new int[]{89503, 81129, 89649, 87060, 89665, 82812, 90910, 81284, 82814, 84807, 84870, 84790, 82822}) {
-            ItemData extraItem = addExtra(items, model, extraId, Function.identity(), null, false, true);
+            ItemData extraItem = addExtra(items, model, extraId, Function.identity(), null, false, true, true);
             OutputText.println("EXTRA " + extraItem);
         }
         //        ItemUtil.disenchant(items);
@@ -70,7 +70,7 @@ public class Jobs {
             EquipOptionsMap submitMap = baseOptions.deepClone();
             List<ItemData> optionItems = new ArrayList<>();
             for (int extraId : combo) {
-                ItemData item = addExtra(submitMap, model, extraId, enchants, null, true, true);
+                ItemData item = addExtra(submitMap, model, extraId, enchants, null, true, true, true);
                 optionItems.add(item);
             }
 
@@ -106,10 +106,11 @@ public class Jobs {
             slot = extraItem.slot.toSlotEquip();
 
         EquipOptionsMap runItems = itemOptions.deepClone();
-        extraItem = addExtra(runItems, model, extraItemId, slot, enchanting, null, replace, true);
+        extraItem = addExtra(runItems, model, extraItemId, slot, enchanting, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem);
 
         JobInfo job = new JobInfo();
+//        job.config(model, runItems, startTime, null, adjustment);
         job.config(model, runItems, startTime, BILLION, adjustment);
         Solver.runJob(job);
 
@@ -120,12 +121,12 @@ public class Jobs {
         }
     }
 
-    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot) {
+    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        return addExtra(reforgedItems, model, extraItemId, extraItem.slot.toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot);
+        return addExtra(reforgedItems, model, extraItemId, extraItem.slot.toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
     }
 
-    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot) {
+    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
         extraItem = customiseItem.apply(extraItem);
         ItemData[] extraForged = reforge != null ?
@@ -136,8 +137,12 @@ public class Jobs {
             reforgedItems.put(slot, extraForged);
         } else {
             ItemData[] existing = reforgedItems.get(slot);
-            if (ArrayUtil.anyMatch(existing, item -> item.id == extraItemId))
-                throw new IllegalArgumentException("item already included " + extraItemId + " " + extraItem);
+            if (ArrayUtil.anyMatch(existing, item -> item.id == extraItemId)) {
+                if (errorOnExists)
+                    throw new IllegalArgumentException("item already included " + extraItemId + " " + extraItem);
+                OutputText.println("ALREADY INCLUDED " + extraItem);
+                return null;
+            }
             reforgedItems.put(slot, ArrayUtil.concat(existing, extraForged));
         }
         ItemData[] slotArray = reforgedItems.get(slot);
@@ -158,11 +163,11 @@ public class Jobs {
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, model, true);
 //        Function<ItemData, ItemData> enchant2 = x -> x.changeFixed(new StatBlock(285,90,0,165,0,0,320,0,0,0));
 
-        ItemData extraItem1 = addExtra(runItems, model, extraItemId1, enchant, null, replace, true);
+        ItemData extraItem1 = addExtra(runItems, model, extraItemId1, enchant, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem1);
         OutputText.println();
 
-        ItemData extraItem2 = addExtra(runItems, model, extraItemId2, enchant, null, replace, true);
+        ItemData extraItem2 = addExtra(runItems, model, extraItemId2, enchant, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem2);
         OutputText.println();
 
@@ -193,21 +198,29 @@ public class Jobs {
                 OutputText.println("SKIP DUP " + extraItem);
             } else {
                 if (slot == SlotEquip.Trinket1) {
-                    addExtra(items, model, extraItemId, SlotEquip.Trinket1, enchant, null, false, true);
-                    addExtra(items, model, extraItemId, SlotEquip.Trinket2, enchant, null, false, true);
+                    addExtra(items, model, extraItemId, SlotEquip.Trinket1, enchant, null, false, true, true);
+                    addExtra(items, model, extraItemId, SlotEquip.Trinket2, enchant, null, false, true, true);
                 } else if (slot == SlotEquip.Ring1) {
-                    addExtra(items, model, extraItemId, SlotEquip.Ring1, enchant, null, false, true);
-                    addExtra(items, model, extraItemId, SlotEquip.Ring2, enchant, null, false, true);
+                    addExtra(items, model, extraItemId, SlotEquip.Ring1, enchant, null, false, true, true);
+                    addExtra(items, model, extraItemId, SlotEquip.Ring2, enchant, null, false, true, true);
                 } else {
-                    addExtra(items, model, extraItemId, slot, enchant, null, false, true);
+                    addExtra(items, model, extraItemId, slot, enchant, null, false, true, true);
                 }
             }
         }
 
-        Long runSize = BILLION * 2;
-//                Long runSize = BILLION / 10;
-//        Long runSize = null;
-        Optional<ItemSet> best = Solver.chooseEngineAndRun(model, items, startTime, runSize, null);
+        JobInfo job = new JobInfo();
+        job.model = model;
+        job.itemOptions = items;
+        job.startTime = startTime;
+        job.printRecorder.outputImmediate = true;
+        job.runSize = null;
+//        job.runSize = BILLION;
+//        job.runSize = BILLION / 10;
+        job.adjustment = null;
+        Solver.runJob(job);
+        job.printRecorder.outputNow();
+        Optional<ItemSet> best = job.resultSet;
         outputResultSimple(best, model, true);
     }
 

@@ -262,6 +262,13 @@ public class FindMultiSpec {
                 else
                     OutputText.printf("presetReforge.put(SlotEquip.%s, new ReforgeRecipe(%s, %s));\n", item.slot, item.reforge.source(), item.reforge.dest());
             });
+            OutputText.println();
+            common.values().forEach(item -> {
+                if (item.reforge == null || item.reforge.isNull())
+                    OutputText.printf("map.put(%d, new ReforgeRecipe(null, null));\n", item.id);
+                else
+                    OutputText.printf("map.put(%d, new ReforgeRecipe(%s, %s));\n", item.id, item.reforge.source(), item.reforge.dest());
+            });
         } else {
             OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
         }

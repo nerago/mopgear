@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public class ServiceEntry {
         ItemCache itemCache = new ItemCache(DataLocation.cacheFile);
         Path gearFile = Path.of(params.gearFile);
         ModelCombined model = ModelCombined.load(params.model);
-        EnumMap<SlotEquip, ReforgeRecipe> fixedForges = new EnumMap<>(params.fixedForges);
+        Map<Integer, ReforgeRecipe> fixedForges = new HashMap<>(params.fixedForges);
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, false, gearFile, model.reforgeRules(), fixedForges);
 
         switch (params.jobType) {
@@ -68,7 +69,7 @@ public class ServiceEntry {
     public record ServiceParam(String gearFile,
                                 String bagFile,
                                 ServiceModel model,
-                                Map<SlotEquip, ReforgeRecipe> fixedForges,
+                                Map<Integer, ReforgeRecipe> fixedForges,
                                 boolean challengeModeScaling,
                                 ServiceJobType jobType,
                                 CostedItem[] extraItems,

@@ -3,6 +3,7 @@ package au.nerago.mopgear;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
+import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.*;
 
 import java.util.*;
@@ -10,17 +11,15 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class SolverCapPhased {
-    public static final int TOP_HIT_COMBO_FILTER = 100;
+    public static final int TOP_HIT_COMBO_FILTER = 1000;
     private final ModelCombined model;
     private final StatBlock adjustment;
+    private final PrintRecorder printRecorder;
 
-    // work out hit in a first pass
-    // per item work out values it can contribute, solve on that
-    // then remaining stats
-
-    public SolverCapPhased(ModelCombined model, StatBlock adjustment) {
+    public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder) {
         this.model = model;
         this.adjustment = adjustment;
+        this.printRecorder = printRecorder;
     }
 
     public Optional<ItemSet> runSolver(EquipOptionsMap items) {
@@ -48,15 +47,18 @@ public class SolverCapPhased {
     private Stream<ItemSet> runSolverPartial(EquipOptionsMap items, boolean parallel) {
         List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
 
-//        long estimate = ItemUtil.estimateSets(skinnyOptions);
-//        System.out.printf("SKINNY COMBO %,d\n", estimate);
+        long estimate = ItemUtil.estimateSets(skinnyOptions);
+        printRecorder.printf("SKINNY COMBO %,d\n", estimate);
 
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 
         Stream<SkinnyItemSet> filteredSets = model.statRequirements().filterSetsSkinny(initialSets);
 
-//        ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
-//        filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
+        if (estimate > 1000000) {
+            printRecorder.printf("SKINNY COMBOS TOO BIG JUST CONSIDERING %,d\n", TOP_HIT_COMBO_FILTER);
+            ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
+            filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
+        }
 
         return filteredSets.map(skin -> makeFromSkinny(skin, items));
     }

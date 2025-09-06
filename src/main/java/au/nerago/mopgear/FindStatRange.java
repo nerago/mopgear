@@ -61,16 +61,18 @@ public class FindStatRange {
     private static StatBlock reportAndAdjustHit(ModelCombined model, JobInfo job, Tuple.Tuple2<Integer, Integer> range) {
         int lowAvailable = range.a(), highAvailable = range.b();
         int minTarget = model.statRequirements().getMinimumHit(), maxTarget = model.statRequirements().getMaximumHit();
-        if (highAvailable >= minTarget && lowAvailable <= maxTarget) {
-            return null; // ok
-        } else if (highAvailable < minTarget) {
+        if (highAvailable < minTarget) {
             StatType takeStat = model.statRatings().bestNonHit();
             int need = minTarget - highAvailable;
             job.printf("BAD Hit Low %d-%d NEED %d-%d STEALING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, need, takeStat);
             return StatBlock.of(StatType.Hit, need, takeStat, -need);
+        } else if (lowAvailable > maxTarget) {
+            StatType giveStat = model.statRatings().worstNonHit();
+            int excess = lowAvailable - maxTarget + 1;
+            job.printf("BAD Hit High %d-%d NEED %d-%d GIFTING %d %s\n", lowAvailable, highAvailable, minTarget, maxTarget, excess, giveStat);
+            return StatBlock.of(StatType.Hit, -excess, giveStat, excess);
         } else {
-            job.printf("BAD Hit %d-%d NEED %d-%d\n", lowAvailable, highAvailable, minTarget, maxTarget);
-            throw new RuntimeException("not yet supported");
+            return null; // ok
         }
     }
 
@@ -94,7 +96,7 @@ public class FindStatRange {
     private static ItemSet adjustForCapsFinalSet(EquipMap setItems, ModelCombined model, PrintRecorder print) {
         StatBlock itemTotal = StatBlock.sum(setItems);
         StatBlock adjust = StatBlock.empty;
-        StatType takeStat = model.statRatings().bestNonHit();
+        StatType takeStat = model.statRatings().bestNonHit(), giveStat = model.statRatings().worstNonHit();
 
         int minHit = model.statRequirements().getMinimumHit(), maxHit = model.statRequirements().getMaximumHit();
         int effectiveHit = model.statRequirements().effectiveHit(itemTotal);
@@ -104,8 +106,8 @@ public class FindStatRange {
             adjust = adjust.withChange(StatType.Hit, need, takeStat, -need);
         } else if (minHit != 0 && maxHit != Integer.MAX_VALUE && effectiveHit > maxHit) {
             int excess = effectiveHit - maxHit + 1;
-            print.printf("ADJUST Hit High %d LIMIT %d GIFTING %d %s\n", effectiveHit, maxHit, excess, takeStat);
-            adjust = adjust.withChange(StatType.Hit, -excess, takeStat, excess);
+            print.printf("ADJUST Hit High %d LIMIT %d GIFTING %d %s\n", effectiveHit, maxHit, excess, giveStat);
+            adjust = adjust.withChange(StatType.Hit, -excess, giveStat, excess);
         }
 
         int minExp = model.statRequirements().getMinimumExpertise(), maxExp = model.statRequirements().getMaximumExpertise();
@@ -115,8 +117,8 @@ public class FindStatRange {
             adjust = adjust.withChange(StatType.Expertise, need, takeStat, -need);
         } else if (minExp != 0 && maxExp != Integer.MAX_VALUE && itemTotal.expertise > maxExp) {
             int excess = itemTotal.expertise - maxExp;
-            print.printf("ADJUST Expertise High %d LIMIT %d GIFTING %d %s\n", itemTotal.expertise, maxExp, excess, takeStat);
-            adjust = adjust.withChange(StatType.Expertise, -excess, takeStat, excess);
+            print.printf("ADJUST Expertise High %d LIMIT %d GIFTING %d %s\n", itemTotal.expertise, maxExp, excess, giveStat);
+            adjust = adjust.withChange(StatType.Expertise, -excess, giveStat, excess);
         }
 
         if (adjust == StatBlock.empty) {

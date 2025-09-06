@@ -33,6 +33,10 @@ public class Reforger {
     }
 
     public static ItemData presetReforge(ItemData baseItem, ReforgeRecipe statChange) {
+        if (statChange == null) {
+            return baseItem;
+        }
+
         StatType sourceStat = statChange.source();
         StatType targetStat = statChange.dest();
         if (sourceStat == null && targetStat == null) {

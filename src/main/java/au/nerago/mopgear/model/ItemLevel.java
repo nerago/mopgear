@@ -71,14 +71,16 @@ public class ItemLevel {
 
     public static ItemData scaleForChallengeMode(ItemData item) {
         Integer level = levelLookup.get(item.id);
-        if (level == null) {
-            throw new IllegalArgumentException("item level not known " + item.id + " " + item.toStringExtended());
-        } else if (level != item.itemLevel) {
+        if (level != null && level != item.itemLevel) {
             throw new IllegalArgumentException("item level mismatch " + item.id + " " + item.toStringExtended() + " vs " + level);
+        } else if (level == null) {
+            level = item.itemLevel;
         }
+
         if (level <= CHALLENGE_TARGET_LEVEL) {
             return item;
         }
+
         if (!multiplier.containsKey(level)) {
             throw new IllegalArgumentException("missing level scaling for " + level);
         }

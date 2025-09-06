@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 import au.nerago.mopgear.util.BestHolder;
+import au.nerago.mopgear.util.LowHighHolder;
 
 import java.util.EnumMap;
 
@@ -12,6 +13,7 @@ import static au.nerago.mopgear.domain.StatType.*;
 public abstract class StatRatings {
     protected EnumMap<SocketType, StatBlock> standardGems;
     protected StatType bestNonHit;
+    protected StatType worstNonHit;
 
     public abstract long calcRating(StatBlock totals);
 
@@ -29,13 +31,14 @@ public abstract class StatRatings {
     }
 
     protected void chooseBestStats() {
-        BestHolder<StatType> bestStat = new BestHolder<>();
+        LowHighHolder<StatType> bestStat = new LowHighHolder<>();
         for (StatType stat : StatType.values()) {
             if (stat != Primary && stat != Hit && stat != Expertise) {
                 bestStat.add(stat, calcRating(stat, 1));
             }
         }
-        bestNonHit = bestStat.get();
+        bestNonHit = bestStat.getHigh();
+        worstNonHit = bestStat.getLow();
     }
 
     public StatBlock gemChoice(SocketType socket) {
@@ -44,5 +47,9 @@ public abstract class StatRatings {
 
     public StatType bestNonHit() {
         return bestNonHit;
+    }
+
+    public StatType worstNonHit() {
+        return worstNonHit;
     }
 }

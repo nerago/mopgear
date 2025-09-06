@@ -19,6 +19,7 @@ public class JobInfo {
     public EquipOptionsMap itemOptions;
     public Instant startTime;
     public Long runSize;
+    public boolean forceRandom;
     public boolean singleThread;
     public StatBlock adjustment;
     public ItemData extraItem;

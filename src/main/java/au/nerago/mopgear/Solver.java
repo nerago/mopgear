@@ -22,7 +22,7 @@ public class Solver {
 
         long estimate = ItemUtil.estimateSets(itemOptions);
         Optional<ItemSet> proposed;
-        if (runSize != null && estimate / THRESHOLD_PHASED > runSize) {
+        if (job.forceRandom || (runSize != null && estimate / THRESHOLD_PHASED > runSize)) {
             job.printf("COMBINATIONS estimate=%,d RANDOM SAMPLE %,d\n", estimate, runSize);
             if (job.singleThread)
                 proposed = SolverRandom.runSolverSingleThread(model, itemOptions, adjustment, runSize);
@@ -31,9 +31,9 @@ public class Solver {
         } else {
             job.printf("COMBINATIONS estimate=%,d FULL RUN (phased)\n", estimate);
             if (job.singleThread)
-                proposed = new SolverCapPhased(model, adjustment).runSolverSingleThread(itemOptions);
+                proposed = new SolverCapPhased(model, adjustment, job.printRecorder).runSolverSingleThread(itemOptions);
             else
-                proposed = new SolverCapPhased(model, adjustment).runSolver(itemOptions);
+                proposed = new SolverCapPhased(model, adjustment, job.printRecorder).runSolver(itemOptions);
         }
 
         if (proposed.isEmpty() && job.hackAllow) {

@@ -468,7 +468,7 @@ public class SourcesOfItems {
 
     public static CostedItem[] strengthPlateValorCelestialTank(ItemCache itemCache) {
         CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
-        return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetCelestial());
+        return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetCelestial(), strengthPallyRetSetCelestial());
     }
 
     public static CostedItem[] strengthPlateValorCelestialRet(ItemCache itemCache) {
