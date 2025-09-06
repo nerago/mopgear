@@ -13,7 +13,9 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
                             DefaultEnchants enchants) {
 
     public long calcRating(ItemSet set) {
-        return statRatings.calcRating(set.getTotals());
+        long value = statRatings.calcRating(set.getTotals());
+        value = value * SetBonus.calc(set.items) / SetBonus.DENOMIATOR;
+        return value;
     }
 
     public long calcRating(ItemData it) {

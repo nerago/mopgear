@@ -86,16 +86,25 @@ public class ItemLevel {
         }
 
         double factor = multiplier.get(level);
-        StatBlock stats = item.stat;
+        StatBlock stats = scaleStatBlock(item.stat, factor);
+        if (item.slot != SlotItem.Trinket) {
+            OutputText.println("SCALED " + item.name + " " + stats);
+            return item.changeStats(stats);
+        } else {
+            StatBlock statsFixed = scaleStatBlock(item.statFixed, factor);
+            OutputText.println("SCALED TRINKET " + item.name + " " + stats + " " + statsFixed);
+            return item.changeStats(stats).changeFixed(statsFixed);
+        }
+    }
+
+    private static StatBlock scaleStatBlock(StatBlock stats, double factor) {
         for (StatType type : StatType.values()) {
             double val = stats.get(type);
             if (val != 0) {
                 val *= factor;
                 stats = stats.withChange(type, (int) Math.round(val));
             }
-
         }
-        OutputText.println("SCALED " + item.name + " " + stats);
-        return item.changeStats(stats);
+        return stats;
     }
 }

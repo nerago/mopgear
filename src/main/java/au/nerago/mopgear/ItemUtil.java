@@ -232,8 +232,23 @@ public class ItemUtil {
 
             StatBlock total = StatBlock.empty;
             if (socketSlots != null) {
+                int engineer = 0;
                 for (SocketType type : socketSlots) {
-                    total = total.plus(model.gemChoice(type));
+                    if (type == SocketType.Engineer) {
+                        StatBlock value;
+                        if (engineer == 0)
+                            value = StatBlock.of(StatType.Haste, 600);
+                        else if (engineer == 1)
+                            value = StatBlock.of(StatType.Mastery, 600);
+                        else if (engineer == 2)
+                            value = StatBlock.of(StatType.Crit, 600);
+                        else
+                            throw new IllegalArgumentException("don't know what engineer gem to add");
+                        total = total.plus(value);
+                        engineer++;
+                    } else {
+                        total = total.plus(model.gemChoice(type));
+                    }
                 }
             }
             if (item.socketBonus != 0) {

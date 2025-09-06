@@ -375,13 +375,14 @@ public class Main {
         List<ItemData> inputSetItems = ItemUtil.loadItems(itemCache, itemIds, true);
 
         OutputText.println("FINDING EXPECTED REFORGE IN RAID RET");
-        EquipOptionsMap raidMap = ItemUtil.standardItemsReforgedToMap(model.reforgeRules(), inputSetItems);
+        EquipOptionsMap raidMap = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, commonFixedItems());
         ItemSet raidSet = chooseEngineAndRun(model, raidMap, null, null, null).orElseThrow();
         OutputText.println("FOUND REFORGE RAID RET");
         outputResultSimple(Optional.of(raidSet), model, false);
 
         Map<Integer, ReforgeRecipe> presetReforge = commonFixedItems();
         raidSet.getItems().forEachValue(item -> presetReforge.put(item.id, item.reforge));
+        presetReforge.put(89954, new ReforgeRecipe(Crit, Haste));
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
 
@@ -407,6 +408,8 @@ public class Main {
 //                return extraItem.changeFixed(new StatBlock(170, 0, 0, 0, 160, 60 + 320 + 160, 0, 0, 0, 0));
 //            } else if (extraItem.id == 86145) { // jang-xi devastating legs
 //                return extraItem.changeFixed(new StatBlock(120, 430, 0, 0, 160, 160 * 2, 160, 0, 0, 0));
+            } else if (extraItem.id == 77539) { // engineer helm
+                return extraItem.changeFixed(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
             } else if (extraItem.id == 89503) { // Greenstone Drape
                 return extraItem.changeStats(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
                         .changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
