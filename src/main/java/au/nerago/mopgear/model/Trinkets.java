@@ -5,6 +5,7 @@ import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import static au.nerago.mopgear.domain.StatType.*;
@@ -29,6 +30,14 @@ public class Trinkets {
 
 //        map.put(89080, new TrinketData(Spirit, 3595, 15, 60, null));
         map.put(89080, new TrinketData(Spirit, 0, 15, 60, null)); // nerfed so don't try out on balance
+        map.put(81133, new TrinketData(Primary, 3386, 10, 115, 15)); // doesn't show proc nums
+        map.put(86805, new TrinketData(Primary, 2866, 20, 55, 15)); // doesn't show proc nums
+
+        // some crappy greens druid has
+        map.put(84077, new TrinketData(Haste, 1851, 20, 115, 15)); // doesn't show proc nums
+        map.put(83736, new TrinketData(Spirit, 1852, 20, 115, 15)); // doesn't show proc nums
+        map.put(84071, new TrinketData(Haste, 1851, 20, 55, 15)); // doesn't show proc nums
+        map.put(88585, new TrinketData(Primary, 0, 6, 55, 15)); // doesn't show proc nums
 
         return map;
     }

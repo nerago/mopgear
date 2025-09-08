@@ -11,7 +11,8 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class SolverCapPhased {
-    public static final int TOP_HIT_COMBO_FILTER = 1000;
+//    public static final int TOP_HIT_COMBO_FILTER = 1000;
+    public static final int TOP_HIT_COMBO_FILTER = 400;
     private final ModelCombined model;
     private final StatBlock adjustment;
     private final PrintRecorder printRecorder;

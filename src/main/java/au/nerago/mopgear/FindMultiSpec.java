@@ -8,6 +8,7 @@ import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BigStreamUtil;
 import au.nerago.mopgear.util.TopCollectorReporting;
+import au.nerago.mopgear.util.Tuple;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -44,8 +45,12 @@ public class FindMultiSpec {
         ModelCombined modelNull = ModelCombined.nullMixedModel();
 
         for (SpecDetails spec : specs) {
-            spec.prepare(itemCache);
+            spec.prepareA(itemCache, specs);
         }
+        for (SpecDetails spec : specs) {
+            spec.prepareB(itemCache, specs);
+        }
+
         ItemUtil.validateDualSets(specs.stream().map(s -> s.itemOptions).toList());
 
         Map<Integer, List<ItemData>> commonMap = commonInMultiSet(specs);
@@ -56,7 +61,9 @@ public class FindMultiSpec {
 //        Stream<Map<Integer, ItemData>> commonStream = PossibleStreams.runSolverPartial(commonMap);
 //        commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
 
-        int skip = 15;
+        // PRIMES 7 17 29 41 97 149 251 349 449 743 997 1451 2053 2521 3581 4451 6011 7907
+
+        int skip = 17;
         Stream<Map<Integer, ItemData>> commonStream = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
         commonStream = BigStreamUtil.countProgressSmall(commonCombos / skip, startTime, commonStream);
 
@@ -292,15 +299,43 @@ public class FindMultiSpec {
             this.challengeScale = challengeScale;
         }
 
-        public void prepare(ItemCache itemCache) {
+        public void prepareA(ItemCache itemCache, List<SpecDetails> allSpecs) {
             itemOptions = ItemUtil.readAndLoad(itemCache, false, gearFile, model.reforgeRules(), null);
+        }
+
+        public void prepareB(ItemCache itemCache, List<SpecDetails> allSpecs) {
             for (int itemId : extraItems) {
-                addExtra(itemId);
+                addExtra(itemCache, itemId, allSpecs);
             }
         }
 
-        private void addExtra(int itemId) {
-            ItemData extraItem = ItemUtil.loadItemBasic(Jobs.itemCache, itemId);
+        private void addExtra(ItemCache itemCache, int itemId, List<SpecDetails> allSpecs) {
+            if (!copyFromOtherSpec(itemId, allSpecs)) {
+                loadAndGenerate(itemCache, itemId);
+            }
+        }
+
+        private boolean copyFromOtherSpec(int itemId, List<SpecDetails> allSpecs) {
+            ItemData[] otherCopies = allSpecs.stream()
+                    .flatMap(spec -> spec.itemOptions.entryStream())
+                    .map(Tuple.Tuple2::b)
+                    .flatMap(Arrays::stream)
+                    .filter(item -> item.id == itemId)
+                    .distinct()
+                    .toArray(ItemData[]::new);
+
+            if (otherCopies.length > 0) {
+                SlotEquip slot = otherCopies[0].slot.toSlotEquip();
+                ItemData[] existing = itemOptions.get(slot);
+                itemOptions.put(slot, ArrayUtil.concat(existing, otherCopies));
+                reportNewSlotOptions(slot);
+                return true;
+            }
+            return false;
+        }
+
+        private void loadAndGenerate(ItemCache itemCache, int itemId) {
+            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, itemId);
             extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
             ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
@@ -311,6 +346,10 @@ public class FindMultiSpec {
 
             itemOptions.put(slot, ArrayUtil.concat(existing, extraForged));
 
+            reportNewSlotOptions(slot);
+        }
+
+        private void reportNewSlotOptions(SlotEquip slot) {
             ItemData[] slotArray = itemOptions.get(slot);
             HashSet<Integer> seen = new HashSet<>();
             ArrayUtil.forEach(slotArray, it -> {

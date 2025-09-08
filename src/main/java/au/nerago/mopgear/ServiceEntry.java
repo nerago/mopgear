@@ -80,7 +80,8 @@ public class ServiceEntry {
     public record ServiceModel(List<ServiceWeightStats> weight,
                                 ServiceRequiredStats required,
                                 List<StatType> reforgeTargets,
-                                Map<SlotItem, StatBlock> defaultEnchants) {
+                                Map<SlotItem, StatBlock> defaultEnchants,
+                                boolean blacksmith) {
     }
 
     public enum ServiceJobType {

@@ -9,13 +9,16 @@ import java.util.Map;
 
 public class DefaultEnchants {
     private final Map<SlotItem, StatBlock> map;
+    private final boolean blacksmith;
 
-    public DefaultEnchants(SpecType spec) {
+    public DefaultEnchants(SpecType spec, boolean blacksmith) {
         this.map = known(spec);
+        this.blacksmith = blacksmith;
     }
 
-    public DefaultEnchants(Map<SlotItem, StatBlock> map) {
+    public DefaultEnchants(Map<SlotItem, StatBlock> map, boolean blacksmith) {
         this.map = map;
+        this.blacksmith = blacksmith;
     }
 
     public StatBlock standardEnchant(SlotItem slot) {
@@ -55,5 +58,9 @@ public class DefaultEnchants {
         }
 
         return map;
+    }
+
+    public boolean isBlacksmith() {
+        return blacksmith;
     }
 }

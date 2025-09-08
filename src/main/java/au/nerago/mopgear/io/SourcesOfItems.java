@@ -435,11 +435,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] bagItemsArray(List<Integer> skip) {
-        CostedItem[] bagArray = InputBagsParser.readInput(DataLocation.bagsFile);
-        if (skip == null)
-            return bagArray;
-        else
-            return filterExclude(bagArray, skip);
+        return bagItemsArray(DataLocation.bagsFile, skip);
     }
 
     public static CostedItem[] bagItemsArray(Path file, List<Integer> skip) {
@@ -459,7 +455,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProt(ItemCache itemCache, ModelCombined model) {
-        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtFile, ReforgeRules.ret(), null);
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtDpsFile, ReforgeRules.ret(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].id, 0));

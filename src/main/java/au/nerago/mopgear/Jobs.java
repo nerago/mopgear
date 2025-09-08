@@ -281,8 +281,9 @@ public class Jobs {
                 1,
                 new int[]{
 //                        81113, // spike-soled stompers
-                        88862, // tankiss
-//                        86742, // jasper clawfeet
+//                        88862, // tankiss
+                        86742, // jasper clawfeet
+                        86852, // impaling treads
 //                        81694, // command bracers
                         82856, // dark blaze gauntlets
 //                        84950 // pvp belt
@@ -291,7 +292,7 @@ public class Jobs {
 
         FindMultiSpec.SpecDetails protDamage = new FindMultiSpec.SpecDetails(
                 "PROT-DAMAGE",
-                DataLocation.gearProtFile,
+                DataLocation.gearProtDpsFile,
                 ModelCombined.damageProtModel(),
                 3,
                 new int[]{}, false);

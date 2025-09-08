@@ -224,8 +224,7 @@ public class ItemUtil {
         if (force || item.statFixed.isEmpty()) {
             SocketType[] socketSlots = item.socketSlots;
 
-            // TODO blacksmith only
-            if (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand)
+            if (model.enchants().isBlacksmith() && (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand))
                 socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
             else if (item.slot == SlotItem.Belt)
                 socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
