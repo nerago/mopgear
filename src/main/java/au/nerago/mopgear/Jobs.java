@@ -263,7 +263,7 @@ public class Jobs {
     public static void multiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec(itemCache);
         multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
-        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
+//        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
         multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
 
 //        multi.addFixedForge(85991, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Soulgrasp Choker

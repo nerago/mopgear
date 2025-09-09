@@ -63,7 +63,7 @@ public class FindMultiSpec {
 
         // PRIMES 7 17 29 41 97 149 251 349 449 743 997 1451 2053 2521 3581 4451 6011 7907
 
-        int skip = 17;
+        int skip = 7;
         Stream<Map<Integer, ItemData>> commonStream = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
         commonStream = BigStreamUtil.countProgressSmall(commonCombos / skip, startTime, commonStream);
 

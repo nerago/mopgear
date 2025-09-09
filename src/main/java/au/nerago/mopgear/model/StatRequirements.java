@@ -237,4 +237,8 @@ public class StatRequirements {
     public int getMaximumExpertise() {
         return expertiseMax;
     }
+
+    public boolean hasExpertiseRange() {
+        return expertiseMin != 0 || expertiseMax != Integer.MAX_VALUE;
+    }
 }

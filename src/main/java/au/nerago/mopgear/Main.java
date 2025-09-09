@@ -60,10 +60,10 @@ public class Main {
     private void launchpad(Instant startTime) {
 //            WowHead.fetchItem(86145);
 
-        multiSpecSolve(startTime);
+//        multiSpecSolve(startTime);
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //                    reforgeBear(startTime);
 //            reforgeWarlock(startTime);
@@ -95,15 +95,15 @@ public class Main {
         ModelCombined model = ModelCombined.extendedRetModel(true, true);
 //        ModelCombined model = ModelCombined.priorityRetModel();
 
-//        Map<Integer, ReforgeRecipe> commonItems = commonFixedItems();
-        Map<Integer, ReforgeRecipe> commonItems = null;
+        Map<Integer, ReforgeRecipe> commonItems = commonFixedItems();
+//        Map<Integer, ReforgeRecipe> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
-//        reforgeProcess(items, model, startTime);
-//        new SolverHitCaps(model).solveHitCaps(items);
+        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
+//        reforgeProcessPlus(items, model, startTime, null,89345, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true, 89981, true, true, null);
 //        reforgeProcessPlus(items, model, startTime, null,86683, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true,86145, false, true, new StatBlock(285+80+120,0,0,165,160,160+160,0,0,0));
@@ -114,7 +114,7 @@ public class Main {
 //          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86683,0), new CostedItem(86682,0), new CostedItem(86662,0)});
 //            reforgeProcessRetFixed(model, startTime, true);
 //            reforgeProcessRetFixedAlone(model, startTime, true);
-        reforgeProcessRetChallenge(model, startTime);
+//        reforgeProcessRetChallenge(model, startTime);
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
@@ -146,7 +146,7 @@ public class Main {
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
-//        reforgeProcessPlus(items, model, startTime, null,86683, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, null,89345, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
 //          reforgeProcessPlusPlus(items, model, startTime, 86753, 89075, false, null);
@@ -157,12 +157,13 @@ public class Main {
 //        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray()), model, true, null);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
+        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateMsvHeroicArray()), model, true, null);
 //        findUpgradeSetup(items, strengthPlateMsvArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
-//        findUpgradeSetup(items, strengthPlateValorArray(), model);
-        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
+//        findUpgradeSetup(items, strengthPlateValorArray(), model, true, null);
+//        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
@@ -229,19 +230,20 @@ public class Main {
 
     private static Map<Integer, ReforgeRecipe> commonFixedItems() {
         Map<Integer, ReforgeRecipe> map = new HashMap<>();
-        // 5/9/2025
+        // 9/9/2025
+        map.put(89345, new ReforgeRecipe(null, null));
         map.put(89280, new ReforgeRecipe(Crit, Haste));
-        map.put(85991, new ReforgeRecipe(null, null));
-        map.put(89346, new ReforgeRecipe(Dodge, Haste));
-        map.put(84807, new ReforgeRecipe(Crit, Expertise));
-        map.put(85323, new ReforgeRecipe(Parry, Haste));
-        map.put(89934, new ReforgeRecipe(null, null));
-        map.put(86794, new ReforgeRecipe(Hit, Expertise));
         map.put(86852, new ReforgeRecipe(Hit, Expertise));
+        map.put(84807, new ReforgeRecipe(Crit, Expertise));
+        map.put(85991, new ReforgeRecipe(null, null));
+        map.put(86219, new ReforgeRecipe(Hit, Haste));
+        map.put(86794, new ReforgeRecipe(Hit, Expertise));
         map.put(89069, new ReforgeRecipe(Crit, Haste));
+        map.put(89934, new ReforgeRecipe(null, null));
         map.put(90862, new ReforgeRecipe(null, null));
         map.put(86802, new ReforgeRecipe(null, null));
-        map.put(86219, new ReforgeRecipe(Hit, Haste));
+        map.put(86683, new ReforgeRecipe(Crit, Expertise));
+        map.put(86042, new ReforgeRecipe(null, null));
         return map;
     }
 
@@ -361,7 +363,7 @@ public class Main {
             }
         }
 
-        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirements.retWideCapRange(), model.reforgeRules(), model.enchants());
+        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirements.retWideCapRange(), model.reforgeRules(), model.enchants(), model.useSetBonus());
         Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null, null);
 
         OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");

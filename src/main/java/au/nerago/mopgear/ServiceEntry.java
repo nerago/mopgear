@@ -81,7 +81,8 @@ public class ServiceEntry {
                                 ServiceRequiredStats required,
                                 List<StatType> reforgeTargets,
                                 Map<SlotItem, StatBlock> defaultEnchants,
-                                boolean blacksmith) {
+                                boolean blacksmith,
+                                boolean useSetBonus) {
     }
 
     public enum ServiceJobType {

@@ -98,7 +98,7 @@ public class SolverCapPhased {
                 HashSet<SkinnyItem> slotSet = new HashSet<>();
                 for (ItemData item : fullOptions) {
                     int hit = statRequirements.effectiveHit(item);
-                    int expertise = statRequirements.effectiveExpertise(item);
+                    int expertise = statRequirements.hasExpertiseRange() ? statRequirements.effectiveExpertise(item) : 0;
                     SkinnyItem skinny = new SkinnyItem(slot, hit, expertise);
                     slotSet.add(skinny);
                 }

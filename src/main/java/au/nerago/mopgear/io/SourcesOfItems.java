@@ -84,21 +84,33 @@ public class SourcesOfItems {
     public static CostedItem[] strengthPlateValorArray() {
         CostedItem neckParagonPale = new CostedItem(89066, 1250);
         CostedItem neckBloodseekers = new CostedItem(89064, 1250);
-        CostedItem beltKlaxxiConsumer = new CostedItem(89056, 1750);
-        CostedItem legKovokRiven = new CostedItem(89093, 2500);
-        CostedItem backYiCloakCourage = new CostedItem(89075, 1250);
+        CostedItem ringGoldenStair = new CostedItem(89069, 1250);
+        CostedItem ringAlaniInflexible = new CostedItem(89071, 1250);
+        CostedItem trinkWok = new CostedItem(89083, 1250);
+        CostedItem trinkLaoCourage = new CostedItem(89079, 1250);
         CostedItem headYiLeastFavorite = new CostedItem(89216, 2500);
         CostedItem headVoiceAmpGreathelm = new CostedItem(89280, 2500);
+        CostedItem shoulderStonetoe = new CostedItem(89345, 1250);
+        CostedItem shoulderAutumn = new CostedItem(89346, 1250);
+        CostedItem backYiCloakCourage = new CostedItem(89075, 1250);
+        CostedItem backDarkDisciple = new CostedItem(89074, 1250);
         CostedItem chestDawnblade = new CostedItem(89420, 2500);
         CostedItem chestCuirassTwin = new CostedItem(89421, 2500);
-        CostedItem gloveOverwhelmSwarm = new CostedItem(88746, 1750);
         CostedItem wristBattleShadow = new CostedItem(88880, 1250);
         CostedItem wristBraidedBlackWhite = new CostedItem(88879, 1250);
+        CostedItem gloveOverwhelmSwarm = new CostedItem(88746, 1750);
+        CostedItem gloveStreetfighter = new CostedItem(88747, 1750);
+        CostedItem beltKlaxxiConsumer = new CostedItem(89056, 1750);
+        CostedItem beltKlaxxiRescinder = new CostedItem(89055, 1750);
+        CostedItem legKovokRiven = new CostedItem(89093, 2500);
+        CostedItem legUnscathed = new CostedItem(89095, 2500);
         CostedItem bootYulonGuardian = new CostedItem(88864, 1750);
         CostedItem bootTankissWarstomp = new CostedItem(88862, 1750);
 
-        return new CostedItem[]{neckParagonPale, neckBloodseekers, beltKlaxxiConsumer, legKovokRiven, backYiCloakCourage, headYiLeastFavorite, headVoiceAmpGreathelm, chestDawnblade,
-                chestCuirassTwin, gloveOverwhelmSwarm, wristBattleShadow, wristBraidedBlackWhite, bootYulonGuardian, bootTankissWarstomp};
+        return new CostedItem[]{neckParagonPale, neckBloodseekers, ringGoldenStair, ringAlaniInflexible, trinkWok, trinkLaoCourage,
+                headYiLeastFavorite, headVoiceAmpGreathelm, shoulderStonetoe, shoulderAutumn, backYiCloakCourage, backDarkDisciple,
+                chestDawnblade, chestCuirassTwin, wristBattleShadow, wristBraidedBlackWhite, gloveOverwhelmSwarm, gloveStreetfighter,
+                beltKlaxxiConsumer, beltKlaxxiRescinder, legKovokRiven, legUnscathed, bootYulonGuardian, bootTankissWarstomp,};
     }
 
     public static CostedItem[] strengthPlatePvpArray() {
@@ -120,6 +132,32 @@ public class SourcesOfItems {
                 new CostedItem(84950, 1750),
                 new CostedItem(84985, 1250),
                 new CostedItem(84986, 1250),
+        };
+    }
+
+    public static CostedItem[] strengthPlateTerrace() {
+        return new CostedItem[]{
+                new CostedItem(86230, 501),
+                new CostedItem(86232, 501),
+                new CostedItem(86234, 501),
+                new CostedItem(86233, 501),
+
+                new CostedItem(86325, 502),
+                new CostedItem(86385, 502),
+                new CostedItem(86384, 502),
+                new CostedItem(86322, 502),
+                new CostedItem(86323, 502),
+
+                new CostedItem(86333, 503),
+                new CostedItem(86385, 503),
+                new CostedItem(86384, 503),
+                new CostedItem(85339, 503),
+                new CostedItem(85319, 503),
+                new CostedItem(86336, 503),
+
+                new CostedItem(86387, 504),
+                new CostedItem(85341, 504),
+                new CostedItem(85321, 504),
         };
     }
 
