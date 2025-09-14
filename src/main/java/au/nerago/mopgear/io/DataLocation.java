@@ -12,6 +12,7 @@ public class DataLocation {
     public static final Path weightRetFile = directory.resolve("weight-ret-sim.txt");
     public static final Path bagsFile = directory.resolve("bags-gear-bags.json");
     public static final Path gearBoomFile = directory.resolve("gear-druid-boom.json");
+    public static final Path gearTreeFile = directory.resolve("gear-druid-resto.json");
     public static final Path gearBearFile = directory.resolve("gear-druid-bear.json");
     public static final Path gearWarlockFile = directory.resolve("gear-warlock-destro.json");
     public static final Path gearProtDpsFile = directory.resolve("gear-prot-dps.json");

@@ -1,8 +1,13 @@
 package au.nerago.mopgear.domain;
 
+import au.nerago.mopgear.util.Tuple;
+
 import java.util.Objects;
+import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public final class EquipMap {
     private ItemData head;
@@ -242,5 +247,49 @@ public final class EquipMap {
     @Override
     public int hashCode() {
         return Objects.hash(head, neck, shoulder, back, chest, wrist, hand, belt, leg, foot, ring1, ring2, trinket1, trinket2, weapon, offhand);
+    }
+
+    public Stream<Tuple.Tuple2<SlotEquip, ItemData>> entryStream() {
+        return StreamSupport.stream(new ItemsSpliterator(), true);
+    }
+
+    public boolean validateNoDuplicates() {
+        ItemData t1 = getTrinket1(), t2 = getTrinket2();
+        ItemData r1 = getRing1(), r2 = getRing2();
+        return (t1 == null || t2 == null || t1.id != t2.id) &&
+                (r1 == null || r2 == null || r1.id != r2.id);
+    }
+
+    private class ItemsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, ItemData>> {
+        static final SlotEquip[] slotArray = SlotEquip.values();
+        int index = 0;
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, ItemData>> action) {
+            while (index < slotArray.length) {
+                SlotEquip slot = slotArray[index++];
+                ItemData value = EquipMap.this.get(slot);
+                if (value != null) {
+                    action.accept(Tuple.create(slot, value));
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public Spliterator<Tuple.Tuple2<SlotEquip, ItemData>> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return 16; // might be lower, but good enough
+        }
+
+        @Override
+        public int characteristics() {
+            return Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE;
+        }
     }
 }

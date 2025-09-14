@@ -60,11 +60,13 @@ public class Main {
     private void launchpad(Instant startTime) {
 //            WowHead.fetchItem(86145);
 
-//        multiSpecSolve(startTime);
+//        paladinMultiSpecSolve(startTime);
+//        druidMultiSpecSolve(startTime);
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
+        reforgeTree(startTime);
 //                    reforgeBear(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
@@ -95,12 +97,12 @@ public class Main {
         ModelCombined model = ModelCombined.extendedRetModel(true, true);
 //        ModelCombined model = ModelCombined.priorityRetModel();
 
-        Map<Integer, ReforgeRecipe> commonItems = commonFixedItems();
-//        Map<Integer, ReforgeRecipe> commonItems = null;
+//        Map<Integer, ReforgeRecipe> commonItems = commonFixedItems();
+        Map<Integer, ReforgeRecipe> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
 //        reforgeProcessPlus(items, model, startTime, null,89345, false, true, null);
@@ -119,12 +121,12 @@ public class Main {
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
-//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
+        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
 //        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
-//                findUpgradeSetup(items, strengthPlateCrafted(), model);
+//                findUpgradeSetup(items, streng1111111111111111111111thPlateCrafted(), model);
 
 //        combinationDumb(items, model, startTime);
     }
@@ -149,15 +151,16 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, null,89345, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
-//          reforgeProcessPlusPlus(items, model, startTime, 86753, 89075, false, null);
+//          reforgeProcessPlusPlus(items, model, startTime, 87024, 85339, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86683, 0), new CostedItem(86682, 0), new CostedItem(86662, 0)});
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
 //        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
-//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray()), model, true, null);
+//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear()), model, true, null);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
-        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateMsvHeroicArray()), model, true, null);
+        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
+//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateMsvHeroicArray()), model, true, null);
 //        findUpgradeSetup(items, strengthPlateMsvArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
@@ -204,6 +207,24 @@ public class Main {
 //        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);
     }
 
+    private void reforgeTree(Instant startTime) {
+        ModelCombined model = ModelCombined.standardTreeModel();
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearTreeFile, model.reforgeRules(), null);
+
+//        reforgeProcess(items, model, startTime);
+//        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, true, SlotEquip.Ring2,89968, false, true, null, null);
+//        reforgeProcessPlusPlus(items, model, startTime, 90410, 84833, false, null);
+//        new FindUpgrades(itemCache, model, true).run(items, new Tuple.Tuple2[]{Tuple.create(89089,0)});
+
+       new FindUpgrades(itemCache, model, true).run(items, intellectLeatherValorCelestial(itemCache), null);
+
+//        new FindUpgrades(itemCache, model, true).run(items, bagItemsArray(ignoredItems), null);
+
+//        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
+//        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);
+    }
+
     private void reforgeBear(Instant startTime) {
         ModelCombined model = ModelCombined.standardBearModel();
 //        ItemUtil.forceReload(itemCache, DataLocation.gearBearFile);
@@ -217,8 +238,8 @@ public class Main {
         ModelCombined model = ModelCombined.standardWarlockModel();
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
 
-        reforgeProcess(items, model, startTime);
-//        new FindUpgrades(itemCache, model, true).groupBySlot().run(items, intellectClothValorCelestialP1Array());
+//        reforgeProcess(items, model, startTime);
+        new FindUpgrades(itemCache, model, true).run(items, intellectClothValorCelestialP1Array(), null);
 
 //               Jobs.rankAlternativeCombos(items, model, startTime, List.of(
 //               List.of(90462),
@@ -230,20 +251,19 @@ public class Main {
 
     private static Map<Integer, ReforgeRecipe> commonFixedItems() {
         Map<Integer, ReforgeRecipe> map = new HashMap<>();
-        // 9/9/2025
-        map.put(89345, new ReforgeRecipe(null, null));
-        map.put(89280, new ReforgeRecipe(Crit, Haste));
-        map.put(86852, new ReforgeRecipe(Hit, Expertise));
-        map.put(84807, new ReforgeRecipe(Crit, Expertise));
-        map.put(85991, new ReforgeRecipe(null, null));
-        map.put(86219, new ReforgeRecipe(Hit, Haste));
-        map.put(86794, new ReforgeRecipe(Hit, Expertise));
-        map.put(89069, new ReforgeRecipe(Crit, Haste));
-        map.put(89934, new ReforgeRecipe(null, null));
-        map.put(90862, new ReforgeRecipe(null, null));
-        map.put(86802, new ReforgeRecipe(null, null));
-        map.put(86683, new ReforgeRecipe(Crit, Expertise));
-        map.put(86042, new ReforgeRecipe(null, null));
+        // 11/9/2025
+        map.put(87024, new ReforgeRecipe(Crit, Expertise));       // COMMON 86852 Impaling Treads RET PROT-DEFENCE PROT-DAMAGE
+        map.put(86802, new ReforgeRecipe(null, null));            // COMMON 84807 Malevolent Gladiator's Cloak of Alacrity RET PROT-DAMAGE
+        map.put(86852, new ReforgeRecipe(Hit, Expertise));        // COMMON 86219 Scimitar of Seven Stars PROT-DEFENCE PROT-DAMAGE
+        map.put(84807, new ReforgeRecipe(Crit, Expertise));       // COMMON 86794 Starcrusher Gauntlets PROT-DEFENCE PROT-DAMAGE
+        map.put(85991, new ReforgeRecipe(Hit, Expertise));        // COMMON 89934 Bonded Soul Bracers RET PROT-DEFENCE PROT-DAMAGE
+        map.put(86219, new ReforgeRecipe(Hit, Expertise));        // COMMON 86802 Lei Shen's Final Orders RET PROT-DEFENCE PROT-DAMAGE
+        map.put(86683, new ReforgeRecipe(null, null));            // COMMON 86683 White Tiger Battleplate RET PROT-DAMAGE
+        map.put(85339, new ReforgeRecipe(Hit, Expertise));        // COMMON 85339 White Tiger Pauldrons RET PROT-DEFENCE PROT-DAMAGE
+        map.put(86794, new ReforgeRecipe(Hit, Mastery));          // COMMON 85991 Soulgrasp Choker RET PROT-DEFENCE PROT-DAMAGE
+        map.put(89069, new ReforgeRecipe(Expertise, Haste));      // COMMON 89069 Ring of the Golden Stair RET PROT-DAMAGE
+        map.put(89934, new ReforgeRecipe(null, null));            // COMMON 90862 Seal of the Bloodseeker RET PROT-DEFENCE PROT-DAMAGE
+        map.put(90862, new ReforgeRecipe(null, null));            // COMMON 87024 Nullification Greathelm PROT-DEFENCE PROT-DAMAGE
         return map;
     }
 

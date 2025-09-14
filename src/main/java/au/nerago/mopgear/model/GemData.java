@@ -42,7 +42,7 @@ public class GemData {
         map.put(4854, new StatBlock(0, 180, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(4831, new StatBlock(80, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(4848, new StatBlock(120, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4858, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+        map.put(4858, new StatBlock(0, 0, 0, 0, 0, 180, 0, 0, 0, 0));
         map.put(4852, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 120));
         map.put(4842, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(4863, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
@@ -89,6 +89,8 @@ public class GemData {
         map.put(76627, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
         map.put(76693, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
         map.put(76593, new StatBlock(0, 0, 0, 160, 0, 0, 160, 0, 0, 0));
+        map.put(76606, new StatBlock(80, 0, 160, 0, 0, 0, 0, 0, 0, 0));
+        map.put(76668, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
     }
 
     private static void gemsEngineering(Map<Integer, StatBlock> map) {
@@ -104,7 +106,6 @@ public class GemData {
         map.put(68778, new StatBlock(54, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76886, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76885, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(76668, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76895, new StatBlock(0, 324, 0, 0, 0, 0, 0, 0, 0, 0)); // tank meta, stam
     }
 

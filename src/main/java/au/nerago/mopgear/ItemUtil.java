@@ -179,7 +179,7 @@ public class ItemUtil {
                     if (val == null) {
                         seen.put(itemId, slot);
                     } else if (val != slot) {
-                        throw new IllegalArgumentException("duplicate in non matching slot");
+                        throw new IllegalArgumentException("duplicate in non matching slot " + item);
                     }
                 }
             });

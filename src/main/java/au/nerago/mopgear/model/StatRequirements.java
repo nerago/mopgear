@@ -4,9 +4,10 @@ import au.nerago.mopgear.SolverCapPhased;
 import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.ItemSet;
 import au.nerago.mopgear.ServiceEntry;
-import au.nerago.mopgear.domain.EquipMap;
 import au.nerago.mopgear.domain.StatBlock;
 
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
 public class StatRequirements {
@@ -24,6 +25,8 @@ public class StatRequirements {
         this.expertiseMin = expertiseMin;
         this.expertiseMax = expertiseMax;
         this.combineHitLike = combineHitLike;
+        if (combineHitLike && expertiseMin != 0)
+            throw new IllegalArgumentException("expect either expertise requirement or combined hit, not both");
     }
 
     public StatRequirements(int hitMin, int hitMax, boolean combineHitLike) {
@@ -111,11 +114,15 @@ public class StatRequirements {
     private final boolean combineHitLike;
 
     public int effectiveHit(StatBlock totals) {
-        return combineHitLike ? totals.hit + totals.expertise + totals.spirit : totals.hit;
+        return hitMin == 0 ? 0
+                : combineHitLike ? totals.hit + totals.expertise + totals.spirit
+                : totals.hit;
     }
 
     public int effectiveHit(ItemData item) {
-        if (combineHitLike) {
+        if (hitMin == 0) {
+            return 0;
+        } else if (combineHitLike) {
             return item.stat.hit + item.statFixed.hit +
                    item.stat.expertise + item.statFixed.expertise +
                    item.stat.spirit + item.statFixed.spirit;
@@ -125,23 +132,29 @@ public class StatRequirements {
     }
 
     public int effectiveExpertise(ItemData item) {
-        if (combineHitLike) {
+        if (combineHitLike || !hasExpertiseRange()) {
             return 0;
         } else {
             return item.stat.expertise + item.statFixed.expertise;
         }
     }
 
-    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
-        return stream.filter(this::filter);
+    public ToIntFunction<StatBlock> effectiveHitFunc() {
+        return combineHitLike
+                ? totals -> totals.hit + totals.expertise + totals.spirit
+                : totals -> totals.hit;
     }
 
-    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
-        return stream.filter(set -> inRangeMax(set.getTotals()) && noDuplicates(set.items));
-    }
+//    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
+//        return stream.filter(this::filter);
+//    }
+//
+//    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
+//        return stream.filter(set -> inRangeMax(set.getTotals()) && noDuplicates(set.items));
+//    }
 
     public boolean filter(ItemSet set) {
-        return inRange(set.getTotals()) && noDuplicates(set.items);
+        return inRange(set.getTotals()) && set.items.validateNoDuplicates();
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -170,6 +183,116 @@ public class StatRequirements {
                 return false;
         }
         return true;
+    }
+
+    public Stream<ItemSet> filterSets(Stream<ItemSet> setStream) {
+        final int minHit = hitMin, maxHit = hitMax;
+        final int minExp = expertiseMin, maxExp = expertiseMax;
+
+        if (minExp != 0 && maxExp != Integer.MAX_VALUE && minHit != 0 && maxHit != Integer.MAX_VALUE) {
+            return setStream.filter(set -> {
+                StatBlock stats = set.getTotals();
+                int hit = stats.hit, expertise = stats.expertise;
+                return hit >= minHit && hit <= maxHit && expertise >= minExp && expertise <= maxExp;
+            });
+        }
+
+        if (combineHitLike) {
+            if (minHit != 0 && maxHit != Integer.MAX_VALUE) {
+                setStream = setStream.filter(set -> {
+                    StatBlock stats = set.getTotals();
+                    int hit = stats.hit + stats.expertise + stats.spirit;
+                    return hit >= minHit && hit <= maxHit;
+                });
+            } else if (minHit != 0) {
+                setStream = setStream.filter(set -> {
+                    StatBlock stats = set.getTotals();
+                    int hit = stats.hit + stats.expertise + stats.spirit;
+                    return hit >= minHit;
+                });
+            } else if (maxHit != Integer.MAX_VALUE) {
+                setStream = setStream.filter(set -> {
+                    StatBlock stats = set.getTotals();
+                    int hit = stats.hit + stats.expertise + stats.spirit;
+                    return hit <= maxHit;
+                });
+            }
+        } else {
+            if (minHit != 0 && maxHit != Integer.MAX_VALUE) {
+                setStream = setStream.filter(set -> {
+                    StatBlock stats = set.getTotals();
+                    int hit = stats.hit;
+                    return hit >= minHit && hit <= maxHit;
+                });
+            } else if (minHit != 0) {
+                setStream = setStream.filter(set -> {
+                    StatBlock stats = set.getTotals();
+                    int hit = stats.hit;
+                    return hit >= minHit;
+                });
+            } else if (maxHit != Integer.MAX_VALUE) {
+                setStream = setStream.filter(set -> {
+                    StatBlock stats = set.getTotals();
+                    int hit = stats.hit;
+                    return hit <= maxHit;
+                });
+            }
+        }
+
+        if (minExp != 0 && maxExp != Integer.MAX_VALUE) {
+            setStream = setStream.filter(set -> {
+                StatBlock stats = set.getTotals();
+                int expertise = stats.expertise;
+                return expertise >= minExp && expertise <= maxExp;
+            });
+        } else if (minExp != 0) {
+            setStream = setStream.filter(set -> {
+                StatBlock stats = set.getTotals();
+                int expertise = stats.expertise;
+                return expertise >= minExp;
+            });
+        } else if (maxExp != Integer.MAX_VALUE) {
+            setStream = setStream.filter(set -> {
+                StatBlock stats = set.getTotals();
+                int expertise = stats.expertise;
+                return expertise <= maxExp;
+            });
+        }
+
+        return setStream;
+    }
+
+    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> setStream) {
+        final int maxHit = hitMax;
+        final int maxExp = expertiseMax;
+
+        if (combineHitLike) {
+            if (maxHit != Integer.MAX_VALUE) {
+                setStream = setStream.filter(set -> {
+                    StatBlock stats = set.getTotals();
+                    int hit = stats.hit + stats.expertise + stats.spirit;
+                    return hit <= maxHit;
+                });
+            }
+        } else {
+            if (maxHit != Integer.MAX_VALUE) {
+                setStream = setStream.filter(set -> {
+                    StatBlock stats = set.getTotals();
+                    int hit = stats.hit;
+                    return hit <= maxHit;
+                });
+            }
+        }
+
+        if (maxExp != Integer.MAX_VALUE) {
+            setStream = setStream.filter(set -> {
+                StatBlock stats = set.getTotals();
+                int expertise = stats.expertise;
+                return expertise <= maxExp;
+            });
+        }
+
+        return setStream;
     }
 
     public Stream<SolverCapPhased.SkinnyItemSet> filterSetsSkinny(Stream<SolverCapPhased.SkinnyItemSet> setStream) {
@@ -213,13 +336,6 @@ public class StatRequirements {
         } else {
             return setStream;
         }
-    }
-
-    private boolean noDuplicates(EquipMap items) {
-        ItemData t1 = items.getTrinket1(), t2 = items.getTrinket2();
-        ItemData r1 = items.getRing1(), r2 = items.getRing2();
-        return (t1 == null || t2 == null || t1.id != t2.id) &&
-                (r1 == null || r2 == null || r1.id != r2.id);
     }
 
     public int getMinimumHit() {

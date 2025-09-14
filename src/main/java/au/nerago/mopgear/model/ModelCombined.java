@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.stream.Stream;
 
+import static au.nerago.mopgear.domain.StatType.*;
+
 @SuppressWarnings("unused")
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
                             DefaultEnchants enchants, boolean useSetBonus) {
@@ -55,11 +57,11 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
 
     private static EnumMap<SocketType, StatBlock> protGems() {
         EnumMap<SocketType, StatBlock> gems = new EnumMap<>(SocketType.class);
-        gems.put(SocketType.Red, StatBlock.of(StatType.Haste, 160, StatType.Expertise, 160));
-        gems.put(SocketType.Blue, StatBlock.of(StatType.Haste, 160, StatType.Hit, 160));
-        gems.put(SocketType.Yellow, StatBlock.of(StatType.Haste, 320));
-        gems.put(SocketType.General, StatBlock.of(StatType.Haste, 320));
-        gems.put(SocketType.Meta, StatBlock.of(StatType.Primary, 216));
+        gems.put(SocketType.Red, StatBlock.of(Haste, 160, Expertise, 160));
+        gems.put(SocketType.Blue, StatBlock.of(Haste, 160, Hit, 160));
+        gems.put(SocketType.Yellow, StatBlock.of(Haste, 320));
+        gems.put(SocketType.General, StatBlock.of(Haste, 320));
+        gems.put(SocketType.Meta, StatBlock.of(Primary, 216));
         return gems;
     }
 
@@ -81,8 +83,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
 //        StatRatings statMix = StatRatingsWeightsMix.mix(statMitigation, 3, statDps, 17, protGems()); // 90% dps
         EnumMap<SocketType, StatBlock> standardGems = protGems();
         StatRatings statMix = StatRatingsWeights.mix(statMitigation, 15, statDps, 10, standardGems); // 50% dps
-//        StatRatings statMix = new StatRatingsPriority(new StatType[] {StatType.Haste, StatType.Mastery, StatType.Dodge, StatType.Crit});
-//        StatRatings statMix = new StatRatingsPriority(new StatType[] {StatType.Haste, StatType.Crit, StatType.Mastery, StatType.Dodge});
+//        StatRatings statMix = new StatRatingsPriority(new StatType[] {Haste, Mastery, Dodge, Crit});
+//        StatRatings statMix = new StatRatingsPriority(new StatType[] {Haste, Crit, Mastery, Dodge});
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt, true);
         ReforgeRules reforge = ReforgeRules.prot();
@@ -109,7 +111,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined priorityRetModel() {
-        StatRatings statRatings = new StatRatingsPriority(new StatType[]{StatType.Primary, StatType.Haste, StatType.Mastery, StatType.Crit});
+        StatRatings statRatings = new StatRatingsPriority(new StatType[]{Primary, Haste, Mastery, Crit});
         StatRequirements statRequirements = StatRequirements.retWideCapRange();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.retExtended();
@@ -120,6 +122,13 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBoomFile);
         StatRequirements statRequirements = StatRequirements.druidBalance();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false); // TODO check same
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, true);
+    }
+
+    public static ModelCombined standardTreeModel() {
+        StatRatings statRatings = new StatRatingsPriorityBreaks(Haste, 3043, new StatType[] {Spirit, Mastery, Crit});
+        StatRequirements statRequirements = StatRequirements.zero();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, true);
     }
 

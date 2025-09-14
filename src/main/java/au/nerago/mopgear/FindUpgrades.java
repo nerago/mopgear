@@ -156,16 +156,16 @@ public class FindUpgrades {
         double factor = resultItem.factor;
         int cost = resultItem.cost;
         String stars = ArrayUtil.repeat('*', resultItem.hackCount);
-        if (factor > 1.0) {
-            double plusPercent = (factor - 1.0) * 100;
+        double plusPercent = (factor - 1.0) * 100;
+        if (plusPercent > 0.0) {
             if (cost >= 10) {
                 double plusPerCost = plusPercent / cost;
-                OutputText.printf("%10s \t%d \t%35s \t$%d \t%1.3f%s \t+%2.1f%%\t %1.4f\n", item.slot, item.itemLevel, item.name, cost, factor, stars, plusPercent, plusPerCost);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\t %1.4f\n", item.slot, item.itemLevel, item.name, cost, plusPercent, stars, plusPerCost);
             } else {
-                OutputText.printf("%10s \t%d \t%35s \t$%d \t%1.3f%s \t+%2.1f%%\n", item.slot, item.itemLevel, item.name, cost, factor, stars, plusPercent);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\n", item.slot, item.itemLevel, item.name, cost, plusPercent, stars);
             }
         } else {
-            OutputText.printf("%10s \t%d \t%35s \t$%d \t%1.3f%s\n", item.slot, item.itemLevel, item.name, cost, factor, stars);
+            OutputText.printf("%10s \t%d \t%35s \t$%d \t%2.2f%% %s\n", item.slot, item.itemLevel, item.name, cost, plusPercent, stars);
         }
     }
 

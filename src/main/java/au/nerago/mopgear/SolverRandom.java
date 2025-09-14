@@ -14,9 +14,13 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
 public class SolverRandom {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
-        Stream<ItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
-        return finalSets.max(Comparator.comparingLong(model::calcRating));
+    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count, boolean parallel) {
+        if (parallel) {
+            Stream<ItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
+            return finalSets.max(Comparator.comparingLong(model::calcRating));
+        } else {
+            return runSolverSingleThread(model, items, adjustment, count);
+        }
     }
 
     public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {

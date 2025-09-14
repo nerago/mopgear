@@ -16,6 +16,8 @@ public class SolverCapPhased {
     private final ModelCombined model;
     private final StatBlock adjustment;
     private final PrintRecorder printRecorder;
+    private EquipOptionsMap fullItems;
+    private List<SkinnyItem[]> skinnyOptions;
 
     public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder) {
         this.model = model;
@@ -23,18 +25,17 @@ public class SolverCapPhased {
         this.printRecorder = printRecorder;
     }
 
-    public Optional<ItemSet> runSolver(EquipOptionsMap items) {
-        try {
-            Stream<ItemSet> finalSets = runSolverPartial(items, true);
-            return BigStreamUtil.findBest(model, finalSets);
-        } finally {
-            postSolve();
-        }
+    public long initAndCheckSizes(EquipOptionsMap items) {
+        fullItems = items;
+        skinnyOptions = convertToSkinny(items);
+
+        long estimate = ItemUtil.estimateSets(skinnyOptions);
+        return estimate;
     }
 
-    public Optional<ItemSet> runSolverSingleThread(EquipOptionsMap items) {
+    public Optional<ItemSet> runSolver(boolean parallel, boolean topCombosOnly) {
         try {
-            Stream<ItemSet> finalSets = runSolverPartial(items, false);
+            Stream<ItemSet> finalSets = runSolverPartial(parallel, topCombosOnly);
             return BigStreamUtil.findBest(model, finalSets);
         } finally {
             postSolve();
@@ -45,33 +46,28 @@ public class SolverCapPhased {
 //        System.out.printf("PHASED COUNTS est=%d init=%d filter=%d filter2=%d\n", estimate, initCount.get(), filterCount.get(), filter2Count.get());
     }
 
-    private Stream<ItemSet> runSolverPartial(EquipOptionsMap items, boolean parallel) {
-        List<SkinnyItem[]> skinnyOptions = convertToSkinny(items);
-
-        long estimate = ItemUtil.estimateSets(skinnyOptions);
-        printRecorder.printf("SKINNY COMBO %,d\n", estimate);
-
+    private Stream<ItemSet> runSolverPartial(boolean parallel, boolean topCombosOnly) {
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 
         Stream<SkinnyItemSet> filteredSets = model.statRequirements().filterSetsSkinny(initialSets);
 
-        if (estimate > 1000000) {
+        if (topCombosOnly) {
             printRecorder.printf("SKINNY COMBOS TOO BIG JUST CONSIDERING %,d\n", TOP_HIT_COMBO_FILTER);
             ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
             filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
         }
 
-        return filteredSets.map(skin -> makeFromSkinny(skin, items));
+        return filteredSets.map(this::makeFromSkinny);
     }
 
-    private ItemSet makeFromSkinny(SkinnyItemSet skinnySet, EquipOptionsMap fullItemOptions) {
+    private ItemSet makeFromSkinny(SkinnyItemSet skinnySet) {
         StatRequirements statReq = model.statRequirements();
         EquipMap chosenItems = EquipMap.empty();
         CurryQueue<SkinnyItem> itemQueue = skinnySet.items;
         while (itemQueue != null) {
             SkinnyItem skinny = itemQueue.item();
             SlotEquip slot = skinny.slot;
-            ItemData[] fullSlotItems = fullItemOptions.get(slot);
+            ItemData[] fullSlotItems = fullItems.get(slot);
 
             BestHolder<ItemData> bestSlotItem = new BestHolder<>();
             for (ItemData item : fullSlotItems) {
@@ -98,7 +94,7 @@ public class SolverCapPhased {
                 HashSet<SkinnyItem> slotSet = new HashSet<>();
                 for (ItemData item : fullOptions) {
                     int hit = statRequirements.effectiveHit(item);
-                    int expertise = statRequirements.hasExpertiseRange() ? statRequirements.effectiveExpertise(item) : 0;
+                    int expertise = statRequirements.effectiveExpertise(item);
                     SkinnyItem skinny = new SkinnyItem(slot, hit, expertise);
                     slotSet.add(skinny);
                 }

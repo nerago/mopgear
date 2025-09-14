@@ -260,16 +260,16 @@ public class Jobs {
         FindStatRange.checkSetReportOnly(model, runItems, job);
     }
 
-    public static void multiSpecSolve(Instant startTime) {
+    public static void paladinMultiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec(itemCache);
-        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+//        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
-        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
+//        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
 
 //        multi.addFixedForge(85991, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Soulgrasp Choker
 //        multi.addFixedForge(86794, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Starcrusher Gauntlets
 
-        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // ring golden stair
+//        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // ring golden stair
 //        multi.addFixedForge(89954, new ReforgeRecipe(StatType.Expertise, StatType.Haste));// warbelt
 
 //        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
@@ -280,13 +280,17 @@ public class Jobs {
                 ModelCombined.extendedRetModel(true, false),
                 1,
                 new int[]{
-//                        81113, // spike-soled stompers
-//                        88862, // tankiss
-                        86742, // jasper clawfeet
-                        86852, // impaling treads
-//                        81694, // command bracers
-                        82856, // dark blaze gauntlets
-//                        84950 // pvp belt
+////                        81113, // spike-soled stompers
+////                        88862, // tankiss
+//                        86742, // jasper clawfeet
+//                        86852, // impaling treads
+////                        81694, // command bracers
+////                        82856, // dark blaze gauntlets
+////                        84950 // pvp belt
+////                        86753, // cloak peacock feathers
+//                        89954, // warbelt pods
+//                        87060, // star-stealer waist
+//                        89280 // voice helm
                 },
                 false);
 
@@ -295,14 +299,31 @@ public class Jobs {
                 DataLocation.gearProtDpsFile,
                 ModelCombined.damageProtModel(),
                 3,
-                new int[]{}, false);
+                new int[]{
+//                        88862, // tankiss
+//                        84870, // pvp legs
+//                        87060, // star waistguard
+//                        86682, // white tiger gloves
+//                        86753, // peacock cloak
+//                        89345, // stonetoe spaulders
+//                        86680, // white tiger legs
+                }, false);
 
         FindMultiSpec.SpecDetails protDefence = new FindMultiSpec.SpecDetails(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 ModelCombined.defenceProtModel(),
                 1,
-                new int[]{}, false);
+                new int[]{
+//                        89280, // voice amp
+////                        87024, // null greathelm
+//                        89345, // autumn shoulder
+////                        85339, // white tiger pauldrons
+////                        89345, // stonetoe spaulders
+//                        82980, // gauntlets ancient steel
+//                        85983, // bracers six oxen
+//                        89075, // yi cloak
+                }, false);
 
 //        ItemUtil.validateRet(ret.itemOptions);
 //        ItemUtil.validateProt(protDamage.itemOptions);
@@ -317,11 +338,30 @@ public class Jobs {
         multi.solve(startTime);
     }
 
-//        Jobs.addExtra(retMap, modelRet, 81113, enchant, null, false, false); // spike boots
-//        Jobs.addExtra(retMap, modelRet, 88862, enchant, null, false, false); // tankiss
-//        Jobs.addExtra(retMap, modelRet, 86742, enchant, null, false, false); // jasper clawfeet
-////        Jobs.addExtra(retMap, modelRet, 89075, enchant, null, false, false); // yi's cloak
-////        Jobs.addExtra(retMap, modelRet, 81694, enchant, null, false, false); // command bracer
-//        Jobs.addExtra(retMap, modelRet, 82856, enchant, null, false, false); // dark blaze gloves
+    public static void druidMultiSpecSolve(Instant startTime) {
+        FindMultiSpec multi = new FindMultiSpec(itemCache);
+
+        FindMultiSpec.SpecDetails boom = new FindMultiSpec.SpecDetails(
+                "BOOM",
+                DataLocation.gearBoomFile,
+                ModelCombined.standardBoomModel(),
+                177,
+                new int[]{
+                },
+                false);
+
+        FindMultiSpec.SpecDetails tree = new FindMultiSpec.SpecDetails(
+                "TREE",
+                DataLocation.gearTreeFile,
+                ModelCombined.standardTreeModel(),
+                1,
+                new int[]{
+                }, false);
+
+        multi.addSpec(boom);
+        multi.addSpec(tree);
+
+        multi.solve(startTime);
+    }
 
 }

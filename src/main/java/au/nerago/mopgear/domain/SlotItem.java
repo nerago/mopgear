@@ -17,6 +17,9 @@ public enum SlotItem {
     Weapon(13, SlotEquip.Weapon), // 1H
     Offhand(14, SlotEquip.Offhand);
 
+    public static final SlotEquip[] ALL_RINGS = {SlotEquip.Ring1, SlotEquip.Ring2};
+    public static final SlotEquip[] ALL_TRINKETS = {SlotEquip.Trinket1, SlotEquip.Trinket2};
+
     private final int wowHeadSlotNum;
     private final SlotEquip slotEquip;
 
@@ -43,5 +46,19 @@ public enum SlotItem {
 
     public SlotEquip toSlotEquip() {
         return slotEquip;
+    }
+
+    public SlotEquip[] toSlotEquipOptions() {
+        switch (this) {
+            case Ring -> {
+                return ALL_RINGS;
+            }
+            case Trinket -> {
+                return ALL_TRINKETS;
+            }
+            default -> {
+                return new SlotEquip[] { this.slotEquip };
+            }
+        }
     }
 }

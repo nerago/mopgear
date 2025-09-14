@@ -17,8 +17,10 @@ public class Tweaker {
             EquipMap baseItems = best.get().getItems();
             ItemData existing = baseItems.get(slot);
             ItemData[] slotItems = items.get(slot);
-            if (existing == null ^ slotItems == null) {
-                throw new IllegalStateException();
+            if (existing == null && slotItems != null) {
+                throw new IllegalStateException("options offered for slot " + slot + " but existing set has as empty");
+            } else if (existing != null && slotItems == null) {
+                throw new IllegalStateException("no options offered for slot " + slot + " but existing set has " + existing);
             } else if (existing == null) {
                 continue;
             }

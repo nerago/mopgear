@@ -5,10 +5,7 @@ import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
-import au.nerago.mopgear.util.ArrayUtil;
-import au.nerago.mopgear.util.BigStreamUtil;
-import au.nerago.mopgear.util.TopCollectorReporting;
-import au.nerago.mopgear.util.Tuple;
+import au.nerago.mopgear.util.*;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -61,9 +58,10 @@ public class FindMultiSpec {
 //        Stream<Map<Integer, ItemData>> commonStream = PossibleStreams.runSolverPartial(commonMap);
 //        commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
 
-        // PRIMES 7 17 29 41 97 149 251 349 449 743 997 1451 2053 2521 3581 4451 6011 7907
+        // PRIMES 7 17 29 41 97 149 251 349 449 743 997 1451 2053 2521 3581 4451 6011 7907 1234543 123456761 1234567669
 
-        int skip = 7;
+        int skip = 349;
+//        int skip = 1234567669;
         Stream<Map<Integer, ItemData>> commonStream = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
         commonStream = BigStreamUtil.countProgressSmall(commonCombos / skip, startTime, commonStream);
 
@@ -117,7 +115,15 @@ public class FindMultiSpec {
             }
         }
 
-        for (List<ItemData> lst : commonOptions.values()) {
+        for (Map.Entry<Integer, List<ItemData>> entry : commonOptions.entrySet()) {
+            List<ItemData> lst = entry.getValue();
+            if (lst.isEmpty()) {
+                int itemId = entry.getKey();
+                Optional<ItemData> any = mapArray.stream().flatMap(x -> x.itemOptions.entryStream().map(Tuple.Tuple2::b))
+                        .flatMap(Arrays::stream).filter(item -> item.id == itemId).findFirst();
+                throw new IllegalArgumentException("No common forge for " + any);
+            }
+
             ItemData item = lst.getFirst();
             Set<String> specs = seenIn.get(item.id);
             OutputText.println("COMMON " + item.id + " " + item.name + " " + String.join(" ", specs));
@@ -155,6 +161,20 @@ public class FindMultiSpec {
             }
         }
         return common;
+    }
+
+    private void filterCommonActuallyUsed(Map<Integer, ItemData> common, List<JobInfo> resultJobs) {
+        common.entrySet().removeIf(entry -> {
+                    int itemId = entry.getKey();
+                    long count = resultJobs.stream().flatMap(job -> job.resultSet.orElseThrow()
+                                    .items.entryStream().map(Tuple.Tuple2::b))
+                            .filter(item -> item.id == itemId)
+                            .count();
+                    if (count < 2)
+                        OutputText.println("REMOVING COMMON " + entry.getValue());
+                    return count < 2;
+                }
+        );
     }
 
     private ProposedResults subSolveEach(Map<Integer, ItemData> commonChoices, List<SpecDetails> specList) {
@@ -260,21 +280,15 @@ public class FindMultiSpec {
             }
 
             OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
+            filterCommonActuallyUsed(common, resultJobs);
             common.values().forEach(item -> OutputText.println(item.toString()));
 
             OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
             common.values().forEach(item -> {
                 if (item.reforge == null || item.reforge.isNull())
-                    OutputText.printf("presetReforge.put(SlotEquip.%s, new ReforgeRecipe(null, null));\n", item.slot);
+                    OutputText.printf("map.put(%d, new ReforgeRecipe(null, null)); // %s %s\n", item.id, item.slot, item.name);
                 else
-                    OutputText.printf("presetReforge.put(SlotEquip.%s, new ReforgeRecipe(%s, %s));\n", item.slot, item.reforge.source(), item.reforge.dest());
-            });
-            OutputText.println();
-            common.values().forEach(item -> {
-                if (item.reforge == null || item.reforge.isNull())
-                    OutputText.printf("map.put(%d, new ReforgeRecipe(null, null));\n", item.id);
-                else
-                    OutputText.printf("map.put(%d, new ReforgeRecipe(%s, %s));\n", item.id, item.reforge.source(), item.reforge.dest());
+                    OutputText.printf("map.put(%d, new ReforgeRecipe(%s, %s)); // %s %s\n", item.id, item.reforge.source(), item.reforge.dest(), item.slot, item.name);
             });
         } else {
             OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
@@ -310,8 +324,19 @@ public class FindMultiSpec {
         }
 
         private void addExtra(ItemCache itemCache, int itemId, List<SpecDetails> allSpecs) {
+            verifyNotAlreadyIncluded(itemCache, itemId);
             if (!copyFromOtherSpec(itemId, allSpecs)) {
                 loadAndGenerate(itemCache, itemId);
+            }
+        }
+
+        private void verifyNotAlreadyIncluded(ItemCache itemCache, int itemId) {
+            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, itemId);
+            SlotEquip[] slots = extraItem.slot.toSlotEquipOptions();
+            for (SlotEquip slot : slots) {
+                ItemData[] existing = itemOptions.get(slot);
+                if (ArrayUtil.anyMatch(existing, item -> item.id == itemId))
+                    throw new IllegalArgumentException("{SET " + label + "} item already included " + itemId + " " + extraItem);
             }
         }
 
@@ -339,14 +364,12 @@ public class FindMultiSpec {
             extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
             ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
-            SlotEquip slot = extraItem.slot.toSlotEquip(); // no smarts for rings/trinkets here
-            ItemData[] existing = itemOptions.get(slot);
-            if (ArrayUtil.anyMatch(existing, item -> item.id == itemId))
-                throw new IllegalArgumentException("item already included " + itemId + " " + extraItem);
-
-            itemOptions.put(slot, ArrayUtil.concat(existing, extraForged));
-
-            reportNewSlotOptions(slot);
+            SlotEquip[] slotOptions = extraItem.slot.toSlotEquipOptions();
+            for (SlotEquip slot : slotOptions) {
+                ItemData[] existing = itemOptions.get(slot);
+                itemOptions.put(slot, ArrayUtil.concat(existing, extraForged));
+                reportNewSlotOptions(slot);
+            }
         }
 
         private void reportNewSlotOptions(SlotEquip slot) {

@@ -2,6 +2,12 @@ package au.nerago.mopgear.domain;
 
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.util.Tuple;
+
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public final class ItemSet {
     public final EquipMap items;
