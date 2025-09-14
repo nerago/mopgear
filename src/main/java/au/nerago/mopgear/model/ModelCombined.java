@@ -126,7 +126,12 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public static ModelCombined standardTreeModel() {
-        StatRatings statRatings = new StatRatingsPriorityBreaks(Haste, 3043, new StatType[] {Spirit, Mastery, Crit});
+        StatRatings statRatings = new StatRatingsPriorityBreaks(Haste, 3043,
+                new StatType[][]{
+                        new StatType[]{Spirit, Mastery},
+                        new StatType[]{Crit}
+                }
+        );
         StatRequirements statRequirements = StatRequirements.zero();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, true);

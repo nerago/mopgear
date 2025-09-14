@@ -211,13 +211,13 @@ public class Main {
         ModelCombined model = ModelCombined.standardTreeModel();
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearTreeFile, model.reforgeRules(), null);
 
-//        reforgeProcess(items, model, startTime);
+        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true, SlotEquip.Ring2,89968, false, true, null, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 90410, 84833, false, null);
 //        new FindUpgrades(itemCache, model, true).run(items, new Tuple.Tuple2[]{Tuple.create(89089,0)});
 
-       new FindUpgrades(itemCache, model, true).run(items, intellectLeatherValorCelestial(itemCache), null);
+//       new FindUpgrades(itemCache, model, true).run(items, intellectLeatherValorCelestial(itemCache), null);
 
 //        new FindUpgrades(itemCache, model, true).run(items, bagItemsArray(ignoredItems), null);
 

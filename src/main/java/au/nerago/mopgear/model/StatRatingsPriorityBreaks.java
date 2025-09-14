@@ -4,16 +4,18 @@ import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class StatRatingsPriorityBreaks extends StatRatings {
     public static final int STEP = 16;
     public static final long INITIAL = 0x100000;
     private final StatType firstAndLastStat;
     private final int breakpointTarget;
-    private final StatType[] remainPriority;
+    private final StatType[][] remainPriority;
     private final static int OUTPUT_MULTIPLY = 1; // scale to similar rates as weighting
 
-    public StatRatingsPriorityBreaks(StatType firstAndLastStat, int breakpointTarget, StatType[] remainPriority) {
+    public StatRatingsPriorityBreaks(StatType firstAndLastStat, int breakpointTarget, StatType[][] remainPriority) {
         this.firstAndLastStat = firstAndLastStat;
         this.breakpointTarget = breakpointTarget;
         this.remainPriority = remainPriority;
@@ -24,11 +26,20 @@ public class StatRatingsPriorityBreaks extends StatRatings {
 
     public void validate() {
         if (remainPriority.length < 2)
-            throw new IllegalStateException("need some more stats to consider");
-        if (Arrays.asList(remainPriority).contains(firstAndLastStat))
-            throw new IllegalStateException("breakpoint stat shouldn't be repeated as remaining");
-        if (Arrays.stream(remainPriority).distinct().count() != remainPriority.length)
-            throw new IllegalStateException("priorities not distinct");
+            throw new IllegalArgumentException("need some more stats to consider");
+        if (Arrays.stream(remainPriority).flatMap(Arrays::stream).anyMatch(s -> s == firstAndLastStat))
+            throw new IllegalArgumentException("breakpoint stat shouldn't be repeated as remaining");
+
+        Set<StatType> seen = new HashSet<>();
+        for (StatType[] rank : remainPriority) {
+            if (rank.length == 0)
+                throw new IllegalArgumentException("empty rank");
+            for (StatType stat : rank) {
+                if (!seen.add(stat)) {
+                    throw new IllegalStateException("repeated priority for " + stat);
+                }
+            }
+        }
     }
 
     @Override
@@ -41,16 +52,24 @@ public class StatRatingsPriorityBreaks extends StatRatings {
             result += breakpointValue - breakpointTarget;
             multiply /= STEP;
 
-            for (StatType stat : remainPriority) {
-                result += totals.get(stat) * multiply;
+            for (StatType[] rank : remainPriority) {
+                int value = 0;
+                for (StatType stat : rank) {
+                    value += totals.get(stat);
+                }
+                result += value * multiply;
                 multiply /= STEP;
             }
         } else {
             result += breakpointValue * multiply;
             multiply /= STEP;
 
-            for (StatType stat : remainPriority) {
-                result += totals.get(stat) * multiply;
+            for (StatType[] rank : remainPriority) {
+                int value = 0;
+                for (StatType stat : rank) {
+                    value += totals.get(stat);
+                }
+                result += value * multiply;
                 multiply /= STEP;
             }
         }
@@ -67,16 +86,24 @@ public class StatRatingsPriorityBreaks extends StatRatings {
             result += breakpointValue - breakpointTarget;
             multiply /= STEP;
 
-            for (StatType stat : remainPriority) {
-                result += (partA.get(stat) + partB.get(stat)) * multiply;
+            for (StatType[] rank : remainPriority) {
+                int value = 0;
+                for (StatType stat : rank) {
+                    value += partA.get(stat) + partB.get(stat);
+                }
+                result += value * multiply;
                 multiply /= STEP;
             }
         } else {
             result += breakpointValue * multiply;
             multiply /= STEP;
 
-            for (StatType stat : remainPriority) {
-                result += (partA.get(stat) + partB.get(stat)) * multiply;
+            for (StatType[] rank : remainPriority) {
+                int value = 0;
+                for (StatType stat : rank) {
+                    value += partA.get(stat) + partB.get(stat);
+                }
+                result += value * multiply;
                 multiply /= STEP;
             }
         }
@@ -93,9 +120,11 @@ public class StatRatingsPriorityBreaks extends StatRatings {
             }
         } else {
             long multiply = INITIAL;
-            for (StatType stat : remainPriority) {
-                if (stat == queryStat) {
-                    return value * multiply * OUTPUT_MULTIPLY;
+            for (StatType[] rank : remainPriority) {
+                for (StatType stat : rank) {
+                    if (stat == queryStat) {
+                        return value * multiply * OUTPUT_MULTIPLY;
+                    }
                 }
                 multiply /= STEP;
             }
