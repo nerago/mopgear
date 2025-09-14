@@ -13,6 +13,7 @@ import au.nerago.mopgear.io.ItemCache;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
@@ -43,6 +44,7 @@ public class Jobs {
     public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime) {
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
         Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
+                .filter(item -> item.slot != SlotItem.Weapon || SourcesOfItems.isOneHandWeapon(item))
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
                     SlotEquip[] slotOptions = item.slot.toSlotEquipOptions();
@@ -62,6 +64,33 @@ public class Jobs {
         Solver.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
+    }
+
+    public static void findBestBySlot(ModelCombined model, CostedItem[] allItems, Instant startTime) {
+        EquipOptionsMap optionsMap = EquipOptionsMap.empty();
+        Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
+                .filter(item -> item.slot != SlotItem.Weapon || SourcesOfItems.isOneHandWeapon(item))
+                .forEach(item -> {
+                    item = ItemUtil.defaultEnchants(item, model, true);
+                    SlotEquip[] slotOptions = item.slot.toSlotEquipOptions();
+//                    ItemData[] reforged = Reforger.reforgeItem(model.reforgeRules(), item);
+                    ItemData[] reforged = new ItemData[] { item };
+                    for (SlotEquip slot : slotOptions) {
+                        optionsMap.put(slot, ArrayUtil.concatNullSafe(optionsMap.get(slot), reforged));
+                    }
+                });
+
+        optionsMap.entryStream().forEach(
+                tuple -> {
+                    SlotEquip slot = tuple.a();
+                    ItemData[] options = tuple.b();
+                    TopHolderN<ItemData> best = new TopHolderN<>(1, model::calcRating);
+                    ArrayUtil.forEach(options, best::add);
+                    OutputText.println(best.result().stream()
+                            .map(item -> item.name + " " + model.calcRating(item))
+                            .collect(Collectors.joining(" | ")));
+                }
+        );
     }
 
     public static void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {

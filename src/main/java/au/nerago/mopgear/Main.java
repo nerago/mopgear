@@ -172,11 +172,18 @@ public class Main {
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
 
-        findBIS(model, ArrayUtil.concat(strengthPlateValorCelestialTank(itemCache), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFearHeroic(), strengthPlateTerraceHeroic()), startTime);
-
-        // so we could get a conclusive result from the ret, then set the common slots to fixed
+        CostedItem[] allTheGoodShit = ArrayUtil.concat(
+                strengthPlateValorCelestialTank(itemCache),
+                strengthPlateMsvHeroicArray(),
+                strengthPlateHeartOfFearHeroic(),
+                strengthPlateTerraceHeroic(),
+                new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
+                new CostedItem[]{new CostedItem(79327, 0)}, // darkmoon dps
+                new CostedItem[]{new CostedItem(84910, 0)} // pvp shield
+        );
+//        findBIS(model, allTheGoodShit, startTime);
+        findBestBySlot(model, allTheGoodShit, startTime);
     }
-
 
     private void reforgeBoom(Instant startTime) {
         ModelCombined model = ModelCombined.standardBoomModel();

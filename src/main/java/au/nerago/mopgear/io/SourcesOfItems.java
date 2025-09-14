@@ -2,6 +2,7 @@ package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.ItemUtil;
 import au.nerago.mopgear.domain.CostedItem;
+import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.SlotItem;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.ReforgeRules;
@@ -186,6 +187,9 @@ public class SourcesOfItems {
                 new CostedItem(87176, 604),
                 new CostedItem(87101, 604),
                 new CostedItem(87111, 604),
+
+                new CostedItem(90508, 609), // Shackle of Eversparks (protectors elite)
+                new CostedItem(90506, 609), // Bracers of Defiled Earth (protectors elite)
         };
     }
 
@@ -512,6 +516,18 @@ public class SourcesOfItems {
                 new CostedItem(82976, 0),
                 new CostedItem(82975, 0),
         };
+    }
+
+    private static final int[] oneHandWeapons = new int[] { 86906, 86789, 87062, 86987, 87173 };
+    private static final int[] twoHandWeapons = new int[] { 86799, 87176 };
+    public static boolean isOneHandWeapon(ItemData item) {
+        if (ArrayUtil.contains(oneHandWeapons, item.id)) {
+            return true;
+        } else if (ArrayUtil.contains(twoHandWeapons, item.id)) {
+            return false;
+        } else {
+            throw new IllegalArgumentException("unknown weapon " + item.toStringExtended());
+        }
     }
 
     public static CostedItem[] bagItemsArray(List<Integer> skip) {

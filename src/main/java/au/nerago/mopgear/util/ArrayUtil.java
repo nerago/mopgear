@@ -102,8 +102,17 @@ public class ArrayUtil {
         return result.toArray(StatType[]::new);
     }
 
-    private static boolean contains(StatType[] array, StatType e) {
-        for (StatType item : array) {
+    public static boolean contains(int[] array, int e) {
+        for (int item : array) {
+            if (item == e) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static <T> boolean contains(T[] array, T e) {
+        for (T item : array) {
             if (item == e) {
                 return true;
             }
