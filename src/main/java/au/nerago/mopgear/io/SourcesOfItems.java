@@ -161,6 +161,34 @@ public class SourcesOfItems {
         };
     }
 
+    public static CostedItem[] strengthPlateTerraceHeroic() {
+        return new CostedItem[]{
+                new CostedItem(87145, 601),
+                new CostedItem(87146, 601),
+                new CostedItem(87148, 601),
+                new CostedItem(87147, 601),
+
+                new CostedItem(87159, 602),
+                new CostedItem(89946, 602),
+                new CostedItem(87186, 602),
+                new CostedItem(87185, 602),
+                new CostedItem(87158, 602),
+                new CostedItem(87160, 602),
+
+                new CostedItem(87171, 603),
+                new CostedItem(87186, 603),
+                new CostedItem(87185, 603),
+                new CostedItem(87103, 603),
+                new CostedItem(87113, 603),
+                new CostedItem(87172, 603),
+
+                new CostedItem(87173, 604),
+                new CostedItem(87176, 604),
+                new CostedItem(87101, 604),
+                new CostedItem(87111, 604),
+        };
+    }
+
     public static CostedItem[] intellectLeatherValorArray() {
         return new CostedItem[]{
                 new CostedItem(89308, 2500),
@@ -410,22 +438,28 @@ public class SourcesOfItems {
                 new CostedItem(89826, 301),
                 new CostedItem(86203, 301),
                 new CostedItem(86155, 301),
+
                 new CostedItem(89828, 302),
                 new CostedItem(86165, 302),
                 new CostedItem(86164, 302),
                 new CostedItem(86162, 302),
+
                 new CostedItem(86174, 303),
                 new CostedItem(89832, 303),
                 new CostedItem(86177, 303),
                 new CostedItem(86172, 303),
+
                 new CostedItem(86202, 304),
                 new CostedItem(86201, 304),
                 new CostedItem(85322, 304),
+
                 new CostedItem(86213, 305),
                 new CostedItem(86219, 305),
                 new CostedItem(85320, 305),
+
                 new CostedItem(89837, 306),
                 new CostedItem(85323, 306),
+
                 new CostedItem(86191, 300),
                 new CostedItem(86190, 300)
         };
@@ -438,22 +472,30 @@ public class SourcesOfItems {
                 new CostedItem(89919, 401),
                 new CostedItem(86944, 401),
                 new CostedItem(86946, 401),
+
                 new CostedItem(89921, 402),
                 new CostedItem(86956, 402),
                 new CostedItem(86955, 402),
                 new CostedItem(86957, 402),
+
                 new CostedItem(86966, 403),
                 new CostedItem(89923, 403),
                 new CostedItem(86967, 403),
                 new CostedItem(86968, 403),
+
                 new CostedItem(86980, 404),
                 new CostedItem(86979, 404),
                 new CostedItem(87110, 404),
+                new CostedItem(87100, 404),
+
                 new CostedItem(86986, 405),
                 new CostedItem(86987, 405),
                 new CostedItem(87112, 405),
+                new CostedItem(87102, 405),
+
                 new CostedItem(89928, 406),
                 new CostedItem(87109, 406),
+                new CostedItem(87099, 406),
         };
     }
 

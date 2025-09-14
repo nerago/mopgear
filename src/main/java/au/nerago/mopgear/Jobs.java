@@ -40,6 +40,30 @@ public class Jobs {
         new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems, adjustment);
     }
 
+    public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime) {
+        EquipOptionsMap optionsMap = EquipOptionsMap.empty();
+        Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
+                .forEach(item -> {
+                    item = ItemUtil.defaultEnchants(item, model, true);
+                    SlotEquip[] slotOptions = item.slot.toSlotEquipOptions();
+                    ItemData[] reforged = Reforger.reforgeItem(model.reforgeRules(), item);
+                    for (SlotEquip slot : slotOptions) {
+                        optionsMap.put(slot, ArrayUtil.concatNullSafe(optionsMap.get(slot), reforged));
+                    }
+                });
+
+        JobInfo job = new JobInfo();
+        job.model = model;
+        job.itemOptions = optionsMap;
+        job.startTime = startTime;
+        job.forceRandom = true;
+        job.runSize = BILLION / 4;
+        job.printRecorder.outputImmediate = true;
+        Solver.runJob(job);
+
+        outputResultSimple(job.resultSet, model, true);
+    }
+
     public static void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {
         Stream<ItemData> stream = Arrays.stream(itemIds)
                 .mapToObj(x -> new EquippedItem(x, new int[0], null))

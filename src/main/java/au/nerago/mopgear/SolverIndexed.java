@@ -9,7 +9,8 @@ import java.util.stream.Stream;
 
 public class SolverIndexed {
     public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount) {
-        Stream<ItemSet> finalSets = runSolverPartial(model, itemOptions, adjustment, startTime, comboCount);
+        Stream<ItemSet> partialSets = runSolverPartial(model, itemOptions, adjustment, startTime, comboCount);
+        Stream<ItemSet> finalSets = model.filterSets(partialSets, true);
         return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 

@@ -53,6 +53,16 @@ public class ArrayUtil {
         return result;
     }
 
+    public static <T> T[] concatNullSafe(T[] first, T[] second) {
+        if (first == null) {
+            return second;
+        } else if (second == null) {
+            return first;
+        } else {
+            return concat(first, second);
+        }
+    }
+
     public static <T> T[] concat(T[]... components) {
         if (components.length == 0)
             throw new IllegalArgumentException();

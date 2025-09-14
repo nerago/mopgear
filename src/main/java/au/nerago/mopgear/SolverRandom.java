@@ -29,7 +29,7 @@ public class SolverRandom {
                                               .map(x -> makeSet(items, adjustment));
         if (startTime != null)
             setStream = BigStreamUtil.countProgress(count, startTime, setStream);
-        return model.filterSets(setStream);
+        return model.filterSets(setStream, true);
     }
 
     public static Optional<ItemSet> runSolverSingleThread(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, long count) {

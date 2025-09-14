@@ -12,13 +12,11 @@ import static au.nerago.mopgear.domain.StatType.*;
 
 @SuppressWarnings("unused")
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
-                            DefaultEnchants enchants, boolean useSetBonus) {
+                            DefaultEnchants enchants, SetBonus setBonus) {
 
     public long calcRating(ItemSet set) {
         long value = statRatings.calcRating(set.getTotals());
-        if (useSetBonus) {
-            value = value * SetBonus.calc(set.items) / SetBonus.DENOMIATOR;
-        }
+        value = value * setBonus.calc(set.items) / SetBonus.DENOMIATOR;
         return value;
     }
 
@@ -26,8 +24,12 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return statRatings.calcRating(it.stat, it.statFixed);
     }
 
-    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
-        return statRequirements.filterSets(stream);
+    public Stream<ItemSet> filterSets(Stream<ItemSet> stream, boolean isFinal) {
+        Stream<ItemSet> filtered = statRequirements.filterSets(stream);
+        if (isFinal) {
+            filtered = filtered.filter(set -> set.items.validateNoDuplicates());
+        }
+        return filtered;
     }
 
     public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
@@ -35,7 +37,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public ModelCombined withNoRequirements() {
-        return new ModelCombined(statRatings, StatRequirements.zero(), reforgeRules, enchants, useSetBonus);
+        return new ModelCombined(statRatings, StatRequirements.zero(), reforgeRules, enchants, setBonus);
     }
 
     public StatBlock gemChoice(SocketType socket) {
@@ -74,7 +76,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt, true);
         ReforgeRules reforge = ReforgeRules.prot();
-        return new ModelCombined(statMix, statRequirements, reforge, enchants, false);
+        SetBonus setBonus = new SetBonus().activateWhiteTigerPlate();
+        return new ModelCombined(statMix, statRequirements, reforge, enchants, setBonus);
     }
 
     public static ModelCombined damageProtModel() {
@@ -88,7 +91,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt, true);
         ReforgeRules reforge = ReforgeRules.prot();
-        return new ModelCombined(statMix, statRequirements, reforge, enchants, false);
+        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegearOnly4pc();
+        return new ModelCombined(statMix, statRequirements, reforge, enchants, setBonus);
     }
 
     public static ModelCombined standardRetModel() {
@@ -97,7 +101,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         statRatings = StatRatingsWeights.mix(statRatings, 22, null, 0, null);
         StatRequirements statRequirements = StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret(), enchants, true);
+        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret(), enchants, setBonus);
     }
 
     public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) {
@@ -107,7 +112,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRequirements statRequirements = wideHitRange ? StatRequirements.retWideCapRange() : StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = extraReforge ? ReforgeRules.retExtended() : ReforgeRules.ret();
-        return new ModelCombined(statRatings, statRequirements, reforge, enchants, true);
+        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
+        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);
     }
 
     public static ModelCombined priorityRetModel() {
@@ -115,14 +121,16 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRequirements statRequirements = StatRequirements.retWideCapRange();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.retExtended();
-        return new ModelCombined(statRatings, statRequirements, reforge, enchants, true);
+        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
+        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);
     }
 
     public static ModelCombined standardBoomModel() {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBoomFile);
         StatRequirements statRequirements = StatRequirements.druidBalance();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false); // TODO check same
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, true);
+        SetBonus setBonus = new SetBonus().activateRegaliaEternalBlossom();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, setBonus);
     }
 
     public static ModelCombined standardTreeModel() {
@@ -134,21 +142,24 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         );
         StatRequirements statRequirements = StatRequirements.zero();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, true);
+        SetBonus setBonus = new SetBonus().activateVestmentsEternalBlossom();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, setBonus);
     }
 
     public static ModelCombined standardBearModel() {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBearFile);
         StatRequirements statRequirements = StatRequirements.druidBear();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, false); // TODO check same
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.bear(), enchants, false);
+        SetBonus setBonus = new SetBonus();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.bear(), enchants, setBonus);
     }
 
     public static ModelCombined standardWarlockModel() {
         StatRatings statRatings = new StatRatingsWeights(DataLocation.weightWarlockFile);
         StatRequirements statRequirements = StatRequirements.warlock();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.warlock(), enchants, true);
+        SetBonus setBonus = new SetBonus();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.warlock(), enchants, setBonus);
     }
 
     public static ModelCombined load(ServiceEntry.ServiceModel modelParam) {
@@ -171,10 +182,11 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
 
         StatRequirements statRequirements = StatRequirements.load(modelParam.required());
         DefaultEnchants enchants = new DefaultEnchants(modelParam.defaultEnchants(), modelParam.blacksmith());
-        return new ModelCombined(rating, statRequirements, ReforgeRules.warlock(), enchants, modelParam.useSetBonus());
+        SetBonus setBonus = new SetBonus();
+        return new ModelCombined(rating, statRequirements, ReforgeRules.warlock(), enchants, setBonus);
     }
 
     public static ModelCombined nullMixedModel() {
-        return new ModelCombined(null, StatRequirements.zero(), ReforgeRules.common(), null, false);
+        return new ModelCombined(null, StatRequirements.zero(), ReforgeRules.common(), null, new SetBonus());
     }
 }

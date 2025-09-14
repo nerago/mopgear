@@ -35,7 +35,8 @@ public class SolverCapPhased {
 
     public Optional<ItemSet> runSolver(boolean parallel, boolean topCombosOnly) {
         try {
-            Stream<ItemSet> finalSets = runSolverPartial(parallel, topCombosOnly);
+            Stream<ItemSet> partialSets = runSolverPartial(parallel, topCombosOnly);
+            Stream<ItemSet> finalSets = model.filterSets(partialSets, true);
             return BigStreamUtil.findBest(model, finalSets);
         } finally {
             postSolve();

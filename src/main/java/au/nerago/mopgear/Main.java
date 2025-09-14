@@ -28,7 +28,6 @@ import static au.nerago.mopgear.io.SourcesOfItems.*;
 
 @SuppressWarnings({"SameParameterValue", "unused", "ConstantValue"})
 public class Main {
-
     public static final long BILLION = 1000 * 1000 * 1000;
 
     public ItemCache itemCache;
@@ -64,9 +63,9 @@ public class Main {
 //        druidMultiSpecSolve(startTime);
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
-        reforgeTree(startTime);
+//        reforgeTree(startTime);
 //                    reforgeBear(startTime);
 //            reforgeWarlock(startTime);
 //        rankSomething();
@@ -159,7 +158,7 @@ public class Main {
 //        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear()), model, true, null);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
-        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
+//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateMsvHeroicArray()), model, true, null);
 //        findUpgradeSetup(items, strengthPlateMsvArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
@@ -173,8 +172,11 @@ public class Main {
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
 
+        findBIS(model, ArrayUtil.concat(strengthPlateValorCelestialTank(itemCache), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFearHeroic(), strengthPlateTerraceHeroic()), startTime);
+
         // so we could get a conclusive result from the ret, then set the common slots to fixed
     }
+
 
     private void reforgeBoom(Instant startTime) {
         ModelCombined model = ModelCombined.standardBoomModel();
@@ -383,7 +385,7 @@ public class Main {
             }
         }
 
-        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirements.retWideCapRange(), model.reforgeRules(), model.enchants(), model.useSetBonus());
+        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirements.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus());
         Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null, null);
 
         OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
