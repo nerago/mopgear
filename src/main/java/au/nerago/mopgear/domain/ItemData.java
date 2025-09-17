@@ -41,6 +41,10 @@ public final class ItemData {
         return new ItemData(id, slot, name, reforge, stat, changedFixed, socketSlots, socketBonus, itemLevel);
     }
 
+    public ItemData changeId(int itemId) {
+        return new ItemData(itemId, slot, name, reforge, stat, statFixed, socketSlots, socketBonus, itemLevel);
+    }
+
     public ItemData withoutFixed() {
         return new ItemData(id, slot, name, reforge, stat, StatBlock.empty, socketSlots, socketBonus, itemLevel);
     }

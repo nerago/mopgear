@@ -19,12 +19,14 @@ public class FindMultiSpec {
     public static final int RANDOM_COMBOS = 100000;
     private final ItemCache itemCache;
     //        Long runSize = 200000L;
-    private final long runSize = 2000L;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final long runSizeMultiply = 1L;
+    @SuppressWarnings("FieldCanBeLocal")
     private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
     private final List<SpecDetails> specs = new ArrayList<>();
-
+    private final Set<Integer> duplicatedItem = new HashSet<>();
 
     public FindMultiSpec(ItemCache itemCache) {
         this.itemCache = itemCache;
@@ -38,6 +40,10 @@ public class FindMultiSpec {
         specs.add(spec);
     }
 
+    public void haveDuplicateItem(int id) {
+        duplicatedItem.add(id);
+    }
+
     public void solve(Instant startTime) {
         ModelCombined modelNull = ModelCombined.nullMixedModel();
 
@@ -48,7 +54,9 @@ public class FindMultiSpec {
             spec.prepareB(itemCache, specs);
         }
 
-        ItemUtil.validateDualSets(specs.stream().map(s -> s.itemOptions).toList());
+        ItemUtil.validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
+
+        addDuplicatedItems();
 
         Map<Integer, List<ItemData>> commonMap = commonInMultiSet(specs);
 
@@ -79,6 +87,27 @@ public class FindMultiSpec {
                 new TopCollectorReporting<>(s -> multiRating(s.resultJobs, specs),
                         s -> reportBetter(s.resultJobs, specs)));
         outputResultTwins(best, specs);
+    }
+
+    private void addDuplicatedItems() {
+        for (int itemId : duplicatedItem) {
+            int dupId = itemId * 10;
+            for (SpecDetails spec : specs) {
+                for (SlotEquip slot : SlotEquip.values()) {
+                    ItemData[] currentOpts = spec.itemOptions.get(slot);
+                    if (currentOpts != null) {
+                        ArrayList<ItemData> optList = new ArrayList<>();
+                        for (ItemData item : currentOpts) {
+                            optList.add(item);
+                            if (item.id == itemId) {
+                                optList.add(item.changeId(dupId));
+                            }
+                        }
+                        spec.itemOptions.put(slot, optList.toArray(ItemData[]::new));
+                    }
+                }
+            }
+        }
     }
 
     private Map<Integer, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
@@ -197,7 +226,7 @@ public class FindMultiSpec {
         JobInfo job = new JobInfo();
         job.model = model;
         job.itemOptions = submitMap;
-        job.runSize = runSize;
+        job.runSizeMultiply = runSizeMultiply;
         job.hackAllow = hackAllow;
         return Solver.runJob(job);
     }

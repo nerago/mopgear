@@ -4,13 +4,20 @@ import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.ReforgeRecipe;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
+import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.ReforgeRules;
+import au.nerago.mopgear.util.BestHolder;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Reforger {
-    static ItemData[] reforgeItem(ReforgeRules rules, ItemData baseItem) {
+    public static ItemData[] reforgeItem(ReforgeRules rules, ItemData baseItem) {
+        List<ItemData> outputItems = reforgeItemToList(rules, baseItem);
+        return outputItems.toArray(ItemData[]::new);
+    }
+
+    private static List<ItemData> reforgeItemToList(ReforgeRules rules, ItemData baseItem) {
         List<ItemData> outputItems = new ArrayList<>();
         outputItems.add(baseItem);
 
@@ -28,8 +35,16 @@ public class Reforger {
                 }
             }
         }
+        return outputItems;
+    }
 
-        return outputItems.toArray(ItemData[]::new);
+    public static ItemData[] reforgeItemBest(ModelCombined model, ItemData baseItem) {
+        List<ItemData> reforgedItems = reforgeItemToList(model.reforgeRules(), baseItem);
+        BestHolder<ItemData> best = new BestHolder<>();
+        for (ItemData item : reforgedItems) {
+            best.add(item, model.calcRating(item));
+        }
+        return new ItemData[] { best.get() };
     }
 
     public static ItemData presetReforge(ItemData baseItem, ReforgeRecipe statChange) {

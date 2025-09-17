@@ -58,6 +58,7 @@ public class GemData {
         gemsMeta(map);
         gemsEngineering(map);
         gemsStandard(map);
+        gemsShaTouched(map);
         return map;
     }
 
@@ -109,6 +110,10 @@ public class GemData {
         map.put(76895, new StatBlock(0, 324, 0, 0, 0, 0, 0, 0, 0, 0)); // tank meta, stam
     }
 
+    private static void gemsShaTouched(Map<Integer, StatBlock> map) {
+        map.put(89881, StatBlock.of(StatType.Primary, 500));
+    }
+
     private static Map<Integer, StatBlock> buildEnchant() {
         Map<Integer, StatBlock> map = new HashMap<>();
         map.put(4419, new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 80)); // chest stats
@@ -141,6 +146,8 @@ public class GemData {
         map.put(4826, new StatBlock(285, 0, 0, 0, 0, 0, 0, 0, 0, 165));// int leg
         map.put(4434, new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int offhand
         map.put(4424, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));// int offhand
+        map.put(4433, StatBlock.of(StatType.Mastery, 170));
+        map.put(4444, StatBlock.empty); // dancing steel
         return map;
     }
 

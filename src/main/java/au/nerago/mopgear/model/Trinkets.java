@@ -20,8 +20,10 @@ public class Trinkets {
         map.put(86802, new TrinketData(Primary, 2866, 20, 55, 15)); // lei shen 476
         map.put(86144, new TrinketData(Primary, 3236, 20, 55, 15)); // lei shen 489
         map.put(87072, new TrinketData(Primary, 3653, 20, 55, 15)); // lei shen 502
+        map.put(86894, new TrinketData(Haste, 6121, 20, 115, 15)); // darkmist 483
         map.put(86336, new TrinketData(Haste, 6908, 20, 115, 15)); // darkmist 496
         map.put(87172, new TrinketData(Haste, 7796, 20, 115, 15)); // darkmist 509
+        map.put(86881, new TrinketData(Dodge, 6121, 20, 115, 15)); // nightmares 483
         map.put(86323, new TrinketData(Dodge, 6908, 20, 115, 15)); // nightmares 496
         map.put(87160, new TrinketData(Dodge, 7796, 20, 115, 15)); // nightmares 509
         map.put(79329, new TrinketData(Dodge, 8871, 10, 60, null)); // relic of niuzao
@@ -29,6 +31,7 @@ public class Trinkets {
         map.put(86131, new TrinketData(Dodge, 3236, 20, 55, 15)); // vial of dragon's 489
         map.put(87063, new TrinketData(Dodge, 3653, 20, 55, 15)); // vial of dragon's 502
         map.put(86042, new TrinketData(Haste, 3595, 15, 60, null)); // jade charioteer 489
+        map.put(86046, new TrinketData(Mastery, 3595, 15, 60, null)); // jade warlord 489
         map.put(81138, new TrinketData(Crit, 3386, 30, 115, 15)); // carbonic carbuncle
         map.put(81268, new TrinketData(Primary, 4232, 20, 120, null)); // lessons of darkmaster
 

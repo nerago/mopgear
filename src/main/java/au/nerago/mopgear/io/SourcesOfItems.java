@@ -304,7 +304,6 @@ public class SourcesOfItems {
                 new CostedItem(86645, 55),
                 new CostedItem(86646, 55),
                 new CostedItem(86648, 45),
-
         };
     }
 
@@ -411,14 +410,18 @@ public class SourcesOfItems {
                 new CostedItem(86753, 25),
                 new CostedItem(86812, 30),
                 new CostedItem(86883, 25),
-                new CostedItem(86853, 25)
+                new CostedItem(86853, 25),
+
+                // trink
+                new CostedItem(86894, 50),
+                new CostedItem(86881, 50),
         };
     }
 
     public static CostedItem[] strengthPallyTankSetCelestial() {
         return new CostedItem[]{
-//                new CostedItem(86661, 75), // head
-//                new CostedItem(86659, 75), // shoulder
+                new CostedItem(86661, 60), // head
+                new CostedItem(86659, 50), // shoulder
                 new CostedItem(86663, 55),
                 new CostedItem(86662, 45),
                 new CostedItem(86660, 55),
@@ -427,8 +430,8 @@ public class SourcesOfItems {
 
     public static CostedItem[] strengthPallyRetSetCelestial() {
         return new CostedItem[]{
-//                new CostedItem(86681, 75), // head
-//                new CostedItem(86679, 75), // shoulder
+                new CostedItem(86681, 60), // head
+                new CostedItem(86679, 50), // shoulder
                 new CostedItem(86683, 55),
                 new CostedItem(86682, 45),
                 new CostedItem(86680, 55),
@@ -559,12 +562,14 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateValorCelestialTank(ItemCache itemCache) {
-        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
+//        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
+        CostedItem[] filteredCelestialArray = strengthPlateCelestialArray();
         return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetCelestial(), strengthPallyRetSetCelestial());
     }
 
     public static CostedItem[] strengthPlateValorCelestialRet(ItemCache itemCache) {
-        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
+//        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
+        CostedItem[] filteredCelestialArray = strengthPlateCelestialArray();
         return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyRetSetCelestial());
     }
 

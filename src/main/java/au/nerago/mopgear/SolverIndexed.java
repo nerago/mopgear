@@ -5,12 +5,15 @@ import au.nerago.mopgear.model.ModelCombined;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class SolverIndexed {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount) {
+    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount, Predicate<ItemSet> specialFilter) {
         Stream<ItemSet> partialSets = runSolverPartial(model, itemOptions, adjustment, startTime, comboCount);
         Stream<ItemSet> finalSets = model.filterSets(partialSets, true);
+        if (specialFilter != null)
+            finalSets = finalSets.filter(specialFilter);
         return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 

@@ -5,6 +5,7 @@ import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.*;
@@ -33,7 +34,7 @@ public class Jobs {
 
         ModelCombined dumbModel = model.withNoRequirements();
 
-        Optional<ItemSet> bestSet = Solver.chooseEngineAndRun(dumbModel, items, startTime, null, null);
+        Optional<ItemSet> bestSet = Solver.chooseEngineAndRun(dumbModel, items, startTime, null);
         outputResultSimple(bestSet, model, true);
     }
 
@@ -59,22 +60,26 @@ public class Jobs {
         job.itemOptions = optionsMap;
         job.startTime = startTime;
         job.forceRandom = true;
-        job.runSize = BILLION / 4;
+        job.runSizeMultiply = 12;
         job.printRecorder.outputImmediate = true;
+        job.specialFilter = set -> model.setBonus().countInSet(set.items) >= 4;
         Solver.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
     }
 
     public static void findBestBySlot(ModelCombined model, CostedItem[] allItems, Instant startTime) {
+        Map<Integer, Integer> costs = new HashMap<>();
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
-        Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
+        Arrays.stream(allItems)
+                .peek(costed -> costs.put(costed.itemId(), costed.cost()))
+                .map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
                 .filter(item -> item.slot != SlotItem.Weapon || SourcesOfItems.isOneHandWeapon(item))
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
                     SlotEquip[] slotOptions = item.slot.toSlotEquipOptions();
-//                    ItemData[] reforged = Reforger.reforgeItem(model.reforgeRules(), item);
-                    ItemData[] reforged = new ItemData[] { item };
+                    ItemData[] reforged = Reforger.reforgeItemBest(model, item);
+//                    ItemData[] reforged = new ItemData[] { item };
                     for (SlotEquip slot : slotOptions) {
                         optionsMap.put(slot, ArrayUtil.concatNullSafe(optionsMap.get(slot), reforged));
                     }
@@ -84,11 +89,16 @@ public class Jobs {
                 tuple -> {
                     SlotEquip slot = tuple.a();
                     ItemData[] options = tuple.b();
-                    TopHolderN<ItemData> best = new TopHolderN<>(1, model::calcRating);
-                    ArrayUtil.forEach(options, best::add);
-                    OutputText.println(best.result().stream()
-                            .map(item -> item.name + " " + model.calcRating(item))
-                            .collect(Collectors.joining(" | ")));
+//                    OutputText.printf("##### %s #####\n", slot);
+                    Arrays.stream(options).sorted(Comparator.comparingLong(model::calcRating))
+                            .forEach(item ->
+                                    OutputText.printf("%s \t%08d \t%s \t%d \t%d\n", slot, model.calcRating(item), item.name, item.itemLevel, costs.get(item.id)));
+                    OutputText.println();
+//                    TopHolderN<ItemData> best = new TopHolderN<>(5, model::calcRating);
+//                    ArrayUtil.forEach(options, best::add);
+//                    OutputText.println(best.result().stream()
+//                            .map(item -> item.name + " " + model.calcRating(item))
+//                            .collect(Collectors.joining(" | ")));
                 }
         );
     }
@@ -127,7 +137,7 @@ public class Jobs {
                 optionItems.add(item);
             }
 
-            ItemSet set = Solver.chooseEngineAndRun(model, submitMap, null, BILLION/1000, null).orElseThrow();
+            ItemSet set = Solver.chooseEngineAndRun(model, submitMap, null, null).orElseThrow();
             set.outputSet(model);
             long rating = model.calcRating(set);
             OutputText.println("RATING " + rating);
@@ -143,7 +153,8 @@ public class Jobs {
         JobInfo job = new JobInfo();
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
-        job.config(model, itemOptions, startTime, null, null);
+        job.runSizeMultiply = 8;
+        job.config(model, itemOptions, startTime, null);
         Solver.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
@@ -164,7 +175,8 @@ public class Jobs {
 
         JobInfo job = new JobInfo();
 //        job.config(model, runItems, startTime, null, adjustment);
-        job.config(model, runItems, startTime, BILLION, adjustment);
+        job.config(model, runItems, startTime, adjustment);
+        job.runSizeMultiply = 16;
         Solver.runJob(job);
 
         job.printRecorder.outputNow();
@@ -225,7 +237,8 @@ public class Jobs {
         OutputText.println();
 
         JobInfo job = new JobInfo();
-        job.config(model, runItems, startTime, BILLION, adjustment);
+        job.config(model, runItems, startTime, adjustment);
+        job.runSizeMultiply = 16;
         job.printRecorder.outputImmediate = true;
         Solver.runJob(job);
 
@@ -267,10 +280,7 @@ public class Jobs {
         job.itemOptions = items;
         job.startTime = startTime;
         job.printRecorder.outputImmediate = true;
-        job.runSize = null;
-//        job.runSize = BILLION;
-//        job.runSize = BILLION / 10;
-        job.adjustment = null;
+        job.runSizeMultiply = 12;
         Solver.runJob(job);
         job.printRecorder.outputNow();
         Optional<ItemSet> best = job.resultSet;
@@ -279,7 +289,12 @@ public class Jobs {
 
     public static void outputResultSimple(Optional<ItemSet> bestSet, ModelCombined model, boolean detailedOutput) {
         if (bestSet.isPresent()) {
-            bestSet.get().outputSet(model);
+            if (detailedOutput) {
+                bestSet.get().outputSetDetailed(model);
+                bestSet.get().outputSetLight();
+            } else {
+                bestSet.get().outputSet(model);
+            }
         } else {
             OutputText.println("@@@@@@@@@ NO VALID SET RESULTS @@@@@@@@@");
         }
@@ -386,7 +401,7 @@ public class Jobs {
         multi.addSpec(protDamage);
         multi.addSpec(protDefence);
 
-        // TODO solve for challenge dps too
+        multi.haveDuplicateItem(89934);
 
         multi.solve(startTime);
     }

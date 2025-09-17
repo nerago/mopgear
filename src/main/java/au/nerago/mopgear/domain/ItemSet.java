@@ -56,6 +56,15 @@ public final class ItemSet {
         getItems().forEachValue(it -> OutputText.println(it + " " + model.calcRating(it)));
     }
 
+    public void outputSetDetailed(ModelCombined model) {
+        OutputText.println(getTotals().toStringExtended() + " " + model.calcRating(this));
+        getItems().forEachValue(it -> OutputText.println(it.toStringExtended() + " " + model.calcRating(it)));
+    }
+
+    public void outputSetLight() {
+        getItems().forEachValue(it -> OutputText.printf("%s [%d]\n", it.name, it.itemLevel));
+    }
+
     @Override
     public String toString() {
         return totals.toString();

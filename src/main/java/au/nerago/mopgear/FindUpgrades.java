@@ -23,13 +23,8 @@ public class FindUpgrades {
     private final boolean hackAllow;
     private final ItemCache itemCache;
 
-    private static final Long runSize = null; // full search
-//    private static final long runSize = 100000; // dummy
-//    private static final long runSize = 10000000; // <1 min runs
-//    private static final long runSize = 50000000; // 4 min total runs
-//    private static final long runSize = 100000000; // 10 min total runs
-//    private static final long runSize = 300000000; // 25 min total runs
-//    private static final long runSize = 1000000000; // 60 min runs
+//    private static final long runSizeMultiply = 4;
+    private static final long runSizeMultiply = 1;
 
     public FindUpgrades(ItemCache itemCache, ModelCombined model, boolean hackAllow) {
         this.itemCache = itemCache;
@@ -44,6 +39,7 @@ public class FindUpgrades {
 
         List<JobInfo> jobList =
                 makeJobs(model, baseItems, extraItemArray, enchanting, adjustment, baseRating)
+                .toList().stream() // helps verify
                 .map(Solver::runJob)
                 .peek(job -> handleResult(job, baseRating))
                 .toList();
@@ -55,7 +51,7 @@ public class FindUpgrades {
         JobInfo job = new JobInfo();
         job.model = model;
         job.itemOptions = baseItems;
-        job.runSize = runSize;
+        job.runSizeMultiply = runSizeMultiply;
         job.adjustment = adjustment;
         job.hackAllow = hackAllow;
         Solver.runJob(job);
@@ -137,7 +133,7 @@ public class FindUpgrades {
             SlotEquip slot = extraItem.slot.toSlotEquip();
 
             if (!canSkipUpgradeCheck(extraItem, slot, baseItems)) {
-                OutputText.printf("JOB %s\n\n", extraItem.toStringExtended());
+                OutputText.printf("JOB %s\n", extraItem.toStringExtended());
 
                 submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating, cost));
 
@@ -171,7 +167,7 @@ public class FindUpgrades {
 
     private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
         JobInfo job = new JobInfo();
-        job.singleThread = true;
+//        job.singleThread = true;
 
         extraItem = enchanting.apply(extraItem);
         job.println("OFFER " + extraItem.toStringExtended());
@@ -188,7 +184,8 @@ public class FindUpgrades {
             job.hackAllow = true;
         }
 
-        job.config(model, items, null, runSize, adjustment);
+        job.config(model, items, null, adjustment);
+        job.runSizeMultiply = runSizeMultiply;
         job.extraItem = extraItem;
         job.cost = cost;
         return job;

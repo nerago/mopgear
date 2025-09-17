@@ -8,6 +8,7 @@ import au.nerago.mopgear.model.ModelCombined;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class JobInfo {
@@ -18,19 +19,19 @@ public class JobInfo {
     public ModelCombined model;
     public EquipOptionsMap itemOptions;
     public Instant startTime;
-    public Long runSize;
+    public long runSizeMultiply = 1;
     public boolean forceRandom;
     public boolean singleThread;
     public StatBlock adjustment;
     public ItemData extraItem;
     public double factor;
     public int cost;
+    public Predicate<ItemSet> specialFilter;
 
-    public void config(ModelCombined model, EquipOptionsMap itemOptions, Instant startTime, Long runSize, StatBlock adjustment) {
+    public void config(ModelCombined model, EquipOptionsMap itemOptions, Instant startTime, StatBlock adjustment) {
         this.model = model;
         this.itemOptions = itemOptions;
         this.startTime = startTime;
-        this.runSize = runSize;
         this.adjustment = adjustment;
     }
 

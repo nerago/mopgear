@@ -75,12 +75,12 @@ public class ItemUtil {
         if (detailedOutput) {
             if (expectedEnchant.contains(item.slot)) {
                 if (equippedItem.enchant() != null) {
-                    OutputText.println(id + ": " + item + " ENCHANT=" + equippedItem.enchant());
+                    OutputText.println(id + ": " + item.toStringExtended() + " ENCHANT=" + equippedItem.enchant());
                 } else {
-                    OutputText.println(id + ": " + item + " MISSING EXPECTED ENCHANT");
+                    OutputText.println(id + ": " + item.toStringExtended() + " MISSING EXPECTED ENCHANT");
                 }
             } else {
-                OutputText.println(id + ": " + item);
+                OutputText.println(id + ": " + item.toStringExtended());
             }
             if (item.stat.isEmpty()) {
                 OutputText.println("MISSING STATS MISSING STATS MISSING STATS MISSING STATS");
@@ -169,7 +169,7 @@ public class ItemUtil {
             throw new IllegalArgumentException("unexpected shield");
     }
 
-    static void validateDualSets(List<EquipOptionsMap> mapsParam) {
+    static void validateMultiSetAlignItemSlots(List<EquipOptionsMap> mapsParam) {
         Map<Integer, SlotEquip> seen = new HashMap<>();
         for (EquipOptionsMap map : mapsParam) {
             map.forEachPair((slot, array) -> {

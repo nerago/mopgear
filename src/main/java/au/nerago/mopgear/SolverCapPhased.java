@@ -7,6 +7,7 @@ import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.*;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
@@ -33,10 +34,12 @@ public class SolverCapPhased {
         return estimate;
     }
 
-    public Optional<ItemSet> runSolver(boolean parallel, boolean topCombosOnly) {
+    public Optional<ItemSet> runSolver(boolean parallel, Predicate<ItemSet> specialFilter, boolean topCombosOnly) {
         try {
             Stream<ItemSet> partialSets = runSolverPartial(parallel, topCombosOnly);
             Stream<ItemSet> finalSets = model.filterSets(partialSets, true);
+            if (specialFilter != null)
+                finalSets = finalSets.filter(specialFilter);
             return BigStreamUtil.findBest(model, finalSets);
         } finally {
             postSolve();

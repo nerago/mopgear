@@ -10,16 +10,19 @@ import au.nerago.mopgear.util.BigStreamUtil;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
 public class SolverRandom {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count, boolean parallel) {
+    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count, boolean parallel, Predicate<ItemSet> specialFilter) {
         if (parallel) {
             Stream<ItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
+            if (specialFilter != null)
+                finalSets = finalSets.filter(specialFilter);
             return finalSets.max(Comparator.comparingLong(model::calcRating));
         } else {
-            return runSolverSingleThread(model, items, adjustment, count);
+            return runSolverSingleThread(model, items, adjustment, count, specialFilter);
         }
     }
 
@@ -32,13 +35,13 @@ public class SolverRandom {
         return model.filterSets(setStream, true);
     }
 
-    public static Optional<ItemSet> runSolverSingleThread(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, long count) {
+    public static Optional<ItemSet> runSolverSingleThread(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, long count, Predicate<ItemSet> specialFilter) {
         Random random = ThreadLocalRandom.current();
         StatRequirements require = model.statRequirements();
         BestHolder<ItemSet> best = new BestHolder<>();
         for (int i = 0; i < count; ++i) {
             ItemSet set = makeSet(items, adjustment, random);
-            if (require.filter(set)) {
+            if (require.filter(set) && (specialFilter == null || specialFilter.test(set))) {
                 best.add(set, model.calcRating(set));
             }
         }

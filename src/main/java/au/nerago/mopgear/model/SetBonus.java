@@ -39,7 +39,8 @@ public class SetBonus {
         return this;
     }
     public SetBonus activateWhiteTigerBattlegearOnly4pc() {
-        activeSets.add(new SetInfo(whiteTigerBattlegear, DENOMIATOR, WHITE_TIGER_BATTLEGEAR_4));
+//        activeSets.add(new SetInfo(whiteTigerBattlegear, DENOMIATOR, WHITE_TIGER_BATTLEGEAR_4));
+        activeSets.add(new SetInfo(whiteTigerBattlegear, DENOMIATOR, 1050));
         return this;
     }
 
@@ -77,6 +78,22 @@ public class SetBonus {
             return DENOMIATOR;
         }
 
+        int[] setCounts = countBySet(itemMap);
+
+        int result = DENOMIATOR;
+        for (int i = 0; i < activeSets.size(); ++i) {
+            int numInSet = setCounts[i];
+            SetInfo info = activeSets.get(i);
+            if (numInSet >= 4) {
+                result = result * info.bonus2 * info.bonus4 / DENOMIATOR / DENOMIATOR;
+            } else if (numInSet >= 2) {
+                result = result * info.bonus2 / DENOMIATOR;
+            }
+        }
+        return result;
+    }
+
+    private int[] countBySet(EquipMap itemMap) {
         int activeSetCount = activeSets.size();
         int[] setCounts = new int[activeSetCount];
         for (SlotEquip slot : SlotEquip.values()) {
@@ -90,18 +107,16 @@ public class SetBonus {
                 }
             }
         }
+        return setCounts;
+    }
 
-        int result = DENOMIATOR;
-        for (int i = 0; i < activeSetCount; ++i) {
-            int numInSet = setCounts[i];
-            SetInfo info = activeSets.get(i);
-            if (numInSet >= 4) {
-                result = result * info.bonus2 * info.bonus4 / DENOMIATOR / DENOMIATOR;
-            } else if (numInSet >= 2) {
-                result = result * info.bonus2 / DENOMIATOR;
-            }
+    public int countInSet(EquipMap itemMap) {
+        int[] counts = countBySet(itemMap);
+        int total = 0;
+        for (int val : counts) {
+            total += val;
         }
-        return result;
+        return total;
     }
 
     private record SetInfo(Set<Integer> items, int bonus2, int bonus4) {

@@ -143,21 +143,19 @@ public class Main {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonItems);
 
 //        reforgeProcess(items, model, startTime);
-//        reforgeProcess2(items, model, startTime);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
-//        reforgeProcessPlus(items, model, startTime, null,89345, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, null,86906, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
-//          reforgeProcessPlusPlus(items, model, startTime, 87024, 85339, false, null);
+//          reforgeProcessPlusPlus(items, model, startTime, 86659, 86662, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
-//        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86683, 0), new CostedItem(86682, 0), new CostedItem(86662, 0)});
+//        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86682, 0), new CostedItem(86680, 0), new CostedItem(86681, 0)});
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
-//        new FindUpgrades(itemCache).findUpgradeSetup(model, items, bagItemsArray(model, ignoredItems));
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear()), model, true, null);
-//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
+//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace()), model, true, null);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateMsvHeroicArray()), model, true, null);
 //        findUpgradeSetup(items, strengthPlateMsvArray(), model, false);
@@ -165,24 +163,24 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model, true, null);
-//        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
+        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
 
-        CostedItem[] allTheGoodShit = ArrayUtil.concat(
-                strengthPlateValorCelestialTank(itemCache),
-                strengthPlateMsvHeroicArray(),
-                strengthPlateHeartOfFearHeroic(),
-                strengthPlateTerraceHeroic(),
-                new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
-                new CostedItem[]{new CostedItem(79327, 0)}, // darkmoon dps
-                new CostedItem[]{new CostedItem(84910, 0)} // pvp shield
-        );
+//        CostedItem[] allTheGoodShit = ArrayUtil.concat(
+//                strengthPlateValorCelestialTank(itemCache),
+//                strengthPlateMsvHeroicArray(),
+//                strengthPlateHeartOfFearHeroic(),
+//                strengthPlateTerraceHeroic(),
+//                new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
+//                new CostedItem[]{new CostedItem(79327, 0)}, // darkmoon dps
+//                new CostedItem[]{new CostedItem(84910, 0)} // pvp shield
+//        );
 //        findBIS(model, allTheGoodShit, startTime);
-        findBestBySlot(model, allTheGoodShit, startTime);
+//        findBestBySlot(model, allTheGoodShit, startTime);
     }
 
     private void reforgeBoom(Instant startTime) {
@@ -306,7 +304,7 @@ public class Main {
 
         OutputText.println("FINDING EXPECTED REFORGE IN RAID RET");
         EquipOptionsMap raidMap = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, commonFixedItems());
-        ItemSet raidSet = chooseEngineAndRun(model, raidMap, null, null, null).orElseThrow();
+        ItemSet raidSet = chooseEngineAndRun(model, raidMap, null, null).orElseThrow();
         OutputText.println("FOUND REFORGE RAID RET");
         outputResultSimple(Optional.of(raidSet), model, false);
 
@@ -364,7 +362,8 @@ public class Main {
 
         JobInfo job = new JobInfo();
         job.printRecorder.outputImmediate = true;
-        job.config(model, scaledMap, startTime, BILLION, null);
+        job.config(model, scaledMap, startTime, null);
+        job.runSizeMultiply = 16;
         job.forceRandom = true;
         Solver.runJob(job);
         ItemSet bestScaledSet = job.resultSet.orElseThrow();
@@ -393,7 +392,7 @@ public class Main {
         }
 
         ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirements.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus());
-        Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null, null);
+        Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null);
 
         OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
         outputResultSimple(bestSetFinal, model, true);
