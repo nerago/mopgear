@@ -26,13 +26,15 @@ public class SolverIndexed {
         EquipMap map = EquipMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] list = itemOptions.get(slot);
-            int size = list.length;
+            if (list != null) {
+                int size = list.length;
 
-            int thisIndex = (int) (mainIndex % size);
-            mainIndex /= size;
+                int thisIndex = (int) (mainIndex % size);
+                mainIndex /= size;
 
-            ItemData choice = list[thisIndex];
-            map.put(slot, choice);
+                ItemData choice = list[thisIndex];
+                map.put(slot, choice);
+            }
         }
         return ItemSet.manyItems(map, adjustment);
     }

@@ -396,6 +396,7 @@ public class SourcesOfItems {
 
                 // weap
                 new CostedItem(86799, 40),
+                new CostedItem(86905, 50),
                 new CostedItem(86906, 30),
                 new CostedItem(86789, 25),
 
@@ -522,7 +523,7 @@ public class SourcesOfItems {
     }
 
     private static final int[] oneHandWeapons = new int[] { 86906, 86789, 87062, 86987, 87173 };
-    private static final int[] twoHandWeapons = new int[] { 86799, 87176 };
+    private static final int[] twoHandWeapons = new int[] { 86799, 87176, 86905, 84790 };
     public static boolean isOneHandWeapon(ItemData item) {
         if (ArrayUtil.contains(oneHandWeapons, item.id)) {
             return true;

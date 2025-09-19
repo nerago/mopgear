@@ -216,6 +216,15 @@ public class FindUpgrades {
             return true;
         }
 
+        if (slot == SlotEquip.Weapon) {
+            ItemData exampleWeapon = reforgedItems.get(SlotEquip.Weapon)[0];
+            if (SourcesOfItems.isOneHandWeapon(extraItem) != SourcesOfItems.isOneHandWeapon(exampleWeapon)) {
+                OutputText.println("WRONG WEAPON TYPE " + extraItem.toStringExtended());
+                return true;
+            }
+        }
+
+
         SlotEquip pairedSlot = slot.pairedSlot();
         if (reforgedItems.get(slot)[0].id == extraItem.id ||
                 (pairedSlot != null && reforgedItems.get(pairedSlot)[0].id == extraItem.id)) {

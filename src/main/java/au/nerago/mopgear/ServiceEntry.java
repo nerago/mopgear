@@ -40,7 +40,7 @@ public class ServiceEntry {
         ItemCache itemCache = new ItemCache(DataLocation.cacheFile);
         Path gearFile = Path.of(params.gearFile);
         ModelCombined model = ModelCombined.load(params.model);
-        Map<Integer, ReforgeRecipe> fixedForges = new HashMap<>(params.fixedForges);
+        Map<Integer, List<ReforgeRecipe>> fixedForges = new HashMap<>(params.fixedForges);
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, false, gearFile, model.reforgeRules(), fixedForges);
 
         switch (params.jobType) {
@@ -69,7 +69,7 @@ public class ServiceEntry {
     public record ServiceParam(String gearFile,
                                 String bagFile,
                                 ServiceModel model,
-                                Map<Integer, ReforgeRecipe> fixedForges,
+                                Map<Integer, List<ReforgeRecipe>> fixedForges,
                                 boolean challengeModeScaling,
                                 ServiceJobType jobType,
                                 CostedItem[] extraItems,

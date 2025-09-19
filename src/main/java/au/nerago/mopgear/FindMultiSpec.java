@@ -68,10 +68,15 @@ public class FindMultiSpec {
 
         // PRIMES 7 17 29 41 97 149 251 349 449 743 997 1451 2053 2521 3581 4451 6011 7907 1234543 123456761 1234567669
 
-        int skip = 349;
-//        int skip = 1234567669;
-        Stream<Map<Integer, ItemData>> commonStream = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
-        commonStream = BigStreamUtil.countProgressSmall(commonCombos / skip, startTime, commonStream);
+//        int skip = 123456761;
+        int skip = 1234567669;
+
+        long indexedOutputSize = commonCombos / skip;
+        Stream<Map<Integer, ItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
+        Stream<Map<Integer, ItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize);
+        Stream<Map<Integer, ItemData>> commonStream = Stream.concat(commonStream1, commonStream2);
+
+        commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 2, startTime, commonStream);
 
 //        Stream<Map<Integer, ItemData>> commonStream = PossibleRandom.runSolverPartial(commonMap, RANDOM_COMBOS);
 //        commonStream = BigStreamUtil.countProgressSmall(RANDOM_COMBOS, startTime, commonStream);
@@ -126,6 +131,8 @@ public class FindMultiSpec {
                 }
             }
         }
+
+        // TODO allow for duplicate
 
         for (Map.Entry<Integer, ReforgeRecipe> entry : fixedForge.entrySet()) {
             int id = entry.getKey();
@@ -315,9 +322,9 @@ public class FindMultiSpec {
             OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
             common.values().forEach(item -> {
                 if (item.reforge == null || item.reforge.isNull())
-                    OutputText.printf("map.put(%d, new ReforgeRecipe(null, null)); // %s %s\n", item.id, item.slot, item.name);
+                    OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(null, null))); // %s %s\n", item.id, item.slot, item.name);
                 else
-                    OutputText.printf("map.put(%d, new ReforgeRecipe(%s, %s)); // %s %s\n", item.id, item.reforge.source(), item.reforge.dest(), item.slot, item.name);
+                    OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(%s, %s))); // %s %s\n", item.id, item.reforge.source(), item.reforge.dest(), item.slot, item.name);
             });
         } else {
             OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
@@ -374,7 +381,7 @@ public class FindMultiSpec {
                     .flatMap(spec -> spec.itemOptions.entryStream())
                     .map(Tuple.Tuple2::b)
                     .flatMap(Arrays::stream)
-                    .filter(item -> item.id == itemId)
+//                    .filter(item -> item.id == itemId)
                     .distinct()
                     .toArray(ItemData[]::new);
 

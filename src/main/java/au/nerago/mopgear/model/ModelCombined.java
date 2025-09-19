@@ -48,6 +48,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
             return new StatBlock(0, 0, 0, 0, 0, 600, 0, 0, 0, 0);
         else if (choice == null && socket == SocketType.Sha)
             return new StatBlock(500, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+//            return StatBlock.empty;
         else if (choice == null)
             throw new RuntimeException("no gem choice for " + socket);
         return choice;

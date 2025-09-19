@@ -34,7 +34,7 @@ public class ItemUtil {
         return set;
     }
 
-    public static EquipOptionsMap readAndLoad(ItemCache itemCache, boolean detailedOutput, Path file, ReforgeRules rules, Map<Integer, ReforgeRecipe> presetForge) {
+    public static EquipOptionsMap readAndLoad(ItemCache itemCache, boolean detailedOutput, Path file, ReforgeRules rules, Map<Integer, List<ReforgeRecipe>> presetForge) {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
         List<ItemData> items = loadItems(itemCache, itemIds, detailedOutput);
         EquipOptionsMap result = presetForge != null
@@ -122,7 +122,7 @@ public class ItemUtil {
     }
 
     public static EquipOptionsMap limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
-                                                            Map<Integer, ReforgeRecipe> presetForge) {
+                                                            Map<Integer, List<ReforgeRecipe>> presetForge) {
         EquipOptionsMap map = EquipOptionsMap.empty();
         for (ItemData item : items) {
             SlotEquip slot = item.slot.toSlotEquip();
@@ -130,10 +130,15 @@ public class ItemUtil {
                 slot = SlotEquip.Ring2;
             } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
                 slot = SlotEquip.Trinket2;
+            } else if (map.has(slot)) {
+                throw new IllegalArgumentException("duplicate item");
             }
+
             if (presetForge.containsKey(item.id)) {
-                ItemData forged = Reforger.presetReforge(item, presetForge.get(item.id));
-                map.put(slot, new ItemData[]{forged});
+                ItemData[] forged = presetForge.get(item.id).stream()
+                        .map(preset -> Reforger.presetReforge(item, preset))
+                        .toArray(ItemData[]::new);
+                map.put(slot, forged);
             } else {
                 map.put(slot, Reforger.reforgeItem(rules, item));
             }

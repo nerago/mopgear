@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public class PossibleRandom {
-    public static Stream<Map<Integer, ItemData>> runSolverPartial(Map<Integer, List<ItemData>> itemMap, int count) {
+    public static Stream<Map<Integer, ItemData>> runSolverPartial(Map<Integer, List<ItemData>> itemMap, long count) {
         Stream<Long> dumbStream = generateDumbStream(count);
         return dumbStream.parallel()
                 .map(x -> makeSet(itemMap));

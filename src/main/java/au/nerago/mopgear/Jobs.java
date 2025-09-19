@@ -5,16 +5,15 @@ import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.*;
 import au.nerago.mopgear.io.ItemCache;
 
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
@@ -330,7 +329,7 @@ public class Jobs {
 
     public static void paladinMultiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec(itemCache);
-//        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
 //        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
 
@@ -349,16 +348,18 @@ public class Jobs {
                 1,
                 new int[]{
 ////                        81113, // spike-soled stompers
-////                        88862, // tankiss
+                        88862, // tankiss
 //                        86742, // jasper clawfeet
 //                        86852, // impaling treads
 ////                        81694, // command bracers
 ////                        82856, // dark blaze gauntlets
 ////                        84950 // pvp belt
-////                        86753, // cloak peacock feathers
-//                        89954, // warbelt pods
-//                        87060, // star-stealer waist
+                        86753, // cloak peacock feathers
+                        89954, // warbelt pods
+                        87060, // star-stealer waist
+                        84949, // mal glad girdle accuracy
 //                        89280 // voice helm
+                        87024 // null greathelm
                 },
                 false);
 
@@ -368,13 +369,14 @@ public class Jobs {
                 ModelCombined.damageProtModel(),
                 3,
                 new int[]{
-//                        88862, // tankiss
+                        88862, // tankiss
 //                        84870, // pvp legs
-//                        87060, // star waistguard
+                        87060, // star waistguard
 //                        86682, // white tiger gloves
 //                        86753, // peacock cloak
 //                        89345, // stonetoe spaulders
 //                        86680, // white tiger legs
+                        84949 // mal glad girdle accuracy
                 }, false);
 
         FindMultiSpec.SpecDetails protDefence = new FindMultiSpec.SpecDetails(
@@ -391,6 +393,8 @@ public class Jobs {
 //                        82980, // gauntlets ancient steel
 //                        85983, // bracers six oxen
 //                        89075, // yi cloak
+                        90594, // golden lotus durable necklace
+                        84807, // mav glad cloak alacrity
                 }, false);
 
 //        ItemUtil.validateRet(ret.itemOptions);
@@ -432,4 +436,34 @@ public class Jobs {
         multi.solve(startTime);
     }
 
+    public static void compareBestReforgesWithCommon(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> commonOne, Map<Integer, List<ReforgeRecipe>> commonTwo) {
+        EquipOptionsMap optionsOne = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonOne);
+        EquipOptionsMap optionsTwo = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonTwo);
+
+        int runSizeMultiply = 2;
+
+        JobInfo jobOne = new JobInfo();
+        jobOne.printRecorder.outputImmediate = true;
+        jobOne.runSizeMultiply = runSizeMultiply;
+        jobOne.model = model;
+        jobOne.itemOptions = optionsOne;
+        Solver.runJob(jobOne);
+
+        OutputText.println("111111111111111111111111111111111111");
+        jobOne.resultSet.orElseThrow().outputSetDetailed(model);
+        double ratingOne = model.calcRating(jobOne.resultSet.orElseThrow());
+
+        JobInfo jobTwo = new JobInfo();
+        jobTwo.printRecorder.outputImmediate = true;
+        jobTwo.runSizeMultiply = runSizeMultiply;
+        jobTwo.model = model;
+        jobTwo.itemOptions = optionsTwo;
+        Solver.runJob(jobTwo);
+
+        OutputText.println("22222222222222222222222222222222222222");
+        jobTwo.resultSet.orElseThrow().outputSetDetailed(model);
+        double ratingTwo = model.calcRating(jobTwo.resultSet.orElseThrow());
+
+        OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", ratingOne / ratingTwo * 100);
+    }
 }

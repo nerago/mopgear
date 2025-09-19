@@ -96,8 +96,8 @@ public class Main {
         ModelCombined model = ModelCombined.extendedRetModel(true, true);
 //        ModelCombined model = ModelCombined.priorityRetModel();
 
-//        Map<Integer, ReforgeRecipe> commonItems = commonFixedItems();
-        Map<Integer, ReforgeRecipe> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
@@ -117,28 +117,30 @@ public class Main {
 //            reforgeProcessRetFixedAlone(model, startTime, true);
 //        reforgeProcessRetChallenge(model, startTime);
 
+        compareBestReforgesWithCommon(DataLocation.gearRetFile, model, commonFixedItems(), null);
+
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
-        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
+//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
 //        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
-//                findUpgradeSetup(items, streng1111111111111111111111thPlateCrafted(), model);
+//                findUpgradeSetup(items, strengthPlateCrafted(), model);
 
 //        combinationDumb(items, model, startTime);
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = ModelCombined.damageProtModel();
-        Path file = DataLocation.gearProtDpsFile;
+//        ModelCombined model = ModelCombined.damageProtModel();
+//        Path file = DataLocation.gearProtDpsFile;
 
-//        ModelCombined model = ModelCombined.defenceProtModel();
-//        Path file = DataLocation.gearProtDefenceFile;
+        ModelCombined model = ModelCombined.defenceProtModel();
+        Path file = DataLocation.gearProtDefenceFile;
 
-//        Map<Integer, ReforgeRecipe> commonItems = commonFixedItems();
-        Map<Integer, ReforgeRecipe> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonItems);
 
@@ -149,7 +151,7 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, null,86906, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
-//          reforgeProcessPlusPlus(items, model, startTime, 86659, 86662, false, null);
+//          reforgeProcessPlusPlus(items, model, startTime, 86680, 86682, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86682, 0), new CostedItem(86680, 0), new CostedItem(86681, 0)});
 
@@ -163,12 +165,14 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model, true, null);
-        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
+//        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
+
+        compareBestReforgesWithCommon(file, model, commonFixedItems(), null);
 
 //        CostedItem[] allTheGoodShit = ArrayUtil.concat(
 //                strengthPlateValorCelestialTank(itemCache),
@@ -256,43 +260,23 @@ public class Main {
 //       ));
     }
 
-    private static Map<Integer, ReforgeRecipe> commonFixedItems() {
-        Map<Integer, ReforgeRecipe> map = new HashMap<>();
-        // 11/9/2025
-        map.put(87024, new ReforgeRecipe(Crit, Expertise));       // COMMON 86852 Impaling Treads RET PROT-DEFENCE PROT-DAMAGE
-        map.put(86802, new ReforgeRecipe(null, null));            // COMMON 84807 Malevolent Gladiator's Cloak of Alacrity RET PROT-DAMAGE
-        map.put(86852, new ReforgeRecipe(Hit, Expertise));        // COMMON 86219 Scimitar of Seven Stars PROT-DEFENCE PROT-DAMAGE
-        map.put(84807, new ReforgeRecipe(Crit, Expertise));       // COMMON 86794 Starcrusher Gauntlets PROT-DEFENCE PROT-DAMAGE
-        map.put(85991, new ReforgeRecipe(Hit, Expertise));        // COMMON 89934 Bonded Soul Bracers RET PROT-DEFENCE PROT-DAMAGE
-        map.put(86219, new ReforgeRecipe(Hit, Expertise));        // COMMON 86802 Lei Shen's Final Orders RET PROT-DEFENCE PROT-DAMAGE
-        map.put(86683, new ReforgeRecipe(null, null));            // COMMON 86683 White Tiger Battleplate RET PROT-DAMAGE
-        map.put(85339, new ReforgeRecipe(Hit, Expertise));        // COMMON 85339 White Tiger Pauldrons RET PROT-DEFENCE PROT-DAMAGE
-        map.put(86794, new ReforgeRecipe(Hit, Mastery));          // COMMON 85991 Soulgrasp Choker RET PROT-DEFENCE PROT-DAMAGE
-        map.put(89069, new ReforgeRecipe(Expertise, Haste));      // COMMON 89069 Ring of the Golden Stair RET PROT-DAMAGE
-        map.put(89934, new ReforgeRecipe(null, null));            // COMMON 90862 Seal of the Bloodseeker RET PROT-DEFENCE PROT-DAMAGE
-        map.put(90862, new ReforgeRecipe(null, null));            // COMMON 87024 Nullification Greathelm PROT-DEFENCE PROT-DAMAGE
+    private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
+        Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
+        // 18/9/2025
+        map.put(89934, List.of(new ReforgeRecipe(Expertise, Hit), new ReforgeRecipe(Expertise, Mastery))); // Wrist Bonded Soul Bracers (Expertise->Hit)
+        map.put(86852, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
+        map.put(84807, List.of(new ReforgeRecipe(null, null))); // Back Malevolent Gladiator's Cloak of Alacrity
+        map.put(85991, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker (Hit->Expertise)
+        map.put(89069, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Ring of the Golden Stair (Expertise->Hit)
+        map.put(90862, List.of(new ReforgeRecipe(Haste, Hit))); // Ring Seal of the Bloodseeker (Haste->Hit)
+        map.put(87024, List.of(new ReforgeRecipe(Crit, Expertise))); // Head Nullification Greathelm (Crit->Expertise)
+        map.put(86802, List.of(new ReforgeRecipe(null, null))); // Trinket Lei Shen's Final Orders
+        map.put(86680, List.of(new ReforgeRecipe(Mastery, Haste))); // Leg White Tiger Legplates (Mastery->Haste)
+        map.put(86683, List.of(new ReforgeRecipe(Crit, Expertise))); // Chest White Tiger Battleplate (Crit->Expertise)
+        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons (Hit->Expertise)
+        map.put(86682, List.of(new ReforgeRecipe(Expertise, Haste))); // Hand White Tiger Gauntlets (Expertise->Haste)
+        map.put(86906, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon Kilrak, Jaws of Terror (Mastery->Expertise)
         return map;
-    }
-
-    private static EnumMap<SlotEquip, ReforgeRecipe> commonFixedItemsOld() {
-        EnumMap<SlotEquip, ReforgeRecipe> presetReforge = new EnumMap<>(SlotEquip.class);
-        presetReforge.put(SlotEquip.Head, new ReforgeRecipe(Crit, StatType.Hit));
-        presetReforge.put(SlotEquip.Neck, new ReforgeRecipe(StatType.Hit, Expertise));
-        //presetReforge.put(SlotEquip.Shoulder, new ReforgeRecipe(StatType.Crit, StatType.Haste));
-//        presetReforge.put(SlotEquip.Chest, new ReforgeRecipe(StatType.Crit, StatType.Expertise));
-//        presetReforge.put(SlotEquip.Back, new ReforgeRecipe(Crit, Expertise));
-        presetReforge.put(SlotEquip.Wrist, new ReforgeRecipe(null, null));
-//        presetReforge.put(SlotEquip.Hand, new ReforgeRecipe(Haste, Expertise));
-//        presetReforge.put(SlotEquip.Belt, new ReforgeRecipe(Dodge, Expertise));
-//        presetReforge.put(SlotEquip.Leg, new ReforgeRecipe(Haste, Expertise));
-//        presetReforge.put(SlotEquip.Foot, new ReforgeRecipe(Mastery, Expertise));
-        presetReforge.put(SlotEquip.Ring1, new ReforgeRecipe(Haste, StatType.Hit));
-        presetReforge.put(SlotEquip.Ring2, new ReforgeRecipe(Crit, Haste));
-        presetReforge.put(SlotEquip.Trinket1, new ReforgeRecipe(Haste, Expertise));
-//        presetReforge.put(SlotEquip.Trinket2, new ReforgeRecipe(StatType.Expertise, StatType.Mastery));
-//        presetReforge.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
-//        presetReforge.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
-        return presetReforge;
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -308,9 +292,9 @@ public class Main {
         OutputText.println("FOUND REFORGE RAID RET");
         outputResultSimple(Optional.of(raidSet), model, false);
 
-        Map<Integer, ReforgeRecipe> presetReforge = commonFixedItems();
-        raidSet.getItems().forEachValue(item -> presetReforge.put(item.id, item.reforge));
-        presetReforge.put(89954, new ReforgeRecipe(Crit, Haste));
+        Map<Integer, List<ReforgeRecipe>> presetReforge = commonFixedItems();
+        raidSet.getItems().forEachValue(item -> presetReforge.put(item.id, List.of(item.reforge)));
+        presetReforge.put(89954, List.of(new ReforgeRecipe(Crit, Haste)));
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
 
@@ -352,7 +336,7 @@ public class Main {
         for (int extraId : extraItems) {
             ReforgeRecipe reforge = null;
             if (presetReforge.containsKey(extraId))
-                reforge = presetReforge.get(extraId);
+                reforge = presetReforge.get(extraId).getFirst();
             ItemData extraItem = addExtra(map, model, extraId, customiseItem, reforge, false, false, false);
             if (extraItem != null)
                 OutputText.println("EXTRA " + extraItem);
