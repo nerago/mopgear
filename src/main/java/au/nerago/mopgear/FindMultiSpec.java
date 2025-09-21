@@ -56,7 +56,7 @@ public class FindMultiSpec {
 
         ItemUtil.validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
 
-        addDuplicatedItems();
+//        addDuplicatedItems();
 
         Map<Integer, List<ItemData>> commonMap = commonInMultiSet(specs);
 
@@ -66,10 +66,11 @@ public class FindMultiSpec {
 //        Stream<Map<Integer, ItemData>> commonStream = PossibleStreams.runSolverPartial(commonMap);
 //        commonStream = BigStreamUtil.countProgressSmall(commonCombos, startTime, commonStream);
 
-        // PRIMES 7 17 29 41 97 149 251 349 449 743 997 1451 2053 2521 3581 4451 6011 7907 1234543 123456761 1234567669
+        // PRIMES 7 17 29 41 97 149 251 349 449 743 997 1451 2053 2521 3581 4451 6011 7907 123457 1234543 123456761 1234567669
 
+                int skip = 123457;
 //        int skip = 123456761;
-        int skip = 1234567669;
+//        int skip = 1234567669;
 
         long indexedOutputSize = commonCombos / skip;
         Stream<Map<Integer, ItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
@@ -118,21 +119,27 @@ public class FindMultiSpec {
     private Map<Integer, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
         Map<Integer, List<ItemData>> commonOptions = new HashMap<>();
         Map<Integer, Set<String>> seenIn = new HashMap<>();
+        
+        // initially filter down for each item to common reforges
         for (SlotEquip slot : SlotEquip.values()) {
             for (SpecDetails spec : mapArray) {
                 ItemData[] slotOptions = spec.itemOptions.get(slot);
                 if (slotOptions != null) {
                     Arrays.stream(slotOptions).collect(Collectors.groupingBy(item -> item.id))
                             .forEach((id, forges) -> {
-                                        commonOptions.compute(id, (x, prior) -> commonForges(prior, forges));
-                                        seenIn.computeIfAbsent(id, x -> new HashSet<>()).add(spec.label);
+                                seenIn.computeIfAbsent(id, x -> new HashSet<>()).add(spec.label);
+                                commonOptions.compute(id, (x, prior) -> commonForges(prior, forges));
+
+//                                if (duplicatedItem.contains(id)) {
+//                                    commonOptions.compute(id, (x, prior) -> commonForgesByFixed(prior, forges));
+//                                } else {
+//                                    commonOptions.compute(id, (x, prior) -> commonForges(prior, forges));
+//                                }
                                     }
                             );
                 }
             }
         }
-
-        // TODO allow for duplicate
 
         for (Map.Entry<Integer, ReforgeRecipe> entry : fixedForge.entrySet()) {
             int id = entry.getKey();
@@ -179,6 +186,35 @@ public class FindMultiSpec {
                 if (ItemData.isIdenticalItem(a, b)) {
                     commonForges.add(a);
                 }
+            }
+        }
+        return commonForges;
+    }
+
+    private static List<ItemData> commonForgesByFixed(List<ItemData> prior, List<ItemData> forges) {
+        if (prior == null) {
+            return forges;
+        }
+
+        Map<StatBlock, List<ItemData>> priorGroup = prior.stream().collect(Collectors.groupingBy(item -> item.statFixed));
+        Map<StatBlock, List<ItemData>> forgesGroup = forges.stream().collect(Collectors.groupingBy(item -> item.statFixed));
+
+        Set<StatBlock> allVersions = new HashSet<>();
+        allVersions.addAll(priorGroup.keySet());
+        allVersions.addAll(forgesGroup.keySet());
+
+        ArrayList<ItemData> commonForges = new ArrayList<>();
+        for (StatBlock version : allVersions) {
+            List<ItemData> versionPriorList = priorGroup.get(version);
+            List<ItemData> versionForgeGroup = forgesGroup.get(version);
+            if (versionPriorList == null && versionForgeGroup != null) {
+                commonForges.addAll(versionForgeGroup);
+            } else if (versionPriorList != null && versionForgeGroup == null) {
+                commonForges.addAll(versionPriorList);
+            } else if (versionPriorList != null) {
+                commonForges.addAll(commonForges(versionPriorList, versionForgeGroup));
+            } else {
+                throw new IllegalStateException();
             }
         }
         return commonForges;
@@ -338,19 +374,22 @@ public class FindMultiSpec {
         final int ratingMultiply;
         final int[] extraItems;
         final boolean challengeScale;
+        final Map<Integer, Integer> remapDuplicateId;
         EquipOptionsMap itemOptions;
 
-        public SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, boolean challengeScale) {
+        public SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, boolean challengeScale, Map<Integer, Integer> remapDuplicateId) {
             this.label = label;
             this.gearFile = gearFile;
             this.model = model;
             this.ratingMultiply = ratingMultiply;
             this.extraItems = extraItems;
             this.challengeScale = challengeScale;
+            this.remapDuplicateId = remapDuplicateId;
         }
 
         public void prepareA(ItemCache itemCache, List<SpecDetails> allSpecs) {
             itemOptions = ItemUtil.readAndLoad(itemCache, false, gearFile, model.reforgeRules(), null);
+            remapItemsIds();
         }
 
         public void prepareB(ItemCache itemCache, List<SpecDetails> allSpecs) {
@@ -363,6 +402,19 @@ public class FindMultiSpec {
             verifyNotAlreadyIncluded(itemCache, itemId);
             if (!copyFromOtherSpec(itemId, allSpecs)) {
                 loadAndGenerate(itemCache, itemId);
+            }
+        }
+
+        private void remapItemsIds() {
+            itemOptions.forEachPair((slot, array) -> ArrayUtil.mapInPlace(array, this::remapItemId));
+        }
+
+        private ItemData remapItemId(ItemData itemData) {
+            Integer replaceId = remapDuplicateId.get(itemData.id);
+            if (replaceId != null) {
+                return itemData.changeId(replaceId);
+            } else {
+                return itemData;
             }
         }
 
@@ -381,15 +433,17 @@ public class FindMultiSpec {
                     .flatMap(spec -> spec.itemOptions.entryStream())
                     .map(Tuple.Tuple2::b)
                     .flatMap(Arrays::stream)
-//                    .filter(item -> item.id == itemId)
+                    .filter(item -> item.id == itemId)
                     .distinct()
                     .toArray(ItemData[]::new);
 
             if (otherCopies.length > 0) {
-                SlotEquip slot = otherCopies[0].slot.toSlotEquip();
-                ItemData[] existing = itemOptions.get(slot);
-                itemOptions.put(slot, ArrayUtil.concat(existing, otherCopies));
-                reportNewSlotOptions(slot);
+                SlotEquip[] slotOptions = otherCopies[0].slot.toSlotEquipOptions();
+                for (SlotEquip slot : slotOptions) {
+                    ItemData[] existing = itemOptions.get(slot);
+                    itemOptions.put(slot, ArrayUtil.concat(existing, otherCopies));
+                    reportNewSlotOptions(slot);
+                }
                 return true;
             }
             return false;

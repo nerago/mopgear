@@ -16,6 +16,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static au.nerago.mopgear.domain.StatType.*;
+
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Jobs {
     public static final long BILLION = 1000 * 1000 * 1000;
@@ -330,16 +332,28 @@ public class Jobs {
     public static void paladinMultiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec(itemCache);
         multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
 //        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
-
 //        multi.addFixedForge(85991, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Soulgrasp Choker
 //        multi.addFixedForge(86794, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Starcrusher Gauntlets
-
 //        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // ring golden stair
 //        multi.addFixedForge(89954, new ReforgeRecipe(StatType.Expertise, StatType.Haste));// warbelt
-
 //        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
+
+        multi.addFixedForge(86852, new ReforgeRecipe(null, null)); // Foot Impaling Treads
+//        map.put(84807, List.of(new ReforgeRecipe(null, null))); // Back Malevolent Gladiator's Cloak of Alacrity
+//        map.put(85991, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker (Hit->Expertise)
+//        map.put(89069, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Ring of the Golden Stair (Expertise->Hit)
+//        map.put(90862, List.of(new ReforgeRecipe(Haste, Hit))); // Ring Seal of the Bloodseeker (Haste->Hit)
+        multi.addFixedForge(87024, new ReforgeRecipe(Crit, Expertise)); // Head Nullification Greathelm (Crit->Expertise)
+////        map.put(86802, List.of(new ReforgeRecipe(null, null))); // Trinket Lei Shen's Final Orders
+        multi.addFixedForge(86680, new ReforgeRecipe(Mastery, Haste)); // Leg White Tiger Legplates (Mastery->Haste)
+//        map.put(86683, List.of(new ReforgeRecipe(Crit, Expertise))); // Chest White Tiger Battleplate (Crit->Expertise)
+//        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons (Hit->Expertise)
+//        multi.addFixedForge(86682, new ReforgeRecipe(Expertise, Haste)); // Hand White Tiger Gauntlets (Expertise->Haste)
+//        map.put(86906, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon Kilrak, Jaws of Terror (Mastery->Expertise)
+        multi.addFixedForge(84910, new ReforgeRecipe(Mastery, Haste)); // Shield
 
         FindMultiSpec.SpecDetails ret = new FindMultiSpec.SpecDetails(
                 "RET",
@@ -355,29 +369,31 @@ public class Jobs {
 ////                        82856, // dark blaze gauntlets
 ////                        84950 // pvp belt
                         86753, // cloak peacock feathers
-                        89954, // warbelt pods
-                        87060, // star-stealer waist
-                        84949, // mal glad girdle accuracy
-//                        89280 // voice helm
-                        87024 // null greathelm
+//                        89954, // warbelt pods
+//                        87060, // star-stealer waist
+//                        84949, // mal glad girdle accuracy
+                        89280 // voice helm
+//                        87024 // null greathelm
                 },
-                false);
+                false,
+                Map.of());
 
         FindMultiSpec.SpecDetails protDamage = new FindMultiSpec.SpecDetails(
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 ModelCombined.damageProtModel(),
-                3,
+                4,
                 new int[]{
                         88862, // tankiss
 //                        84870, // pvp legs
-                        87060, // star waistguard
+//                        87060, // star waistguard
 //                        86682, // white tiger gloves
 //                        86753, // peacock cloak
 //                        89345, // stonetoe spaulders
 //                        86680, // white tiger legs
                         84949 // mal glad girdle accuracy
-                }, false);
+                }, false,
+                Map.of());
 
         FindMultiSpec.SpecDetails protDefence = new FindMultiSpec.SpecDetails(
                 "PROT-DEFENCE",
@@ -395,7 +411,8 @@ public class Jobs {
 //                        89075, // yi cloak
                         90594, // golden lotus durable necklace
                         84807, // mav glad cloak alacrity
-                }, false);
+                }, false,
+                Map.of(89934, 899340));
 
 //        ItemUtil.validateRet(ret.itemOptions);
 //        ItemUtil.validateProt(protDamage.itemOptions);
@@ -420,7 +437,8 @@ public class Jobs {
                 177,
                 new int[]{
                 },
-                false);
+                false,
+                Map.of());
 
         FindMultiSpec.SpecDetails tree = new FindMultiSpec.SpecDetails(
                 "TREE",
@@ -428,7 +446,8 @@ public class Jobs {
                 ModelCombined.standardTreeModel(),
                 1,
                 new int[]{
-                }, false);
+                }, false,
+                Map.of());
 
         multi.addSpec(boom);
         multi.addSpec(tree);
