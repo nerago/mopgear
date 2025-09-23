@@ -62,8 +62,8 @@ public class Main {
 //        paladinMultiSpecSolve(startTime);
 //        druidMultiSpecSolve(startTime);
 
-//        reforgeRet(startTime);
-            reforgeProt(startTime);
+        reforgeRet(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -101,7 +101,7 @@ public class Main {
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket1,79327, false, true, null);
@@ -115,7 +115,7 @@ public class Main {
 //          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86683,0), new CostedItem(86682,0), new CostedItem(86662,0)});
 //            reforgeProcessRetFixed(model, startTime, true);
 //            reforgeProcessRetFixedAlone(model, startTime, true);
-//        reforgeProcessRetChallenge(model, startTime);
+        reforgeProcessRetChallenge(model, startTime);
 
 //        compareBestReforgesWithCommon(DataLocation.gearRetFile, model, commonFixedItems(), null);
 
@@ -133,11 +133,11 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = ModelCombined.damageProtModel();
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = ModelCombined.damageProtModel();
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = ModelCombined.defenceProtModel();
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = ModelCombined.defenceProtModel();
+//        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -324,7 +324,7 @@ public class Main {
         outputResultSimple(Optional.of(raidSet), model, false);
 
         Map<Integer, List<ReforgeRecipe>> presetReforge = commonFixedItems();
-        raidSet.getItems().forEachValue(item -> presetReforge.put(item.id, List.of(item.reforge)));
+        raidSet.getItems().forEachValue(item -> presetReforge.put(item.id, Collections.singletonList(item.reforge)));
         presetReforge.put(89954, List.of(new ReforgeRecipe(Crit, Haste)));
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
