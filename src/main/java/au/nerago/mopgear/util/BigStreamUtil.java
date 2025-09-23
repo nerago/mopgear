@@ -3,6 +3,9 @@ package au.nerago.mopgear.util;
 import au.nerago.mopgear.domain.ItemSet;
 import au.nerago.mopgear.model.ModelCombined;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -11,6 +14,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class BigStreamUtil {
+    public static Stream<ItemSet> countProgress(BigInteger estimate, Instant startTime, Stream<ItemSet> inputStream) {
+//        final double percentMultiply = BigDecimal.valueOf(100).divide(new BigDecimal(estimate), 4, RoundingMode.UP).doubleValue();
+        final double percentMultiply = 100.0 / estimate.doubleValue();
+        final long reportFrequency = chooseReportFrequency(estimate);
+        return coreCount(reportFrequency, percentMultiply, startTime, inputStream);
+    }
+
     public static <T> Stream<T> countProgress(long estimate, Instant startTime, Stream<T> inputStream) {
         final double percentMultiply = 100.0 / estimate;
         final long reportFrequency = chooseReportFrequency(estimate);
@@ -55,6 +65,14 @@ public class BigStreamUtil {
         freq = Math.max(freq, 1000000);
         freq = Math.min(freq, 100000000);
         return freq;
+    }
+
+    private static long chooseReportFrequency(BigInteger estimate) {
+        if (estimate.compareTo(BigInteger.valueOf(Long.MAX_VALUE / 2)) > 0) {
+            return chooseReportFrequency(Long.MAX_VALUE / 2);
+        } else {
+            return chooseReportFrequency(estimate.longValueExact());
+        }
     }
 
     public static Duration estimateRemain(Instant startTime, double percent) {

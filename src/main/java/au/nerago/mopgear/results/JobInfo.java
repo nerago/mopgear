@@ -21,6 +21,8 @@ public class JobInfo {
     public Instant startTime;
     public long runSizeMultiply = 1;
     public boolean forceRandom;
+    public boolean forceSkipIndex;
+    public long forcedRunSized;
     public boolean singleThread;
     public StatBlock adjustment;
     public ItemData extraItem;

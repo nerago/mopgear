@@ -6,6 +6,7 @@ import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -25,7 +26,7 @@ public class Solver {
 
         SolverCapPhased phased = new SolverCapPhased(model, adjustment, job.printRecorder);
         long estimatePhase1Combos = phased.initAndCheckSizes(itemOptions);
-        long estimateFullCombos = ItemUtil.estimateSets(itemOptions);
+        BigInteger estimateFullCombos = ItemUtil.estimateSets(itemOptions);
 
         job.printf("COMBOS full=%,d skinny=%,d\n", estimateFullCombos, estimatePhase1Combos);
 
@@ -34,9 +35,12 @@ public class Solver {
             long runSize = DEFAULT_RANDOM_RUN_SIZE * runSizeMultiply;
             job.printf("SOLVE random %d FORCED\n", runSize);
             proposed = SolverRandom.runSolver(model, itemOptions, adjustment, startTime, runSize, !job.singleThread, job.specialFilter);
-        } else if (estimateFullCombos < MAX_BASIC_FULL_SEARCH * runSizeMultiply) {
+        } else if (job.forceSkipIndex) {
+            job.println("SOLVE skip index");
+            proposed = SolverIndexed.runSolverSkipping(model, itemOptions, adjustment, startTime, job.forcedRunSized, estimateFullCombos, job.specialFilter);
+        } else if (estimateFullCombos.compareTo(BigInteger.valueOf(MAX_BASIC_FULL_SEARCH * runSizeMultiply)) < 0) {
             job.println("SOLVE full search");
-            proposed = SolverIndexed.runSolver(model, itemOptions, adjustment, startTime, estimateFullCombos, job.specialFilter);
+            proposed = SolverIndexed.runSolver(model, itemOptions, adjustment, startTime, estimateFullCombos.longValueExact(), job.specialFilter);
         } else if (estimatePhase1Combos < MAX_SKINNY_FULL_SEARCH * runSizeMultiply) {
             job.println("SOLVE phased full");
             proposed = phased.runSolver(!job.singleThread, job.specialFilter, false);

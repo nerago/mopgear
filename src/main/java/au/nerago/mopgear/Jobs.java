@@ -60,8 +60,8 @@ public class Jobs {
         job.model = model;
         job.itemOptions = optionsMap;
         job.startTime = startTime;
-        job.forceRandom = true;
-        job.runSizeMultiply = 12;
+        job.forceSkipIndex = true;
+        job.forcedRunSized = BILLION*4;
         job.printRecorder.outputImmediate = true;
         job.specialFilter = set -> model.setBonus().countInSet(set.items) >= 4;
         Solver.runJob(job);
@@ -341,19 +341,20 @@ public class Jobs {
 //        multi.addFixedForge(89954, new ReforgeRecipe(StatType.Expertise, StatType.Haste));// warbelt
 //        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
 
-        multi.addFixedForge(86852, new ReforgeRecipe(null, null)); // Foot Impaling Treads
+//        multi.addFixedForge(86852, new ReforgeRecipe(null, null)); // Foot Impaling Treads
 //        map.put(84807, List.of(new ReforgeRecipe(null, null))); // Back Malevolent Gladiator's Cloak of Alacrity
 //        map.put(85991, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker (Hit->Expertise)
 //        map.put(89069, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Ring of the Golden Stair (Expertise->Hit)
 //        map.put(90862, List.of(new ReforgeRecipe(Haste, Hit))); // Ring Seal of the Bloodseeker (Haste->Hit)
-        multi.addFixedForge(87024, new ReforgeRecipe(Crit, Expertise)); // Head Nullification Greathelm (Crit->Expertise)
+//        multi.addFixedForge(87024, new ReforgeRecipe(Crit, Expertise)); // Head Nullification Greathelm (Crit->Expertise)
 ////        map.put(86802, List.of(new ReforgeRecipe(null, null))); // Trinket Lei Shen's Final Orders
-        multi.addFixedForge(86680, new ReforgeRecipe(Mastery, Haste)); // Leg White Tiger Legplates (Mastery->Haste)
-//        map.put(86683, List.of(new ReforgeRecipe(Crit, Expertise))); // Chest White Tiger Battleplate (Crit->Expertise)
-//        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons (Hit->Expertise)
+//        multi.addFixedForge(86680, new ReforgeRecipe(Mastery, Haste)); // Leg White Tiger Legplates (Mastery->Haste)
+//        multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
+//        multi.addFixedForge(85339, new ReforgeRecipe(Hit, Expertise)); // Shoulder White Tiger Pauldrons (Hit->Expertise)
 //        multi.addFixedForge(86682, new ReforgeRecipe(Expertise, Haste)); // Hand White Tiger Gauntlets (Expertise->Haste)
 //        map.put(86906, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon Kilrak, Jaws of Terror (Mastery->Expertise)
-        multi.addFixedForge(84910, new ReforgeRecipe(Mastery, Haste)); // Shield
+//        multi.addFixedForge(84910, new ReforgeRecipe(Mastery, Haste)); // Shield
+//        multi.addFixedForge(8607, new ReforgeRecipe(Mastery, Haste)); // Shield
 
         FindMultiSpec.SpecDetails ret = new FindMultiSpec.SpecDetails(
                 "RET",
@@ -372,7 +373,7 @@ public class Jobs {
 //                        89954, // warbelt pods
 //                        87060, // star-stealer waist
 //                        84949, // mal glad girdle accuracy
-                        89280 // voice helm
+//                        89280 // voice helm
 //                        87024 // null greathelm
                 },
                 false,
@@ -384,14 +385,14 @@ public class Jobs {
                 ModelCombined.damageProtModel(),
                 4,
                 new int[]{
-                        88862, // tankiss
+//                        88862, // tankiss
 //                        84870, // pvp legs
 //                        87060, // star waistguard
 //                        86682, // white tiger gloves
 //                        86753, // peacock cloak
 //                        89345, // stonetoe spaulders
 //                        86680, // white tiger legs
-                        84949 // mal glad girdle accuracy
+//                        84949 // mal glad girdle accuracy
                 }, false,
                 Map.of());
 
@@ -410,7 +411,7 @@ public class Jobs {
 //                        85983, // bracers six oxen
 //                        89075, // yi cloak
                         90594, // golden lotus durable necklace
-                        84807, // mav glad cloak alacrity
+//                        84807, // mav glad cloak alacrity
                 }, false,
                 Map.of(89934, 899340));
 

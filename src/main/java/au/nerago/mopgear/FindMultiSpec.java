@@ -68,7 +68,8 @@ public class FindMultiSpec {
 
         // PRIMES 7 17 29 41 97 149 251 349 449 743 997 1451 2053 2521 3581 4451 6011 7907 123457 1234543 123456761 1234567669
 
-                int skip = 123457;
+                int skip = Primes.roundToPrimeInt(999999);
+
 //        int skip = 123456761;
 //        int skip = 1234567669;
 

@@ -11,6 +11,7 @@ import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.WowHead;
 import au.nerago.mopgear.util.ArrayUtil;
 
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -270,8 +271,14 @@ public class ItemUtil {
         }
     }
 
-    static long estimateSets(EquipOptionsMap reforgedItems) {
-        return reforgedItems.entryStream().mapToLong(x -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
+    static BigInteger estimateSets(EquipOptionsMap reforgedItems) {
+        Optional<BigInteger> number = reforgedItems.entryStream().map(x -> BigInteger.valueOf(x.b().length)).reduce(BigInteger::multiply);
+        if (number.isPresent()) {
+            return number.get();
+        } else {
+            throw new RuntimeException("unable to determine item combination estimate");
+        }
+//        return reforgedItems.entryStream().mapToLong(x -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
     }
 
     public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> skinnyOptions) {

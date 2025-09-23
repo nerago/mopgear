@@ -101,15 +101,15 @@ public class Main {
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
-//        reforgeProcess(items, model, startTime);
+        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
-        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket1,79327, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket1,79327, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true, 89981, true, true, null);
 //        reforgeProcessPlus(items, model, startTime, null,86683, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true,86145, false, true, new StatBlock(285+80+120,0,0,165,160,160+160,0,0,0));
 //        reforgeProcessPlus(items, model, startTime, null, 86145, false, true, null);
-//        reforgeProcessPlusPlus(model, startTime, 81251, 81694);
+//        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new int[]{77530,89075,81262,87607,89823}));
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new ArrayList<>()));
 //          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86683,0), new CostedItem(86682,0), new CostedItem(86662,0)});
@@ -139,13 +139,13 @@ public class Main {
         ModelCombined model = ModelCombined.defenceProtModel();
         Path file = DataLocation.gearProtDefenceFile;
 
-        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonItems);
 
 //        reforgeProcess(items, model, startTime);
-        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
@@ -153,8 +153,9 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
 //          reforgeProcessPlusPlus(items, model, startTime, 86680, 86682, false, null);
+//        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
-//        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86682, 0), new CostedItem(86680, 0), new CostedItem(86681, 0)});
+//        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear()), model, true, null);
@@ -167,7 +168,7 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model, true, null);
 //        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
-//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null);
+        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
@@ -278,19 +279,34 @@ public class Main {
 //        map.put(86682, List.of(new ReforgeRecipe(Expertise, Haste))); // Hand White Tiger Gauntlets (Expertise->Haste)
 //        map.put(86906, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon Kilrak, Jaws of Terror (Mastery->Expertise)
         // 20/9/2025
-        map.put(86852, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
-        map.put(84807, List.of(new ReforgeRecipe(Crit, Hit))); // Back Malevolent Gladiator's Cloak of Alacrity (Crit->Hit)
-        map.put(85991, List.of(new ReforgeRecipe(null, null))); // Neck Soulgrasp Choker
-        map.put(89069, List.of(new ReforgeRecipe(Crit, Hit))); // Ring Ring of the Golden Stair (Crit->Hit)
-        map.put(89934, List.of(new ReforgeRecipe(null, null))); // Wrist Bonded Soul Bracers [both copies unforged]
-        map.put(90862, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Seal of the Bloodseeker (Expertise->Hit)
-        map.put(87024, List.of(new ReforgeRecipe(Crit, Expertise))); // Head Nullification Greathelm (Crit->Expertise)
+//        map.put(86852, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
+//        map.put(84807, List.of(new ReforgeRecipe(Crit, Hit))); // Back Malevolent Gladiator's Cloak of Alacrity (Crit->Hit)
+//        map.put(85991, List.of(new ReforgeRecipe(null, null))); // Neck Soulgrasp Choker
+//        map.put(89069, List.of(new ReforgeRecipe(Crit, Hit))); // Ring Ring of the Golden Stair (Crit->Hit)
+//        map.put(89934, List.of(new ReforgeRecipe(null, null))); // Wrist Bonded Soul Bracers [both copies unforged]
+//        map.put(90862, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Seal of the Bloodseeker (Expertise->Hit)
+//        map.put(87024, List.of(new ReforgeRecipe(Crit, Expertise))); // Head Nullification Greathelm (Crit->Expertise)
+//        map.put(86802, List.of(new ReforgeRecipe(null, null))); // Trinket Lei Shen's Final Orders
+//        map.put(86680, List.of(new ReforgeRecipe(Mastery, Haste))); // Leg White Tiger Legplates (Mastery->Haste)
+//        map.put(86683, List.of(new ReforgeRecipe(null, null))); // Chest White Tiger Battleplate
+//        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons (Hit->Expertise)
+//        map.put(86682, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets (Crit->Haste)
+//        map.put(86906, List.of(new ReforgeRecipe(Mastery, Crit))); // Weapon Kilrak, Jaws of Terror (Mastery->Crit)
+        // 22/9
+        map.put(86852, List.of(new ReforgeRecipe(Hit, Expertise))); // Foot Impaling Treads (Hit->Expertise)
+        map.put(84807, List.of(new ReforgeRecipe(Haste, Mastery))); // Back Malevolent Gladiator's Cloak of Alacrity (Haste->Mastery)
+        map.put(85991, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker (Hit->Expertise)
+        map.put(89069, List.of(new ReforgeRecipe(Expertise, Haste))); // Ring Ring of the Golden Stair (Expertise->Haste)
+        map.put(89934, List.of(new ReforgeRecipe(null, null), new ReforgeRecipe(Expertise, Hit))); // Wrist Bonded Soul Bracers
+        map.put(90862, List.of(new ReforgeRecipe(Expertise, Mastery))); // Ring Seal of the Bloodseeker (Expertise->Mastery)
+        map.put(87024, List.of(new ReforgeRecipe(Crit, Hit))); // Head Nullification Greathelm (Crit->Hit)
         map.put(86802, List.of(new ReforgeRecipe(null, null))); // Trinket Lei Shen's Final Orders
         map.put(86680, List.of(new ReforgeRecipe(Mastery, Haste))); // Leg White Tiger Legplates (Mastery->Haste)
-        map.put(86683, List.of(new ReforgeRecipe(null, null))); // Chest White Tiger Battleplate
-        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons (Hit->Expertise)
-        map.put(86682, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets (Crit->Haste)
-        map.put(86906, List.of(new ReforgeRecipe(Mastery, Crit))); // Weapon Kilrak, Jaws of Terror (Mastery->Crit)
+        map.put(86683, List.of(new ReforgeRecipe(Crit, Hit))); // Chest White Tiger Battleplate (Crit->Hit)
+        map.put(85339, List.of(new ReforgeRecipe(null, null))); // Shoulder White Tiger Pauldrons
+        map.put(86906, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon Kilrak, Jaws of Terror (Mastery->Expertise)
+        map.put(87100, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets (Crit->Haste)
+        map.put(79327, List.of(new ReforgeRecipe(null, null))); // Trinket Relic of Xuen
         return map;
     }
 
@@ -364,6 +380,7 @@ public class Main {
         job.config(model, scaledMap, startTime, null);
         job.runSizeMultiply = 16;
         job.forceRandom = true;
+        job.forcedRunSized = BILLION;
         Solver.runJob(job);
         ItemSet bestScaledSet = job.resultSet.orElseThrow();
 
