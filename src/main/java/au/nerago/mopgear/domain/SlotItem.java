@@ -13,8 +13,8 @@ public enum SlotItem {
     Foot(8, SlotEquip.Foot),
     Ring(11, SlotEquip.Ring1),
     Trinket(12, SlotEquip.Trinket1),
-    WeaponTwoHand(17, SlotEquip.Weapon), // 2H
-    WeaponOneHand(13, SlotEquip.Weapon), // 1H
+    Weapon2H(17, SlotEquip.Weapon),
+    Weapon1H(13, SlotEquip.Weapon),
     Offhand(14, SlotEquip.Offhand);
 
     public static final SlotEquip[] ALL_RINGS = {SlotEquip.Ring1, SlotEquip.Ring2};

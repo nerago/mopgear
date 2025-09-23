@@ -28,7 +28,7 @@ public class Jobs {
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
         // TODO upgrade level
         Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId(), upgradeLevel))
-                .filter(item -> item.slot != SlotItem.WeaponTwoHand)
+                .filter(item -> item.slot != SlotItem.Weapon2H)
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
                     SlotEquip[] slotOptions = item.slot.toSlotEquipOptions();
@@ -58,7 +58,7 @@ public class Jobs {
         Arrays.stream(allItems)
                 .peek(costed -> costs.put(costed.itemId(), costed.cost()))
                 .map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId(), upgradeLevel))
-                .filter(item -> item.slot != SlotItem.WeaponTwoHand)
+                .filter(item -> item.slot != SlotItem.Weapon2H)
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
                     SlotEquip[] slotOptions = item.slot.toSlotEquipOptions();

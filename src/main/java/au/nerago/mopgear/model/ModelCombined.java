@@ -1,5 +1,6 @@
 package au.nerago.mopgear.model;
 
+import au.nerago.mopgear.ItemUtil;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.ServiceEntry;
 import au.nerago.mopgear.io.DataLocation;
@@ -27,7 +28,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     public Stream<ItemSet> filterSets(Stream<ItemSet> stream, boolean isFinal) {
         Stream<ItemSet> filtered = statRequirements.filterSets(stream);
         if (isFinal) {
-            filtered = filtered.filter(set -> set.items.validateNoDuplicates());
+            filtered = filtered.filter(set -> ItemUtil.validateNoDuplicates(set.items));
         }
         return filtered;
     }

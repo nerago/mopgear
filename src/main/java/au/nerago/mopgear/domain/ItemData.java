@@ -76,6 +76,7 @@ public final class ItemData {
     public String toStringExtended() {
         final StringBuilder sb = new StringBuilder("{ ");
         append(sb);
+        sb.append("REF ");
         sb.append("ilevel=").append(ref.itemLevel()).append(' ');
         sb.append("itemId=").append(ref.itemId()).append(' ');
         sb.append('}');

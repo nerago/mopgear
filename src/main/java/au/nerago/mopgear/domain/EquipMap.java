@@ -253,13 +253,6 @@ public final class EquipMap {
         return StreamSupport.stream(new ItemsSpliterator(), true);
     }
 
-    public boolean validateNoDuplicates() {
-        ItemData t1 = getTrinket1(), t2 = getTrinket2();
-        ItemData r1 = getRing1(), r2 = getRing2();
-        return (t1 == null || t2 == null || t1.ref.itemId() != t2.ref.itemId()) &&
-                (r1 == null || r2 == null || r1.ref.itemId() != r2.ref.itemId());
-    }
-
     private class ItemsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, ItemData>> {
         static final SlotEquip[] slotArray = SlotEquip.values();
         int index = 0;

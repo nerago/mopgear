@@ -130,18 +130,11 @@ public class FindUpgrades {
             int extraItemId = extraItemInfo.itemId();
             int cost = extraItemInfo.cost();
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
-            SlotEquip slot = extraItem.slot.toSlotEquip();
 
-            if (!canSkipUpgradeCheck(extraItem, slot, baseItems)) {
-                OutputText.printf("JOB %s\n", extraItem.toStringExtended());
-
-                submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating, cost));
-
-                if (slot == SlotEquip.Trinket1) {
-                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, SlotEquip.Trinket2, baseRating, cost));
-                }
-                if (slot == SlotEquip.Ring1) {
-                    submitJob.accept(checkForUpgrade(model, baseItems.deepClone(), extraItem, enchanting, adjustment, SlotEquip.Ring2, baseRating, cost));
+            for (SlotEquip slot : extraItem.slot.toSlotEquipOptions()) {
+                if (canPerformSpecifiedUpgrade(extraItem, slot, baseItems)) {
+                    OutputText.printf("JOB %s\n", extraItem.toStringExtended());
+                    submitJob.accept(buildUpgradeJob(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating, cost));
                 }
             }
         });
@@ -165,11 +158,9 @@ public class FindUpgrades {
         }
     }
 
-    private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
+    private JobInfo buildUpgradeJob(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
         JobInfo job = new JobInfo();
 //        job.singleThread = true;
-
-        // TODO upgrade levels
 
         extraItem = enchanting.apply(extraItem);
         job.println("OFFER " + extraItem.toStringExtended());
@@ -209,20 +200,20 @@ public class FindUpgrades {
         OutputText.println();
     }
 
-    private boolean canSkipUpgradeCheck(ItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {
+    private boolean canPerformSpecifiedUpgrade(ItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {
         if (SourcesOfItems.ignoredItems.contains(extraItem.ref.itemId()))
-            return true;
+            return false;
 
         if (reforgedItems.get(slot) == null) {
             OutputText.println("SLOT NOT USED IN CURRENT SET " + extraItem.toStringExtended());
-            return true;
+            return false;
         }
 
         if (slot == SlotEquip.Weapon) {
             ItemData exampleWeapon = reforgedItems.get(SlotEquip.Weapon)[0];
             if (extraItem.slot != exampleWeapon.slot) {
                 OutputText.println("WRONG WEAPON TYPE " + extraItem.toStringExtended());
-                return true;
+                return false;
             }
         }
 
@@ -230,10 +221,15 @@ public class FindUpgrades {
         if (reforgedItems.get(slot)[0].ref.equalsTyped(extraItem.ref) ||
                 (pairedSlot != null && reforgedItems.get(pairedSlot)[0].ref.equalsTyped(extraItem.ref))) {
             OutputText.println("SAME ITEM " + extraItem.toStringExtended());
-            return true;
+            return false;
         }
 
-        return false;
+        if (pairedSlot != null && reforgedItems.get(pairedSlot)[0].ref.itemId() == extraItem.ref.itemId()) {
+            OutputText.println("SAME ITEM ID IN OTHER SLOT " + extraItem.toStringExtended());
+            return false;
+        }
+
+        return true;
     }
 
 }

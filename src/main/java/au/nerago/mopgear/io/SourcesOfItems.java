@@ -529,7 +529,7 @@ public class SourcesOfItems {
     public static CostedItem[] strengthPlateCurrentItemsRet(ItemCache itemCache) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         Stream<CostedItem> itemStream = items.entryStream()
-                .filter(it -> it.b()[0].slot != SlotItem.WeaponTwoHand && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
+                .filter(it -> it.b()[0].slot != SlotItem.Weapon2H && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }
@@ -537,7 +537,7 @@ public class SourcesOfItems {
     public static CostedItem[] strengthPlateCurrentItemsProt(ItemCache itemCache) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.entryStream()
-                .filter(it -> it.b()[0].slot != SlotItem.WeaponOneHand && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
+                .filter(it -> it.b()[0].slot != SlotItem.Weapon1H && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }

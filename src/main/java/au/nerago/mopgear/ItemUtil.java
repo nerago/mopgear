@@ -26,8 +26,8 @@ public class ItemUtil {
 //        set.add(SlotItem.Belt);
         set.add(SlotItem.Leg);
         set.add(SlotItem.Foot);
-        set.add(SlotItem.WeaponOneHand);
-        set.add(SlotItem.WeaponTwoHand);
+        set.add(SlotItem.Weapon1H);
+        set.add(SlotItem.Weapon2H);
         set.add(SlotItem.Offhand);
         return set;
     }
@@ -192,10 +192,17 @@ public class ItemUtil {
         }
     }
 
+    public static boolean validateNoDuplicates(EquipMap map) {
+        ItemData t1 = map.getTrinket1(), t2 = map.getTrinket2();
+        ItemData r1 = map.getRing1(), r2 = map.getRing2();
+        return (t1 == null || t2 == null || t1.ref.itemId() != t2.ref.itemId()) &&
+                (r1 == null || r2 == null || r1.ref.itemId() != r2.ref.itemId());
+    }
+
     public static List<ItemData> onlyMatchingForge(List<ItemData> forgeList, ReforgeRecipe recipe) {
         if (recipe == null || recipe.isEmpty()) {
             for (ItemData item : forgeList) {
-                if (item.reforge == null || item.reforge.isEmpty())
+                if (item.reforge.isEmpty())
                     return List.of(item);
             }
         } else {
@@ -212,48 +219,52 @@ public class ItemUtil {
     }
 
     public static ItemData defaultEnchants(ItemData item, ModelCombined model, boolean force) {
-        if (force || item.statFixed.isEmpty()) {
-            SocketType[] socketSlots = item.socketSlots;
-
-            if (model.enchants().isBlacksmith() && (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand))
-                socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
-            else if (item.slot == SlotItem.Belt)
-                socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
-
-            StatBlock total = StatBlock.empty;
-            if (socketSlots != null) {
-                int engineer = 0;
-                for (SocketType type : socketSlots) {
-                    if (type == SocketType.Engineer) {
-                        StatBlock value;
-                        if (engineer == 0)
-                            value = StatBlock.of(StatType.Haste, 600);
-                        else if (engineer == 1)
-                            value = StatBlock.of(StatType.Mastery, 600);
-                        else if (engineer == 2)
-                            value = StatBlock.of(StatType.Crit, 600);
-                        else
-                            throw new IllegalArgumentException("don't know what engineer gem to add");
-                        total = total.plus(value);
-                        engineer++;
-                    } else {
-                        total = total.plus(model.gemChoice(type));
-                    }
-                }
-            }
-            if (item.socketBonus != 0) {
-                StatBlock bonus = GemData.getSocketBonus(item);
-                total = total.plus(bonus);
-            }
-            StatBlock enchant = model.standardEnchant(item.slot);
-            if (enchant != null) {
-                total = total.plus(enchant);
-            }
-
-            return item.changeFixed(total);
-        } else {
+        if (item.slot == SlotItem.Trinket) {
             return item;
         }
+
+        if (!item.statFixed.isEmpty() && !force) {
+            return item;
+        }
+
+        SocketType[] socketSlots = item.socketSlots;
+
+        if (model.enchants().isBlacksmith() && (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand))
+            socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
+        else if (item.slot == SlotItem.Belt)
+            socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
+
+        StatBlock total = StatBlock.empty;
+        if (socketSlots != null) {
+            int engineer = 0;
+            for (SocketType type : socketSlots) {
+                if (type == SocketType.Engineer) {
+                    StatBlock value;
+                    if (engineer == 0)
+                        value = StatBlock.of(StatType.Haste, 600);
+                    else if (engineer == 1)
+                        value = StatBlock.of(StatType.Mastery, 600);
+                    else if (engineer == 2)
+                        value = StatBlock.of(StatType.Crit, 600);
+                    else
+                        throw new IllegalArgumentException("don't know what engineer gem to add");
+                    total = total.plus(value);
+                    engineer++;
+                } else {
+                    total = total.plus(model.gemChoice(type));
+                }
+            }
+        }
+        if (item.socketBonus != 0) {
+            StatBlock bonus = GemData.getSocketBonus(item);
+            total = total.plus(bonus);
+        }
+        StatBlock enchant = model.standardEnchant(item.slot);
+        if (enchant != null) {
+            total = total.plus(enchant);
+        }
+
+        return item.changeFixed(total);
     }
 
     static BigInteger estimateSets(EquipOptionsMap reforgedItems) {
