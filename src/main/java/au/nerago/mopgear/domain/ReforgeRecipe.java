@@ -20,7 +20,7 @@ public record ReforgeRecipe(StatType source, StatType dest) {
         return new ReforgeRecipe(null, null);
     }
 
-    public boolean isNull() {
+    public boolean isEmpty() {
         return source == null && dest == null;
     }
 

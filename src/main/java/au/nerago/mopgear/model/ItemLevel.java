@@ -27,12 +27,16 @@ public class ItemLevel {
     }
 
     public static ItemData scaleForChallengeMode(ItemData item) {
-        int level = item.itemLevel;
+        int level = item.ref.itemLevel();
         if (level <= CHALLENGE_TARGET_LEVEL) {
             return item;
         }
 
         double factor = calcMultiplier(level, CHALLENGE_TARGET_LEVEL);
+        return scaleAll(item, factor);
+    }
+
+    private static ItemData scaleAll(ItemData item, double factor) {
         StatBlock stats = scaleStatBlock(item.stat, factor);
         if (item.slot != SlotItem.Trinket) {
             OutputText.println("SCALED " + item.name + " " + stats);
@@ -42,6 +46,19 @@ public class ItemLevel {
             OutputText.println("SCALED TRINKET " + item.name + " " + stats + " " + statsFixed);
             return item.changeStats(stats).changeFixed(statsFixed);
         }
+    }
+
+    public static ItemData upgrade(ItemData item, int upgradeLevel) {
+        if (upgradeLevel == 0)
+            return item;
+        else if (upgradeLevel < 0 || upgradeLevel > 2)
+            throw new IllegalArgumentException("invalid upgrade level");
+
+        int startLevel = item.ref.itemLevel();
+        int levelIncrease = upgradeLevel * 4;
+        int targetLevel = item.ref.itemLevel() + levelIncrease;
+        double factor = calcMultiplier(startLevel, targetLevel);
+        return scaleAll(item, factor).changeItemLevel(targetLevel);
     }
 
     private static StatBlock scaleStatBlock(StatBlock stats, double factor) {

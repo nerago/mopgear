@@ -48,11 +48,11 @@ public class ServiceEntry {
                 Jobs.reforgeProcess(items, model, null);
             }
             case EXTRA_ITEMS -> {
-                Jobs.reforgeProcessPlusMany(items, model, null, params.extraItems);
+                Jobs.reforgeProcessPlusMany(items, model, null, params.extraItems, params.upgradeLevel);
             }
             case EXTRA_BAGS -> {
                 Path bagsFile = Path.of(params.bagFile);
-                Jobs.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(bagsFile, SourcesOfItems.ignoredItems));
+                Jobs.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(bagsFile, SourcesOfItems.ignoredItems), params.upgradeLevel);
             }
             case FIND_UPGRADE -> {
                 CostedItem[] extraItems = params.extraItems();
@@ -73,7 +73,8 @@ public class ServiceEntry {
                                 boolean challengeModeScaling,
                                 ServiceJobType jobType,
                                 CostedItem[] extraItems,
-                                String sourceOfItems
+                                String sourceOfItems,
+                                Integer upgradeLevel
                                ) {
     }
 

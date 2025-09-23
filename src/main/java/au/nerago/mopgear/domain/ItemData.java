@@ -1,20 +1,30 @@
 package au.nerago.mopgear.domain;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Objects;
 
 public final class ItemData {
-    public final int id;
+    @NotNull
+    public final ItemRef ref;
+    @NotNull
     public final SlotItem slot;
+    @NotNull
     public final String name;
+    @NotNull
     public final ReforgeRecipe reforge;
+    @NotNull
     public final StatBlock stat;
+    @NotNull
     public final StatBlock statFixed;
+    @NotNull
     public final SocketType[] socketSlots;
     public final int socketBonus;
-    public final int itemLevel;
 
-    private ItemData(int id, SlotItem slot, String name, ReforgeRecipe reforge, StatBlock stat, StatBlock statFixed, SocketType[] socketSlots, int socketBonus, int itemLevel) {
-        this.id = id;
+    private ItemData(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull ReforgeRecipe reforge,
+                     @NotNull StatBlock stat, @NotNull StatBlock statFixed, @NotNull SocketType[] socketSlots, int socketBonus) {
+        this.ref = ref;
         this.slot = slot;
         this.name = name;
         this.reforge = reforge;
@@ -22,31 +32,30 @@ public final class ItemData {
         this.statFixed = statFixed;
         this.socketSlots = socketSlots;
         this.socketBonus = socketBonus;
-        this.itemLevel = itemLevel;
     }
 
-    public static ItemData build(int id, SlotItem slot, String name, StatBlock stat, SocketType[] socketSlots, int socketBonus, int itemLevel) {
-        return new ItemData(id, slot, name, null, stat, StatBlock.empty, socketSlots, socketBonus, itemLevel);
+    public static ItemData build(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, int socketBonus, int itemLevel) {
+        return new ItemData(new ItemRef(id, itemLevel, 0), slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
     }
 
-    public ItemData changeNameAndStats(String changedName, StatBlock changedStats, ReforgeRecipe recipe) {
-        return new ItemData(id, slot, changedName, recipe, changedStats, statFixed, socketSlots, socketBonus, itemLevel);
+    public ItemData changeNameAndStats(@NotNull String changedName, @NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
+        return new ItemData(ref, slot, changedName, recipe, changedStats, statFixed, socketSlots, socketBonus);
     }
 
-    public ItemData changeStats(StatBlock changedStats) {
-        return new ItemData(id, slot, name, reforge, changedStats, statFixed, socketSlots, socketBonus, itemLevel);
+    public ItemData changeStats(@NotNull StatBlock changedStats) {
+        return new ItemData(ref, slot, name, reforge, changedStats, statFixed, socketSlots, socketBonus);
     }
 
-    public ItemData changeFixed(StatBlock changedFixed) {
-        return new ItemData(id, slot, name, reforge, stat, changedFixed, socketSlots, socketBonus, itemLevel);
+    public ItemData changeFixed(@NotNull StatBlock changedFixed) {
+        return new ItemData(ref, slot, name, reforge, stat, changedFixed, socketSlots, socketBonus);
     }
 
-    public ItemData changeId(int itemId) {
-        return new ItemData(itemId, slot, name, reforge, stat, statFixed, socketSlots, socketBonus, itemLevel);
+    public ItemData changeDuplicate(int dupNum) {
+        return new ItemData(new ItemRef(ref.itemId(), ref.itemLevel(), dupNum), slot, name, reforge, stat, statFixed, socketSlots, socketBonus);
     }
 
-    public ItemData withoutFixed() {
-        return new ItemData(id, slot, name, reforge, stat, StatBlock.empty, socketSlots, socketBonus, itemLevel);
+    public ItemData changeItemLevel(int targetLevel) {
+        return new ItemData(new ItemRef(ref.itemId(), targetLevel, ref.duplicateNum()), slot, name, reforge, stat, statFixed, socketSlots, socketBonus);
     }
 
     public StatBlock totalStatCopy() {
@@ -54,10 +63,6 @@ public final class ItemData {
             return stat;
         else
             return stat.plus(statFixed);
-    }
-
-    public int totalStat(StatType type) {
-        return stat.get(type) + statFixed.get(type);
     }
 
     @Override
@@ -71,19 +76,15 @@ public final class ItemData {
     public String toStringExtended() {
         final StringBuilder sb = new StringBuilder("{ ");
         append(sb);
-        sb.append("ilevel=").append(itemLevel).append(' ');
-        sb.append("itemId=").append(id).append(' ');
+        sb.append("ilevel=").append(ref.itemLevel()).append(' ');
+        sb.append("itemId=").append(ref.itemId()).append(' ');
         sb.append('}');
         return sb.toString();
     }
 
     private void append(StringBuilder sb) {
-        if (slot != null)
-            sb.append(slot).append(' ');
-        if (name != null)
-            sb.append('"').append(name).append("\" ");
-        else
-            sb.append("TOTAL ");
+        sb.append(slot).append(' ');
+        sb.append('"').append(name).append("\" ");
         stat.append(sb, false);
         if (!statFixed.isEmpty()) {
             sb.append("GEMS ");
@@ -92,11 +93,11 @@ public final class ItemData {
     }
 
     public static boolean isSameEquippedItem(ItemData a, ItemData b) {
-        return a.id == b.id && a.statFixed.equalsStats(b.statFixed);
+        return a.ref.equalsTyped(b.ref);
     }
 
     public static boolean isIdenticalItem(ItemData a, ItemData b) {
-        return a.id == b.id && a.stat.equalsStats(b.stat) && a.statFixed.equalsStats(b.statFixed);
+        return a.ref.equalsTyped(b.ref) && a.stat.equalsStats(b.stat) && a.statFixed.equalsStats(b.statFixed);
     }
 
     @Override
@@ -104,11 +105,11 @@ public final class ItemData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ItemData itemData = (ItemData) o;
-        return id == itemData.id && slot == itemData.slot && Objects.equals(reforge, itemData.reforge) && Objects.equals(stat, itemData.stat) && Objects.equals(statFixed, itemData.statFixed);
+        return ref.equalsTyped(itemData.ref) && slot == itemData.slot && Objects.equals(reforge, itemData.reforge) && Objects.equals(stat, itemData.stat) && Objects.equals(statFixed, itemData.statFixed);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, slot, reforge, stat, statFixed);
+        return Objects.hash(ref, slot, reforge, stat, statFixed);
     }
 }

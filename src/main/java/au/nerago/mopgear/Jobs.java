@@ -14,30 +14,11 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static au.nerago.mopgear.domain.StatType.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Jobs {
     public static final long BILLION = 1000 * 1000 * 1000;
     public static ItemCache itemCache;
-
-    public static void combinationDumb(EquipOptionsMap items, ModelCombined model, Instant startTime) {
-        for (int extraId : new int[]{89503, 81129, 89649, 87060, 89665, 82812, 90910, 81284, 82814, 84807, 84870, 84790, 82822}) {
-            ItemData extraItem = addExtra(items, model, extraId, Function.identity(), null, false, true, true);
-            OutputText.println("EXTRA " + extraItem);
-        }
-        //        ItemUtil.disenchant(items);
-        ItemUtil.defaultEnchants(items, model, true);
-        ItemUtil.bestForgesOnly(items, model);
-        ItemLevel.scaleForChallengeMode(items);
-
-        ModelCombined dumbModel = model.withNoRequirements();
-
-        Optional<ItemSet> bestSet = Solver.chooseEngineAndRun(dumbModel, items, startTime, null);
-        outputResultSimple(bestSet, model, true);
-    }
 
     public static void findUpgradeSetup(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
         new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems, adjustment);
@@ -46,7 +27,7 @@ public class Jobs {
     public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime) {
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
         Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
-                .filter(item -> item.slot != SlotItem.Weapon || SourcesOfItems.isOneHandWeapon(item))
+                .filter(item -> item.slot != SlotItem.WeaponTwoHand)
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
                     SlotEquip[] slotOptions = item.slot.toSlotEquipOptions();
@@ -75,7 +56,7 @@ public class Jobs {
         Arrays.stream(allItems)
                 .peek(costed -> costs.put(costed.itemId(), costed.cost()))
                 .map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
-                .filter(item -> item.slot != SlotItem.Weapon || SourcesOfItems.isOneHandWeapon(item))
+                .filter(item -> item.slot != SlotItem.WeaponTwoHand)
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
                     SlotEquip[] slotOptions = item.slot.toSlotEquipOptions();
@@ -93,7 +74,7 @@ public class Jobs {
 //                    OutputText.printf("##### %s #####\n", slot);
                     Arrays.stream(options).sorted(Comparator.comparingLong(model::calcRating))
                             .forEach(item ->
-                                    OutputText.printf("%s \t%08d \t%s \t%d \t%d\n", slot, model.calcRating(item), item.name, item.itemLevel, costs.get(item.id)));
+                                    OutputText.printf("%s \t%08d \t%s \t%d \t%d\n", slot, model.calcRating(item), item.name, item.ref.itemLevel(), costs.get(item.ref.itemId())));
                     OutputText.println();
 //                    TopHolderN<ItemData> best = new TopHolderN<>(5, model::calcRating);
 //                    ArrayUtil.forEach(options, best::add);
@@ -104,29 +85,6 @@ public class Jobs {
         );
     }
 
-    public static void rankAlternativesAsSingleItems(ModelCombined model, int[] itemIds, Map<Integer, StatBlock> enchants, boolean scaleChallenge) {
-        Stream<ItemData> stream = Arrays.stream(itemIds)
-                .mapToObj(x -> new EquippedItem(x, new int[0], null))
-                .map(x -> ItemUtil.loadItem(itemCache, x, true))
-                .flatMap(x -> Arrays.stream(Reforger.reforgeItem(model.reforgeRules(), x)));
-        if (enchants != null) {
-            stream = stream.map(x ->
-                    enchants.containsKey(x.id) ?
-                            x.changeFixed(enchants.get(x.id)) :
-                            ItemUtil.defaultEnchants(x, model, true)
-            );
-        }
-        if (scaleChallenge) {
-            stream = stream.map(ItemLevel::scaleForChallengeMode);
-        }
-        List<ItemData> reforgedItems = stream
-                .sorted(Comparator.comparingLong(model::calcRating))
-                .toList();
-        for (ItemData item : reforgedItems) {
-            OutputText.println(item + " " + model.calcRating(item));
-        }
-    }
-
     public static void rankAlternativeCombos(EquipOptionsMap baseOptions, ModelCombined model, Instant startTime, List<List<Integer>> comboListList) {
         BestHolder<List<ItemData>> best = new BestHolder<>();
         for (List<Integer> combo : comboListList) {
@@ -134,7 +92,7 @@ public class Jobs {
             EquipOptionsMap submitMap = baseOptions.deepClone();
             List<ItemData> optionItems = new ArrayList<>();
             for (int extraId : combo) {
-                ItemData item = addExtra(submitMap, model, extraId, enchants, null, true, true, true);
+                ItemData item = addExtra(submitMap, model, extraId, 0, enchants, null, true, true, true);
                 optionItems.add(item);
             }
 
@@ -163,7 +121,7 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
+    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int updateLevel, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
 
         Function<ItemData, ItemData> enchanting = defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) : Function.identity();
@@ -171,7 +129,7 @@ public class Jobs {
             slot = extraItem.slot.toSlotEquip();
 
         EquipOptionsMap runItems = itemOptions.deepClone();
-        extraItem = addExtra(runItems, model, extraItemId, slot, enchanting, null, replace, true, true);
+        extraItem = addExtra(runItems, model, extraItemId, updateLevel, slot, enchanting, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem);
 
         JobInfo job = new JobInfo();
@@ -187,14 +145,17 @@ public class Jobs {
         }
     }
 
-    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        return addExtra(reforgedItems, model, extraItemId, extraItem.slot.toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
+        return addExtra(reforgedItems, model, extraItemId, upgradeLevel, extraItem.slot.toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
     }
 
-    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+        extraItem = ItemLevel.upgrade(extraItem, upgradeLevel);
         extraItem = customiseItem.apply(extraItem);
+        ItemRef ref = extraItem.ref;
+
         ItemData[] extraForged = reforge != null ?
                 new ItemData[]{Reforger.presetReforge(extraItem, reforge)} :
                 Reforger.reforgeItem(model.reforgeRules(), extraItem);
@@ -203,7 +164,7 @@ public class Jobs {
             reforgedItems.put(slot, extraForged);
         } else {
             ItemData[] existing = reforgedItems.get(slot);
-            if (ArrayUtil.anyMatch(existing, item -> item.id == extraItemId)) {
+            if (ArrayUtil.anyMatch(existing, item -> item.ref.equalsTyped(ref))) {
                 if (errorOnExists)
                     throw new IllegalArgumentException("item already included " + extraItemId + " " + extraItem);
                 OutputText.println("ALREADY INCLUDED " + extraItem);
@@ -215,9 +176,9 @@ public class Jobs {
         if (customiseOthersInSlot) {
             ArrayUtil.mapInPlace(slotArray, customiseItem);
         }
-        HashSet<Integer> seen = new HashSet<>();
+        HashSet<ItemRef> seen = new HashSet<>();
         ArrayUtil.forEach(slotArray, it -> {
-            if (seen.add(it.id)) {
+            if (seen.add(it.ref)) {
                 OutputText.println("NEW " + slot + " " + it);
             }
         });
@@ -225,15 +186,15 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlusPlus(EquipOptionsMap runItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2, boolean replace, StatBlock adjustment) {
+    public static void reforgeProcessPlusPlus(EquipOptionsMap runItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2, int upgradeLevel, boolean replace, StatBlock adjustment) {
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, model, true);
 //        Function<ItemData, ItemData> enchant2 = x -> x.changeFixed(new StatBlock(285,90,0,165,0,0,320,0,0,0));
 
-        ItemData extraItem1 = addExtra(runItems, model, extraItemId1, enchant, null, replace, true, true);
+        ItemData extraItem1 = addExtra(runItems, model, extraItemId1, upgradeLevel, enchant, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem1);
         OutputText.println();
 
-        ItemData extraItem2 = addExtra(runItems, model, extraItemId2, enchant, null, replace, true, true);
+        ItemData extraItem2 = addExtra(runItems, model, extraItemId2, upgradeLevel, enchant, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem2);
         OutputText.println();
 
@@ -250,28 +211,21 @@ public class Jobs {
         job.printRecorder.outputNow();
     }
 
-    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems) {
+    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel) {
         Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, model, true);
 
         for (CostedItem entry : extraItems) {
             int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
             ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-            SlotEquip slot = extraItem.slot.toSlotEquip();
-            ItemData[] existing = items.get(slot);
-            if (existing == null) {
-                OutputText.println("SKIP SLOT NOT NEEDED " + extraItem);
-            } else if (ArrayUtil.anyMatch(existing, item -> item.id == extraItemId)) {
-                OutputText.println("SKIP DUP " + extraItem);
-            } else {
-                if (slot == SlotEquip.Trinket1) {
-                    addExtra(items, model, extraItemId, SlotEquip.Trinket1, enchant, null, false, true, true);
-                    addExtra(items, model, extraItemId, SlotEquip.Trinket2, enchant, null, false, true, true);
-                } else if (slot == SlotEquip.Ring1) {
-                    addExtra(items, model, extraItemId, SlotEquip.Ring1, enchant, null, false, true, true);
-                    addExtra(items, model, extraItemId, SlotEquip.Ring2, enchant, null, false, true, true);
+            for (SlotEquip slot : extraItem.slot.toSlotEquipOptions()) {
+                ItemData[] existing = items.get(slot);
+                if (existing == null) {
+                    OutputText.println("SKIP SLOT NOT NEEDED " + extraItem);
+                } else if (ArrayUtil.anyMatch(existing, item -> item.ref.equalsTyped(extraItem.ref))) {
+                    OutputText.println("SKIP DUP " + extraItem);
                 } else {
-                    addExtra(items, model, extraItemId, slot, enchant, null, false, true, true);
+                    addExtra(items, model, extraItemId, upgradeLevel, slot, enchant, null, false, true, true);
                 }
             }
         }

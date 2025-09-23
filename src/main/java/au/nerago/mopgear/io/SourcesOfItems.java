@@ -339,14 +339,6 @@ public class SourcesOfItems {
         };
     }
 
-    public static CostedItem[] filterItemLevel(ItemCache itemCache, CostedItem[] existing, int maxItemLevel) {
-        return Arrays.stream(existing)
-                .map(tup -> Tuple.create(tup, ItemUtil.loadItemBasic(itemCache, tup.itemId())))
-                .filter(tup2 -> tup2.b().itemLevel <= maxItemLevel)
-                .map(Tuple.Tuple2::a)
-                .toArray(CostedItem[]::new);
-    }
-
     public static CostedItem[] filterExclude(CostedItem[] existing, List<Integer> exclude) {
         return Arrays.stream(existing)
                 .filter(tup -> !exclude.contains(tup.itemId()))
@@ -522,18 +514,6 @@ public class SourcesOfItems {
         };
     }
 
-    private static final int[] oneHandWeapons = new int[] { 86906, 86789, 87062, 86987, 87173 };
-    private static final int[] twoHandWeapons = new int[] { 86799, 87176, 86905, 84790 };
-    public static boolean isOneHandWeapon(ItemData item) {
-        if (ArrayUtil.contains(oneHandWeapons, item.id)) {
-            return true;
-        } else if (ArrayUtil.contains(twoHandWeapons, item.id)) {
-            return false;
-        } else {
-            throw new IllegalArgumentException("unknown weapon " + item.toStringExtended());
-        }
-    }
-
     public static CostedItem[] bagItemsArray(List<Integer> skip) {
         return bagItemsArray(DataLocation.bagsFile, skip);
     }
@@ -549,16 +529,16 @@ public class SourcesOfItems {
     public static CostedItem[] strengthPlateCurrentItemsRet(ItemCache itemCache, ModelCombined model) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         Stream<CostedItem> itemStream = items.entryStream()
-                .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
-                .map(tup -> new CostedItem(tup.b()[0].id, 0));
+                .filter(it -> it.b()[0].slot != SlotItem.WeaponTwoHand && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
+                .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProt(ItemCache itemCache, ModelCombined model) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtDpsFile, ReforgeRules.ret(), null);
         Stream<CostedItem> itemStream = items.entryStream()
-                .filter(it -> it.b()[0].slot != SlotItem.Weapon && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
-                .map(tup -> new CostedItem(tup.b()[0].id, 0));
+                .filter(it -> it.b()[0].slot != SlotItem.WeaponOneHand && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
+                .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }
 
@@ -575,7 +555,8 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] intellectLeatherValorCelestial(ItemCache itemCache) {
-        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 483);
+//        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 483);
+        CostedItem[] filteredCelestialArray = intellectLeatherCelestialArray();
         return ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray());
     }
 

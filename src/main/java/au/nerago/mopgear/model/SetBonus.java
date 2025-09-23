@@ -99,7 +99,7 @@ public class SetBonus {
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData item = itemMap.get(slot);
             if (item != null) {
-                int itemId = item.id;
+                int itemId = item.ref.itemId();
                 for (int i = 0; i < activeSetCount; ++i) {
                     if (activeSets.get(i).items.contains(itemId)) {
                         setCounts[i]++;

@@ -73,23 +73,6 @@ public class Main {
 //            multiSpecSpecifiedRating();
     }
 
-    private void rankSomething() {
-        ModelCombined model = ModelCombined.standardRetModel();
-//        ModelCombined model = standardProtModel();
-
-        // assumes socket bonus+non matching gems
-        Map<Integer, StatBlock> enchants = Map.of(
-//                86145, new StatBlock(120+285, 0, 0, 165, 0, 640,0,0,0),
-                86145, new StatBlock(285, 0, 0, 165, 0, 640, 0, 0, 0, 0),
-                84870, new StatBlock(0, 430, 0, 0, 0, 640, 0, 165, 0, 0));
-
-        rankAlternativesAsSingleItems(model, new int[]{82856, 86794}, enchants, false);
-//        rankAlternatives(new int [] {81129,81234,82850,81571}); // cloak
-//        rankAlternatives(new int [] {84036,81190,81687,81130,81086}); // belt
-//        rankAlternativesAsSingleItems(model, new int[]{84027, 81284, 81073, 81113, 82852}); // feet
-//        rankAlternativesAsSingleItems(model, new int[]{86145, 82812, 84870}, enchants, false); // legs
-    }
-
     private void reforgeRet(Instant startTime) {
 //        ModelCombined model = ModelCombined.standardRetModel();
 //        ModelCombined model = ModelCombined.extendedRetModel(true, true);
@@ -128,8 +111,6 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
 //        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
-
-//        combinationDumb(items, model, startTime);
     }
 
     private void reforgeProt(Instant startTime) {
@@ -324,7 +305,7 @@ public class Main {
         outputResultSimple(Optional.of(raidSet), model, false);
 
         Map<Integer, List<ReforgeRecipe>> presetReforge = commonFixedItems();
-        raidSet.getItems().forEachValue(item -> presetReforge.put(item.id, Collections.singletonList(item.reforge)));
+        raidSet.getItems().forEachValue(item -> presetReforge.put(item.ref.itemId(), Collections.singletonList(item.reforge)));
         presetReforge.put(89954, List.of(new ReforgeRecipe(Crit, Haste)));
 
         EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
@@ -345,15 +326,15 @@ public class Main {
 //                return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0, 0));
 //            } else if (extraItem.id == 81113) { // Spike-Soled Stompers
 //                return extraItem.changeFixed(new StatBlock(60, 0, 0, 0, 160, 175 + 160, 0, 0, 0, 0));
-            if (extraItem.id == 87060) { // Star-Stealer Waistguard
+            if (extraItem.ref.itemId() == 87060) { // Star-Stealer Waistguard
                 return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 160, 320 * 2 + 160, 0, 120, 0, 0));
 //            } else if (extraItem.id == 86794) { // starcrusher gauntlets
 //                return extraItem.changeFixed(new StatBlock(170, 0, 0, 0, 160, 60 + 320 + 160, 0, 0, 0, 0));
 //            } else if (extraItem.id == 86145) { // jang-xi devastating legs
 //                return extraItem.changeFixed(new StatBlock(120, 430, 0, 0, 160, 160 * 2, 160, 0, 0, 0));
-            } else if (extraItem.id == 77539) { // engineer helm
+            } else if (extraItem.ref.itemId() == 77539) { // engineer helm
                 return extraItem.changeFixed(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
-            } else if (extraItem.id == 89503) { // Greenstone Drape
+            } else if (extraItem.ref.itemId() == 89503) { // Greenstone Drape
                 return extraItem.changeStats(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
                         .changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else if (extraItem.slot == SlotItem.Back) {
@@ -368,7 +349,7 @@ public class Main {
             ReforgeRecipe reforge = null;
             if (presetReforge.containsKey(extraId))
                 reforge = presetReforge.get(extraId).getFirst();
-            ItemData extraItem = addExtra(map, model, extraId, customiseItem, reforge, false, false, false);
+            ItemData extraItem = addExtra(map, model, extraId, 0, customiseItem, reforge, false, false, false);
             if (extraItem != null)
                 OutputText.println("EXTRA " + extraItem);
         }
@@ -391,16 +372,16 @@ public class Main {
             ItemData scaledChoice = bestScaledSet.items.get(slot);
             if (scaledChoice != null) {
                 ItemData[] options = map.get(slot);
-                boolean inRaidDPSSet = inputSetItems.stream().anyMatch(x -> x.id == scaledChoice.id);
+                boolean inRaidDPSSet = inputSetItems.stream().anyMatch(x -> x.ref.itemId() == scaledChoice.ref.itemId());
 
                 if (inRaidDPSSet) {
                     // need exact item + forge but prescale
                     // note were using id match only, scaled stuff could confused normal "exact" match
                     // avoid engineering heads mixup
-                    ItemData match = ArrayUtil.findOne(options, x -> x.id == scaledChoice.id && Objects.equals(x.reforge, scaledChoice.reforge));
+                    ItemData match = ArrayUtil.findOne(options, x -> x.ref.itemId() == scaledChoice.ref.itemId() && Objects.equals(x.reforge, scaledChoice.reforge));
                     options = new ItemData[]{match};
                 } else {
-                    options = ArrayUtil.allMatch(options, x -> x.id == scaledChoice.id);
+                    options = ArrayUtil.allMatch(options, x -> x.ref.itemId() == scaledChoice.ref.itemId());
                 }
 
                 map.put(slot, options);

@@ -234,6 +234,10 @@ public final class EquipOptionsMap {
         return StreamSupport.stream(new OptionsSpliterator(), true);
     }
 
+    public Stream<ItemData> itemStream() {
+        return entryStream().flatMap(entry -> Arrays.stream(entry.b()));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

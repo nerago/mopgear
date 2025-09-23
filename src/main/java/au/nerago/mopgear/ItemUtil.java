@@ -14,7 +14,6 @@ import au.nerago.mopgear.util.ArrayUtil;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class ItemUtil {
@@ -30,7 +29,8 @@ public class ItemUtil {
 //        set.add(SlotItem.Belt);
         set.add(SlotItem.Leg);
         set.add(SlotItem.Foot);
-        set.add(SlotItem.Weapon);
+        set.add(SlotItem.WeaponOneHand);
+        set.add(SlotItem.WeaponTwoHand);
         set.add(SlotItem.Offhand);
         return set;
     }
@@ -135,8 +135,8 @@ public class ItemUtil {
                 throw new IllegalArgumentException("duplicate item");
             }
 
-            if (presetForge.containsKey(item.id)) {
-                ItemData[] forged = presetForge.get(item.id).stream()
+            if (presetForge.containsKey(item.ref.itemId())) {
+                ItemData[] forged = presetForge.get(item.ref.itemId()).stream()
                         .map(preset -> Reforger.presetReforge(item, preset))
                         .toArray(ItemData[]::new);
                 map.put(slot, forged);
@@ -180,7 +180,7 @@ public class ItemUtil {
         for (EquipOptionsMap map : mapsParam) {
             map.forEachPair((slot, array) -> {
                 for (ItemData item : array) {
-                    int itemId = item.id;
+                    int itemId = item.ref.itemId();
                     SlotEquip val = seen.get(itemId);
                     if (val == null) {
                         seen.put(itemId, slot);
@@ -192,25 +192,10 @@ public class ItemUtil {
         }
     }
 
-    public static void bestForgesOnly(EquipOptionsMap itemMap, ModelCombined model) {
-        for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] items = itemMap.get(slot);
-            if (items != null) {
-                ItemData[] bestByItemId = Arrays.stream(items)
-                        .collect(Collectors.groupingBy(it -> it.id,
-                                Collectors.maxBy(Comparator.comparingLong(model::calcRating))))
-                        .values().stream().map(Optional::orElseThrow)
-                        .toArray(ItemData[]::new);
-//                Optional<ItemData> best = Arrays.stream(items).max(Comparator.comparingLong(x -> model.calcRating(x.totalStatCopy())));
-                itemMap.put(slot, bestByItemId);
-            }
-        }
-    }
-
     public static List<ItemData> onlyMatchingForge(List<ItemData> forgeList, ReforgeRecipe recipe) {
-        if (recipe == null || recipe.isNull()) {
+        if (recipe == null || recipe.isEmpty()) {
             for (ItemData item : forgeList) {
-                if (item.reforge == null || item.reforge.isNull())
+                if (item.reforge == null || item.reforge.isEmpty())
                     return List.of(item);
             }
         } else {
@@ -219,7 +204,7 @@ public class ItemUtil {
                     return List.of(item);
             }
         }
-        throw new IllegalArgumentException("specified forge not found " + forgeList.getFirst().id + " " + recipe);
+        throw new IllegalArgumentException("specified forge not found " + forgeList.getFirst() + " " + recipe);
     }
 
     public static void defaultEnchants(EquipOptionsMap itemMap, ModelCombined model, boolean force) {
@@ -285,7 +270,7 @@ public class ItemUtil {
         return skinnyOptions.stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
     }
 
-    public static long estimateSets(Map<Integer, List<ItemData>> commonMap) {
+    public static <X, T> long estimateSets(Map<X, List<T>> commonMap) {
         return commonMap.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
     }
 }

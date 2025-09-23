@@ -156,12 +156,12 @@ public class FindUpgrades {
         if (plusPercent > 0.0) {
             if (cost >= 10) {
                 double plusPerCost = plusPercent / cost;
-                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\t %1.4f\n", item.slot, item.itemLevel, item.name, cost, plusPercent, stars, plusPerCost);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\t %1.4f\n", item.slot, item.ref.itemLevel(), item.name, cost, plusPercent, stars, plusPerCost);
             } else {
-                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\n", item.slot, item.itemLevel, item.name, cost, plusPercent, stars);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\n", item.slot, item.ref.itemLevel(), item.name, cost, plusPercent, stars);
             }
         } else {
-            OutputText.printf("%10s \t%d \t%35s \t$%d \t%2.2f%% %s\n", item.slot, item.itemLevel, item.name, cost, plusPercent, stars);
+            OutputText.printf("%10s \t%d \t%35s \t$%d \t%2.2f%% %s\n", item.slot, item.ref.itemLevel(), item.name, cost, plusPercent, stars);
         }
     }
 
@@ -208,7 +208,7 @@ public class FindUpgrades {
     }
 
     private boolean canSkipUpgradeCheck(ItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {
-        if (SourcesOfItems.ignoredItems.contains(extraItem.id))
+        if (SourcesOfItems.ignoredItems.contains(extraItem.ref.itemId()))
             return true;
 
         if (reforgedItems.get(slot) == null) {
@@ -218,16 +218,15 @@ public class FindUpgrades {
 
         if (slot == SlotEquip.Weapon) {
             ItemData exampleWeapon = reforgedItems.get(SlotEquip.Weapon)[0];
-            if (SourcesOfItems.isOneHandWeapon(extraItem) != SourcesOfItems.isOneHandWeapon(exampleWeapon)) {
+            if (extraItem.slot != exampleWeapon.slot) {
                 OutputText.println("WRONG WEAPON TYPE " + extraItem.toStringExtended());
                 return true;
             }
         }
 
-
         SlotEquip pairedSlot = slot.pairedSlot();
-        if (reforgedItems.get(slot)[0].id == extraItem.id ||
-                (pairedSlot != null && reforgedItems.get(pairedSlot)[0].id == extraItem.id)) {
+        if (reforgedItems.get(slot)[0].ref.equalsTyped(extraItem.ref) ||
+                (pairedSlot != null && reforgedItems.get(pairedSlot)[0].ref.equalsTyped(extraItem.ref))) {
             OutputText.println("SAME ITEM " + extraItem.toStringExtended());
             return true;
         }

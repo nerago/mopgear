@@ -62,7 +62,7 @@ public final class ItemSet {
     }
 
     public void outputSetLight() {
-        getItems().forEachValue(it -> OutputText.printf("%s [%d]\n", it.name, it.itemLevel));
+        getItems().forEachValue(it -> OutputText.printf("%s [%d]\n", it.name, it.ref.itemLevel()));
     }
 
     @Override
