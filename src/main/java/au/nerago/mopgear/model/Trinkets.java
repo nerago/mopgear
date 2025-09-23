@@ -58,7 +58,6 @@ public class Trinkets {
 
     public static ItemData updateTrinket(ItemData item) {
         TrinketData trinketData = knownTrinkets.get(item.ref.itemId());
-        // TODO upgrade unaware
         if (trinketData == null) {
             throw new IllegalArgumentException("unknown trinket " + item.toStringExtended());
         }

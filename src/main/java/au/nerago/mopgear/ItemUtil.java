@@ -2,10 +2,7 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.InputGearParser;
-import au.nerago.mopgear.model.GemData;
-import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.model.ReforgeRules;
-import au.nerago.mopgear.model.Trinkets;
+import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.WowHead;
@@ -65,8 +62,8 @@ public class ItemUtil {
     }
 
     public static ItemData loadItem(ItemCache itemCache, EquippedItem equippedItem, boolean detailedOutput) {
-        int id = equippedItem.id();
-        ItemData item = loadItemBasic(itemCache, id);
+        int id = equippedItem.id(), upgrade = equippedItem.upgradeStep();
+        ItemData item = loadItemBasic(itemCache, id, upgrade);
 
         if (equippedItem.gems().length > 0) {
             StatBlock gemStat = GemData.process(equippedItem.gems(), item.socketBonus, item.name);
@@ -80,6 +77,8 @@ public class ItemUtil {
                 } else {
                     OutputText.println(id + ": " + item.toStringExtended() + " MISSING EXPECTED ENCHANT");
                 }
+            } else if (equippedItem.enchant() != null) {
+                OutputText.println(id + ": " + item.toStringExtended() + " UNEXPECTED ENCHANT UNEXPECTED ENCHANT=" + equippedItem.enchant());
             } else {
                 OutputText.println(id + ": " + item.toStringExtended());
             }
@@ -90,20 +89,21 @@ public class ItemUtil {
         return item;
     }
 
-    public static ItemData loadItemBasic(ItemCache itemCache, int id) {
-        ItemData item = itemCache.get(id);
+    public static ItemData loadItemBasic(ItemCache itemCache, int itemId, int upgradeLevel) {
+        ItemData item = itemCache.get(itemId);
         if (item == null) {
-            item = WowHead.fetchItem(id);
+            item = WowHead.fetchItem(itemId);
             if (item != null) {
-                itemCache.put(id, item);
+                itemCache.put(itemId, item);
                 itemCache.cacheSave();
             } else {
-                throw new RuntimeException("missing item " + id);
+                throw new RuntimeException("missing item " + itemId);
             }
         }
         if (item.slot == SlotItem.Trinket) {
             item = Trinkets.updateTrinket(item);
         }
+        item = ItemLevel.upgrade(item, upgradeLevel);
         return item;
     }
 

@@ -20,13 +20,14 @@ public class Jobs {
     public static final long BILLION = 1000 * 1000 * 1000;
     public static ItemCache itemCache;
 
-    public static void findUpgradeSetup(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
-        new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems, adjustment);
+    public static void findUpgradeSetup(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, int upgradeLevel) {
+        new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems, adjustment, upgradeLevel);
     }
 
-    public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime) {
+    public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel) {
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
-        Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
+        // TODO upgrade level
+        Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId(), upgradeLevel))
                 .filter(item -> item.slot != SlotItem.WeaponTwoHand)
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
@@ -50,12 +51,13 @@ public class Jobs {
         outputResultSimple(job.resultSet, model, true);
     }
 
-    public static void findBestBySlot(ModelCombined model, CostedItem[] allItems, Instant startTime) {
+    public static void findBestBySlot(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel) {
         Map<Integer, Integer> costs = new HashMap<>();
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
+        // TODO upgrade level
         Arrays.stream(allItems)
                 .peek(costed -> costs.put(costed.itemId(), costed.cost()))
-                .map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId()))
+                .map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId(), upgradeLevel))
                 .filter(item -> item.slot != SlotItem.WeaponTwoHand)
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
@@ -121,15 +123,17 @@ public class Jobs {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int updateLevel, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
-        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
+        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
+
+        // TODO upgrade level
 
         Function<ItemData, ItemData> enchanting = defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) : Function.identity();
         if (slot == null)
             slot = extraItem.slot.toSlotEquip();
 
         EquipOptionsMap runItems = itemOptions.deepClone();
-        extraItem = addExtra(runItems, model, extraItemId, updateLevel, slot, enchanting, null, replace, true, true);
+        extraItem = addExtra(runItems, model, extraItemId, upgradeLevel, slot, enchanting, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem);
 
         JobInfo job = new JobInfo();
@@ -146,13 +150,12 @@ public class Jobs {
     }
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
-        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
         return addExtra(reforgedItems, model, extraItemId, upgradeLevel, extraItem.slot.toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
     }
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
-        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
-        extraItem = ItemLevel.upgrade(extraItem, upgradeLevel);
+        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
         extraItem = customiseItem.apply(extraItem);
         ItemRef ref = extraItem.ref;
 
@@ -217,7 +220,7 @@ public class Jobs {
         for (CostedItem entry : extraItems) {
             int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
             for (SlotEquip slot : extraItem.slot.toSlotEquipOptions()) {
                 ItemData[] existing = items.get(slot);
                 if (existing == null) {
@@ -330,6 +333,7 @@ public class Jobs {
 //                        89280 // voice helm
 //                        87024 // null greathelm
                 },
+                0,
                 false,
                 Map.of());
 
@@ -347,7 +351,9 @@ public class Jobs {
 //                        89345, // stonetoe spaulders
 //                        86680, // white tiger legs
 //                        84949 // mal glad girdle accuracy
-                }, false,
+                },
+                0,
+                false,
                 Map.of());
 
         FindMultiSpec.SpecDetails protDefence = new FindMultiSpec.SpecDetails(
@@ -366,7 +372,9 @@ public class Jobs {
 //                        89075, // yi cloak
                         90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
-                }, false,
+                },
+                0,
+                false,
                 Map.of(89934, 899340));
 
 //        ItemUtil.validateRet(ret.itemOptions);
@@ -392,6 +400,7 @@ public class Jobs {
                 177,
                 new int[]{
                 },
+                0,
                 false,
                 Map.of());
 
@@ -401,7 +410,9 @@ public class Jobs {
                 ModelCombined.standardTreeModel(),
                 1,
                 new int[]{
-                }, false,
+                },
+                0,
+                false,
                 Map.of());
 
         multi.addSpec(boom);

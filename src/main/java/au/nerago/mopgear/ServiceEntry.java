@@ -12,7 +12,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +60,7 @@ public class ServiceEntry {
                 } else {
                     throw new IllegalArgumentException("no upgrade items specified");
                 }
-                Jobs.findUpgradeSetup(items, extraItems, model, false, null);
+                Jobs.findUpgradeSetup(items, extraItems, model, false, null, params.upgradeLevel);
             }
         }
     }

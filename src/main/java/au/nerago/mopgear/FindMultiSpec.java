@@ -310,16 +310,18 @@ public class FindMultiSpec {
         final ModelCombined model;
         final int ratingMultiply;
         final int[] extraItems;
+        final int extraItemsUpgradeLevel;
         final boolean challengeScale;
         final Map<Integer, Integer> remapDuplicateId;
         EquipOptionsMap itemOptions;
 
-        public SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, boolean challengeScale, Map<Integer, Integer> remapDuplicateId) {
+        public SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean challengeScale, Map<Integer, Integer> remapDuplicateId) {
             this.label = label;
             this.gearFile = gearFile;
             this.model = model;
             this.ratingMultiply = ratingMultiply;
             this.extraItems = extraItems;
+            this.extraItemsUpgradeLevel = extraItemsUpgradeLevel;
             this.challengeScale = challengeScale;
             this.remapDuplicateId = remapDuplicateId;
         }
@@ -349,14 +351,14 @@ public class FindMultiSpec {
         private ItemData remapDuplicate(ItemData itemData) {
             Integer replaceId = remapDuplicateId.get(itemData.ref.itemId());
             if (replaceId != null) {
-                return itemData.changeDuplicate(itemData.ref.duplicateNum());
+                return itemData.changeDuplicate(itemData.ref.duplicateNum() + 1);
             } else {
                 return itemData;
             }
         }
 
         private void verifyNotAlreadyIncluded(ItemCache itemCache, int itemId) {
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, itemId);
+            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, itemId, extraItemsUpgradeLevel);
             SlotEquip[] slots = extraItem.slot.toSlotEquipOptions();
             for (SlotEquip slot : slots) {
                 ItemData[] existing = itemOptions.get(slot);
@@ -385,7 +387,7 @@ public class FindMultiSpec {
         }
 
         private void loadAndGenerate(ItemCache itemCache, int itemId) {
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, itemId);
+            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, itemId, extraItemsUpgradeLevel);
             extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
             ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 

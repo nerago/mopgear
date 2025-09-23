@@ -62,8 +62,8 @@ public class Main {
 //        paladinMultiSpecSolve(startTime);
 //        druidMultiSpecSolve(startTime);
 
-        reforgeRet(startTime);
-//            reforgeProt(startTime);
+//        reforgeRet(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -149,7 +149,8 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgradeSetup(items, strengthPlateValorArray(), model, true, null);
 //        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
-        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null);
+//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null, 0);
+        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCurrentItemsProtAll(itemCache), null, 1);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
@@ -233,7 +234,7 @@ public class Main {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime);
-        new FindUpgrades(itemCache, model, true).run(items, intellectClothValorCelestialP1Array(), null);
+        new FindUpgrades(itemCache, model, true).run(items, intellectClothValorCelestialP1Array(), null, 0);
 
 //               Jobs.rankAlternativeCombos(items, model, startTime, List.of(
 //               List.of(90462),

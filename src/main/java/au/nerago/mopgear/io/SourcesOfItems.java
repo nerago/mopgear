@@ -526,7 +526,7 @@ public class SourcesOfItems {
             return filterExclude(bagArray, skip);
     }
 
-    public static CostedItem[] strengthPlateCurrentItemsRet(ItemCache itemCache, ModelCombined model) {
+    public static CostedItem[] strengthPlateCurrentItemsRet(ItemCache itemCache) {
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.WeaponTwoHand && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
@@ -534,10 +534,17 @@ public class SourcesOfItems {
         return itemStream.toArray(CostedItem[]::new);
     }
 
-    public static CostedItem[] strengthPlateCurrentItemsProt(ItemCache itemCache, ModelCombined model) {
-        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtDpsFile, ReforgeRules.ret(), null);
+    public static CostedItem[] strengthPlateCurrentItemsProt(ItemCache itemCache) {
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.WeaponOneHand && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
+                .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
+        return itemStream.toArray(CostedItem[]::new);
+    }
+
+    public static CostedItem[] strengthPlateCurrentItemsProtAll(ItemCache itemCache) {
+        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
+        Stream<CostedItem> itemStream = items.entryStream()
                 .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }

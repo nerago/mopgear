@@ -32,13 +32,13 @@ public class FindUpgrades {
         this.hackAllow = hackAllow;
     }
 
-    public void run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment) {
+    public void run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment, int upgradeLevel) {
         double baseRating = findBase(baseItems, adjustment);
 
         Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
 
         List<JobInfo> jobList =
-                makeJobs(model, baseItems, extraItemArray, enchanting, adjustment, baseRating)
+                makeJobs(model, baseItems, extraItemArray, upgradeLevel, enchanting, adjustment, baseRating)
                 .toList().stream() // helps verify
                 .map(Solver::runJob)
                 .peek(job -> handleResult(job, baseRating))
@@ -125,11 +125,11 @@ public class FindUpgrades {
         }
     }
 
-    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, CostedItem[] extraItemArray, Function<ItemData, ItemData> enchanting, StatBlock adjustment, double baseRating) {
+    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, CostedItem[] extraItemArray, int upgradeLevel, Function<ItemData, ItemData> enchanting, StatBlock adjustment, double baseRating) {
         return ArrayUtil.arrayStream(extraItemArray).mapMulti((extraItemInfo, submitJob) -> {
             int extraItemId = extraItemInfo.itemId();
             int cost = extraItemInfo.cost();
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId);
+            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
             SlotEquip slot = extraItem.slot.toSlotEquip();
 
             if (!canSkipUpgradeCheck(extraItem, slot, baseItems)) {
@@ -168,6 +168,8 @@ public class FindUpgrades {
     private JobInfo checkForUpgrade(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
         JobInfo job = new JobInfo();
 //        job.singleThread = true;
+
+        // TODO upgrade levels
 
         extraItem = enchanting.apply(extraItem);
         job.println("OFFER " + extraItem.toStringExtended());

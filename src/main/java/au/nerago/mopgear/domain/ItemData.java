@@ -35,7 +35,7 @@ public final class ItemData {
     }
 
     public static ItemData build(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, int socketBonus, int itemLevel) {
-        return new ItemData(new ItemRef(id, itemLevel, 0), slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
+        return new ItemData(ItemRef.build(id, itemLevel), slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
     }
 
     public ItemData changeNameAndStats(@NotNull String changedName, @NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
@@ -51,11 +51,11 @@ public final class ItemData {
     }
 
     public ItemData changeDuplicate(int dupNum) {
-        return new ItemData(new ItemRef(ref.itemId(), ref.itemLevel(), dupNum), slot, name, reforge, stat, statFixed, socketSlots, socketBonus);
+        return new ItemData(ref.changeDuplicate(dupNum), slot, name, reforge, stat, statFixed, socketSlots, socketBonus);
     }
 
-    public ItemData changeItemLevel(int targetLevel) {
-        return new ItemData(new ItemRef(ref.itemId(), targetLevel, ref.duplicateNum()), slot, name, reforge, stat, statFixed, socketSlots, socketBonus);
+    public ItemData changeItemLevel(int itemLevel) {
+        return new ItemData(ref.changeItemLevel(itemLevel), slot, name, reforge, stat, statFixed, socketSlots, socketBonus);
     }
 
     public StatBlock totalStatCopy() {

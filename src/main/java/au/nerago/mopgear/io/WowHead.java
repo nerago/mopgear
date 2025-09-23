@@ -14,6 +14,7 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class WowHead {
     public static ItemData fetchItem(int itemId) {
@@ -94,6 +95,7 @@ public class WowHead {
 
     private static ItemData buildItem(JsonObject itemObject, int itemId, int itemLevel) {
         String name = objectGetString(itemObject, "name_enus");
+        Objects.requireNonNull(name);
 
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
         SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
@@ -119,7 +121,7 @@ public class WowHead {
                 sockets.add(type);
             }
         }
-        SocketType[] socketArray = sockets.isEmpty() ? null : sockets.toArray(SocketType[]::new);
+        SocketType[] socketArray = sockets.toArray(SocketType[]::new);
 
         return ItemData.build(itemId, slot, name, statBlock, socketArray, socketBonus, itemLevel);
     }

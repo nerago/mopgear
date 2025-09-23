@@ -2,7 +2,19 @@ package au.nerago.mopgear.domain;
 
 import java.util.Objects;
 
-public record ItemRef(int itemId, int itemLevel, int duplicateNum) {
+public record ItemRef(int itemId, int itemLevel, int itemLevelBase, int duplicateNum) {
+    public static ItemRef build(int id, int itemLevel) {
+        return new ItemRef(id, itemLevel, itemLevel, 0);
+    }
+
+    public ItemRef changeItemLevel(int changedItemLevel) {
+        return new ItemRef(itemId, changedItemLevel, itemLevel, duplicateNum);
+    }
+
+    public ItemRef changeDuplicate(int changedDuplicateNum) {
+        return new ItemRef(itemId, itemLevel, itemLevelBase, changedDuplicateNum);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

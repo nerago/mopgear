@@ -58,7 +58,12 @@ public class InputGearParser {
                     enchant = enchantId;
                 }
 
-                result.add(new EquippedItem(id, gems, enchant));
+                int upgradeStep = 0;
+                if (elementObject.has("upgrade_step")) {
+                    upgradeStep = elementObject.get("upgrade_step").getAsInt();
+                }
+
+                result.add(new EquippedItem(id, gems, enchant, upgradeStep));
             }
         }
         return result;

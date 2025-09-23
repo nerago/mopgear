@@ -4,12 +4,10 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class ItemLevel {
     private static final int CHALLENGE_TARGET_LEVEL = 463;
     private static final double FORMULA_POWER = 4.424;
+    private static final int ITEM_LEVELS_PER_UPGRADE_LEVEL = 4;
 
     private static double calcMultiplier(int levelFrom, int levelTo) {
         return Math.pow((double) levelTo / (double) levelFrom, FORMULA_POWER);
@@ -49,16 +47,19 @@ public class ItemLevel {
     }
 
     public static ItemData upgrade(ItemData item, int upgradeLevel) {
-        if (upgradeLevel == 0)
-            return item;
-        else if (upgradeLevel < 0 || upgradeLevel > 2)
+        if (upgradeLevel < 0 || upgradeLevel > 2)
             throw new IllegalArgumentException("invalid upgrade level");
 
-        int startLevel = item.ref.itemLevel();
-        int levelIncrease = upgradeLevel * 4;
-        int targetLevel = item.ref.itemLevel() + levelIncrease;
-        double factor = calcMultiplier(startLevel, targetLevel);
-        return scaleAll(item, factor).changeItemLevel(targetLevel);
+        int currentLevel = item.ref.itemLevel();
+        int baseItemLevel = item.ref.itemLevelBase();
+        int targetLevel = baseItemLevel + upgradeLevel * ITEM_LEVELS_PER_UPGRADE_LEVEL;
+
+        if (currentLevel != targetLevel) {
+            double factor = calcMultiplier(currentLevel, targetLevel);
+            return scaleAll(item, factor).changeItemLevel(targetLevel);
+        } else {
+            return item;
+        }
     }
 
     private static StatBlock scaleStatBlock(StatBlock stats, double factor) {
