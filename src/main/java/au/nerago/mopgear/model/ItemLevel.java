@@ -6,7 +6,7 @@ import au.nerago.mopgear.util.ArrayUtil;
 
 public class ItemLevel {
     private static final int CHALLENGE_TARGET_LEVEL = 463;
-    private static final double FORMULA_POWER = 4.424;
+    private static final double FORMULA_POWER = 5.48;
     private static final int ITEM_LEVELS_PER_UPGRADE_LEVEL = 4;
 
     private static double calcMultiplier(int levelFrom, int levelTo) {
@@ -72,4 +72,34 @@ public class ItemLevel {
         }
         return stats;
     }
+
+    // https://github.com/wowsims/mop/blob/master/tools/database/dbc/item.go#L173
+//    func (item *Item) GetScaledStat(index int, itemLevel int) float64 {
+//
+//        if itemLevel == item.ItemLevel {
+//            // Maybe just return it?
+//            return item.BonusAmountCalculated[index]
+//        }
+//
+//        slotType := item.GetRandomSuffixType()
+//        itemBudget := 0.0
+//
+//        if slotType != -1 && item.OverallQuality > 0 {
+//
+//            randomProperty := GetDBC().RandomPropertiesByIlvl[itemLevel]
+//            itemBudget = float64(randomProperty[item.OverallQuality.ToProto()][slotType])
+//
+//            if item.StatAlloc[index] > 0 && itemBudget > 0 {
+//                rawValue := math.Round(item.StatAlloc[index] * itemBudget * 0.0001)
+//
+//                //Todo: Figure out if this does anything in MoP
+//                //Not used right now in Cata
+//                //socket_penalty := math.RoundNearby item.StatPercentageOfSocket[index] * SocketCost(itemLevel)
+//                return rawValue - item.SocketModifier[index] // Todo: Could this be a calculated socket penalty?
+//            } else {
+//                return math.Floor(item.BonusAmountCalculated[index] * item.ApproximateScaleCoeff(item.ItemLevel, itemLevel))
+//            }
+//        }
+//        return 0
+//    }
 }

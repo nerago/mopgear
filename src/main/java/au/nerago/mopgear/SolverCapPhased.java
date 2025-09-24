@@ -58,7 +58,12 @@ public class SolverCapPhased {
         if (topCombosOnly) {
             printRecorder.printf("SKINNY COMBOS TOO BIG JUST CONSIDERING %,d\n", TOP_HIT_COMBO_FILTER);
             ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
+
             filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
+
+            // try a Top Collector (with good merging), re-stream combo
+//            filteredSets = filteredSets.collect(new BottomCollectorN<>(TOP_HIT_COMBO_FILTER, ratingFunc))
+//                    .parallelStream();
         }
 
         return filteredSets.map(this::makeFromSkinny);

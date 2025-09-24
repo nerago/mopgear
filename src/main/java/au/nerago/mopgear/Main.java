@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.io.ItemCache;
+import au.nerago.mopgear.io.WowSimDB;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
@@ -59,11 +60,18 @@ public class Main {
     private void launchpad(Instant startTime) {
 //            WowHead.fetchItem(86145);
 
+        System.out.println(ItemData.toStringExtended(itemCache.get(89817)));
+        System.out.println(ItemData.toStringExtended(itemCache.get(89934)));
+        System.out.println(ItemData.toStringExtended(new WowSimDB().lookup(ItemRef.build(89817, 489))));
+        System.out.println(ItemData.toStringExtended(new WowSimDB().lookup(ItemRef.build(89817, 502))));
+        System.out.println(ItemData.toStringExtended(new WowSimDB().lookup(ItemRef.build(89934, 489))));
+        System.out.println(ItemData.toStringExtended(new WowSimDB().lookup(ItemRef.build(89934, 502))));
+
 //        paladinMultiSpecSolve(startTime);
 //        druidMultiSpecSolve(startTime);
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -120,12 +128,15 @@ public class Main {
 //        ModelCombined model = ModelCombined.defenceProtModel();
 //        Path file = DataLocation.gearProtDefenceFile;
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonItems);
 
-//        reforgeProcess(items, model, startTime);
+//        System.out.println(ItemUtil.loadItemBasic(itemCache, 87024, 0));
+//        System.out.println(ItemUtil.loadItemBasic(itemCache, 87024, 1));
+
+        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
@@ -150,7 +161,7 @@ public class Main {
 //        findUpgradeSetup(items, strengthPlateValorArray(), model, true, null);
 //        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null, 0);
-        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCurrentItemsProtAll(itemCache), null, 1);
+//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCurrentItemsProtAll(itemCache), null, 1);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});

@@ -22,6 +22,7 @@ public class JobInfo {
     public long runSizeMultiply = 1;
     public boolean forceRandom;
     public boolean forceSkipIndex;
+//    public boolean forcePhasedSkip;
     public long forcedRunSized;
     public boolean singleThread;
     public StatBlock adjustment;

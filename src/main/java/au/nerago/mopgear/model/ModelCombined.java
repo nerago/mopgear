@@ -91,7 +91,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
 //        StatRatings statMix = new StatRatingsPriority(new StatType[] {Haste, Mastery, Dodge, Crit});
 //        StatRatings statMix = new StatRatingsPriority(new StatType[] {Haste, Crit, Mastery, Dodge});
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt, true);
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.prot();
         SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegearOnly4pc();
         return new ModelCombined(statMix, statRequirements, reforge, enchants, setBonus);

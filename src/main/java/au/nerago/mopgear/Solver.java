@@ -13,7 +13,7 @@ import java.util.Optional;
 public class Solver {
     private static final long MILLION = 1_000_000;
     private static final long DEFAULT_RANDOM_RUN_SIZE = 10 * MILLION;
-    public static final long MAX_SKINNY_PHASED_ANY = 100 * MILLION;
+    public static final long MAX_SKINNY_PHASED_ANY = 1000 * MILLION;
     public static final long MAX_SKINNY_FULL_SEARCH = 10000;
     public static final long MAX_BASIC_FULL_SEARCH = MILLION;
 
@@ -38,6 +38,9 @@ public class Solver {
         } else if (job.forceSkipIndex) {
             job.println("SOLVE skip index");
             proposed = SolverIndexed.runSolverSkipping(model, itemOptions, adjustment, startTime, job.forcedRunSized, estimateFullCombos, job.specialFilter);
+//        } else if (job.forcePhasedSkip) {
+//            job.println("SOLVE phased skip");
+//            proposed = SolverIndexed.runSolverSkipping(model, itemOptions, adjustment, startTime, job.forcedRunSized, estimateFullCombos, job.specialFilter);
         } else if (estimateFullCombos.compareTo(BigInteger.valueOf(MAX_BASIC_FULL_SEARCH * runSizeMultiply)) < 0) {
             job.println("SOLVE full search");
             proposed = SolverIndexed.runSolver(model, itemOptions, adjustment, startTime, estimateFullCombos.longValueExact(), job.specialFilter);
@@ -46,7 +49,7 @@ public class Solver {
             proposed = phased.runSolver(!job.singleThread, job.specialFilter, false);
         } else if (estimatePhase1Combos < MAX_SKINNY_PHASED_ANY * runSizeMultiply) {
             job.println("SOLVE phased top only");
-            proposed = phased.runSolver(!job.singleThread, job.specialFilter, false);
+            proposed = phased.runSolver(!job.singleThread, job.specialFilter, true);
         } else {
             long runSize = DEFAULT_RANDOM_RUN_SIZE * runSizeMultiply;
             job.printf("SOLVE random %d\n", runSize);

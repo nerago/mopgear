@@ -83,6 +83,11 @@ public final class ItemData {
         return sb.toString();
     }
 
+    public static String toStringExtended(ItemData item) {
+        return item != null ? item.toStringExtended() : "null";
+    }
+
+
     private void append(StringBuilder sb) {
         sb.append(slot).append(' ');
         sb.append('"').append(name).append("\" ");

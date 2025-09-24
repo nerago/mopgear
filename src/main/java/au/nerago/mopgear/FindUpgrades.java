@@ -23,8 +23,8 @@ public class FindUpgrades {
     private final boolean hackAllow;
     private final ItemCache itemCache;
 
-//    private static final long runSizeMultiply = 4;
-    private static final long runSizeMultiply = 1;
+    private static final long runSizeMultiply = 4;
+//    private static final long runSizeMultiply = 1;
 
     public FindUpgrades(ItemCache itemCache, ModelCombined model, boolean hackAllow) {
         this.itemCache = itemCache;
@@ -39,7 +39,7 @@ public class FindUpgrades {
 
         List<JobInfo> jobList =
                 makeJobs(model, baseItems, extraItemArray, upgradeLevel, enchanting, adjustment, baseRating)
-                .toList().stream() // helps verify
+                .toList().parallelStream() // helps verify
                 .map(Solver::runJob)
                 .peek(job -> handleResult(job, baseRating))
                 .toList();
