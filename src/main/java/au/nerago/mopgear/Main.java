@@ -53,14 +53,14 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
-        ItemCache.instance.clear();
-        WowSimDB.instance.stream().forEach(ItemCache.instance::put);
+//        ItemCache.instance.clear();
+//        WowSimDB.instance.stream().forEach(ItemCache.instance::put);
 
-//        paladinMultiSpecSolve(startTime);
+        paladinMultiSpecSolve(startTime);
 //        druidMultiSpecSolve(startTime);
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -117,15 +117,15 @@ public class Main {
 //        ModelCombined model = ModelCombined.defenceProtModel();
 //        Path file = DataLocation.gearProtDefenceFile;
 
-        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(true, file, model.reforgeRules(), commonItems);
 
 //        System.out.println(ItemUtil.loadItemBasic(itemCache, 87024, 0));
 //        System.out.println(ItemUtil.loadItemBasic(itemCache, 87024, 1));
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
@@ -133,7 +133,7 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, null,86906, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
-//          reforgeProcessPlusPlus(items, model, startTime, 86680, 86682, false, null);
+//          reforgeProcessPlusPlus(items, model, startTime, 86680, 86682, 0, false, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});

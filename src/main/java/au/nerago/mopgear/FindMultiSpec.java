@@ -56,7 +56,7 @@ public class FindMultiSpec {
         long commonCombos = ItemUtil.estimateSets(commonMap);
         OutputText.println("COMMON COMBOS " + commonCombos);
 
-        int skip = Primes.roundToPrimeInt(999999);
+        int skip = Primes.roundToPrimeInt(39999999);
 
         long indexedOutputSize = commonCombos / skip;
         Stream<Map<ItemRef, ItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
@@ -146,7 +146,7 @@ public class FindMultiSpec {
             // print common item
             ItemData item = lst.getFirst();
             Set<String> specs = seenIn.get(ref);
-            OutputText.println("COMMON " + ref.itemId() + " " + item.name + " " + String.join(" ", specs));
+            OutputText.println("COMMON " + ref.itemId() + " " + item.name + " " + item.ref.itemLevel() + " " + String.join(" ", specs));
         }
 
         return commonOptions;

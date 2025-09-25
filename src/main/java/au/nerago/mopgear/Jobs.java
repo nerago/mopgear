@@ -328,7 +328,9 @@ public class Jobs {
 //                        87060, // star-stealer waist
 //                        84949, // mal glad girdle accuracy
 //                        89280 // voice helm
-//                        87024 // null greathelm
+//                        87024 // null greathelm,
+                        87036, // heroic soulgrasp
+                        87026 // heroic peacock cloak
                 },
                 0,
                 false,
@@ -348,6 +350,8 @@ public class Jobs {
 //                        89345, // stonetoe spaulders
 //                        86680, // white tiger legs
 //                        84949 // mal glad girdle accuracy
+                        87036, // heroic soulgrasp
+                        87026 // heroic peacock cloak
                 },
                 0,
                 false,
@@ -369,6 +373,8 @@ public class Jobs {
 //                        89075, // yi cloak
                         90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
+                        87036, // heroic soulgrasp
+                        87026 // heroic peacock cloak
                 },
                 0,
                 false,
