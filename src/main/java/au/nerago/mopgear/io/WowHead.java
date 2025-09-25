@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.SlotItem;
 import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
+import au.nerago.mopgear.model.GemData;
 import au.nerago.mopgear.results.OutputText;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
@@ -100,6 +101,7 @@ public class WowHead {
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
         SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
         int socketBonus = objectGetInt(equipObject, "socketbonus");
+        StatBlock socketBonusBlock = GemData.getSocketBonus(name, socketBonus);
 
         StatBlock statBlock = new StatBlock(
                 objectGetIntOneOf(equipObject, "str", "int", "agi"),
@@ -123,7 +125,7 @@ public class WowHead {
         }
         SocketType[] socketArray = sockets.toArray(SocketType[]::new);
 
-        return ItemData.buildFromWowHead(itemId, slot, name, statBlock, socketArray, socketBonus, itemLevel);
+        return ItemData.buildFromWowHead(itemId, slot, name, statBlock, socketArray, socketBonusBlock, itemLevel);
     }
 
     @SuppressWarnings("SameParameterValue")

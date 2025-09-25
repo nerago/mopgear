@@ -6,6 +6,7 @@ import au.nerago.mopgear.domain.ItemRef;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public class PossibleIndexed {
@@ -16,7 +17,8 @@ public class PossibleIndexed {
     }
 
     private static Stream<Long> generateDumbStream(long count, long skip) {
-        return Stream.iterate(0L, x -> x < count, x -> x + skip);
+        long start = ThreadLocalRandom.current().nextLong(skip);
+        return Stream.iterate(start, x -> x < count, x -> x + skip);
     }
 
     private static Map<ItemRef, ItemData> makeSet(Map<ItemRef, List<ItemData>> items, long mainIndex) {

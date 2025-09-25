@@ -151,7 +151,7 @@ public class GemData {
         return map;
     }
 
-    public static StatBlock process(int[] gemIds, int socketBonus, String name) {
+    public static StatBlock process(int[] gemIds, StatBlock socketBonus, String name) {
         StatBlock result = StatBlock.empty;
         for (int id : gemIds) {
             StatBlock stats = knownGems.get(id);
@@ -161,9 +161,8 @@ public class GemData {
                 throw new IllegalArgumentException("unknown gem " + id + " on " + name);
             result = result.plus(stats);
         }
-        if (socketBonus != 0) {
-            StatBlock bonus = getSocketBonus(name, socketBonus);
-            result = result.plus(bonus);
+        if (socketBonus != null) {
+            result = result.plus(socketBonus);
         }
 
         return result;
@@ -185,10 +184,10 @@ public class GemData {
     }
 
     public static StatBlock getSocketBonus(ItemData item) {
-        return getSocketBonus(item.name, item.socketBonus);
+        return item.socketBonus;
     }
 
-    private static StatBlock getSocketBonus(String name, int socketBonus) {
+    public static StatBlock getSocketBonus(String name, int socketBonus) {
         StatBlock bonus = knownSocketBonus.get(socketBonus);
         if (bonus == null)
             throw new IllegalArgumentException("unknown socket bonus " + socketBonus + " on " + name);

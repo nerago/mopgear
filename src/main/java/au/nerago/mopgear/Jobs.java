@@ -285,7 +285,7 @@ public class Jobs {
 
     public static void paladinMultiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec();
-        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+//        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
 //        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
@@ -327,12 +327,12 @@ public class Jobs {
 //                        89954, // warbelt pods
 //                        87060, // star-stealer waist
 //                        84949, // mal glad girdle accuracy
-//                        89280 // voice helm
+                        89280, // voice helm
 //                        87024 // null greathelm,
-                        87036, // heroic soulgrasp
+//                        87036, // heroic soulgrasp
                         87026 // heroic peacock cloak
                 },
-                0,
+                2,
                 false,
                 Map.of());
 
@@ -350,10 +350,10 @@ public class Jobs {
 //                        89345, // stonetoe spaulders
 //                        86680, // white tiger legs
 //                        84949 // mal glad girdle accuracy
-                        87036, // heroic soulgrasp
-                        87026 // heroic peacock cloak
+//                        87036, // heroic soulgrasp
+//                        87026 // heroic peacock cloak
                 },
-                0,
+                2,
                 false,
                 Map.of());
 
@@ -369,14 +369,14 @@ public class Jobs {
 ////                        85339, // white tiger pauldrons
 ////                        89345, // stonetoe spaulders
 //                        82980, // gauntlets ancient steel
-//                        85983, // bracers six oxen
+                        85983, // bracers six oxen
 //                        89075, // yi cloak
                         90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
-                        87036, // heroic soulgrasp
-                        87026 // heroic peacock cloak
+//                        87036, // heroic soulgrasp
+//                        87026 // heroic peacock cloak
                 },
-                0,
+                2,
                 false,
                 Map.of(89934, 899340));
 

@@ -56,7 +56,8 @@ public class WowSimDB {
             return;
 
         int weaponType = getIntOrDefault(object, "weaponType", 0);
-        SlotItem slot = mapSlot(type, weaponType);
+        int handType = getIntOrDefault(object, "handType", 0);
+        SlotItem slot = mapSlot(type, weaponType, handType);
 
         SocketType[] sockets = new SocketType[0];
         JsonArray gemSockets = object.getAsJsonArray("gemSockets");
@@ -64,6 +65,12 @@ public class WowSimDB {
             sockets = gemSockets.asList().stream()
                     .map(e -> mapSocket(e.getAsInt()))
                     .toArray(SocketType[]::new);
+        }
+
+        JsonArray socketBonus = object.getAsJsonArray("socketBonus");
+        StatBlock socketBonusBlock = null;
+        if (socketBonus != null) {
+            socketBonusBlock = convertBlock(socketBonus);
         }
 
         JsonObject scalingOptions = object.getAsJsonObject("scalingOptions");
@@ -85,8 +92,42 @@ public class WowSimDB {
             }
 
             ItemRef ref = ItemRef.buildAdvanced(id, itemLevel, baseItemLevel);
-            ItemData item = ItemData.buildFromWowSim(ref, slot, name, block, sockets, 0);
+            ItemData item = ItemData.buildFromWowSim(ref, slot, name, block, sockets, socketBonusBlock);
             itemMap.put(item.ref, item);
+        }
+    }
+
+    private StatBlock convertBlock(JsonArray array) {
+        StatType type = null;
+        int value = 0;
+        for (int index = 0; index < array.size(); ++index) {
+            int slot = array.get(index).getAsInt();
+            if (slot != 0) {
+                if (type != null)
+                    throw new RuntimeException("unexpected second value");
+                type = blockIndexToStat(index);
+                value = slot;
+            }
+        }
+        if (type == null)
+            return null;
+        return StatBlock.of(type, value);
+    }
+
+    private StatType blockIndexToStat(int index) {
+        switch (index) {
+            case 0, 1, 3 -> { return StatType.Primary; }
+            case 2 -> { return StatType.Stam; }
+            case 4 -> {return StatType.Spirit;}
+            case 5 -> {return StatType.Hit;}
+            case 6 -> {return StatType.Crit;}
+            case 7 -> { return StatType.Haste;}
+            case 8 -> {return StatType.Expertise;}
+            case 9 -> {return StatType.Dodge;}
+            case 10 -> {return StatType.Parry;}
+            case 11 -> {return StatType.Mastery;}
+            case 15, 16 -> {return null; }//pvp
+            default -> throw new RuntimeException("unknown stat index " + index);
         }
     }
 
@@ -103,7 +144,7 @@ public class WowSimDB {
         }
     }
 
-    private static SlotItem mapSlot(int type, int weaponType) {
+    private static SlotItem mapSlot(int type, int weaponType, int handType) {
         switch (type) {
             case 1 -> { return SlotItem.Head; }
             case 2 -> { return SlotItem.Neck; }
@@ -117,17 +158,11 @@ public class WowSimDB {
             case 10 -> { return SlotItem.Foot; }
             case 11 -> { return SlotItem.Ring; }
             case 12 -> { return SlotItem.Trinket; }
-            case 13 -> {
-                switch (weaponType) {
-                    case 1, 4, 6, 8, 9 -> { return SlotItem.Weapon2H; }
-                    case 2, 3 -> { return SlotItem.Weapon1H; }
-                    case 5, 7 -> { return SlotItem.Offhand; }
-                    default -> throw new RuntimeException("unknown weapon " + weaponType);
-                }
-            }
-            case 14 -> {
-                switch (weaponType) {
-                    case 0 -> { return SlotItem.Weapon2H; }
+            case 13, 14 -> {
+                switch (handType) {
+                    case 1, 2 -> { return SlotItem.Weapon1H; }
+                    case 0, 4 -> { return SlotItem.Weapon2H; }
+                    case 3 -> { return SlotItem.Offhand; }
                     default -> throw new RuntimeException("unknown weapon " + weaponType);
                 }
             }

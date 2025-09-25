@@ -19,10 +19,10 @@ public final class ItemData {
     public final StatBlock statFixed;
     @NotNull
     public final SocketType[] socketSlots;
-    public final int socketBonus;
+    public final StatBlock socketBonus;
 
     private ItemData(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull ReforgeRecipe reforge,
-                     @NotNull StatBlock stat, @NotNull StatBlock statFixed, @NotNull SocketType[] socketSlots, int socketBonus) {
+                     @NotNull StatBlock stat, @NotNull StatBlock statFixed, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
         this.ref = ref;
         this.slot = slot;
         this.name = name;
@@ -33,11 +33,11 @@ public final class ItemData {
         this.socketBonus = socketBonus;
     }
 
-    public static ItemData buildFromWowSim(ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, int socketBonus) {
+    public static ItemData buildFromWowSim(ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
         return new ItemData(ref, slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
     }
 
-    public static ItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, int socketBonus, int itemLevel) {
+    public static ItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
         return new ItemData(ItemRef.buildBasic(id, itemLevel), slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
     }
 
@@ -120,5 +120,9 @@ public final class ItemData {
     @Override
     public int hashCode() {
         return Objects.hash(ref, slot, reforge, stat, statFixed);
+    }
+
+    public boolean isUpgradable() {
+        return !name.contains("Gladiator");
     }
 }

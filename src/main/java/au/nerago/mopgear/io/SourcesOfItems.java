@@ -2,6 +2,7 @@ package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.ItemUtil;
 import au.nerago.mopgear.domain.CostedItem;
+import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.SlotItem;
 import au.nerago.mopgear.model.ReforgeRules;
 import au.nerago.mopgear.domain.EquipOptionsMap;
@@ -523,7 +524,7 @@ public class SourcesOfItems {
             return filterExclude(bagArray, skip);
     }
 
-    public static CostedItem[] strengthPlateCurrentItemsRet(ItemCache itemCache) {
+    public static CostedItem[] strengthPlateCurrentItemsRet() {
         EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon2H && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
@@ -531,7 +532,7 @@ public class SourcesOfItems {
         return itemStream.toArray(CostedItem[]::new);
     }
 
-    public static CostedItem[] strengthPlateCurrentItemsProt(ItemCache itemCache) {
+    public static CostedItem[] strengthPlateCurrentItemsProt() {
         EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon1H && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
@@ -539,26 +540,35 @@ public class SourcesOfItems {
         return itemStream.toArray(CostedItem[]::new);
     }
 
-    public static CostedItem[] strengthPlateCurrentItemsProtAll(ItemCache itemCache) {
+    public static CostedItem[] strengthPlateCurrentItemsProtAll() {
         EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }
 
-    public static CostedItem[] strengthPlateValorCelestialTank(ItemCache itemCache) {
-//        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
+    public static CostedItem[] strengthPlateCurrentItemsProtAllUpgradable() {
+        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
+        Stream<CostedItem> itemStream = items.itemStream()
+                .filter(ItemData::isUpgradable)
+                .map(item -> new CostedItem(item.ref.itemId(), 0))
+                .distinct();
+        return itemStream.toArray(CostedItem[]::new);
+    }
+
+    public static CostedItem[] strengthPlateValorCelestialTank() {
+//        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(strengthPlateCelestialArray(), 483);
         CostedItem[] filteredCelestialArray = strengthPlateCelestialArray();
         return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetCelestial(), strengthPallyRetSetCelestial());
     }
 
-    public static CostedItem[] strengthPlateValorCelestialRet(ItemCache itemCache) {
+    public static CostedItem[] strengthPlateValorCelestialRet() {
 //        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
         CostedItem[] filteredCelestialArray = strengthPlateCelestialArray();
         return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyRetSetCelestial());
     }
 
-    public static CostedItem[] intellectLeatherValorCelestial(ItemCache itemCache) {
+    public static CostedItem[] intellectLeatherValorCelestial() {
 //        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 483);
         CostedItem[] filteredCelestialArray = intellectLeatherCelestialArray();
         return ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray());

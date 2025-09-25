@@ -262,9 +262,8 @@ public class ItemUtil {
                 }
             }
         }
-        if (item.socketBonus != 0) {
-            StatBlock bonus = GemData.getSocketBonus(item);
-            total = total.plus(bonus);
+        if (item.socketBonus != null) {
+            total = total.plus(item.socketBonus);
         }
         StatBlock enchant = model.standardEnchant(item.slot);
         if (enchant != null) {

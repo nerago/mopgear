@@ -40,6 +40,7 @@ public class FindMultiSpec {
     }
 
     public void solve(Instant startTime) {
+        OutputText.println("PREPARING SPECS");
         for (SpecDetails spec : specs) {
             spec.prepareA(specs);
         }
@@ -47,16 +48,21 @@ public class FindMultiSpec {
             spec.prepareB(specs);
         }
 
+
         ItemUtil.validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
 
 //        addDuplicatedItems();
 
+        OutputText.println("PREPARING BASELINE SPEC RUNS");
+        specs.stream().parallel().forEach(this::optimalWithoutCommon);
+
+        OutputText.println("PREPARING COMMON ITEMS");
         Map<ItemRef, List<ItemData>> commonMap = commonInMultiSet(specs);
 
         long commonCombos = ItemUtil.estimateSets(commonMap);
         OutputText.println("COMMON COMBOS " + commonCombos);
 
-        int skip = Primes.roundToPrimeInt(39999999);
+        int skip = Primes.roundToPrimeInt(2799999);
 
         long indexedOutputSize = commonCombos / skip;
         Stream<Map<ItemRef, ItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
@@ -71,6 +77,7 @@ public class FindMultiSpec {
                 .unordered()
                 .parallel();
 
+        OutputText.println("RUNNING");
         Optional<ProposedResults> best = resultStream.collect(
                 new TopCollectorReporting<>(s -> multiRating(s.resultJobs, specs),
                         s -> reportBetter(s.resultJobs, specs)));
@@ -150,6 +157,16 @@ public class FindMultiSpec {
         }
 
         return commonOptions;
+    }
+
+    public void optimalWithoutCommon(SpecDetails spec) {
+        JobInfo job = new JobInfo();
+        job.model = spec.model;
+        job.itemOptions = spec.itemOptions;
+        job.runSizeMultiply = runSizeMultiply;
+        job.hackAllow = hackAllow;
+        Solver.runJob(job);
+        spec.optimalRating = spec.model.calcRating(job.resultSet.orElseThrow());
     }
 
     private static List<ItemData> commonForges(List<ItemData> prior, List<ItemData> forges) {
@@ -279,8 +296,10 @@ public class FindMultiSpec {
                 ItemSet set = job.resultSet.orElseThrow();
                 SpecDetails spec = specList.get(i);
                 OutputText.printf("-------------- %s --------------\n", spec.label);
-                set.outputSet(spec.model);
                 job.printRecorder.outputNow();
+                set.outputSet(spec.model);
+                double specRating = spec.model.calcRating(set);
+                OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
             }
 
             OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
@@ -308,6 +327,7 @@ public class FindMultiSpec {
         final int extraItemsUpgradeLevel;
         final boolean challengeScale;
         final Map<Integer, Integer> remapDuplicateId;
+        double optimalRating;
         EquipOptionsMap itemOptions;
 
         public SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean challengeScale, Map<Integer, Integer> remapDuplicateId) {
