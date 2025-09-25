@@ -1,6 +1,7 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.ItemRef;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -9,21 +10,30 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ItemCache {
     private static final Object writeSync = new Object();
-    private final Map<Integer, ItemData> itemCache;
+    private final Map<ItemRef, ItemData> itemRefLookup;
+    private final Map<Integer, Set<ItemData>> itemIdLookup;
     private final Path file;
 
-    public ItemCache(Path file) {
+    public static final ItemCache instance = new ItemCache(DataLocation.cacheFile);
+
+    private ItemCache(Path file) {
         this.file = file;
-        this.itemCache = cacheLoad(file);
+
+        List<ItemData> itemList = cacheLoad(file);
+
+        this.itemRefLookup = itemList.stream().collect(Collectors.toMap(item -> item.ref, item -> item, (a, b) -> a, HashMap::new));
+
+        this.itemIdLookup = itemList.stream().collect(Collectors.groupingBy(item -> item.ref.itemId(), HashMap::new, Collectors.toSet()));
     }
 
-    private static Map<Integer, ItemData> cacheLoad(Path file) {
+    private static List<ItemData> cacheLoad(Path file) {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
-            TypeToken<Map<Integer, ItemData>> typeToken = new TypeToken<>() {
+            TypeToken<List<ItemData>> typeToken = new TypeToken<>() {
             };
             return new Gson().fromJson(reader, typeToken);
         } catch (IOException ex) {
@@ -31,22 +41,39 @@ public class ItemCache {
         }
     }
 
-
     public void cacheSave() {
         synchronized (writeSync) {
             try (BufferedWriter writer = Files.newBufferedWriter(file)) {
-                new Gson().newBuilder().setPrettyPrinting().create().toJson(itemCache, writer);
+                List<ItemData> itemList = itemRefLookup.values().stream().toList();
+                new Gson().newBuilder().setPrettyPrinting().create().toJson(itemList, writer);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         }
     }
 
-    public ItemData get(int id) {
-        return itemCache.get(id);
+    public ItemData get(ItemRef ref) {
+        return itemRefLookup.get(ref);
     }
 
-    public void put(int id, ItemData item) {
-        itemCache.put(id, item);
+    public ItemData get(int itemId, int upgradeLevel) {
+        Set<ItemData> itemList = itemIdLookup.get(itemId);
+        if (itemList != null) {
+            for (ItemData item : itemList) {
+                if (item.ref.upgradeLevel() == upgradeLevel)
+                    return item;
+            }
+        }
+        return null;
+    }
+
+    public void put(ItemData item) {
+        itemRefLookup.put(item.ref, item);
+        itemIdLookup.computeIfAbsent(item.ref.itemId(), k -> new HashSet<>()).add(item);
+    }
+
+    public void clear() {
+        itemRefLookup.clear();
+        itemIdLookup.clear();
     }
 }

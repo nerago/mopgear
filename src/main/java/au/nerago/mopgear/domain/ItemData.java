@@ -1,7 +1,6 @@
 package au.nerago.mopgear.domain;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -34,8 +33,12 @@ public final class ItemData {
         this.socketBonus = socketBonus;
     }
 
-    public static ItemData build(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, int socketBonus, int itemLevel) {
-        return new ItemData(ItemRef.build(id, itemLevel), slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
+    public static ItemData buildFromWowSim(ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, int socketBonus) {
+        return new ItemData(ref, slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
+    }
+
+    public static ItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, int socketBonus, int itemLevel) {
+        return new ItemData(ItemRef.buildBasic(id, itemLevel), slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
     }
 
     public ItemData changeNameAndStats(@NotNull String changedName, @NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {

@@ -21,13 +21,11 @@ import java.util.stream.Stream;
 public class FindUpgrades {
     private final ModelCombined model;
     private final boolean hackAllow;
-    private final ItemCache itemCache;
 
     private static final long runSizeMultiply = 4;
 //    private static final long runSizeMultiply = 1;
 
-    public FindUpgrades(ItemCache itemCache, ModelCombined model, boolean hackAllow) {
-        this.itemCache = itemCache;
+    public FindUpgrades(ModelCombined model, boolean hackAllow) {
         this.model = model;
         this.hackAllow = hackAllow;
     }
@@ -129,7 +127,7 @@ public class FindUpgrades {
         return ArrayUtil.arrayStream(extraItemArray).mapMulti((extraItemInfo, submitJob) -> {
             int extraItemId = extraItemInfo.itemId();
             int cost = extraItemInfo.cost();
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
+            ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
 
             for (SlotEquip slot : extraItem.slot.toSlotEquipOptions()) {
                 if (canPerformSpecifiedUpgrade(extraItem, slot, baseItems)) {

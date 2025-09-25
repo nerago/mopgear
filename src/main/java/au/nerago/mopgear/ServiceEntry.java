@@ -1,8 +1,6 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.DataLocation;
-import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ModelCombined;
 import com.google.gson.Gson;
@@ -36,11 +34,10 @@ public class ServiceEntry {
 
     @SuppressWarnings("RedundantLabeledSwitchRuleCodeBlock")
     public void run(ServiceParam params) {
-        ItemCache itemCache = new ItemCache(DataLocation.cacheFile);
         Path gearFile = Path.of(params.gearFile);
         ModelCombined model = ModelCombined.load(params.model);
         Map<Integer, List<ReforgeRecipe>> fixedForges = new HashMap<>(params.fixedForges);
-        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, false, gearFile, model.reforgeRules(), fixedForges);
+        EquipOptionsMap items = ItemUtil.readAndLoad(false, gearFile, model.reforgeRules(), fixedForges);
 
         switch (params.jobType) {
             case REFORGE -> {

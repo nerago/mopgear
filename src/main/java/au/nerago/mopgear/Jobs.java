@@ -3,7 +3,6 @@ package au.nerago.mopgear;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
-import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
@@ -18,16 +17,14 @@ import java.util.function.Function;
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Jobs {
     public static final long BILLION = 1000 * 1000 * 1000;
-    public static ItemCache itemCache;
 
     public static void findUpgradeSetup(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, int upgradeLevel) {
-        new FindUpgrades(itemCache, model, allowHacks).run(baseItems, extraItems, adjustment, upgradeLevel);
+        new FindUpgrades(model, allowHacks).run(baseItems, extraItems, adjustment, upgradeLevel);
     }
 
     public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel) {
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
-        // TODO upgrade level
-        Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId(), upgradeLevel))
+        Arrays.stream(allItems).map(equip -> ItemUtil.loadItemBasic(equip.itemId(), upgradeLevel))
                 .filter(item -> item.slot != SlotItem.Weapon2H)
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
@@ -57,7 +54,7 @@ public class Jobs {
         // TODO upgrade level
         Arrays.stream(allItems)
                 .peek(costed -> costs.put(costed.itemId(), costed.cost()))
-                .map(equip -> ItemUtil.loadItemBasic(itemCache, equip.itemId(), upgradeLevel))
+                .map(equip -> ItemUtil.loadItemBasic(equip.itemId(), upgradeLevel))
                 .filter(item -> item.slot != SlotItem.Weapon2H)
                 .forEach(item -> {
                     item = ItemUtil.defaultEnchants(item, model, true);
@@ -124,7 +121,7 @@ public class Jobs {
 
     @SuppressWarnings("SameParameterValue")
     public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
-        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
+        ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
 
         // TODO upgrade level
 
@@ -150,12 +147,12 @@ public class Jobs {
     }
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
-        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
+        ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
         return addExtra(reforgedItems, model, extraItemId, upgradeLevel, extraItem.slot.toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
     }
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
-        ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
+        ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
         extraItem = customiseItem.apply(extraItem);
         ItemRef ref = extraItem.ref;
 
@@ -220,7 +217,7 @@ public class Jobs {
         for (CostedItem entry : extraItems) {
             int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, extraItemId, upgradeLevel);
+            ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
             for (SlotEquip slot : extraItem.slot.toSlotEquipOptions()) {
                 ItemData[] existing = items.get(slot);
                 if (existing == null) {
@@ -287,7 +284,7 @@ public class Jobs {
     }
 
     public static void paladinMultiSpecSolve(Instant startTime) {
-        FindMultiSpec multi = new FindMultiSpec(itemCache);
+        FindMultiSpec multi = new FindMultiSpec();
         multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
@@ -391,7 +388,7 @@ public class Jobs {
     }
 
     public static void druidMultiSpecSolve(Instant startTime) {
-        FindMultiSpec multi = new FindMultiSpec(itemCache);
+        FindMultiSpec multi = new FindMultiSpec();
 
         FindMultiSpec.SpecDetails boom = new FindMultiSpec.SpecDetails(
                 "BOOM",
@@ -422,8 +419,8 @@ public class Jobs {
     }
 
     public static void compareBestReforgesWithCommon(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> commonOne, Map<Integer, List<ReforgeRecipe>> commonTwo) {
-        EquipOptionsMap optionsOne = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonOne);
-        EquipOptionsMap optionsTwo = ItemUtil.readAndLoad(itemCache, true, file, model.reforgeRules(), commonTwo);
+        EquipOptionsMap optionsOne = ItemUtil.readAndLoad(true, file, model.reforgeRules(), commonOne);
+        EquipOptionsMap optionsTwo = ItemUtil.readAndLoad(true, file, model.reforgeRules(), commonTwo);
 
         int runSizeMultiply = 2;
 

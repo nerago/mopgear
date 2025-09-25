@@ -2,11 +2,8 @@ package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.ItemUtil;
 import au.nerago.mopgear.domain.CostedItem;
-import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.SlotItem;
-import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.ReforgeRules;
-import au.nerago.mopgear.util.Tuple;
 import au.nerago.mopgear.domain.EquipOptionsMap;
 import au.nerago.mopgear.util.ArrayUtil;
 
@@ -527,7 +524,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateCurrentItemsRet(ItemCache itemCache) {
-        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
+        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon2H && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
@@ -535,7 +532,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProt(ItemCache itemCache) {
-        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
+        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot != SlotItem.Weapon1H && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
@@ -543,7 +540,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProtAll(ItemCache itemCache) {
-        EquipOptionsMap items = ItemUtil.readAndLoad(itemCache, true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
+        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.entryStream()
                 .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);

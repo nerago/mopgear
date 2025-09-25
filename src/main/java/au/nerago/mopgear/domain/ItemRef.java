@@ -1,10 +1,16 @@
 package au.nerago.mopgear.domain;
 
+import au.nerago.mopgear.model.ItemLevel;
+
 import java.util.Objects;
 
 public record ItemRef(int itemId, int itemLevel, int itemLevelBase, int duplicateNum) {
-    public static ItemRef build(int id, int itemLevel) {
-        return new ItemRef(id, itemLevel, itemLevel, 0);
+    public static ItemRef buildBasic(int itemId, int itemLevel) {
+        return new ItemRef(itemId, itemLevel, itemLevel, 0);
+    }
+
+    public static ItemRef buildAdvanced(int itemId, int itemLevel, int itemLevelBase) {
+        return new ItemRef(itemId, itemLevel, itemLevelBase, 0);
     }
 
     public ItemRef changeItemLevel(int changedItemLevel) {
@@ -13,6 +19,10 @@ public record ItemRef(int itemId, int itemLevel, int itemLevelBase, int duplicat
 
     public ItemRef changeDuplicate(int changedDuplicateNum) {
         return new ItemRef(itemId, itemLevel, itemLevelBase, changedDuplicateNum);
+    }
+
+    public int upgradeLevel() {
+        return (itemLevel - itemLevelBase) / ItemLevel.ITEM_LEVELS_PER_UPGRADE_LEVEL;
     }
 
     @Override

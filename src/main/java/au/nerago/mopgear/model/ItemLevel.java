@@ -7,7 +7,7 @@ import au.nerago.mopgear.util.ArrayUtil;
 public class ItemLevel {
     private static final int CHALLENGE_TARGET_LEVEL = 463;
     private static final double FORMULA_POWER = 5.48;
-    private static final int ITEM_LEVELS_PER_UPGRADE_LEVEL = 4;
+    public static final int ITEM_LEVELS_PER_UPGRADE_LEVEL = 4;
 
     private static double calcMultiplier(int levelFrom, int levelTo) {
         return Math.pow((double) levelTo / (double) levelFrom, FORMULA_POWER);
@@ -24,7 +24,7 @@ public class ItemLevel {
         return result;
     }
 
-    public static ItemData scaleForChallengeMode(ItemData item) {
+    private static ItemData scaleForChallengeMode(ItemData item) {
         int level = item.ref.itemLevel();
         if (level <= CHALLENGE_TARGET_LEVEL) {
             return item;

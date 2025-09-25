@@ -123,7 +123,7 @@ public class WowHead {
         }
         SocketType[] socketArray = sockets.toArray(SocketType[]::new);
 
-        return ItemData.build(itemId, slot, name, statBlock, socketArray, socketBonus, itemLevel);
+        return ItemData.buildFromWowHead(itemId, slot, name, statBlock, socketArray, socketBonus, itemLevel);
     }
 
     @SuppressWarnings("SameParameterValue")

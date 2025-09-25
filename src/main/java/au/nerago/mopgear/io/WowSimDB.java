@@ -13,17 +13,20 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class WowSimDB {
-    private Map<ItemRef, ItemData> itemMap = new HashMap<>();
+    private final Map<ItemRef, ItemData> itemMap = new HashMap<>();
 
     // https://raw.githubusercontent.com/wowsims/mop/57251c327bbc745d1512b9c13e952f4bcf3deedb/assets/database/db.json
 
-    public WowSimDB() {
+    public static WowSimDB instance = new WowSimDB();
+
+    private WowSimDB() {
         readInput(Objects.requireNonNull(getClass().getClassLoader().getResource("wowsimdb.json")));
     }
 
-    public void readInput(URL url) {
+    private void readInput(URL url) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
             convert(JsonParser.parseReader(reader).getAsJsonObject());
         } catch (IOException ex) {
@@ -54,7 +57,17 @@ public class WowSimDB {
 
         int weaponType = getIntOrDefault(object, "weaponType", 0);
         SlotItem slot = mapSlot(type, weaponType);
+
+        SocketType[] sockets = new SocketType[0];
+        JsonArray gemSockets = object.getAsJsonArray("gemSockets");
+        if (gemSockets != null) {
+            sockets = gemSockets.asList().stream()
+                    .map(e -> mapSocket(e.getAsInt()))
+                    .toArray(SocketType[]::new);
+        }
+
         JsonObject scalingOptions = object.getAsJsonObject("scalingOptions");
+        int baseItemLevel = scalingOptions.get("0").getAsJsonObject().get("ilvl").getAsInt();
         for (Map.Entry<String, JsonElement> entry : scalingOptions.entrySet()) {
             JsonObject scaleEntry = entry.getValue().getAsJsonObject();
             int itemLevel = scaleEntry.get("ilvl").getAsInt();
@@ -71,9 +84,22 @@ public class WowSimDB {
                 }
             }
 
-            // TODO sockets
-            ItemData item = ItemData.build(id, slot, name, block, new SocketType[0], 0, itemLevel);
+            ItemRef ref = ItemRef.buildAdvanced(id, itemLevel, baseItemLevel);
+            ItemData item = ItemData.buildFromWowSim(ref, slot, name, block, sockets, 0);
             itemMap.put(item.ref, item);
+        }
+    }
+
+    private SocketType mapSocket(int num) {
+        switch (num) {
+            case 1: return SocketType.Meta;
+            case 2: return SocketType.Red;
+            case 3: return SocketType.Blue;
+            case 4: return SocketType.Yellow;
+            case 8: return SocketType.General; // flagging for a possible belt socket
+            case 9: return SocketType.Engineer;
+            case 10: return SocketType.Sha;
+            default: throw new RuntimeException("unknown socket " + num);
         }
     }
 
@@ -81,7 +107,7 @@ public class WowSimDB {
         switch (type) {
             case 1 -> { return SlotItem.Head; }
             case 2 -> { return SlotItem.Neck; }
-            case 3 -> { return SlotItem.Offhand; }
+            case 3 -> { return SlotItem.Shoulder; }
             case 4 -> { return SlotItem.Back; }
             case 5 -> { return SlotItem.Chest; }
             case 6 -> { return SlotItem.Wrist; }
@@ -143,5 +169,9 @@ public class WowSimDB {
 
     public ItemData lookup(ItemRef ref) {
         return itemMap.get(ref);
+    }
+
+    public Stream<ItemData> stream() {
+        return itemMap.values().stream();
     }
 }

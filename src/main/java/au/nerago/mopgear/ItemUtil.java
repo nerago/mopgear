@@ -32,13 +32,13 @@ public class ItemUtil {
         return set;
     }
 
-    public static EquipOptionsMap readAndLoad(ItemCache itemCache, boolean detailedOutput, Path file, ReforgeRules rules, Map<Integer, List<ReforgeRecipe>> presetForge) {
+    public static EquipOptionsMap readAndLoad(boolean detailedOutput, Path file, ReforgeRules rules, Map<Integer, List<ReforgeRecipe>> presetForge) {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
-        List<ItemData> items = loadItems(itemCache, itemIds, detailedOutput);
+        List<ItemData> items = loadItems(itemIds, detailedOutput);
         EquipOptionsMap result = presetForge != null
                 ? limitedItemsReforgedToMap(rules, items, presetForge)
                 : standardItemsReforgedToMap(rules, items);
-        itemCache.cacheSave();
+        ItemCache.instance.cacheSave();
         return result;
     }
 
@@ -47,23 +47,23 @@ public class ItemUtil {
         for (EquippedItem equippedItem : itemIds) {
             int id = equippedItem.id();
             ItemData item = WowHead.fetchItem(id);
-            itemCache.put(id, item);
+            itemCache.put(item);
         }
         itemCache.cacheSave();
     }
 
-    public static List<ItemData> loadItems(ItemCache itemCache, List<EquippedItem> itemIds, boolean detailedOutput) {
+    public static List<ItemData> loadItems(List<EquippedItem> itemIds, boolean detailedOutput) {
         List<ItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
-            ItemData item = loadItem(itemCache, equippedItem, detailedOutput);
+            ItemData item = loadItem(equippedItem, detailedOutput);
             items.add(item);
         }
         return items;
     }
 
-    public static ItemData loadItem(ItemCache itemCache, EquippedItem equippedItem, boolean detailedOutput) {
+    public static ItemData loadItem(EquippedItem equippedItem, boolean detailedOutput) {
         int id = equippedItem.id(), upgrade = equippedItem.upgradeStep();
-        ItemData item = loadItemBasic(itemCache, id, upgrade);
+        ItemData item = loadItemBasic(id, upgrade);
 
         if (equippedItem.gems().length > 0) {
             StatBlock gemStat = GemData.process(equippedItem.gems(), item.socketBonus, item.name);
@@ -89,21 +89,28 @@ public class ItemUtil {
         return item;
     }
 
-    public static ItemData loadItemBasic(ItemCache itemCache, int itemId, int upgradeLevel) {
-        ItemData item = itemCache.get(itemId);
+    public static ItemData loadItemBasic(int itemId, int upgradeLevel) {
+        ItemCache itemCache = ItemCache.instance;
+        ItemData item = itemCache.get(itemId, upgradeLevel);
         if (item == null) {
             item = WowHead.fetchItem(itemId);
             if (item != null) {
-                itemCache.put(itemId, item);
+                itemCache.put(item);
                 itemCache.cacheSave();
             } else {
                 throw new RuntimeException("missing item " + itemId);
+            }
+
+            if (upgradeLevel != 0) {
+                OutputText.println("INACCURATE-UPGRADE " + item.toStringExtended());
+                item = ItemLevel.upgrade(item, upgradeLevel);
+                itemCache.put(item);
             }
         }
         if (item.slot == SlotItem.Trinket) {
             item = Trinkets.updateTrinket(item);
         }
-        item = ItemLevel.upgrade(item, upgradeLevel);
+        // TODO trinket vs upgrade ordering?
         return item;
     }
 

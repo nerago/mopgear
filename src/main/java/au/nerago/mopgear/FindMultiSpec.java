@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class FindMultiSpec {
     public static final int RANDOM_COMBOS = 100000;
-    private final ItemCache itemCache;
     //        Long runSize = 200000L;
     @SuppressWarnings("FieldCanBeLocal")
     private final long runSizeMultiply = 1L;
@@ -27,10 +26,6 @@ public class FindMultiSpec {
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
     private final List<SpecDetails> specs = new ArrayList<>();
     private final Set<Integer> duplicatedItem = new HashSet<>();
-
-    public FindMultiSpec(ItemCache itemCache) {
-        this.itemCache = itemCache;
-    }
 
     public void addFixedForge(int id, ReforgeRecipe reforge) {
         fixedForge.put(id, reforge);
@@ -46,10 +41,10 @@ public class FindMultiSpec {
 
     public void solve(Instant startTime) {
         for (SpecDetails spec : specs) {
-            spec.prepareA(itemCache, specs);
+            spec.prepareA(specs);
         }
         for (SpecDetails spec : specs) {
-            spec.prepareB(itemCache, specs);
+            spec.prepareB(specs);
         }
 
         ItemUtil.validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
@@ -326,21 +321,21 @@ public class FindMultiSpec {
             this.remapDuplicateId = remapDuplicateId;
         }
 
-        public void prepareA(ItemCache itemCache, List<SpecDetails> allSpecs) {
-            itemOptions = ItemUtil.readAndLoad(itemCache, false, gearFile, model.reforgeRules(), null);
+        public void prepareA(List<SpecDetails> allSpecs) {
+            itemOptions = ItemUtil.readAndLoad(false, gearFile, model.reforgeRules(), null);
             remapDuplicates();
         }
 
-        public void prepareB(ItemCache itemCache, List<SpecDetails> allSpecs) {
+        public void prepareB(List<SpecDetails> allSpecs) {
             for (int itemId : extraItems) {
-                addExtra(itemCache, itemId, allSpecs);
+                addExtra(itemId, allSpecs);
             }
         }
 
-        private void addExtra(ItemCache itemCache, int itemId, List<SpecDetails> allSpecs) {
-            verifyNotAlreadyIncluded(itemCache, itemId);
+        private void addExtra(int itemId, List<SpecDetails> allSpecs) {
+            verifyNotAlreadyIncluded(itemId);
             if (!copyFromOtherSpec(itemId, allSpecs)) {
-                loadAndGenerate(itemCache, itemId);
+                loadAndGenerate(itemId);
             }
         }
 
@@ -357,8 +352,8 @@ public class FindMultiSpec {
             }
         }
 
-        private void verifyNotAlreadyIncluded(ItemCache itemCache, int itemId) {
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, itemId, extraItemsUpgradeLevel);
+        private void verifyNotAlreadyIncluded(int itemId) {
+            ItemData extraItem = ItemUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
             SlotEquip[] slots = extraItem.slot.toSlotEquipOptions();
             for (SlotEquip slot : slots) {
                 ItemData[] existing = itemOptions.get(slot);
@@ -386,8 +381,8 @@ public class FindMultiSpec {
             return false;
         }
 
-        private void loadAndGenerate(ItemCache itemCache, int itemId) {
-            ItemData extraItem = ItemUtil.loadItemBasic(itemCache, itemId, extraItemsUpgradeLevel);
+        private void loadAndGenerate(int itemId) {
+            ItemData extraItem = ItemUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
             extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
             ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
