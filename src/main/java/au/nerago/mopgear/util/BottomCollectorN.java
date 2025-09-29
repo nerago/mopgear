@@ -75,7 +75,7 @@ public class BottomCollectorN<T> implements Collector<T, BottomCollectorN.State<
 
         private void trim() {
             while (sortedSet.size() > size) {
-                sortedSet.removeFirst();
+                sortedSet.removeLast();
             }
             highestValue = getValue.applyAsLong(sortedSet.getLast());
         }

@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +37,8 @@ public class ItemCache {
             TypeToken<List<ItemData>> typeToken = new TypeToken<>() {
             };
             return new Gson().fromJson(reader, typeToken);
+        } catch (NoSuchFileException ex) {
+            return new ArrayList<>();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }

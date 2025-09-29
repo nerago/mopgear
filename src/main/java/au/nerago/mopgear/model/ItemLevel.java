@@ -8,6 +8,7 @@ public class ItemLevel {
     private static final int CHALLENGE_TARGET_LEVEL = 463;
     private static final double FORMULA_POWER = 5.48;
     public static final int ITEM_LEVELS_PER_UPGRADE_LEVEL = 4;
+    public static final int MAX_UPGRADE_LEVEL = 2;
 
     private static double calcMultiplier(int levelFrom, int levelTo) {
         return Math.pow((double) levelTo / (double) levelFrom, FORMULA_POWER);
@@ -92,10 +93,10 @@ public class ItemLevel {
 //            if item.StatAlloc[index] > 0 && itemBudget > 0 {
 //                rawValue := math.Round(item.StatAlloc[index] * itemBudget * 0.0001)
 //
-//                //Todo: Figure out if this does anything in MoP
+//                // Figure out if this does anything in MoP
 //                //Not used right now in Cata
 //                //socket_penalty := math.RoundNearby item.StatPercentageOfSocket[index] * SocketCost(itemLevel)
-//                return rawValue - item.SocketModifier[index] // Todo: Could this be a calculated socket penalty?
+//                return rawValue - item.SocketModifier[index] // Could this be a calculated socket penalty?
 //            } else {
 //                return math.Floor(item.BonusAmountCalculated[index] * item.ApproximateScaleCoeff(item.ItemLevel, itemLevel))
 //            }

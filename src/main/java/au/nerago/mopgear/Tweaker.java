@@ -8,11 +8,6 @@ public class Tweaker {
     public static ItemSet tweak(ItemSet baseSet, ModelCombined model, EquipOptionsMap items) {
         BestHolder<ItemSet> best = new BestHolder<>(baseSet, model.calcRating(baseSet));
 
-        // TODO support tweak for more null reforges but same result
-        // if that isn't already the case
-
-        // or at least avoid the expertise reforges for non-melee
-
         for (SlotEquip slot : SlotEquip.values()) {
             EquipMap baseItems = best.get().getItems();
             ItemData existing = baseItems.get(slot);

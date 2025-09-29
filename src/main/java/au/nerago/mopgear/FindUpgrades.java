@@ -1,18 +1,15 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.SourcesOfItems;
+import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.RankedGroupsCollection;
 import au.nerago.mopgear.util.ArrayUtil;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,7 +19,7 @@ public class FindUpgrades {
     private final ModelCombined model;
     private final boolean hackAllow;
 
-    private static final long runSizeMultiply = 4;
+    private static final long runSizeMultiply = 2;
 //    private static final long runSizeMultiply = 1;
 
     public FindUpgrades(ModelCombined model, boolean hackAllow) {
@@ -30,13 +27,42 @@ public class FindUpgrades {
         this.hackAllow = hackAllow;
     }
 
+    public void run(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {
+        List<CostedItemData> extraItemList = extraItems.stream()
+                .map(ei -> new CostedItemData(ItemUtil.loadItem(ei, false), 0))
+                .toList();
+        runMain(baseItems, extraItemList, adjustment);
+    }
+
     public void run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment, int upgradeLevel) {
+        List<CostedItemData> extraItemList = Arrays.stream(extraItemArray)
+                .map(ci -> new CostedItemData(ItemUtil.loadItemBasic(ci.itemId(), upgradeLevel), ci.cost()))
+                .toList();
+        runMain(baseItems, extraItemList, adjustment);
+    }
+
+    public void runMaxedItems(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {
+        baseItems = ItemUtil.upgradeAllTo2(baseItems);
+        List<CostedItemData> extraItemList = extraItems.stream()
+                .map(ei -> new EquippedItem(ei.itemId(), ei.gems(), ei.enchant(), ItemLevel.MAX_UPGRADE_LEVEL))
+                .map(ei -> new CostedItemData(ItemUtil.loadItem(ei, false), 0))
+                .toList();
+        runMain(baseItems, extraItemList, adjustment);
+    }
+
+    public void runMaxedItems(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment) {
+        baseItems = ItemUtil.upgradeAllTo2(baseItems);
+        List<CostedItemData> extraItemList = Arrays.stream(extraItemArray)
+                .map(ci -> new CostedItemData(ItemUtil.loadItemBasic(ci.itemId(), ItemLevel.MAX_UPGRADE_LEVEL), ci.cost()))
+                .toList();
+        runMain(baseItems, extraItemList, adjustment);
+    }
+
+    public void runMain(EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment) {
         double baseRating = findBase(baseItems, adjustment);
 
-        Function<ItemData, ItemData> enchanting = x -> ItemUtil.defaultEnchants(x, model, true);
-
         List<JobInfo> jobList =
-                makeJobs(model, baseItems, extraItemArray, upgradeLevel, enchanting, adjustment, baseRating)
+                makeJobs(model, baseItems, extraItemList, adjustment, baseRating)
                 .toList().parallelStream() // helps verify
                 .map(Solver::runJob)
                 .peek(job -> handleResult(job, baseRating))
@@ -123,16 +149,15 @@ public class FindUpgrades {
         }
     }
 
-    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, CostedItem[] extraItemArray, int upgradeLevel, Function<ItemData, ItemData> enchanting, StatBlock adjustment, double baseRating) {
-        return ArrayUtil.arrayStream(extraItemArray).mapMulti((extraItemInfo, submitJob) -> {
-            int extraItemId = extraItemInfo.itemId();
+    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment, double baseRating) {
+        return extraItemList.parallelStream().mapMulti((extraItemInfo, submitJob) -> {
+            ItemData extraItem = extraItemInfo.item();
             int cost = extraItemInfo.cost();
-            ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
 
             for (SlotEquip slot : extraItem.slot.toSlotEquipOptions()) {
                 if (canPerformSpecifiedUpgrade(extraItem, slot, baseItems)) {
                     OutputText.printf("JOB %s\n", extraItem.toStringExtended());
-                    submitJob.accept(buildUpgradeJob(model, baseItems.deepClone(), extraItem, enchanting, adjustment, slot, baseRating, cost));
+                    submitJob.accept(buildUpgradeJob(model, baseItems.deepClone(), extraItem, adjustment, slot, baseRating, cost));
                 }
             }
         });
@@ -156,17 +181,17 @@ public class FindUpgrades {
         }
     }
 
-    private JobInfo buildUpgradeJob(ModelCombined model, EquipOptionsMap items, ItemData extraItem, Function<ItemData, ItemData> enchanting, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
+    private JobInfo buildUpgradeJob(ModelCombined model, EquipOptionsMap items, ItemData extraItem, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
         JobInfo job = new JobInfo();
 //        job.singleThread = true;
 
-        extraItem = enchanting.apply(extraItem);
+        extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
         job.println("OFFER " + extraItem.toStringExtended());
-        job.println("REPLACING " + (items.get(slot) != null ? items.get(slot)[0] : "NOTHING"));
+        job.println("REPLACING " + (items.get(slot) != null ? items.get(slot)[0].toStringExtended() : "NOTHING"));
 
         ItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
         items.put(slot, extraOptions);
-        ArrayUtil.mapInPlace(items.get(slot), enchanting); // redundant?
+        ArrayUtil.mapInPlace(items.get(slot), x -> ItemUtil.defaultEnchants(x, model, true)); // redundant?
 
         if (hackAllow) {
             adjustment = FindStatRange.checkSetAdjust(model, items, job);
@@ -229,5 +254,4 @@ public class FindUpgrades {
 
         return true;
     }
-
 }

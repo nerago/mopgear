@@ -101,7 +101,7 @@ public class WowHead {
         JsonObject equipObject = itemObject.get("jsonequip").getAsJsonObject();
         SlotItem slot = SlotItem.withNum(objectGetInt(equipObject, "slotbak"));
         int socketBonus = objectGetInt(equipObject, "socketbonus");
-        StatBlock socketBonusBlock = GemData.getSocketBonus(name, socketBonus);
+        StatBlock socketBonusBlock = socketBonus != 0 ? GemData.getSocketBonus(name, socketBonus) : null;
 
         StatBlock statBlock = new StatBlock(
                 objectGetIntOneOf(equipObject, "str", "int", "agi"),

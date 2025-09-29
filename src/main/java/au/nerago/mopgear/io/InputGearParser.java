@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,34 +39,40 @@ public class InputGearParser {
         for (JsonElement element : items) {
             if (element.isJsonObject()) {
                 JsonObject elementObject = element.getAsJsonObject();
-                int id = elementObject.get("id").getAsInt();
-
-                int[] gems = null;
-                if (elementObject.has("gems")) {
-                    JsonArray array = elementObject.get("gems").getAsJsonArray();
-                    gems = array.asList().stream().mapToInt(JsonElement::getAsInt).toArray();
-                }
-
-                Integer enchant = null;
-                if (elementObject.has("enchant")) {
-                    int enchantId = elementObject.get("enchant").getAsInt();
-                    if (gems == null) {
-                        gems = new int[]{enchantId};
-                    } else {
-                        gems = Arrays.copyOf(gems, gems.length + 1);
-                        gems[gems.length - 1] = enchantId;
-                    }
-                    enchant = enchantId;
-                }
-
-                int upgradeStep = 0;
-                if (elementObject.has("upgrade_step")) {
-                    upgradeStep = elementObject.get("upgrade_step").getAsInt();
-                }
-
-                result.add(new EquippedItem(id, gems, enchant, upgradeStep));
+                EquippedItem equippedItem = parseEquipped(elementObject);
+                result.add(equippedItem);
             }
         }
         return result;
+    }
+
+    @NotNull
+    public static EquippedItem parseEquipped(JsonObject elementObject) {
+        int id = elementObject.get("id").getAsInt();
+
+        int[] gems = null;
+        if (elementObject.has("gems")) {
+            JsonArray array = elementObject.get("gems").getAsJsonArray();
+            gems = array.asList().stream().mapToInt(JsonElement::getAsInt).toArray();
+        }
+
+        Integer enchant = null;
+        if (elementObject.has("enchant")) {
+            int enchantId = elementObject.get("enchant").getAsInt();
+            if (gems == null) {
+                gems = new int[]{enchantId};
+            } else {
+                gems = Arrays.copyOf(gems, gems.length + 1);
+                gems[gems.length - 1] = enchantId;
+            }
+            enchant = enchantId;
+        }
+
+        int upgradeStep = 0;
+        if (elementObject.has("upgrade_step")) {
+            upgradeStep = elementObject.get("upgrade_step").getAsInt();
+        }
+
+        return new EquippedItem(id, gems, enchant, upgradeStep);
     }
 }

@@ -48,7 +48,7 @@ public class ServiceEntry {
             }
             case EXTRA_BAGS -> {
                 Path bagsFile = Path.of(params.bagFile);
-                Jobs.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(bagsFile, SourcesOfItems.ignoredItems), params.upgradeLevel);
+                Jobs.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(bagsFile, SourcesOfItems.ignoredItems));
             }
             case FIND_UPGRADE -> {
                 CostedItem[] extraItems = params.extraItems();
@@ -57,7 +57,7 @@ public class ServiceEntry {
                 } else {
                     throw new IllegalArgumentException("no upgrade items specified");
                 }
-                Jobs.findUpgradeSetup(items, extraItems, model, false, null, params.upgradeLevel);
+                Jobs.findUpgrade(items, extraItems, model, false, null, params.upgradeLevel);
             }
         }
     }

@@ -46,10 +46,10 @@ public class Solver {
             proposed = SolverIndexed.runSolver(model, itemOptions, adjustment, startTime, estimateFullCombos.longValueExact(), job.specialFilter);
         } else if (estimatePhase1Combos < MAX_SKINNY_FULL_SEARCH * runSizeMultiply) {
             job.println("SOLVE phased full");
-            proposed = phased.runSolver(!job.singleThread, job.specialFilter, false);
+            proposed = phased.runSolver(!job.singleThread, job.specialFilter, null);
         } else if (estimatePhase1Combos < MAX_SKINNY_PHASED_ANY * runSizeMultiply) {
             job.println("SOLVE phased top only");
-            proposed = phased.runSolver(!job.singleThread, job.specialFilter, true);
+            proposed = phased.runSolver(!job.singleThread, job.specialFilter, runSizeMultiply);
         } else {
             long runSize = DEFAULT_RANDOM_RUN_SIZE * runSizeMultiply;
             job.printf("SOLVE random %d\n", runSize);

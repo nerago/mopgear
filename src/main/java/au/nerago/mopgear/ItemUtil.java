@@ -45,7 +45,7 @@ public class ItemUtil {
     public static void forceReload(ItemCache itemCache, Path file) {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
         for (EquippedItem equippedItem : itemIds) {
-            int id = equippedItem.id();
+            int id = equippedItem.itemId();
             ItemData item = WowHead.fetchItem(id);
             itemCache.put(item);
         }
@@ -62,7 +62,7 @@ public class ItemUtil {
     }
 
     public static ItemData loadItem(EquippedItem equippedItem, boolean detailedOutput) {
-        int id = equippedItem.id(), upgrade = equippedItem.upgradeStep();
+        int id = equippedItem.itemId(), upgrade = equippedItem.upgradeStep();
         ItemData item = loadItemBasic(id, upgrade);
 
         if (equippedItem.gems().length > 0) {
@@ -102,9 +102,13 @@ public class ItemUtil {
             }
 
             if (upgradeLevel != 0) {
-                OutputText.println("INACCURATE-UPGRADE " + item.toStringExtended());
-                item = ItemLevel.upgrade(item, upgradeLevel);
-                itemCache.put(item);
+                if (item.isUpgradable()) {
+                    OutputText.println("INACCURATE-UPGRADE " + item.toStringExtended());
+                    item = ItemLevel.upgrade(item, upgradeLevel);
+                    itemCache.put(item);
+                } else {
+                    OutputText.println("CANNOT-UPGRADE " + item.toStringExtended());
+                }
             }
         }
         if (item.slot == SlotItem.Trinket) {
@@ -182,23 +186,6 @@ public class ItemUtil {
             throw new IllegalArgumentException("unexpected shield");
     }
 
-    static void validateMultiSetAlignItemSlots(List<EquipOptionsMap> mapsParam) {
-        Map<Integer, SlotEquip> seen = new HashMap<>();
-        for (EquipOptionsMap map : mapsParam) {
-            map.forEachPair((slot, array) -> {
-                for (ItemData item : array) {
-                    int itemId = item.ref.itemId();
-                    SlotEquip val = seen.get(itemId);
-                    if (val == null) {
-                        seen.put(itemId, slot);
-                    } else if (val != slot) {
-                        throw new IllegalArgumentException("duplicate in non matching slot " + item);
-                    }
-                }
-            });
-        }
-    }
-
     public static boolean validateNoDuplicates(EquipMap map) {
         ItemData t1 = map.getTrinket1(), t2 = map.getTrinket2();
         ItemData r1 = map.getRing1(), r2 = map.getRing2();
@@ -271,6 +258,24 @@ public class ItemUtil {
         }
 
         return item.changeFixed(total);
+    }
+
+    public static EquipOptionsMap upgradeAllTo2(EquipOptionsMap baseItems) {
+        EquipOptionsMap result = EquipOptionsMap.empty();
+        baseItems.forEachPair((slot, itemArray) -> {
+            result.put(slot, ArrayUtil.mapAsNew(itemArray, ItemUtil::upgradeItemTo2, ItemData[]::new));
+        });
+        return result;
+    }
+
+    private static ItemData upgradeItemTo2(ItemData oldItem) {
+        if (!oldItem.isUpgradable() || oldItem.ref.upgradeLevel() == ItemLevel.MAX_UPGRADE_LEVEL) {
+            return oldItem;
+        }
+
+        ItemData loaded = loadItemBasic(oldItem.ref.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
+        loaded = Reforger.presetReforge(loaded, oldItem.reforge);
+        return loaded.changeFixed(oldItem.statFixed);
     }
 
     static BigInteger estimateSets(EquipOptionsMap reforgedItems) {

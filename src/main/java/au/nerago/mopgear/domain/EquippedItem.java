@@ -1,4 +1,4 @@
 package au.nerago.mopgear.domain;
 
-public record EquippedItem(int id, int[] gems, Integer enchant, int upgradeStep) {
+public record EquippedItem(int itemId, int[] gems, Integer enchant, int upgradeStep) {
 }

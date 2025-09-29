@@ -34,9 +34,9 @@ public class SolverCapPhased {
         return estimate;
     }
 
-    public Optional<ItemSet> runSolver(boolean parallel, Predicate<ItemSet> specialFilter, boolean topCombosOnly) {
+    public Optional<ItemSet> runSolver(boolean parallel, Predicate<ItemSet> specialFilter, Long topCombosMultiply) {
         try {
-            Stream<ItemSet> partialSets = runSolverPartial(parallel, topCombosOnly);
+            Stream<ItemSet> partialSets = runSolverPartial(parallel, topCombosMultiply);
             Stream<ItemSet> finalSets = model.filterSets(partialSets, true);
             if (specialFilter != null)
                 finalSets = finalSets.filter(specialFilter);
@@ -50,20 +50,23 @@ public class SolverCapPhased {
 //        System.out.printf("PHASED COUNTS est=%d init=%d filter=%d filter2=%d\n", estimate, initCount.get(), filterCount.get(), filter2Count.get());
     }
 
-    private Stream<ItemSet> runSolverPartial(boolean parallel, boolean topCombosOnly) {
+    private Stream<ItemSet> runSolverPartial(boolean parallel, Long topCombosMultiply) {
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 
         Stream<SkinnyItemSet> filteredSets = model.statRequirements().filterSetsSkinny(initialSets);
 
-        if (topCombosOnly) {
-            printRecorder.printf("SKINNY COMBOS TOO BIG JUST CONSIDERING %,d\n", TOP_HIT_COMBO_FILTER);
+        if (topCombosMultiply != null) {
+            int actualTop = (int) (topCombosMultiply * TOP_HIT_COMBO_FILTER);
+            printRecorder.printf("SKINNY COMBOS TOO BIG JUST CONSIDERING %,d\n", actualTop);
             ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
 
-            filteredSets = filteredSets.filter(new BottomNFilter<>(TOP_HIT_COMBO_FILTER, ratingFunc));
+//            filteredSets = filteredSets.filter(new BottomNFilter<>(actualTop, ratingFunc));
 
             // try a Top Collector (with good merging), re-stream combo
-//            filteredSets = filteredSets.collect(new BottomCollectorN<>(TOP_HIT_COMBO_FILTER, ratingFunc))
-//                    .parallelStream();
+            filteredSets = filteredSets.collect(new BottomCollectorN<>(actualTop, ratingFunc))
+                    .parallelStream();
+
+            // TODO multiple sets with equal superhit may be lost
         }
 
         return filteredSets.map(this::makeFromSkinny);

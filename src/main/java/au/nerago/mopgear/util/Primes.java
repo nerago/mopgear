@@ -11,7 +11,7 @@ public class Primes {
         }
     }
 
-    public static int roundToPrimeInt(int val) {
-        return roundToPrime(BigInteger.valueOf(val)).intValueExact();
+    public static long roundToPrimeInt(long val) {
+        return roundToPrime(BigInteger.valueOf(val)).longValueExact();
     }
 }

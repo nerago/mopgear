@@ -1,10 +1,12 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.CostedItem;
+import au.nerago.mopgear.domain.EquippedItem;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputBagsParser {
-    static CostedItem[] readInput(Path file) {
+    static List<EquippedItem> readInput(Path file) {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             return parseReader(reader);
         } catch (IOException ex) {
@@ -23,17 +25,17 @@ public class InputBagsParser {
         }
     }
 
-    private static CostedItem[] parseReader(Reader reader) {
-        List<CostedItem> result = new ArrayList<>();
+    private static List<EquippedItem> parseReader(Reader reader) {
+        List<EquippedItem> result = new ArrayList<>();
         JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
         JsonArray items = root.getAsJsonArray("items");
         for (JsonElement element : items) {
             if (element.isJsonObject()) {
                 JsonObject elementObject = element.getAsJsonObject();
-                int id = elementObject.get("id").getAsInt();
-                result.add(new CostedItem(id, 0));
+                EquippedItem item = InputGearParser.parseEquipped(elementObject);
+                result.add(item);
             }
         }
-        return result.toArray(CostedItem[]::new);
+        return result;
     }
 }

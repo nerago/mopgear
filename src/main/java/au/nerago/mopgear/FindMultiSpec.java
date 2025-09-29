@@ -1,7 +1,6 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
@@ -14,29 +13,28 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
-    public static final int RANDOM_COMBOS = 100000;
-    //        Long runSize = 200000L;
+    private static final int TARGET_COMBO_COUNT = 15000;
     @SuppressWarnings("FieldCanBeLocal")
-    private final long runSizeMultiply = 1L;
+    private static final long individualRunSizeMultiply = 1L;
     @SuppressWarnings("FieldCanBeLocal")
     private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
     private final List<SpecDetails> specs = new ArrayList<>();
-    private final Set<Integer> duplicatedItem = new HashSet<>();
+    private final Set<Integer> suppressSlotCheck = new HashSet<>();
 
     public void addFixedForge(int id, ReforgeRecipe reforge) {
         fixedForge.put(id, reforge);
     }
 
-    public void addSpec(SpecDetails spec) {
-        specs.add(spec);
+    public void addSpec(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems, boolean challengeScale, Map<Integer, Integer> duplicatedItem) {
+        specs.add(new SpecDetails(label, gearFile, model, ratingMultiply, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems, challengeScale, duplicatedItem));
     }
 
-    public void haveDuplicateItem(int id) {
-        duplicatedItem.add(id);
+    public void suppressSlotCheck(int id) {
+        suppressSlotCheck.add(id);
     }
 
     public void solve(Instant startTime) {
@@ -49,7 +47,7 @@ public class FindMultiSpec {
         }
 
 
-        ItemUtil.validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
+        validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
 
 //        addDuplicatedItems();
 
@@ -60,9 +58,14 @@ public class FindMultiSpec {
         Map<ItemRef, List<ItemData>> commonMap = commonInMultiSet(specs);
 
         long commonCombos = ItemUtil.estimateSets(commonMap);
-        OutputText.println("COMMON COMBOS " + commonCombos);
+        long skip;
+        if (commonCombos < TARGET_COMBO_COUNT * 2) {
+            skip = 1;
+        } else {
+            skip = Primes.roundToPrimeInt(commonCombos / TARGET_COMBO_COUNT * 2);
+        }
 
-        int skip = Primes.roundToPrimeInt(2799999);
+        OutputText.println("COMMON COMBOS " + commonCombos + " SKIP SIZE " + skip);
 
         long indexedOutputSize = commonCombos / skip;
         Stream<Map<ItemRef, ItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
@@ -82,27 +85,6 @@ public class FindMultiSpec {
                 new TopCollectorReporting<>(s -> multiRating(s.resultJobs, specs),
                         s -> reportBetter(s.resultJobs, specs)));
         outputResultTwins(best, specs);
-    }
-
-    private void addDuplicatedItems() {
-        int dupNum = 1;
-        for (int itemId : duplicatedItem) {
-            for (SpecDetails spec : specs) {
-                for (SlotEquip slot : SlotEquip.values()) {
-                    ItemData[] currentOpts = spec.itemOptions.get(slot);
-                    if (currentOpts != null) {
-                        ArrayList<ItemData> optList = new ArrayList<>();
-                        for (ItemData item : currentOpts) {
-                            optList.add(item);
-                            if (item.ref.itemId() == itemId) {
-                                optList.add(item.changeDuplicate(dupNum));
-                            }
-                        }
-                        spec.itemOptions.put(slot, optList.toArray(ItemData[]::new));
-                    }
-                }
-            }
-        }
     }
 
     private Map<ItemRef, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
@@ -159,11 +141,11 @@ public class FindMultiSpec {
         return commonOptions;
     }
 
-    public void optimalWithoutCommon(SpecDetails spec) {
+    private void optimalWithoutCommon(SpecDetails spec) {
         JobInfo job = new JobInfo();
         job.model = spec.model;
         job.itemOptions = spec.itemOptions;
-        job.runSizeMultiply = runSizeMultiply;
+        job.runSizeMultiply = individualRunSizeMultiply;
         job.hackAllow = hackAllow;
         Solver.runJob(job);
         spec.optimalRating = spec.model.calcRating(job.resultSet.orElseThrow());
@@ -218,7 +200,7 @@ public class FindMultiSpec {
         JobInfo job = new JobInfo();
         job.model = model;
         job.itemOptions = submitMap;
-        job.runSizeMultiply = runSizeMultiply;
+        job.runSizeMultiply = individualRunSizeMultiply;
         job.hackAllow = hackAllow;
         return Solver.runJob(job);
     }
@@ -254,6 +236,23 @@ public class FindMultiSpec {
         }
 
         return list.toArray(ItemData[]::new);
+    }
+
+    private void validateMultiSetAlignItemSlots(List<EquipOptionsMap> mapsParam) {
+        Map<Integer, SlotEquip> seen = new HashMap<>();
+        for (EquipOptionsMap map : mapsParam) {
+            map.forEachPair((slot, array) -> {
+                for (ItemData item : array) {
+                    int itemId = item.ref.itemId();
+                    SlotEquip val = seen.get(itemId);
+                    if (val == null) {
+                        seen.put(itemId, slot);
+                    } else if (val != slot && !suppressSlotCheck.contains(itemId)) {
+                        throw new IllegalArgumentException("duplicate in non matching slot " + item);
+                    }
+                }
+            });
+        }
     }
 
     private long multiRating(List<JobInfo> resultJobs, List<SpecDetails> specList) {
@@ -308,7 +307,7 @@ public class FindMultiSpec {
 
             OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
             common.values().forEach(item -> {
-                if (item.reforge == null || item.reforge.isEmpty())
+                if (item.reforge.isEmpty())
                     OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(null, null))); // %s %s\n", item.ref.itemId(), item.slot, item.name);
                 else
                     OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(%s, %s))); // %s %s\n", item.ref.itemId(), item.reforge.source(), item.reforge.dest(), item.slot, item.name);
@@ -318,31 +317,35 @@ public class FindMultiSpec {
         }
     }
 
-    public static class SpecDetails {
+    private class SpecDetails {
         final String label;
         final Path gearFile;
         final ModelCombined model;
         final int ratingMultiply;
         final int[] extraItems;
         final int extraItemsUpgradeLevel;
+        final boolean upgradeCurrentItems;
         final boolean challengeScale;
-        final Map<Integer, Integer> remapDuplicateId;
+        final Map<Integer, Integer> duplicatedItems;
         double optimalRating;
         EquipOptionsMap itemOptions;
 
-        public SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean challengeScale, Map<Integer, Integer> remapDuplicateId) {
+        private SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems, boolean challengeScale, Map<Integer, Integer> remapDuplicateId) {
             this.label = label;
             this.gearFile = gearFile;
             this.model = model;
             this.ratingMultiply = ratingMultiply;
             this.extraItems = extraItems;
             this.extraItemsUpgradeLevel = extraItemsUpgradeLevel;
+            this.upgradeCurrentItems = upgradeCurrentItems;
             this.challengeScale = challengeScale;
-            this.remapDuplicateId = remapDuplicateId;
+            this.duplicatedItems = remapDuplicateId;
         }
 
         public void prepareA(List<SpecDetails> allSpecs) {
             itemOptions = ItemUtil.readAndLoad(false, gearFile, model.reforgeRules(), null);
+            if (upgradeCurrentItems)
+                itemOptions = ItemUtil.upgradeAllTo2(itemOptions);
             remapDuplicates();
         }
 
@@ -364,9 +367,9 @@ public class FindMultiSpec {
         }
 
         private ItemData remapDuplicate(ItemData itemData) {
-            Integer replaceId = remapDuplicateId.get(itemData.ref.itemId());
-            if (replaceId != null) {
-                return itemData.changeDuplicate(itemData.ref.duplicateNum() + 1);
+            Integer duplicateId = duplicatedItems.get(itemData.ref.itemId());
+            if (duplicateId != null && duplicateId != 0) {
+                return itemData.changeDuplicate(duplicateId);
             } else {
                 return itemData;
             }
@@ -402,8 +405,14 @@ public class FindMultiSpec {
         }
 
         private void loadAndGenerate(int itemId) {
-            ItemData extraItem = ItemUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
-            extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
+            ItemData extraItem;
+            if (itemId == 86905) { // TODO override enchants feature
+                extraItem = ItemUtil.loadItemBasic(itemId, 0);
+                extraItem = extraItem.changeFixed(StatBlock.of(StatType.Primary, 500));
+            } else {
+                extraItem = ItemUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
+                extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
+            }
             ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
             SlotEquip[] slotOptions = extraItem.slot.toSlotEquipOptions();

@@ -135,9 +135,11 @@ public class ArrayUtil {
     }
 
     public static <T> boolean anyMatch(T[] existing, Predicate<T> predicate) {
-        for (T item : existing) {
-            if (predicate.test(item))
-                return true;
+        if (existing != null) {
+            for (T item : existing) {
+                if (predicate.test(item))
+                    return true;
+            }
         }
         return false;
     }

@@ -1,15 +1,11 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.ItemUtil;
-import au.nerago.mopgear.domain.CostedItem;
-import au.nerago.mopgear.domain.ItemData;
-import au.nerago.mopgear.domain.SlotItem;
+import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ReforgeRules;
-import au.nerago.mopgear.domain.EquipOptionsMap;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -337,10 +333,10 @@ public class SourcesOfItems {
         };
     }
 
-    public static CostedItem[] filterExclude(CostedItem[] existing, List<Integer> exclude) {
-        return Arrays.stream(existing)
-                .filter(tup -> !exclude.contains(tup.itemId()))
-                .toArray(CostedItem[]::new);
+    public static List<EquippedItem> filterExclude(List<EquippedItem> existing, List<Integer> exclude) {
+        return existing.stream()
+                .filter(eq -> !exclude.contains(eq.itemId()))
+                .toList();
     }
 
     public static CostedItem[] strengthPlateCelestialArray() {
@@ -512,12 +508,12 @@ public class SourcesOfItems {
         };
     }
 
-    public static CostedItem[] bagItemsArray(List<Integer> skip) {
+    public static List<EquippedItem> bagItemsArray(List<Integer> skip) {
         return bagItemsArray(DataLocation.bagsFile, skip);
     }
 
-    public static CostedItem[] bagItemsArray(Path file, List<Integer> skip) {
-        CostedItem[] bagArray = InputBagsParser.readInput(file);
+    public static List<EquippedItem> bagItemsArray(Path file, List<Integer> skip) {
+        List<EquippedItem> bagArray = InputBagsParser.readInput(file);
         if (skip == null)
             return bagArray;
         else

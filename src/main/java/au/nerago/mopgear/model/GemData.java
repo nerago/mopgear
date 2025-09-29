@@ -92,6 +92,7 @@ public class GemData {
         map.put(76593, new StatBlock(0, 0, 0, 160, 0, 0, 160, 0, 0, 0));
         map.put(76606, new StatBlock(80, 0, 160, 0, 0, 0, 0, 0, 0, 0));
         map.put(76668, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
+        map.put(76537, new StatBlock(60, 0, 0, 0, 0, 120, 0, 0, 0, 0));
     }
 
     private static void gemsEngineering(Map<Integer, StatBlock> map) {

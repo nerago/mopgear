@@ -7,7 +7,7 @@ import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.*;
-import au.nerago.mopgear.io.ItemCache;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -18,8 +18,16 @@ import java.util.function.Function;
 public class Jobs {
     public static final long BILLION = 1000 * 1000 * 1000;
 
-    public static void findUpgradeSetup(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, int upgradeLevel) {
+    public static void findUpgrade(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, int upgradeLevel) {
         new FindUpgrades(model, allowHacks).run(baseItems, extraItems, adjustment, upgradeLevel);
+    }
+
+    public static void findUpgrade(EquipOptionsMap baseItems, List<EquippedItem> extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
+        new FindUpgrades(model, allowHacks).run(baseItems, extraItems, adjustment);
+    }
+
+    public static void findUpgradeMaxedItems(EquipOptionsMap baseItems, List<EquippedItem> extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
+        new FindUpgrades(model, allowHacks).runMaxedItems(baseItems, extraItems, adjustment);
     }
 
     public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel) {
@@ -51,7 +59,6 @@ public class Jobs {
     public static void findBestBySlot(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel) {
         Map<Integer, Integer> costs = new HashMap<>();
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
-        // TODO upgrade level
         Arrays.stream(allItems)
                 .peek(costed -> costs.put(costed.itemId(), costed.cost()))
                 .map(equip -> ItemUtil.loadItemBasic(equip.itemId(), upgradeLevel))
@@ -123,8 +130,6 @@ public class Jobs {
     public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
         ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
 
-        // TODO upgrade level
-
         Function<ItemData, ItemData> enchanting = defaultEnchants ? x -> ItemUtil.defaultEnchants(x, model, true) : Function.identity();
         if (slot == null)
             slot = extraItem.slot.toSlotEquip();
@@ -134,12 +139,11 @@ public class Jobs {
         OutputText.println("EXTRA " + extraItem);
 
         JobInfo job = new JobInfo();
-//        job.config(model, runItems, startTime, null, adjustment);
+        job.printRecorder.outputImmediate = true;
         job.config(model, runItems, startTime, adjustment);
-        job.runSizeMultiply = 16;
+        job.runSizeMultiply = 4;
         Solver.runJob(job);
 
-        job.printRecorder.outputNow();
         outputResultSimple(job.resultSet, model, true);
         if (job.resultSet.isEmpty()) {
             outputFailureDetails(model, runItems, job);
@@ -148,30 +152,46 @@ public class Jobs {
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
-        return addExtra(reforgedItems, model, extraItemId, upgradeLevel, extraItem.slot.toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
+        return addExtra(reforgedItems, model, extraItem, customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
     }
 
     public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         ItemData extraItem = ItemUtil.loadItemBasic(extraItemId, upgradeLevel);
+        return addExtra(reforgedItems, model, extraItem, slot, customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
+    }
+
+    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, ItemData extraItem, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+        return addExtra(reforgedItems, model, extraItem, extraItem.slot.toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
+    }
+
+    @Nullable
+    private static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, ItemData extraItem, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         extraItem = customiseItem.apply(extraItem);
         ItemRef ref = extraItem.ref;
+        ItemData[] existing = reforgedItems.get(slot);
+
+        if (slot == SlotEquip.Weapon && existing != null && extraItem.slot != existing[0].slot) {
+            OutputText.println("WRONG WEAPON " + extraItem);
+            return null;
+        }
 
         ItemData[] extraForged = reforge != null ?
                 new ItemData[]{Reforger.presetReforge(extraItem, reforge)} :
                 Reforger.reforgeItem(model.reforgeRules(), extraItem);
+
         if (replace) {
-            OutputText.println("REPLACING " + (reforgedItems.get(slot) != null ? reforgedItems.get(slot)[0] : "NOTHING"));
+            OutputText.println("REPLACING " + (existing != null ? existing[0] : "NOTHING"));
             reforgedItems.put(slot, extraForged);
         } else {
-            ItemData[] existing = reforgedItems.get(slot);
             if (ArrayUtil.anyMatch(existing, item -> item.ref.equalsTyped(ref))) {
                 if (errorOnExists)
-                    throw new IllegalArgumentException("item already included " + extraItemId + " " + extraItem);
+                    throw new IllegalArgumentException("item already included " + extraItem);
                 OutputText.println("ALREADY INCLUDED " + extraItem);
                 return null;
             }
-            reforgedItems.put(slot, ArrayUtil.concat(existing, extraForged));
+            reforgedItems.put(slot, ArrayUtil.concatNullSafe(existing, extraForged));
         }
+
         ItemData[] slotArray = reforgedItems.get(slot);
         if (customiseOthersInSlot) {
             ArrayUtil.mapInPlace(slotArray, customiseItem);
@@ -182,6 +202,7 @@ public class Jobs {
                 OutputText.println("NEW " + slot + " " + it);
             }
         });
+
         return extraItem;
     }
 
@@ -242,6 +263,38 @@ public class Jobs {
         outputResultSimple(best, model, true);
     }
 
+    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, List<EquippedItem> extraItems) {
+        Function<ItemData, ItemData> enchant = x -> ItemUtil.defaultEnchants(x, model, true);
+
+        EquipOptionsMap itemsOriginal = items.deepClone();
+
+        for (EquippedItem entry : extraItems) {
+            if (SourcesOfItems.ignoredItems.contains(entry.itemId())) continue;
+            ItemData extraItem = ItemUtil.loadItem(entry, true);
+            for (SlotEquip slot : extraItem.slot.toSlotEquipOptions()) {
+                ItemData[] existing = items.get(slot);
+                if (existing == null) {
+                    OutputText.println("SKIP SLOT NOT NEEDED " + extraItem);
+                } else if (ArrayUtil.anyMatch(existing, item -> item.ref.equalsTyped(extraItem.ref))) {
+                    OutputText.println("SKIP DUP " + extraItem);
+                } else {
+                    addExtra(items, model, extraItem, slot, enchant, null, false, true, true);
+                }
+            }
+        }
+
+        JobInfo job = new JobInfo();
+        job.model = model;
+        job.itemOptions = items;
+        job.startTime = startTime;
+        job.printRecorder.outputImmediate = true;
+        job.runSizeMultiply = 20;
+        Solver.runJob(job);
+        job.printRecorder.outputNow();
+        ItemSet best = job.resultSet.orElseThrow();
+        outputResultChanges(itemsOriginal, best, model);
+    }
+
     public static void outputResultSimple(Optional<ItemSet> bestSet, ModelCombined model, boolean detailedOutput) {
         if (bestSet.isPresent()) {
             if (detailedOutput) {
@@ -252,6 +305,24 @@ public class Jobs {
             }
         } else {
             OutputText.println("@@@@@@@@@ NO VALID SET RESULTS @@@@@@@@@");
+        }
+    }
+
+    private static void outputResultChanges(EquipOptionsMap baseline, ItemSet best, ModelCombined model) {
+        best.outputSetDetailed(model);
+        best.outputSetLight();
+
+        OutputText.println("CHANGES vvvvvvvvvvvvvvv CHANGES");
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData[] options = baseline.get(slot);
+            ItemData choice = best.getItems().get(slot);
+            if (choice != null) {
+                boolean existing = ArrayUtil.anyMatch(options, x -> x.ref.equalsTyped(choice.ref));
+                if (existing)
+                    OutputText.println(" == " + choice.toStringExtended());
+                else
+                    OutputText.println(">>> " + choice.toStringExtended());
+            }
         }
     }
 
@@ -310,54 +381,60 @@ public class Jobs {
 //        multi.addFixedForge(84910, new ReforgeRecipe(Mastery, Haste)); // Shield
 //        multi.addFixedForge(8607, new ReforgeRecipe(Mastery, Haste)); // Shield
 
-        FindMultiSpec.SpecDetails ret = new FindMultiSpec.SpecDetails(
+        int extraUpgrade = 0;
+        boolean preUpgrade = false;
+
+        multi.addSpec(
                 "RET",
                 DataLocation.gearRetFile,
                 ModelCombined.extendedRetModel(true, false),
                 1,
                 new int[]{
-////                        81113, // spike-soled stompers
-                        88862, // tankiss
+//                        88862, // tankiss
 //                        86742, // jasper clawfeet
-//                        86852, // impaling treads
-////                        81694, // command bracers
-////                        82856, // dark blaze gauntlets
-////                        84950 // pvp belt
-                        86753, // cloak peacock feathers
+//                        84950, // pvp belt
 //                        89954, // warbelt pods
 //                        87060, // star-stealer waist
 //                        84949, // mal glad girdle accuracy
-                        89280, // voice helm
-//                        87024 // null greathelm,
+//                        89280, // voice helm
+//                        87024, // null greathelm,
 //                        87036, // heroic soulgrasp
-                        87026 // heroic peacock cloak
+//                        87026, // heroic peacock cloak
+                        86822, // celestial overwhelm assault belt
+//                        86799, // starshatter
+//                        86905, // shinka
+//                        86880, // dread shadow ring
+//                        86955, // heroic overwhelm assault belt
+//                        86979, // heroic impaling treads
                 },
-                2,
+                extraUpgrade,
+                preUpgrade,
                 false,
-                Map.of());
+                Map.of()
+        );
 
-        FindMultiSpec.SpecDetails protDamage = new FindMultiSpec.SpecDetails(
+        multi.addSpec(
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 ModelCombined.damageProtModel(),
-                4,
+                7,
                 new int[]{
-//                        88862, // tankiss
 //                        84870, // pvp legs
-//                        87060, // star waistguard
 //                        86682, // white tiger gloves
-//                        86753, // peacock cloak
-//                        89345, // stonetoe spaulders
 //                        86680, // white tiger legs
 //                        84949 // mal glad girdle accuracy
-//                        87036, // heroic soulgrasp
-//                        87026 // heroic peacock cloak
+//                        87026, // heroic peacock cloak
+                        86075, // steelskin basic
+//                        86955, // heroic overwhelm assault belt
+//                        86979, // heroic impaling treads
                 },
-                2,
+                extraUpgrade,
+                preUpgrade,
                 false,
-                Map.of());
+                Map.of()
+        );
 
-        FindMultiSpec.SpecDetails protDefence = new FindMultiSpec.SpecDetails(
+        multi.addSpec(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 ModelCombined.defenceProtModel(),
@@ -365,30 +442,25 @@ public class Jobs {
                 new int[]{
 //                        89280, // voice amp
 ////                        87024, // null greathelm
-//                        89345, // autumn shoulder
 ////                        85339, // white tiger pauldrons
 ////                        89345, // stonetoe spaulders
 //                        82980, // gauntlets ancient steel
-                        85983, // bracers six oxen
+//                        85983, // bracers six oxen
 //                        89075, // yi cloak
-                        90594, // golden lotus durable necklace
+//                        90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
 //                        87036, // heroic soulgrasp
-//                        87026 // heroic peacock cloak
+                        87026, // heroic peacock cloak
+//                        86955, // heroic overwhelm assault belt
+//                        86979, // heroic impaling treads
                 },
-                2,
+                extraUpgrade,
+                preUpgrade,
                 false,
-                Map.of(89934, 899340));
+                Map.of(89934, 1)
+        );
 
-//        ItemUtil.validateRet(ret.itemOptions);
-//        ItemUtil.validateProt(protDamage.itemOptions);
-//        ItemUtil.validateProt(protDefence.itemOptions);
-
-        multi.addSpec(ret);
-        multi.addSpec(protDamage);
-        multi.addSpec(protDefence);
-
-        multi.haveDuplicateItem(89934);
+        multi.suppressSlotCheck(86880);
 
         multi.solve(startTime);
     }
@@ -396,7 +468,7 @@ public class Jobs {
     public static void druidMultiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec();
 
-        FindMultiSpec.SpecDetails boom = new FindMultiSpec.SpecDetails(
+        multi.addSpec(
                 "BOOM",
                 DataLocation.gearBoomFile,
                 ModelCombined.standardBoomModel(),
@@ -404,10 +476,12 @@ public class Jobs {
                 new int[]{
                 },
                 0,
+                true,
                 false,
-                Map.of());
+                Map.of()
+        );
 
-        FindMultiSpec.SpecDetails tree = new FindMultiSpec.SpecDetails(
+        multi.addSpec(
                 "TREE",
                 DataLocation.gearTreeFile,
                 ModelCombined.standardTreeModel(),
@@ -415,11 +489,10 @@ public class Jobs {
                 new int[]{
                 },
                 0,
+                true,
                 false,
-                Map.of());
-
-        multi.addSpec(boom);
-        multi.addSpec(tree);
+                Map.of()
+        );
 
         multi.solve(startTime);
     }

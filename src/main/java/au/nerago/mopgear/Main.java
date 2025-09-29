@@ -76,15 +76,15 @@ public class Main {
         ModelCombined model = ModelCombined.extendedRetModel(true, true);
 //        ModelCombined model = ModelCombined.priorityRetModel();
 
-        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 
-//        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket1,79327, false, true, null);
+        reforgeProcessPlus(items, model, startTime, SlotEquip.Ring2,86880, 2, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true, 89981, true, true, null);
 //        reforgeProcessPlus(items, model, startTime, null,86683, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true,86145, false, true, new StatBlock(285+80+120,0,0,165,160,160+160,0,0,0));
@@ -92,12 +92,17 @@ public class Main {
 //        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new int[]{77530,89075,81262,87607,89823}));
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new ArrayList<>()));
-//          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(86683,0), new CostedItem(86682,0), new CostedItem(86662,0)});
+//          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
+//                  new CostedItem(84950,0),
+//                  new CostedItem(89954,0),
+////                  new CostedItem(86822,0)
+//          }, 0);
+
 //            reforgeProcessRetFixed(model, startTime, true);
 //            reforgeProcessRetFixedAlone(model, startTime, true);
 //        reforgeProcessRetChallenge(model, startTime);
 
-        compareBestReforgesWithCommon(DataLocation.gearRetFile, model, commonFixedItems(), null);
+//        compareBestReforgesWithCommon(DataLocation.gearRetFile, model, commonFixedItems(), null);
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
@@ -111,11 +116,11 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = ModelCombined.damageProtModel();
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = ModelCombined.damageProtModel();
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = ModelCombined.defenceProtModel();
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = ModelCombined.defenceProtModel();
+//        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -130,12 +135,13 @@ public class Main {
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
-//        reforgeProcessPlus(items, model, startTime, null,86906, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, null,86822, 0, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
 //          reforgeProcessPlusPlus(items, model, startTime, 86680, 86682, 0, false, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
+//        reforgeProcessPlusMany(items, model, startTime, bagItemsArray(ignoredItems));
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
@@ -145,18 +151,19 @@ public class Main {
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateMsvHeroicArray()), model, true, null);
 //        findUpgradeSetup(items, strengthPlateMsvArray(), model, false);
 //        findUpgradeSetup(items, strengthPlateMsvHeroicArray(), model, false);
-//        findUpgradeSetup(items, strengthPlateHeartOfFearHeroic(), model, true);
+//        findUpgrade(items, strengthPlateHeartOfFearHeroic(), model, true, null, 2);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
-//        findUpgradeSetup(items, strengthPlateValorArray(), model, true, null);
-//        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
-//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialTank(itemCache), null, 0);
+//        findUpgrade(items, strengthPlateTerrace(), model, true, null, 2);
+//        findUpgradeMaxedItems(items, bagItemsArray(ignoredItems), model, true, null);
+//        findUpgradeMaxedItems(items, bagItemsArray(ignoredItems), model, true, null);
+//        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialTank(), null);
 //        new FindUpgrades(model, true).run(items, strengthPlateCurrentItemsProtAllUpgradable(), null, 1);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
 
-        compareBestReforgesWithCommon(file, model, commonFixedItems(), null);
+//        compareBestReforgesWithCommon(file, model, commonFixedItems(), null);
 
 //        CostedItem[] allTheGoodShit = ArrayUtil.concat(
 //                strengthPlateValorCelestialTank(itemCache),
@@ -246,22 +253,21 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 25/9/2025
+        // 28/9/2025
+        map.put(87036, List.of(new ReforgeRecipe(null, null))); // Neck Soulgrasp Choker
         map.put(89069, List.of(new ReforgeRecipe(Expertise, Haste))); // Ring Ring of the Golden Stair (Expertise->Haste)
         map.put(86852, List.of(new ReforgeRecipe(Hit, Expertise))); // Foot Impaling Treads (Hit->Expertise)
-        map.put(86680, List.of(new ReforgeRecipe(Mastery, Haste))); // Leg White Tiger Legplates (Mastery->Haste)
         map.put(85339, List.of(new ReforgeRecipe(null, null))); // Shoulder White Tiger Pauldrons
+        map.put(89934, List.of(new ReforgeRecipe(null, null))); // Wrist Bonded Soul Bracers
+        map.put(90862, List.of(new ReforgeRecipe(null, null))); // Ring Seal of the Bloodseeker
+        map.put(87100, List.of(new ReforgeRecipe(Crit, Hit))); // Hand White Tiger Gauntlets (Crit->Hit)
+        map.put(87024, List.of(new ReforgeRecipe(Crit, Mastery))); // Head Nullification Greathelm (Crit->Mastery)
         map.put(87026, List.of(new ReforgeRecipe(Crit, Haste))); // Back Cloak of Peacock Feathers (Crit->Haste)
-        map.put(89934, List.of(new ReforgeRecipe(Expertise, Hit))); // Wrist Bonded Soul Bracers (Expertise->Hit)
-        map.put(90862, List.of(new ReforgeRecipe(Haste, Hit))); // Ring Seal of the Bloodseeker (Haste->Hit)
-        map.put(87100, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets (Crit->Haste)
-        map.put(87024, List.of(new ReforgeRecipe(null, null))); // Head Nullification Greathelm
-        map.put(84790, List.of(new ReforgeRecipe(Crit, Haste))); // Weapon2H Malevolent Gladiator's Greatsword (Crit->Haste)
-        map.put(84949, List.of(new ReforgeRecipe(Haste, Mastery))); // Belt Malevolent Gladiator's Girdle of Accuracy (Haste->Mastery)
         map.put(79327, List.of(new ReforgeRecipe(null, null))); // Trinket Relic of Xuen
         map.put(86802, List.of(new ReforgeRecipe(null, null))); // Trinket Lei Shen's Final Orders
-        map.put(86683, List.of(new ReforgeRecipe(Haste, Hit))); // Chest White Tiger Battleplate (Haste->Hit)
-        map.put(87036, List.of(new ReforgeRecipe(Hit, Crit))); // Neck Soulgrasp Choker (Hit->Crit)
+        map.put(86906, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon1H Kilrak, Jaws of Terror (Mastery->Expertise)
+        map.put(86683, List.of(new ReforgeRecipe(null, null))); // Chest White Tiger Battleplate
+        map.put(86680, List.of(new ReforgeRecipe(Mastery, Haste))); // Leg White Tiger Legplates (Mastery->Haste)
         return map;
     }
 
