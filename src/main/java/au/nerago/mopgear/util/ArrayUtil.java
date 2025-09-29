@@ -1,5 +1,6 @@
 package au.nerago.mopgear.util;
 
+import au.nerago.mopgear.domain.CostedItem;
 import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.StatType;
 
@@ -190,6 +191,15 @@ public class ArrayUtil {
             return Arrays.copyOf(array, array.length);
         } else {
             return null;
+        }
+    }
+
+    public static <T> void throwIfHasDuplicates(T[] tempArray) {
+        HashSet<T> set = new HashSet<>();
+        for (T item : tempArray) {
+            if (!set.add(item)) {
+                throw new IllegalArgumentException("duplicate item " + item);
+            }
         }
     }
 

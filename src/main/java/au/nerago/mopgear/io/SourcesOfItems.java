@@ -242,62 +242,71 @@ public class SourcesOfItems {
     public static CostedItem[] intellectLeatherCelestialArray() {
         return new CostedItem[]{
                 new CostedItem(89957, 45),
-                new CostedItem(86856, 30),
-                new CostedItem(86644, 50),
-                new CostedItem(86840, 30),
-                new CostedItem(86645, 55),
                 new CostedItem(86786, 25),
                 new CostedItem(86768, 25),
                 new CostedItem(86648, 50),
                 new CostedItem(86746, 40),
-                new CostedItem(86748, 25),
-                new CostedItem(89971, 25),
-                new CostedItem(86646, 55),
                 new CostedItem(86878, 50),
-                new CostedItem(86814, 30),
-                new CostedItem(86873, 30),
-                new CostedItem(86792, 40),
-                new CostedItem(86907, 50),
                 new CostedItem(86893, 50),
                 new CostedItem(86808, 40),
                 new CostedItem(86797, 40),
-                new CostedItem(86806, 25),
-                new CostedItem(89426, 15),
-                new CostedItem(86754, 25),
-                new CostedItem(86783, 25),
+                new CostedItem(86757, 25),
                 new CostedItem(86810, 25),
-                new CostedItem(86767, 25),
-                new CostedItem(89968, 25),
                 new CostedItem(86838, 45),
                 new CostedItem(86845, 30),
                 new CostedItem(86912, 30),
                 new CostedItem(86817, 30),
-                new CostedItem(86878, 50),
+                new CostedItem(89983, 50),
+                new CostedItem(86898, 50),
 
                 // int back
                 new CostedItem(86874, 30),
                 new CostedItem(86827, 30),
                 new CostedItem(86840, 30),
+                new CostedItem(86748, 25),
+                new CostedItem(89971, 25),
 
                 // int weap
                 new CostedItem(86865, 30),
                 new CostedItem(86909, 30),
                 new CostedItem(86862, 30),
                 new CostedItem(86829, 15),
+                new CostedItem(86806, 25),
+                new CostedItem(89426, 15),
 
                 // int neck
+                new CostedItem(86754, 25),
+                new CostedItem(86783, 25),
                 new CostedItem(86856, 30),
+
+                // ring
+                new CostedItem(86767, 25),
+                new CostedItem(89968, 25),
                 new CostedItem(86814, 30),
                 new CostedItem(86858, 30),
                 new CostedItem(86873, 30),
 
                 // trink
+                new CostedItem(86885, 50),
+                new CostedItem(86907, 50),
+                new CostedItem(86774, 40),
                 new CostedItem(86773, 40),
+                new CostedItem(86792, 40),
+                new CostedItem(86805, 40),
 
-                // teir
+                // teir balance
                 new CostedItem(86645, 55),
                 new CostedItem(86646, 55),
                 new CostedItem(86648, 45),
+                new CostedItem(86647, 60),
+                new CostedItem(86644, 50),
+
+                // teir resto
+                new CostedItem(86695, 55),
+                new CostedItem(86696, 55),
+                new CostedItem(86698, 45),
+                new CostedItem(86697, 60),
+                new CostedItem(86694, 50),
         };
     }
 
@@ -566,8 +575,9 @@ public class SourcesOfItems {
 
     public static CostedItem[] intellectLeatherValorCelestial() {
 //        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 483);
-        CostedItem[] filteredCelestialArray = intellectLeatherCelestialArray();
-        return ArrayUtil.concat(filteredCelestialArray, intellectLeatherValorArray());
+        CostedItem[] tempArray = ArrayUtil.concat(intellectLeatherCelestialArray(), intellectLeatherValorArray());
+        ArrayUtil.throwIfHasDuplicates(tempArray);
+        return tempArray;
     }
 
     public static CostedItem[] get(String param) {

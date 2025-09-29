@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
-    private static final int TARGET_COMBO_COUNT = 15000;
+    private static final int TARGET_COMBO_COUNT = 320000;
     @SuppressWarnings("FieldCanBeLocal")
     private static final long individualRunSizeMultiply = 1L;
     @SuppressWarnings("FieldCanBeLocal")
@@ -260,7 +260,8 @@ public class FindMultiSpec {
         for (int i = 0; i < resultJobs.size(); ++i) {
             ItemSet set = resultJobs.get(i).resultSet.orElseThrow();
             SpecDetails spec = specList.get(i);
-            total += spec.model.calcRating(set) * spec.ratingMultiply;
+            long specRating = spec.model.calcRating(set);
+            total += specRating * spec.ratingMultiply;
         }
         return total;
     }

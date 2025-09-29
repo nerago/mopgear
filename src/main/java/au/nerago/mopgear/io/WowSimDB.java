@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 public class WowSimDB {
     private final Map<ItemRef, ItemData> itemMap = new HashMap<>();
+    private final Map<ReforgeRecipe, Integer> reforgeIds = new HashMap<>();
 
     // https://raw.githubusercontent.com/wowsims/mop/57251c327bbc745d1512b9c13e952f4bcf3deedb/assets/database/db.json
 
@@ -38,13 +39,26 @@ public class WowSimDB {
         convertItems(mainObject.getAsJsonArray("items"));
 //        mainObject.getAsJsonArray("enchants")
 //        mainObject.getAsJsonArray("gems")
-//        mainObject.getAsJsonArray("reforgeStats") // ids and stuff
+        convertReforge(mainObject.getAsJsonArray("reforgeStats"));
     }
 
     private void convertItems(JsonArray itemsArray) {
         for (JsonElement element : itemsArray) {
             JsonObject object = element.getAsJsonObject();
             convertItem(object);
+        }
+    }
+
+    private void convertReforge(JsonArray reforgeStats) {
+        for (JsonElement element : reforgeStats) {
+            JsonObject object = element.getAsJsonObject();
+            int id = object.get("id").getAsInt();
+            String from = object.get("fromStat").getAsString();
+            String to = object.get("toStat").getAsString();
+            StatType fromStat = mapStat(from);
+            StatType toStat = mapStat(to);
+            ReforgeRecipe reforge = new ReforgeRecipe(fromStat, toStat);
+            reforgeIds.put(reforge, id);
         }
     }
 
@@ -202,11 +216,15 @@ public class WowSimDB {
             return defaultValue;
     }
 
-    public ItemData lookup(ItemRef ref) {
+    public ItemData lookupItem(ItemRef ref) {
         return itemMap.get(ref);
     }
 
-    public Stream<ItemData> stream() {
+    public Stream<ItemData> itemStream() {
         return itemMap.values().stream();
+    }
+
+    public int reforgeId(ReforgeRecipe reforge) {
+        return reforgeIds.get(reforge);
     }
 }

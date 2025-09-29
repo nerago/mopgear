@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.results.AsWowSimJson;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.*;
@@ -123,6 +124,7 @@ public class Jobs {
         Solver.runJob(job);
 
         outputResultSimple(job.resultSet, model, true);
+        outputReforgeJson(job.resultSet);
         outputTweaked(job.resultSet, itemOptions, model);
     }
 
@@ -326,6 +328,10 @@ public class Jobs {
         }
     }
 
+    private static void outputReforgeJson(Optional<ItemSet> resultSet) {
+        AsWowSimJson.writeToOut(resultSet.orElseThrow().items);
+    }
+
     public static void outputTweaked(Optional<ItemSet> bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
         bestSet.ifPresent(itemSet -> outputTweaked(itemSet, reforgedItems, model));
     }
@@ -474,9 +480,10 @@ public class Jobs {
                 ModelCombined.standardBoomModel(),
                 177,
                 new int[]{
+//                        86909 // regail dagger
                 },
                 0,
-                true,
+                false,
                 false,
                 Map.of()
         );
@@ -487,9 +494,10 @@ public class Jobs {
                 ModelCombined.standardTreeModel(),
                 1,
                 new int[]{
+//                        86909 // regail dagger
                 },
                 0,
-                true,
+                false,
                 false,
                 Map.of()
         );

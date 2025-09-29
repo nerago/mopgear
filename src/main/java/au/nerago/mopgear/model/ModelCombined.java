@@ -138,6 +138,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     public static ModelCombined standardTreeModel() {
         StatRatings statRatings = new StatRatingsPriorityBreaks(Haste, 3043,
                 new StatType[][]{
+                        new StatType[]{Primary},
                         new StatType[]{Spirit, Mastery},
                         new StatType[]{Crit}
                 }

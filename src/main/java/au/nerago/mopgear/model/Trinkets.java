@@ -40,6 +40,8 @@ public class Trinkets {
         map.put(86907, new TrinketData(Haste, 6121, 20, 115, 15)); // essence terror
         map.put(86773, new TrinketData(Crit, 3184, 15, 60, null));
         map.put(89081, new TrinketData(Crit, 3595, 15, 60, null)); // Blossom of Pure Sno
+        map.put(86885, new TrinketData(Spirit, 6121, 20, 115, 15)); // Spirits of the sun
+        map.put(86774, new TrinketData(Spirit, 3184, 15, 60, null)); // Jade Courtesan Figurine
 
 //        map.put(89080, new TrinketData(Spirit, 3595, 15, 60, null));
         map.put(89080, new TrinketData(Spirit, 0, 15, 60, null)); // nerfed so don't try out on balance
