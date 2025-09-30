@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class StatRatingsPriorityBreaks extends StatRatings {
-    public static final int STEP = 16;
+    public static final int STEP = 2;
     public static final long INITIAL = 0x100000;
     private final StatType firstAndLastStat;
     private final int breakpointTarget;

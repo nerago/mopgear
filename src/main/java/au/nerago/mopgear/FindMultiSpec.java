@@ -2,6 +2,7 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.results.AsWowSimJson;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.*;
@@ -15,7 +16,7 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
-    private static final int TARGET_COMBO_COUNT = 320000;
+//    private static final int TARGET_COMBO_COUNT = 320000;
     @SuppressWarnings("FieldCanBeLocal")
     private static final long individualRunSizeMultiply = 1L;
     @SuppressWarnings("FieldCanBeLocal")
@@ -37,7 +38,7 @@ public class FindMultiSpec {
         suppressSlotCheck.add(id);
     }
 
-    public void solve(Instant startTime) {
+    public void solve(Instant startTime, long targetComboCount) {
         OutputText.println("PREPARING SPECS");
         for (SpecDetails spec : specs) {
             spec.prepareA(specs);
@@ -46,10 +47,7 @@ public class FindMultiSpec {
             spec.prepareB(specs);
         }
 
-
         validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
-
-//        addDuplicatedItems();
 
         OutputText.println("PREPARING BASELINE SPEC RUNS");
         specs.stream().parallel().forEach(this::optimalWithoutCommon);
@@ -59,10 +57,10 @@ public class FindMultiSpec {
 
         long commonCombos = ItemUtil.estimateSets(commonMap);
         long skip;
-        if (commonCombos < TARGET_COMBO_COUNT * 2) {
+        if (commonCombos < targetComboCount * 2) {
             skip = 1;
         } else {
-            skip = Primes.roundToPrimeInt(commonCombos / TARGET_COMBO_COUNT * 2);
+            skip = Primes.roundToPrimeInt(commonCombos / targetComboCount * 2);
         }
 
         OutputText.println("COMMON COMBOS " + commonCombos + " SKIP SIZE " + skip);
@@ -84,7 +82,7 @@ public class FindMultiSpec {
         Optional<ProposedResults> best = resultStream.collect(
                 new TopCollectorReporting<>(s -> multiRating(s.resultJobs, specs),
                         s -> reportBetter(s.resultJobs, specs)));
-        outputResultTwins(best, specs);
+        outputResultFinal(best, specs);
     }
 
     private Map<ItemRef, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
@@ -149,6 +147,7 @@ public class FindMultiSpec {
         job.hackAllow = hackAllow;
         Solver.runJob(job);
         spec.optimalRating = spec.model.calcRating(job.resultSet.orElseThrow());
+        OutputText.printf("%s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
     }
 
     private static List<ItemData> commonForges(List<ItemData> prior, List<ItemData> forges) {
@@ -282,37 +281,56 @@ public class FindMultiSpec {
         }
     }
 
-    private void outputResultTwins(Optional<ProposedResults> bestSets, List<SpecDetails> specList) {
+    private void outputResultFinal(Optional<ProposedResults> bestSets, List<SpecDetails> specList) {
         if (bestSets.isPresent()) {
             List<JobInfo> resultJobs = bestSets.get().resultJobs;
-            Map<ItemRef, ItemData> common = bestSets.get().chosenMap;
-            long rating = multiRating(resultJobs, specList);
+            long totalRating = multiRating(resultJobs, specList);
 
-            OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
-            OutputText.printf("^^^^^^^^^^^^^ %d ^^^^^^^^^^^^^\n", rating);
-
-            for (int i = 0; i < resultJobs.size(); ++i) {
-                JobInfo job = resultJobs.get(i);
-                ItemSet set = job.resultSet.orElseThrow();
-                SpecDetails spec = specList.get(i);
-                OutputText.printf("-------------- %s --------------\n", spec.label);
-                job.printRecorder.outputNow();
-                set.outputSet(spec.model);
-                double specRating = spec.model.calcRating(set);
-                OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
-            }
+            Map<ItemRef, ItemData> commonFinal = bestSets.get().chosenMap;
 
             OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
-            filterCommonActuallyUsed(common, resultJobs);
-            common.values().forEach(item -> OutputText.println(item.toString()));
+            filterCommonActuallyUsed(commonFinal, resultJobs);
+            commonFinal.values().forEach(item -> OutputText.println(item.toString()));
 
             OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
-            common.values().forEach(item -> {
+            commonFinal.values().forEach(item -> {
                 if (item.reforge.isEmpty())
                     OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(null, null))); // %s %s\n", item.ref.itemId(), item.slot, item.name);
                 else
                     OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(%s, %s))); // %s %s\n", item.ref.itemId(), item.reforge.source(), item.reforge.dest(), item.slot, item.name);
             });
+
+            OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
+            OutputText.printf("^^^^^^^^^^^^^ %d ^^^^^^^^^^^^^\n", totalRating);
+
+            for (int i = 0; i < resultJobs.size(); ++i) {
+                SpecDetails spec = specList.get(i);
+                OutputText.printf("-------------- %s --------------\n", spec.label);
+
+                OutputText.println("DRAFTDRAFTDRAFT");
+                JobInfo draftJob = resultJobs.get(i);
+                ItemSet draftSet = draftJob.resultSet.orElseThrow();
+                double draftSpecRating = spec.model.calcRating(draftSet);
+                draftJob.printRecorder.outputNow();
+                draftSet.outputSet(spec.model);
+                AsWowSimJson.writeToOut(draftSet.items);
+
+                OutputText.println("REVISEDREVISEDREVISED");
+                JobInfo revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal);
+                ItemSet revisedSet = revisedJob.resultSet.orElseThrow();
+                double revisedSpecRating = spec.model.calcRating(revisedSet);
+                if (revisedSpecRating > draftSpecRating) {
+                    revisedJob.printRecorder.outputNow();
+                    revisedSet.outputSet(spec.model);
+                    AsWowSimJson.writeToOut(revisedSet.items);
+                } else {
+                    OutputText.println("Revised no better");
+                }
+
+                double specRating = Math.max(draftSpecRating, revisedSpecRating);
+                OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
+            }
+
         } else {
             OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
         }

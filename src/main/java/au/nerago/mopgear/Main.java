@@ -58,9 +58,9 @@ public class Main {
 //        WowSimDB.instance.stream().forEach(ItemCache.instance::put);
 //
 //        paladinMultiSpecSolve(startTime);
-//        druidMultiSpecSolve(startTime);
+        druidMultiSpecSolve(startTime);
 
-        reforgeRet(startTime);
+//        reforgeRet(startTime);
 //            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
@@ -179,15 +179,15 @@ public class Main {
         ModelCombined model = ModelCombined.standardBoomModel();
         EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearBoomFile, model.reforgeRules(), null);
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true, SlotEquip.Ring2,89968, false, true, null, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 90410, 84833, false, null);
 //        new FindUpgrades(itemCache, model, true).run(items, new Tuple.Tuple2[]{Tuple.create(89089,0)});
 
-//       new FindUpgrades(itemCache, model, true).run(items, intellectLeatherValorCelestial(itemCache), null);
+//       new FindUpgrades(model, true).run(items, intellectLeatherValorCelestial(), null, 0);
 
-//        new FindUpgrades(itemCache, model, true).run(items, bagItemsArray(ignoredItems), null);
+        new FindUpgrades(model, true).run(items, bagItemsArray(ignoredItems), null);
 
 //       Jobs.rankAlternativeCombos(items, model, startTime, List.of(
 //               List.of(81140),
@@ -210,15 +210,15 @@ public class Main {
         ModelCombined model = ModelCombined.standardTreeModel();
         EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearTreeFile, model.reforgeRules(), null);
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true, SlotEquip.Ring2,89968, false, true, null, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 90410, 84833, false, null);
 //        new FindUpgrades(itemCache, model, true).run(items, new Tuple.Tuple2[]{Tuple.create(89089,0)});
 
-       new FindUpgrades(model, true).run(items, intellectLeatherValorCelestial(), null, 0);
+//       new FindUpgrades(model, true).run(items, intellectLeatherValorCelestial(), null, 0);
 
-//        new FindUpgrades(itemCache, model, true).run(items, bagItemsArray(ignoredItems), null);
+        new FindUpgrades( model, true).run(items, bagItemsArray(ignoredItems), null);
 
 //        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
 //        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);

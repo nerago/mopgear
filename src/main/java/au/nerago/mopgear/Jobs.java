@@ -468,7 +468,7 @@ public class Jobs {
 
         multi.suppressSlotCheck(86880);
 
-        multi.solve(startTime);
+        multi.solve(startTime, 320000);
     }
 
     public static void druidMultiSpecSolve(Instant startTime) {
@@ -478,9 +478,12 @@ public class Jobs {
                 "BOOM",
                 DataLocation.gearBoomFile,
                 ModelCombined.standardBoomModel(),
-                177,
+                400,
                 new int[]{
 //                        86909 // regail dagger
+                        86694, // Eternal Blossom Mantle
+                        88885, // Clever Ashyo's Armbands
+                        86748, // Cape of Three Lanterns
                 },
                 0,
                 false,
@@ -495,6 +498,8 @@ public class Jobs {
                 1,
                 new int[]{
 //                        86909 // regail dagger
+                        88885, // Clever Ashyo's Armbands
+                        86810, // Worldwaker Cabochon
                 },
                 0,
                 false,
@@ -502,7 +507,7 @@ public class Jobs {
                 Map.of()
         );
 
-        multi.solve(startTime);
+        multi.solve(startTime, 2000);
     }
 
     public static void compareBestReforgesWithCommon(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> commonOne, Map<Integer, List<ReforgeRecipe>> commonTwo) {
