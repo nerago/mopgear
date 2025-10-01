@@ -57,8 +57,9 @@ public class Main {
 //        ItemCache.instance.clear();
 //        WowSimDB.instance.stream().forEach(ItemCache.instance::put);
 //
-//        paladinMultiSpecSolve(startTime);
-        druidMultiSpecSolve(startTime);
+//        determineRatingMultipliers();
+        paladinMultiSpecSolve(startTime);
+//        druidMultiSpecSolve(startTime);
 
 //        reforgeRet(startTime);
 //            reforgeProt(startTime);
@@ -82,7 +83,7 @@ public class Main {
 
         EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Ring2,86880, 2, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true, 89981, true, true, null);
@@ -106,24 +107,24 @@ public class Main {
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
 //                findUpgradeSetup(items, strengthPlateValorArray(), model);
-//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
-//        new FindUpgrades(itemCache, model, true).run(items, strengthPlateValorCelestialRet(itemCache), null);
+//        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialRet(), null);
+//        new FindUpgrades(model, true).runMaxedItems(items, new CostedItem[]{new CostedItem(86905, 0)}, null);
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
-//        findUpgradeSetup(items, bagItemsArray(ignoredItems), model, true, null);
+        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = ModelCombined.damageProtModel();
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = ModelCombined.damageProtModel();
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = ModelCombined.defenceProtModel();
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = ModelCombined.defenceProtModel();
+//        Path file = DataLocation.gearProtDefenceFile;
 
-        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemUtil.readAndLoad(true, file, model.reforgeRules(), commonItems);
 
@@ -216,9 +217,9 @@ public class Main {
 //        reforgeProcessPlusPlus(items, model, startTime, 90410, 84833, false, null);
 //        new FindUpgrades(itemCache, model, true).run(items, new Tuple.Tuple2[]{Tuple.create(89089,0)});
 
-//       new FindUpgrades(model, true).run(items, intellectLeatherValorCelestial(), null, 0);
+       new FindUpgrades(model, true).run(items, intellectLeatherValorCelestial(), null, 0);
 
-        new FindUpgrades( model, true).run(items, bagItemsArray(ignoredItems), null);
+//        new FindUpgrades( model, true).run(items, bagItemsArray(ignoredItems), null);
 
 //        findUpgradeSetup(items, intellectLeatherCelestialArray(), model, 476);
 //        findUpgradeSetup(items, intellectLeatherValorArray(), model, null);
@@ -250,21 +251,21 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 29/9/2025
+        // 1/10/2025
+        map.put(86979, List.of(new ReforgeRecipe(Hit, Expertise))); // Foot Impaling Treads (Hit->Expertise)
         map.put(87036, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker (Hit->Expertise)
         map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons (Hit->Expertise)
-        map.put(89934, List.of(new ReforgeRecipe(null, null))); // Wrist Bonded Soul Bracers
-        map.put(90862, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Seal of the Bloodseeker (Expertise->Hit)
+        map.put(89934, List.of(new ReforgeRecipe(Haste, Hit))); // Wrist Bonded Soul Bracers (Haste->Hit)
+        map.put(90862, List.of(new ReforgeRecipe(Haste, Hit))); // Ring Seal of the Bloodseeker (Haste->Hit)
         map.put(87100, List.of(new ReforgeRecipe(Expertise, Haste))); // Hand White Tiger Gauntlets (Expertise->Haste)
-        map.put(87024, List.of(new ReforgeRecipe(Crit, Hit))); // Head Nullification Greathelm (Crit->Hit)
-        map.put(87026, List.of(new ReforgeRecipe(Crit, Haste))); // Back Cloak of Peacock Feathers (Crit->Haste)
+        map.put(87024, List.of(new ReforgeRecipe(Crit, Expertise))); // Head Nullification Greathelm (Crit->Expertise)
+        map.put(87026, List.of(new ReforgeRecipe(null, null))); // Back Cloak of Peacock Feathers
         map.put(79327, List.of(new ReforgeRecipe(null, null))); // Trinket Relic of Xuen
         map.put(86802, List.of(new ReforgeRecipe(null, null))); // Trinket Lei Shen's Final Orders
-        map.put(86906, List.of(new ReforgeRecipe(Hit, Haste))); // Weapon1H Kilrak, Jaws of Terror (Hit->Haste)
+        map.put(86906, List.of(new ReforgeRecipe(Mastery, Crit))); // Weapon1H Kilrak, Jaws of Terror (Mastery->Crit)
+        map.put(86683, List.of(new ReforgeRecipe(Haste, Expertise))); // Chest White Tiger Battleplate (Haste->Expertise)
+        map.put(86680, List.of(new ReforgeRecipe(Mastery, Hit))); // Leg White Tiger Legplates (Mastery->Hit)
         map.put(86955, List.of(new ReforgeRecipe(Mastery, Expertise))); // Belt Waistplate of Overwhelming Assault (Mastery->Expertise)
-        map.put(86683, List.of(new ReforgeRecipe(null, null))); // Chest White Tiger Battleplate
-        map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
-        map.put(86680, List.of(new ReforgeRecipe(Mastery, Haste))); // Leg White Tiger Legplates (Mastery->Haste)
         return map;
     }
 
@@ -373,7 +374,7 @@ public class Main {
     }
 
     private void multiSpecSpecifiedRating() {
-        ModelCombined modelRet = ModelCombined.standardRetModel();
+        ModelCombined modelRet = ModelCombined.extendedRetModel(true, true);
         ModelCombined modelProt = ModelCombined.defenceProtModel();
 
         OutputText.println("RET GEAR CURRENT");

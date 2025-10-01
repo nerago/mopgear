@@ -23,11 +23,16 @@ public class FindMultiSpec {
     private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
+    private final Map<Integer, StatBlock> overrideEnchant = new HashMap<>();
     private final List<SpecDetails> specs = new ArrayList<>();
     private final Set<Integer> suppressSlotCheck = new HashSet<>();
 
     public void addFixedForge(int id, ReforgeRecipe reforge) {
         fixedForge.put(id, reforge);
+    }
+
+    public void overrideEnchant(int id, StatBlock stats) {
+        overrideEnchant.put(id, stats);
     }
 
     public void addSpec(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems, boolean challengeScale, Map<Integer, Integer> duplicatedItem) {
@@ -424,14 +429,13 @@ public class FindMultiSpec {
         }
 
         private void loadAndGenerate(int itemId) {
-            ItemData extraItem;
-            if (itemId == 86905) { // TODO override enchants feature
-                extraItem = ItemUtil.loadItemBasic(itemId, 0);
-                extraItem = extraItem.changeFixed(StatBlock.of(StatType.Primary, 500));
+            ItemData extraItem = ItemUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
+            if (overrideEnchant.containsKey(itemId)) {
+                extraItem = extraItem.changeFixed(overrideEnchant.get(itemId));
             } else {
-                extraItem = ItemUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
                 extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
             }
+
             ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
             SlotEquip[] slotOptions = extraItem.slot.toSlotEquipOptions();

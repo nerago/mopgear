@@ -73,7 +73,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 28, statDps, 1, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 13, statDps, 3, standardGems);
 //        StatRequirements statRequirements = StatRequirements.protFullExpertise();
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt, true);
@@ -85,11 +85,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     public static ModelCombined damageProtModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
-//        StatRatings statMix = StatRatingsWeightsMix.mix(statMitigation, 3, statDps, 17, protGems()); // 90% dps
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 15, statDps, 10, standardGems); // 50% dps
-//        StatRatings statMix = new StatRatingsPriority(new StatType[] {Haste, Mastery, Dodge, Crit});
-//        StatRatings statMix = new StatRatingsPriority(new StatType[] {Haste, Crit, Mastery, Dodge});
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 1, statDps, 25, standardGems);
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.prot();
@@ -97,20 +94,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statMix, statRequirements, reforge, enchants, setBonus);
     }
 
-    public static ModelCombined standardRetModel() {
-        StatRatingsWeights statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
-//        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
-        statRatings = StatRatingsWeights.mix(statRatings, 22, null, 0, null);
-        StatRequirements statRequirements = StatRequirements.ret();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
-        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.ret(), enchants, setBonus);
-    }
-
     public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) {
         StatRatingsWeights statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
-//        StatRatings statRatings = StatRatingsWeights.hardCodeRetWeight();
-        statRatings = StatRatingsWeights.mix(statRatings, 18, null, 0, null);
         StatRequirements statRequirements = wideHitRange ? StatRequirements.retWideCapRange() : StatRequirements.ret();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = extraReforge ? ReforgeRules.retExtended() : ReforgeRules.ret();

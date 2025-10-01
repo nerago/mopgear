@@ -3,7 +3,7 @@ package au.nerago.mopgear;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
-import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.results.AsWowSimJson;
 import au.nerago.mopgear.results.JobInfo;
 import au.nerago.mopgear.results.OutputText;
@@ -362,7 +362,7 @@ public class Jobs {
 
     public static void paladinMultiSpecSolve(Instant startTime) {
         FindMultiSpec multi = new FindMultiSpec();
-//        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
 //        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
@@ -394,7 +394,7 @@ public class Jobs {
                 "RET",
                 DataLocation.gearRetFile,
                 ModelCombined.extendedRetModel(true, false),
-                1,
+                4227,
                 new int[]{
 //                        88862, // tankiss
 //                        86742, // jasper clawfeet
@@ -406,7 +406,7 @@ public class Jobs {
 //                        87024, // null greathelm,
 //                        87036, // heroic soulgrasp
 //                        87026, // heroic peacock cloak
-                        86822, // celestial overwhelm assault belt
+//                        86822, // celestial overwhelm assault belt
 //                        86799, // starshatter
 //                        86905, // shinka
 //                        86880, // dread shadow ring
@@ -423,7 +423,7 @@ public class Jobs {
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 ModelCombined.damageProtModel(),
-                7,
+                676,
                 new int[]{
 //                        84870, // pvp legs
 //                        86682, // white tiger gloves
@@ -444,7 +444,7 @@ public class Jobs {
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 ModelCombined.defenceProtModel(),
-                1,
+                241,
                 new int[]{
 //                        89280, // voice amp
 ////                        87024, // null greathelm
@@ -468,7 +468,9 @@ public class Jobs {
 
         multi.suppressSlotCheck(86880);
 
-        multi.solve(startTime, 320000);
+        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
+
+        multi.solve(startTime, 920000);
     }
 
     public static void druidMultiSpecSolve(Instant startTime) {
@@ -539,5 +541,66 @@ public class Jobs {
         double ratingTwo = model.calcRating(jobTwo.resultSet.orElseThrow());
 
         OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", ratingOne / ratingTwo * 100);
+    }
+
+    public static void determineRatingMultipliers() {
+        StatRatingsWeights tankMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
+        StatRatingsWeights tankDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
+        StatRatingsWeights retRet = new StatRatingsWeights(DataLocation.weightRetFile);
+
+        EquipOptionsMap itemsRet = ItemUtil.readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
+        EquipOptionsMap itemsTank = ItemUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
+
+        double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirements.protFlexibleParry());
+        double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirements.protFlexibleParry());
+        double rateRet = determineRatingMultipliersOne(retRet, itemsRet, StatRequirements.ret());
+
+        double targetCombined = 1000000000;
+
+        OutputText.printf("MITIGATION %,d\n", (long)rateMitigation);
+        OutputText.printf("TANK_DPS   %,d\n", (long)rateTankDps);
+        OutputText.printf("RET        %,d\n", (long)rateRet);
+        OutputText.println();
+
+        OutputText.printf("defenceProtModel 90%% mitigation, 10%% dps\n");
+        long defMultiplyA = Math.round(targetCombined * 0.9 / rateMitigation);
+        long defMultiplyB = Math.round(targetCombined * 0.1 / rateTankDps);
+        OutputText.printf("USE mitigation %d dps %d\n", defMultiplyA, defMultiplyB);
+        double defTotal = defMultiplyA * rateMitigation + defMultiplyB * rateTankDps;
+        OutputText.printf("EFFECTIVE %.2f %.2f\n\n",
+                defMultiplyA * rateMitigation / defTotal,
+                defMultiplyB * rateTankDps / defTotal);
+
+
+        OutputText.printf("damageProtModel 10%% mitigation, 90%% dps\n");
+        long dmgMultiplyA = Math.round(targetCombined * 0.1 / rateMitigation);
+        long dmgMultiplyB = Math.round(targetCombined * 0.9 / rateTankDps);
+        OutputText.printf("USE mitigation %d dps %d\n", dmgMultiplyA, dmgMultiplyB);
+        double dmgTotal = dmgMultiplyA * rateMitigation + dmgMultiplyB * rateTankDps;
+        OutputText.printf("EFFECTIVE %.2f %.2f\n\n",
+                dmgMultiplyA * rateMitigation / dmgTotal,
+                dmgMultiplyB * rateTankDps / dmgTotal);
+
+        long multiTargetCombined = 1000000000000L;
+        OutputText.printf("multiSpec 10%% ret 30%% mitigation 70%% dmg_tank\n");
+        long multiA = Math.round(multiTargetCombined * 0.1 / rateRet);
+        long multiB = Math.round(multiTargetCombined * 0.25 / defTotal);
+        long multiC = Math.round(multiTargetCombined * 0.65 / dmgTotal);
+        OutputText.printf("USE ret %d mitigation %d dmg_tank %d\n", multiA, multiB, multiC);
+        double multiTotal = multiA * rateRet + multiB * defTotal + multiC * dmgTotal;
+        OutputText.printf("EFFECTIVE %.2f %.2f %.2f\n\n",
+                multiA * rateRet / multiTotal,
+                multiB * defTotal / multiTotal,
+                multiC * dmgTotal / multiTotal);
+    }
+
+    private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req) {
+        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.prot(), null, new SetBonus());
+        JobInfo job = new JobInfo();
+        job.model = model;
+        job.itemOptions = items;
+        Solver.runJob(job);
+        ItemSet set = job.resultSet.orElseThrow();
+        return model.calcRating(set);
     }
 }
