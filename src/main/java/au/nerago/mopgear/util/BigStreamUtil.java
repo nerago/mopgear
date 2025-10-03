@@ -1,13 +1,15 @@
 package au.nerago.mopgear.util;
 
+import au.nerago.mopgear.SolverCapPhased;
+import au.nerago.mopgear.domain.EquipOptionsMap;
 import au.nerago.mopgear.domain.ItemSet;
 import au.nerago.mopgear.model.ModelCombined;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
@@ -99,6 +101,24 @@ public class BigStreamUtil {
                 return false;
             }
         });
+    }
+
+    public static BigInteger estimateSets(EquipOptionsMap reforgedItems) {
+        Optional<BigInteger> number = reforgedItems.entryStream().map(x -> BigInteger.valueOf(x.b().length)).reduce(BigInteger::multiply);
+        if (number.isPresent()) {
+            return number.get();
+        } else {
+            throw new RuntimeException("unable to determine item combination estimate");
+        }
+//        return reforgedItems.entryStream().mapToLong(x -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
+    }
+
+    public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> skinnyOptions) {
+        return skinnyOptions.stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
+    }
+
+    public static <X, T> long estimateSets(Map<X, List<T>> commonMap) {
+        return commonMap.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
     }
 
 //    <T> Stream<T> dropWhile(Predicate<? super T> predicate) {

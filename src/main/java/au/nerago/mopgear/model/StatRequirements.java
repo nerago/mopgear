@@ -1,10 +1,9 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.ItemUtil;
+import au.nerago.mopgear.ServiceEntry;
 import au.nerago.mopgear.SolverCapPhased;
 import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.ItemSet;
-import au.nerago.mopgear.ServiceEntry;
 import au.nerago.mopgear.domain.StatBlock;
 
 import java.util.function.ToIntFunction;
@@ -154,8 +153,7 @@ public class StatRequirements {
 //    }
 
     public boolean filter(ItemSet set) {
-        if (!inRange(set.getTotals())) return false;
-        return ItemUtil.validateNoDuplicates(set.items);
+        return inRange(set.getTotals()) && set.validate();
     }
 
     @SuppressWarnings("RedundantIfStatement")

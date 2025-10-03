@@ -2,10 +2,12 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.util.Tuple;
 import au.nerago.mopgear.util.BestHolder;
+import au.nerago.mopgear.util.Tuple;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.List;
+import java.util.Optional;
 
 public class SolverLocalStack {
     private final List<Tuple.Tuple2<SlotEquip, ItemData[]>> slotItems;

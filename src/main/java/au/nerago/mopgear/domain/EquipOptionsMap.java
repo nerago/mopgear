@@ -1,11 +1,9 @@
 package au.nerago.mopgear.domain;
 
-import au.nerago.mopgear.util.Tuple;
 import au.nerago.mopgear.util.ArrayUtil;
+import au.nerago.mopgear.util.Tuple;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

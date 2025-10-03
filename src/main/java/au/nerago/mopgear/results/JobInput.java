@@ -7,28 +7,25 @@ import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.model.ModelCombined;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class JobInfo {
+public class JobInput {
     public final PrintRecorder printRecorder = new PrintRecorder();
-    public Optional<ItemSet> resultSet;
-    public long resultRating;
-    public boolean hackAllow;
-    public int hackCount;
+
     public ModelCombined model;
     public EquipOptionsMap itemOptions;
     public Instant startTime;
+    public StatBlock adjustment;
+
     public long runSizeMultiply = 1;
+    public boolean hackAllow;
     public boolean forceRandom;
     public boolean forceSkipIndex;
-//    public boolean forcePhasedSkip;
     public long forcedRunSized;
     public boolean singleThread;
-    public StatBlock adjustment;
+
     public ItemData extraItem;
-    public double factor;
     public int cost;
     public Predicate<ItemSet> specialFilter;
 
@@ -45,9 +42,5 @@ public class JobInfo {
 
     public void printf(String format, Object... args) {
         printRecorder.printf(format, args);
-    }
-
-    public void printfAndEcho(String format, Object... args) {
-        printRecorder.printfAndEcho(format, args);
     }
 }

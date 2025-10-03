@@ -1,4 +1,4 @@
-package au.nerago.mopgear;
+package au.nerago.mopgear.process;
 
 import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.ReforgeRecipe;

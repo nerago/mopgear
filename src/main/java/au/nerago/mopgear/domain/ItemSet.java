@@ -1,13 +1,7 @@
 package au.nerago.mopgear.domain;
 
-import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.util.Tuple;
-
-import java.util.Spliterator;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import au.nerago.mopgear.results.OutputText;
 
 public final class ItemSet {
     public final EquipMap items;
@@ -63,6 +57,21 @@ public final class ItemSet {
 
     public void outputSetLight() {
         getItems().forEachValue(it -> OutputText.printf("%s [%d]\n", it.name, it.ref.itemLevel()));
+    }
+
+    public boolean validate() {
+        ItemData weapon = items.getWeapon();
+        if (weapon == null)
+            throw new IllegalStateException("no weapon in set");
+        if (weapon.slot == SlotItem.Weapon2H && items.getOffhand() != null)
+            throw new IllegalStateException("weapon 2H with unexpected offhand");
+        if (weapon.slot == SlotItem.Weapon1H && items.getOffhand() == null)
+            throw new IllegalStateException("weapon 1H with missing offhand");
+
+        ItemData t1 = items.getTrinket1(), t2 = items.getTrinket2();
+        ItemData r1 = items.getRing1(), r2 = items.getRing2();
+        return (t1 == null || t2 == null || t1.ref.itemId() != t2.ref.itemId()) &&
+                (r1 == null || r2 == null || r1.ref.itemId() != r2.ref.itemId());
     }
 
     @Override

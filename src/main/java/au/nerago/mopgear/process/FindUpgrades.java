@@ -1,16 +1,20 @@
-package au.nerago.mopgear;
+package au.nerago.mopgear.process;
 
+import au.nerago.mopgear.ItemLoadUtil;
+import au.nerago.mopgear.ItemMapUtil;
+import au.nerago.mopgear.Solver;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.results.JobInfo;
+import au.nerago.mopgear.results.JobInput;
+import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.OutputText;
-import au.nerago.mopgear.util.RankedGroupsCollection;
+import au.nerago.mopgear.results.UpgradeResultItem;
 import au.nerago.mopgear.util.ArrayUtil;
+import au.nerago.mopgear.util.RankedGroupsCollection;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,31 +33,31 @@ public class FindUpgrades {
 
     public void run(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {
         List<CostedItemData> extraItemList = extraItems.stream()
-                .map(ei -> new CostedItemData(ItemUtil.loadItem(ei, false), 0))
+                .map(ei -> new CostedItemData(ItemLoadUtil.loadItem(ei, false), 0))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
     }
 
     public void run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment, int upgradeLevel) {
         List<CostedItemData> extraItemList = Arrays.stream(extraItemArray)
-                .map(ci -> new CostedItemData(ItemUtil.loadItemBasic(ci.itemId(), upgradeLevel), ci.cost()))
+                .map(ci -> new CostedItemData(ItemLoadUtil.loadItemBasic(ci.itemId(), upgradeLevel), ci.cost()))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
     }
 
     public void runMaxedItems(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {
-        baseItems = ItemUtil.upgradeAllTo2(baseItems);
+        baseItems = ItemMapUtil.upgradeAllTo2(baseItems);
         List<CostedItemData> extraItemList = extraItems.stream()
                 .map(ei -> new EquippedItem(ei.itemId(), ei.gems(), ei.enchant(), ItemLevel.MAX_UPGRADE_LEVEL))
-                .map(ei -> new CostedItemData(ItemUtil.loadItem(ei, false), 0))
+                .map(ei -> new CostedItemData(ItemLoadUtil.loadItem(ei, false), 0))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
     }
 
     public void runMaxedItems(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment) {
-        baseItems = ItemUtil.upgradeAllTo2(baseItems);
+        baseItems = ItemMapUtil.upgradeAllTo2(baseItems);
         List<CostedItemData> extraItemList = Arrays.stream(extraItemArray)
-                .map(ci -> new CostedItemData(ItemUtil.loadItemBasic(ci.itemId(), ItemLevel.MAX_UPGRADE_LEVEL), ci.cost()))
+                .map(ci -> new CostedItemData(ItemLoadUtil.loadItemBasic(ci.itemId(), ItemLevel.MAX_UPGRADE_LEVEL), ci.cost()))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
     }
@@ -61,29 +65,29 @@ public class FindUpgrades {
     public void runMain(EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment) {
         double baseRating = findBase(baseItems, adjustment);
 
-        List<JobInfo> jobList =
+        List<UpgradeResultItem> jobList =
                 makeJobs(model, baseItems, extraItemList, adjustment, baseRating)
                 .toList().parallelStream() // helps verify
                 .map(Solver::runJob)
-                .peek(job -> handleResult(job, baseRating))
+                .map(job -> handleResult(job, baseRating))
                 .toList();
 
         reportResults(jobList);
     }
 
     private double findBase(EquipOptionsMap baseItems, StatBlock adjustment) {
-        JobInfo job = new JobInfo();
+        JobInput job = new JobInput();
         job.model = model;
         job.itemOptions = baseItems;
         job.runSizeMultiply = runSizeMultiply;
         job.adjustment = adjustment;
         job.hackAllow = hackAllow;
-        Solver.runJob(job);
+        JobOutput output = Solver.runJob(job);
         job.printRecorder.outputNow();
 
-        Optional<ItemSet> baseSet = job.resultSet;
+        Optional<ItemSet> baseSet = output.resultSet;
         if (baseSet.isPresent()) {
-            double baseRating = job.resultRating;
+            double baseRating = output.resultRating;
             OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.get().totals, baseRating);
 
             return baseRating;
@@ -92,22 +96,22 @@ public class FindUpgrades {
         }
     }
 
-    private void reportResults(List<JobInfo> jobList) {
+    private void reportResults(List<UpgradeResultItem> jobList) {
         reportByCost(jobList);
         reportBySlot(jobList);
         reportCostUpgradeRank(jobList);
         reportOverallRank(jobList);
     }
 
-    private void reportCostUpgradeRank(List<JobInfo> jobList) {
-        RankedGroupsCollection<JobInfo> grouped = new RankedGroupsCollection<>();
+    private void reportCostUpgradeRank(List<UpgradeResultItem> jobList) {
+        RankedGroupsCollection<UpgradeResultItem> grouped = new RankedGroupsCollection<>();
 
-        jobList.forEach(job -> {
-            ItemData item = job.extraItem;
-            int cost = job.cost;
+        jobList.forEach(resultItem -> {
+            ItemData item = resultItem.item();
+            int cost = resultItem.cost();
             if (cost >= 10) {
-                double plusPerCost = (job.factor - 1.0) * 100 / cost;
-                grouped.add(job, plusPerCost);
+                double plusPerCost = (resultItem.factor() - 1.0) * 100 / cost;
+                grouped.add(resultItem, plusPerCost);
             }
         });
 
@@ -116,31 +120,31 @@ public class FindUpgrades {
         OutputText.println();
     }
 
-    private static void reportOverallRank(List<JobInfo> jobList) {
-        RankedGroupsCollection<JobInfo> bestCollection = new RankedGroupsCollection<>();
-        jobList.forEach(job -> bestCollection.add(job, job.factor));
+    private static void reportOverallRank(List<UpgradeResultItem> jobList) {
+        RankedGroupsCollection<UpgradeResultItem> bestCollection = new RankedGroupsCollection<>();
+        jobList.forEach(job -> bestCollection.add(job, job.factor()));
 
         OutputText.println("RANKING PERCENT UPGRADE");
         bestCollection.forEach((item, factor) -> reportItem(item));
     }
 
-    private void reportByCost(List<JobInfo> jobList) {
-        Map<Integer, RankedGroupsCollection<JobInfo>> grouped = jobList.stream().collect(
-                Collectors.groupingBy(j -> j.cost,
-                        RankedGroupsCollection.collector(job -> job.factor)));
+    private void reportByCost(List<UpgradeResultItem> jobList) {
+        Map<Integer, RankedGroupsCollection<UpgradeResultItem>> grouped = jobList.stream().collect(
+                Collectors.groupingBy(UpgradeResultItem::cost,
+                        RankedGroupsCollection.collector(UpgradeResultItem::factor)));
         for (Integer cost : grouped.keySet().stream().sorted(Comparator.naturalOrder()).toList()) {
-            RankedGroupsCollection<JobInfo> best = grouped.get(cost);
+            RankedGroupsCollection<UpgradeResultItem> best = grouped.get(cost);
             best.forEach((item, factor) -> reportItem(item));
             OutputText.println();
         }
     }
 
-    private static void reportBySlot(List<JobInfo> jobList) {
-        Map<SlotItem, RankedGroupsCollection<JobInfo>> grouped = jobList.stream().collect(
-                Collectors.groupingBy(j -> j.extraItem.slot,
-                        RankedGroupsCollection.collector(job -> job.factor)));
+    private static void reportBySlot(List<UpgradeResultItem> jobList) {
+        Map<SlotItem, RankedGroupsCollection<UpgradeResultItem>> grouped = jobList.stream().collect(
+                Collectors.groupingBy(j -> j.item().slot,
+                        RankedGroupsCollection.collector(UpgradeResultItem::factor)));
         for (SlotItem slot : SlotItem.values()) {
-            RankedGroupsCollection<JobInfo> best = grouped.get(slot);
+            RankedGroupsCollection<UpgradeResultItem> best = grouped.get(slot);
             if (best != null) {
                 OutputText.println("RANKING " + slot);
                 best.forEach((item, factor) -> reportItem(item));
@@ -149,7 +153,7 @@ public class FindUpgrades {
         }
     }
 
-    private Stream<JobInfo> makeJobs(ModelCombined model, EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment, double baseRating) {
+    private Stream<JobInput> makeJobs(ModelCombined model, EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment, double baseRating) {
         return extraItemList.parallelStream().mapMulti((extraItemInfo, submitJob) -> {
             ItemData extraItem = extraItemInfo.item();
             int cost = extraItemInfo.cost();
@@ -163,11 +167,11 @@ public class FindUpgrades {
         });
     }
 
-    private static void reportItem(JobInfo resultItem) {
-        ItemData item = resultItem.extraItem;
-        double factor = resultItem.factor;
-        int cost = resultItem.cost;
-        String stars = ArrayUtil.repeat('*', resultItem.hackCount);
+    private static void reportItem(UpgradeResultItem resultItem) {
+        ItemData item = resultItem.item();
+        double factor = resultItem.factor();
+        int cost = resultItem.cost();
+        String stars = ArrayUtil.repeat('*', resultItem.hackCount());
         double plusPercent = (factor - 1.0) * 100;
         if (plusPercent > 0.0) {
             if (cost >= 10) {
@@ -181,22 +185,22 @@ public class FindUpgrades {
         }
     }
 
-    private JobInfo buildUpgradeJob(ModelCombined model, EquipOptionsMap items, ItemData extraItem, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
-        JobInfo job = new JobInfo();
+    private JobInput buildUpgradeJob(ModelCombined model, EquipOptionsMap items, ItemData extraItem, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
+        JobInput job = new JobInput();
 //        job.singleThread = true;
 
-        extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
+        extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true);
         job.println("OFFER " + extraItem.toStringExtended());
         job.println("REPLACING " + (items.get(slot) != null ? items.get(slot)[0].toStringExtended() : "NOTHING"));
 
         ItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
         items.put(slot, extraOptions);
-        ArrayUtil.mapInPlace(items.get(slot), x -> ItemUtil.defaultEnchants(x, model, true)); // redundant?
+        ArrayUtil.mapInPlace(items.get(slot), x -> ItemLoadUtil.defaultEnchants(x, model, true)); // redundant?
 
         if (hackAllow) {
-            adjustment = FindStatRange.checkSetAdjust(model, items, job);
-            if (adjustment != null)
-                job.hackCount++;
+//            adjustment = FindStatRange.checkSetAdjust(model, items, job.printRecorder);
+//            if (adjustment != null)
+//                job.hackCount++;
             job.hackAllow = true;
         }
 
@@ -207,20 +211,22 @@ public class FindUpgrades {
         return job;
     }
 
-    private void handleResult(JobInfo job, double baseRating) {
+    private UpgradeResultItem handleResult(JobOutput job, double baseRating) {
         Optional<ItemSet> resultSet = job.resultSet;
-        job.printRecorder.outputNow();
+        job.input.printRecorder.outputNow();
+
+        double factor;
         if (resultSet.isPresent()) {
             OutputText.println("SET STATS " + resultSet.get().totals);
             double extraRating = job.resultRating;
-            double factor = extraRating / baseRating;
+            factor = extraRating / baseRating;
             OutputText.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
-            job.factor = factor;
         } else {
+            factor = 0;
             OutputText.println("UPGRADE SET NOT FOUND");
-            job.factor = 0;
         }
         OutputText.println();
+        return new UpgradeResultItem(job.input.extraItem, factor, job.hackCount, job.input.cost);
     }
 
     private boolean canPerformSpecifiedUpgrade(ItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {

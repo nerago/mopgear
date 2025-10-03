@@ -1,9 +1,12 @@
 package au.nerago.mopgear;
 
-import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.ItemRef;
 import au.nerago.mopgear.util.ArrayUtil;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class PossibleStreams {

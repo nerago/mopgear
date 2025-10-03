@@ -37,18 +37,18 @@ public class ServiceEntry {
         Path gearFile = Path.of(params.gearFile);
         ModelCombined model = ModelCombined.load(params.model);
         Map<Integer, List<ReforgeRecipe>> fixedForges = new HashMap<>(params.fixedForges);
-        EquipOptionsMap items = ItemUtil.readAndLoad(false, gearFile, model.reforgeRules(), fixedForges);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(false, gearFile, model.reforgeRules(), fixedForges);
 
-        switch (params.jobType) {
+        switch (params.taskType) {
             case REFORGE -> {
-                Jobs.reforgeProcess(items, model, null);
+                Tasks.reforgeProcess(items, model, null);
             }
             case EXTRA_ITEMS -> {
-                Jobs.reforgeProcessPlusMany(items, model, null, params.extraItems, params.upgradeLevel);
+                Tasks.reforgeProcessPlusMany(items, model, null, params.extraItems, params.upgradeLevel);
             }
             case EXTRA_BAGS -> {
                 Path bagsFile = Path.of(params.bagFile);
-                Jobs.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(bagsFile, SourcesOfItems.ignoredItems));
+                Tasks.reforgeProcessPlusMany(items, model, null, SourcesOfItems.bagItemsArray(bagsFile, SourcesOfItems.ignoredItems));
             }
             case FIND_UPGRADE -> {
                 CostedItem[] extraItems = params.extraItems();
@@ -57,7 +57,7 @@ public class ServiceEntry {
                 } else {
                     throw new IllegalArgumentException("no upgrade items specified");
                 }
-                Jobs.findUpgrade(items, extraItems, model, false, null, params.upgradeLevel);
+                Tasks.findUpgrade(items, extraItems, model, false, null, params.upgradeLevel);
             }
         }
     }
@@ -67,7 +67,7 @@ public class ServiceEntry {
                                 ServiceModel model,
                                 Map<Integer, List<ReforgeRecipe>> fixedForges,
                                 boolean challengeModeScaling,
-                                ServiceJobType jobType,
+                                ServiceTaskType taskType,
                                 CostedItem[] extraItems,
                                 String sourceOfItems,
                                 Integer upgradeLevel
@@ -82,7 +82,7 @@ public class ServiceEntry {
                                 boolean useSetBonus) {
     }
 
-    public enum ServiceJobType {
+    public enum ServiceTaskType {
         REFORGE, EXTRA_ITEMS, EXTRA_BAGS, FIND_UPGRADE
     }
 

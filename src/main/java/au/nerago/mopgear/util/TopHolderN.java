@@ -1,8 +1,9 @@
 package au.nerago.mopgear.util;
 
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.Collector;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.TreeSet;
+import java.util.function.ToLongFunction;
 
 public class TopHolderN<T> {
     private final int size;

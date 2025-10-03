@@ -4,11 +4,12 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.io.ItemCache;
-import au.nerago.mopgear.io.WowSimDB;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
-import au.nerago.mopgear.results.JobInfo;
+import au.nerago.mopgear.process.FindUpgrades;
+import au.nerago.mopgear.results.JobInput;
+import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 
@@ -22,10 +23,11 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static au.nerago.mopgear.Jobs.*;
+import static au.nerago.mopgear.Tasks.*;
 import static au.nerago.mopgear.Solver.chooseEngineAndRun;
 import static au.nerago.mopgear.domain.StatType.*;
-import static au.nerago.mopgear.io.SourcesOfItems.*;
+import static au.nerago.mopgear.io.SourcesOfItems.intellectClothValorCelestialP1Array;
+import static au.nerago.mopgear.io.SourcesOfItems.intellectLeatherValorCelestial;
 
 @SuppressWarnings({"SameParameterValue", "unused", "ConstantValue"})
 public class Main {
@@ -81,7 +83,7 @@ public class Main {
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
-        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
@@ -127,7 +129,7 @@ public class Main {
         Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
 //        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
-        EquipOptionsMap items = ItemUtil.readAndLoad(true, file, model.reforgeRules(), commonItems);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, file, model.reforgeRules(), commonItems);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
@@ -179,7 +181,7 @@ public class Main {
 
     private void reforgeBoom(Instant startTime) {
         ModelCombined model = ModelCombined.standardBoomModel();
-        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearBoomFile, model.reforgeRules(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearBoomFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
@@ -210,7 +212,7 @@ public class Main {
 
     private void reforgeTree(Instant startTime) {
         ModelCombined model = ModelCombined.standardTreeModel();
-        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearTreeFile, model.reforgeRules(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearTreeFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
@@ -229,7 +231,7 @@ public class Main {
     private void reforgeBear(Instant startTime) {
         ModelCombined model = ModelCombined.standardBearModel();
 //        ItemUtil.forceReload(itemCache, DataLocation.gearBearFile);
-        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearBearFile, model.reforgeRules(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearBearFile, model.reforgeRules(), null);
 
         reforgeProcess(items, model, startTime);
 //        findUpgradeSetup(items, ArrayUtil.concat(SourcesOfItems.agilityLeatherCelestialArray(), SourcesOfItems.agilityLeatherValorArray()), model, true, null);
@@ -237,7 +239,7 @@ public class Main {
 
     private void reforgeWarlock(Instant startTime) {
         ModelCombined model = ModelCombined.standardWarlockModel();
-        EquipOptionsMap items = ItemUtil.readAndLoad(true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime);
         new FindUpgrades(model, true).run(items, intellectClothValorCelestialP1Array(), null, 0);
@@ -275,10 +277,10 @@ public class Main {
         // CHALLENGE MODE SET
 
         List<EquippedItem> itemIds = InputGearParser.readInput(DataLocation.gearRetFile);
-        List<ItemData> inputSetItems = ItemUtil.loadItems(itemIds, true);
+        List<ItemData> inputSetItems = ItemLoadUtil.loadItems(itemIds, true);
 
         OutputText.println("FINDING EXPECTED REFORGE IN RAID RET");
-        EquipOptionsMap raidMap = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, commonFixedItems());
+        EquipOptionsMap raidMap = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, commonFixedItems());
         ItemSet raidSet = chooseEngineAndRun(model, raidMap, null, null).orElseThrow();
         OutputText.println("FOUND REFORGE RAID RET");
         outputResultSimple(Optional.of(raidSet), model, false);
@@ -287,7 +289,7 @@ public class Main {
         raidSet.getItems().forEachValue(item -> presetReforge.put(item.ref.itemId(), Collections.singletonList(item.reforge)));
         presetReforge.put(89954, List.of(new ReforgeRecipe(Crit, Haste)));
 
-        EquipOptionsMap map = ItemUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
+        EquipOptionsMap map = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
 
         // compared to raid dps
         int[] extraItems = new int[]{
@@ -320,7 +322,7 @@ public class Main {
                 return extraItem.changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else {
                 OutputText.println("DEFAULT ENCHANT " + extraItem);
-                return ItemUtil.defaultEnchants(extraItem, model, false);
+                return ItemLoadUtil.defaultEnchants(extraItem, model, false);
             }
         };
 
@@ -335,14 +337,14 @@ public class Main {
 
         EquipOptionsMap scaledMap = ItemLevel.scaleForChallengeMode(map);
 
-        JobInfo job = new JobInfo();
+        JobInput job = new JobInput();
         job.printRecorder.outputImmediate = true;
         job.config(model, scaledMap, startTime, null);
         job.runSizeMultiply = 16;
         job.forceRandom = true;
         job.forcedRunSized = BILLION;
-        Solver.runJob(job);
-        ItemSet bestScaledSet = job.resultSet.orElseThrow();
+        JobOutput output = Solver.runJob(job);
+        ItemSet bestScaledSet = output.resultSet.orElseThrow();
 
         OutputText.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
         outputResultSimple(Optional.of(bestScaledSet), model, true);
@@ -379,9 +381,9 @@ public class Main {
         ModelCombined modelProt = ModelCombined.defenceProtModel();
 
         OutputText.println("RET GEAR CURRENT");
-        List<ItemData> retItems = ItemUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), true);
+        List<ItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), true);
         OutputText.println("PROT GEAR CURRENT");
-        List<ItemData> protItems = ItemUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), true);
+        List<ItemData> protItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), true);
 
         Map<SlotEquip, ReforgeRecipe> reforgeRet = new EnumMap<>(SlotEquip.class);
         reforgeRet.put(SlotEquip.Head, new ReforgeRecipe(null, null));
@@ -418,10 +420,10 @@ public class Main {
         reforgeProt.put(SlotEquip.Weapon, new ReforgeRecipe(null, null));
         reforgeProt.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
 
-        EquipMap retForgedItems = ItemUtil.chosenItemsReforgedToMap(retItems, reforgeRet);
+        EquipMap retForgedItems = ItemMapUtil.chosenItemsReforgedToMap(retItems, reforgeRet);
         ItemSet retSet = ItemSet.manyItems(retForgedItems, null);
 
-        EquipMap protForgedItems = ItemUtil.chosenItemsReforgedToMap(protItems, reforgeProt);
+        EquipMap protForgedItems = ItemMapUtil.chosenItemsReforgedToMap(protItems, reforgeProt);
         ItemSet protSet = ItemSet.manyItems(protForgedItems, null);
 
         retSet.outputSet(modelRet);

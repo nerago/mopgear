@@ -4,7 +4,10 @@ import au.nerago.mopgear.domain.EquipMap;
 import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.SlotEquip;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class SetBonus {

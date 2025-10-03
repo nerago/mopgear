@@ -7,10 +7,10 @@ import au.nerago.mopgear.util.Primes;
 
 import java.math.BigInteger;
 import java.time.Instant;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
-import java.util.stream.BaseStream;
 import java.util.stream.Stream;
 
 public class SolverIndexed {

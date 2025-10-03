@@ -20,12 +20,6 @@ public class PrintRecorder {
             outputLine(str);
     }
 
-    public void printfAndEcho(String format, Object[] args) {
-        String str = String.format(format, args);
-        prints.add(str);
-        outputLine(str);
-    }
-
     public void outputNow() {
         for (String str : prints) {
             outputLine(str);

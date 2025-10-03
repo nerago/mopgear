@@ -30,7 +30,7 @@ public class SolverCapPhased {
         fullItems = items;
         skinnyOptions = convertToSkinny(items);
 
-        long estimate = ItemUtil.estimateSets(skinnyOptions);
+        long estimate = BigStreamUtil.estimateSets(skinnyOptions);
         return estimate;
     }
 

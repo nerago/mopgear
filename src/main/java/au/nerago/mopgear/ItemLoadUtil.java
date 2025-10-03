@@ -2,18 +2,17 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.InputGearParser;
-import au.nerago.mopgear.model.*;
-import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.WowHead;
+import au.nerago.mopgear.model.*;
+import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 
-import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.*;
 
 @SuppressWarnings("unused")
-public class ItemUtil {
+public class ItemLoadUtil {
     private static final Set<SlotItem> expectedEnchant = buildExpectedEnchant();
 
     private static Set<SlotItem> buildExpectedEnchant() {
@@ -36,8 +35,8 @@ public class ItemUtil {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
         List<ItemData> items = loadItems(itemIds, detailedOutput);
         EquipOptionsMap result = presetForge != null
-                ? limitedItemsReforgedToMap(rules, items, presetForge)
-                : standardItemsReforgedToMap(rules, items);
+                ? ItemMapUtil.limitedItemsReforgedToMap(rules, items, presetForge)
+                : ItemMapUtil.standardItemsReforgedToMap(rules, items);
         ItemCache.instance.cacheSave();
         return result;
     }
@@ -118,96 +117,6 @@ public class ItemUtil {
         return item;
     }
 
-    public static EquipOptionsMap standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
-        EquipOptionsMap map = EquipOptionsMap.empty();
-        for (ItemData item : items) {
-            SlotEquip slot = item.slot.toSlotEquip();
-            if (slot == SlotEquip.Ring1 && map.has(slot)) {
-                map.put(SlotEquip.Ring2, Reforger.reforgeItem(rules, item));
-            } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
-                map.put(SlotEquip.Trinket2, Reforger.reforgeItem(rules, item));
-            } else {
-                map.put(slot, Reforger.reforgeItem(rules, item));
-            }
-        }
-        return map;
-    }
-
-    public static EquipOptionsMap limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
-                                                            Map<Integer, List<ReforgeRecipe>> presetForge) {
-        EquipOptionsMap map = EquipOptionsMap.empty();
-        for (ItemData item : items) {
-            SlotEquip slot = item.slot.toSlotEquip();
-            if (slot == SlotEquip.Ring1 && map.has(slot)) {
-                slot = SlotEquip.Ring2;
-            } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
-                slot = SlotEquip.Trinket2;
-            } else if (map.has(slot)) {
-                throw new IllegalArgumentException("duplicate item");
-            }
-
-            if (presetForge.containsKey(item.ref.itemId())) {
-                ItemData[] forged = presetForge.get(item.ref.itemId()).stream()
-                        .map(preset -> Reforger.presetReforge(item, preset))
-                        .toArray(ItemData[]::new);
-                map.put(slot, forged);
-            } else {
-                map.put(slot, Reforger.reforgeItem(rules, item));
-            }
-        }
-        return map;
-    }
-
-    public static EquipMap chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, ReforgeRecipe> presetForge) {
-        EquipMap map = EquipMap.empty();
-        for (ItemData item : items) {
-            SlotEquip slot = item.slot.toSlotEquip();
-            if (slot == SlotEquip.Ring1 && map.has(slot)) {
-                slot = SlotEquip.Ring2;
-            } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
-                slot = SlotEquip.Trinket2;
-            }
-            if (presetForge.containsKey(slot)) {
-                map.put(slot, Reforger.presetReforge(item, presetForge.get(slot)));
-            } else {
-                throw new IllegalArgumentException("not specified reforge for " + slot);
-            }
-        }
-        return map;
-    }
-
-    static void validateProt(EquipOptionsMap protMap) {
-        if (protMap.get(SlotEquip.Offhand) == null || protMap.get(SlotEquip.Offhand).length == 0)
-            throw new IllegalArgumentException("no shield");
-    }
-
-    static void validateRet(EquipOptionsMap retMap) {
-        if (retMap.get(SlotEquip.Offhand) != null)
-            throw new IllegalArgumentException("unexpected shield");
-    }
-
-    public static boolean validateNoDuplicates(EquipMap map) {
-        ItemData t1 = map.getTrinket1(), t2 = map.getTrinket2();
-        ItemData r1 = map.getRing1(), r2 = map.getRing2();
-        return (t1 == null || t2 == null || t1.ref.itemId() != t2.ref.itemId()) &&
-                (r1 == null || r2 == null || r1.ref.itemId() != r2.ref.itemId());
-    }
-
-    public static List<ItemData> onlyMatchingForge(List<ItemData> forgeList, ReforgeRecipe recipe) {
-        if (recipe == null || recipe.isEmpty()) {
-            for (ItemData item : forgeList) {
-                if (item.reforge.isEmpty())
-                    return List.of(item);
-            }
-        } else {
-            for (ItemData item : forgeList) {
-                if (recipe.equalsTyped(item.reforge))
-                    return List.of(item);
-            }
-        }
-        throw new IllegalArgumentException("specified forge not found " + forgeList.getFirst() + " " + recipe);
-    }
-
     public static void defaultEnchants(EquipOptionsMap itemMap, ModelCombined model, boolean force) {
         itemMap.forEachValue(array -> ArrayUtil.mapInPlace(array, item -> defaultEnchants(item, model, force)));
     }
@@ -258,41 +167,5 @@ public class ItemUtil {
         }
 
         return item.changeFixed(total);
-    }
-
-    public static EquipOptionsMap upgradeAllTo2(EquipOptionsMap baseItems) {
-        EquipOptionsMap result = EquipOptionsMap.empty();
-        baseItems.forEachPair((slot, itemArray) -> {
-            result.put(slot, ArrayUtil.mapAsNew(itemArray, ItemUtil::upgradeItemTo2, ItemData[]::new));
-        });
-        return result;
-    }
-
-    private static ItemData upgradeItemTo2(ItemData oldItem) {
-        if (!oldItem.isUpgradable() || oldItem.ref.upgradeLevel() == ItemLevel.MAX_UPGRADE_LEVEL) {
-            return oldItem;
-        }
-
-        ItemData loaded = loadItemBasic(oldItem.ref.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
-        loaded = Reforger.presetReforge(loaded, oldItem.reforge);
-        return loaded.changeFixed(oldItem.statFixed);
-    }
-
-    static BigInteger estimateSets(EquipOptionsMap reforgedItems) {
-        Optional<BigInteger> number = reforgedItems.entryStream().map(x -> BigInteger.valueOf(x.b().length)).reduce(BigInteger::multiply);
-        if (number.isPresent()) {
-            return number.get();
-        } else {
-            throw new RuntimeException("unable to determine item combination estimate");
-        }
-//        return reforgedItems.entryStream().mapToLong(x -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
-    }
-
-    public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> skinnyOptions) {
-        return skinnyOptions.stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
-    }
-
-    public static <X, T> long estimateSets(Map<X, List<T>> commonMap) {
-        return commonMap.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
     }
 }

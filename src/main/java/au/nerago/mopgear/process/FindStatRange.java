@@ -1,8 +1,8 @@
-package au.nerago.mopgear;
+package au.nerago.mopgear.process;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.results.JobInfo;
+import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.*;
 
@@ -12,14 +12,14 @@ import java.util.Optional;
 import java.util.function.ToIntFunction;
 
 public class FindStatRange {
-    public static void checkSetReportOnly(ModelCombined model, EquipOptionsMap items, JobInfo job) {
+    public static void checkSetReportOnly(ModelCombined model, EquipOptionsMap items, PrintRecorder job) {
         for (StatType statType : StatType.values()) {
             Tuple.Tuple2<Integer, Integer> range = findRange(model, items, statType);
             report(statType, range, model, job);
         }
     }
 
-    public static StatBlock checkSetAdjust(ModelCombined model, EquipOptionsMap items, JobInfo job) {
+    public static StatBlock checkSetAdjust(ModelCombined model, EquipOptionsMap items, PrintRecorder job) {
         Tuple.Tuple2<Integer, Integer> hitRange = findRange(model, items, StatType.Hit);
         StatBlock hitAdjust = reportAndAdjustHit(model, job, hitRange);
 
@@ -37,7 +37,7 @@ public class FindStatRange {
         return setList;
     }
 
-    private static void report(StatType statType, Tuple.Tuple2<Integer, Integer> range, ModelCombined model, JobInfo job) {
+    private static void report(StatType statType, Tuple.Tuple2<Integer, Integer> range, ModelCombined model, PrintRecorder job) {
         int lowAvailable = range.a(), highAvailable = range.b();
         if (statType == StatType.Hit) {
             int minTarget = model.statRequirements().getMinimumHit(), maxTarget = model.statRequirements().getMaximumHit();
@@ -58,7 +58,7 @@ public class FindStatRange {
         }
     }
 
-    private static StatBlock reportAndAdjustHit(ModelCombined model, JobInfo job, Tuple.Tuple2<Integer, Integer> range) {
+    private static StatBlock reportAndAdjustHit(ModelCombined model, PrintRecorder job, Tuple.Tuple2<Integer, Integer> range) {
         int lowAvailable = range.a(), highAvailable = range.b();
         int minTarget = model.statRequirements().getMinimumHit(), maxTarget = model.statRequirements().getMaximumHit();
         if (highAvailable < minTarget) {
@@ -76,7 +76,7 @@ public class FindStatRange {
         }
     }
 
-    private static StatBlock reportAndAdjustExpertise(ModelCombined model, JobInfo job, Tuple.Tuple2<Integer, Integer> range) {
+    private static StatBlock reportAndAdjustExpertise(ModelCombined model, PrintRecorder job, Tuple.Tuple2<Integer, Integer> range) {
         int lowAvailable = range.a(), highAvailable = range.b();
         int minTarget = model.statRequirements().getMinimumExpertise(), maxTarget = model.statRequirements().getMaximumExpertise();
         if (highAvailable >= minTarget && lowAvailable <= maxTarget) {
@@ -180,7 +180,7 @@ public class FindStatRange {
         return holder;
     }
 
-    public static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobInfo job) {
+    public static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobOutput job) {
         job.println("NO SET FOUND USING NORMAL PROCESS");
 
         List<ItemSet> proposedList = setsAtLimits(model, itemOptions, adjustment);
@@ -193,7 +193,7 @@ public class FindStatRange {
         }
     }
 
-    private static Optional<ItemSet> fallbackSimpleLimits(ModelCombined model, JobInfo job, List<ItemSet> proposedList) {
+    private static Optional<ItemSet> fallbackSimpleLimits(ModelCombined model, JobOutput job, List<ItemSet> proposedList) {
         BestHolder<ItemSet> bestHolder = new BestHolder<>();
 
         for (ItemSet set : proposedList) {
@@ -212,7 +212,7 @@ public class FindStatRange {
         }
     }
 
-    private static Optional<ItemSet> fallbackLimitsWithAdjustment(ModelCombined model, JobInfo job, List<ItemSet> proposedList) {
+    private static Optional<ItemSet> fallbackLimitsWithAdjustment(ModelCombined model, JobOutput job, List<ItemSet> proposedList) {
         BestHolder<Tuple.Tuple2<ItemSet, PrintRecorder>> bestHolder = new BestHolder<>();
 
         for (ItemSet set : proposedList) {
@@ -231,7 +231,7 @@ public class FindStatRange {
 
         if (bestHolder.get() != null) {
             Tuple.Tuple2<ItemSet, PrintRecorder> result = bestHolder.get();
-            job.printRecorder.append(result.b());
+            job.input.printRecorder.append(result.b());
             job.println("FALLBACK SET FUDGED TOGETHER WITH HACKED STATS");
             job.hackCount += 2;
             return Optional.ofNullable(result.a());

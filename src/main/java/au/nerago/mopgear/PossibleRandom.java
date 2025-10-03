@@ -1,6 +1,7 @@
 package au.nerago.mopgear;
 
-import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.ItemRef;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.util.HashMap;

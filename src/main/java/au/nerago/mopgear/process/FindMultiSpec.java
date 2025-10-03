@@ -1,9 +1,11 @@
-package au.nerago.mopgear;
+package au.nerago.mopgear.process;
 
+import au.nerago.mopgear.*;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.AsWowSimJson;
-import au.nerago.mopgear.results.JobInfo;
+import au.nerago.mopgear.results.JobInput;
+import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.*;
 
@@ -65,7 +67,7 @@ public class FindMultiSpec {
         Map<ItemRef, List<ItemData>> commonMap = commonInMultiSet(specs);
         OutputText.println();
 
-        long commonCombos = ItemUtil.estimateSets(commonMap);
+        long commonCombos = BigStreamUtil.estimateSets(commonMap);
         long skip;
         if (commonCombos < targetComboCount * 2) {
             skip = 1;
@@ -119,7 +121,7 @@ public class FindMultiSpec {
             int id = entry.getKey();
             for (ItemRef ref : commonOptions.keySet().stream().filter(t -> t.itemId() == id).toList()) {
                 List<ItemData> forgeList = commonOptions.get(ref);
-                forgeList = ItemUtil.onlyMatchingForge(forgeList, entry.getValue());
+                forgeList = onlyMatchingForge(forgeList, entry.getValue());
                 commonOptions.put(ref, forgeList);
                 OutputText.println("FIXED " + forgeList.getFirst().name);
             }
@@ -155,15 +157,15 @@ public class FindMultiSpec {
     }
 
     private void optimalWithoutCommon(SpecDetails spec) {
-        JobInfo job = new JobInfo();
+        JobInput job = new JobInput();
         job.model = spec.model;
         job.itemOptions = spec.itemOptions;
         job.runSizeMultiply = individualRunSizeMultiply;
         job.hackAllow = hackAllow;
-        Solver.runJob(job);
+        JobOutput output = Solver.runJob(job);
 
-        ItemSet set = job.resultSet.orElseThrow();
-        spec.optimalRating = job.resultRating;
+        ItemSet set = output.resultSet.orElseThrow();
+        spec.optimalRating = output.resultRating;
         OutputText.printf("BASELINE %s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
         set.outputSet(spec.model);
     }
@@ -184,7 +186,7 @@ public class FindMultiSpec {
         return commonForges;
     }
 
-    private void filterCommonActuallyUsed(Map<ItemRef, ItemData> common, List<JobInfo> resultJobs) {
+    private void filterCommonActuallyUsed(Map<ItemRef, ItemData> common, List<JobOutput> resultJobs) {
         common.entrySet().removeIf(entry -> {
                     ItemRef ref = entry.getKey();
                     long count = resultJobs.stream().flatMap(job -> job.resultSet.orElseThrow()
@@ -199,9 +201,9 @@ public class FindMultiSpec {
     }
 
     private ProposedResults subSolveEach(Map<ItemRef, ItemData> commonChoices, List<SpecDetails> specList) {
-        List<JobInfo> results = new ArrayList<>();
+        List<JobOutput> results = new ArrayList<>();
         for (SpecDetails spec : specList) {
-            JobInfo job = subSolvePart(spec.itemOptions, spec.model, commonChoices);
+            JobOutput job = subSolvePart(spec.itemOptions, spec.model, commonChoices);
             if (job.resultSet.isEmpty()) {
                 return null;
             }
@@ -210,11 +212,11 @@ public class FindMultiSpec {
         return new ProposedResults(results, commonChoices);
     }
 
-    private JobInfo subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, Map<ItemRef, ItemData> chosenMap) {
+    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, Map<ItemRef, ItemData> chosenMap) {
         EquipOptionsMap submitMap = fullItemMap.shallowClone();
         buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
 
-        JobInfo job = new JobInfo();
+        JobInput job = new JobInput();
         job.model = model;
         job.itemOptions = submitMap;
         job.runSizeMultiply = individualRunSizeMultiply;
@@ -272,9 +274,24 @@ public class FindMultiSpec {
         }
     }
 
-    private boolean checkGood(List<JobInfo> resultJobs, List<SpecDetails> specList) {
+    public static List<ItemData> onlyMatchingForge(List<ItemData> forgeList, ReforgeRecipe recipe) {
+        if (recipe == null || recipe.isEmpty()) {
+            for (ItemData item : forgeList) {
+                if (item.reforge.isEmpty())
+                    return List.of(item);
+            }
+        } else {
+            for (ItemData item : forgeList) {
+                if (recipe.equalsTyped(item.reforge))
+                    return List.of(item);
+            }
+        }
+        throw new IllegalArgumentException("specified forge not found " + forgeList.getFirst() + " " + recipe);
+    }
+
+    private boolean checkGood(List<JobOutput> resultJobs, List<SpecDetails> specList) {
         for (int i = 0; i < resultJobs.size(); ++i) {
-            JobInfo job = resultJobs.get(i);
+            JobOutput job = resultJobs.get(i);
             SpecDetails spec = specList.get(i);
             long jobRating = job.resultRating;
 
@@ -290,10 +307,10 @@ public class FindMultiSpec {
         return true;
     }
 
-    private long multiRating(List<JobInfo> resultJobs, List<SpecDetails> specList) {
+    private long multiRating(List<JobOutput> resultJobs, List<SpecDetails> specList) {
         long total = 0;
         for (int i = 0; i < resultJobs.size(); ++i) {
-            JobInfo job = resultJobs.get(i);
+            JobOutput job = resultJobs.get(i);
 //            ItemSet set = job.resultSet.orElseThrow();
             SpecDetails spec = specList.get(i);
             long specRating = job.resultRating;
@@ -302,16 +319,16 @@ public class FindMultiSpec {
         return total;
     }
 
-    private void reportBetter(List<JobInfo> resultJobs, List<SpecDetails> specList) {
+    private void reportBetter(List<JobOutput> resultJobs, List<SpecDetails> specList) {
         long rating = multiRating(resultJobs, specList);
         synchronized (OutputText.class) {
             OutputText.printf("^^^^^^^^^ %s ^^^^^^^ %d ^^^^^^^^^\n", LocalDateTime.now(), rating);
             for (int i = 0; i < resultJobs.size(); ++i) {
-                JobInfo job = resultJobs.get(i);
+                JobOutput job = resultJobs.get(i);
                 ItemSet set = job.resultSet.orElseThrow();
                 SpecDetails spec = specList.get(i);
                 OutputText.printf("-------------- %s -------------- %s\n", spec.label, "<HACK>".repeat(job.hackCount));
-                job.printRecorder.outputNow();
+                job.input.printRecorder.outputNow();
                 set.outputSet(spec.model);
             }
             OutputText.println("#######################################");
@@ -320,7 +337,7 @@ public class FindMultiSpec {
 
     private void outputResultFinal(Optional<ProposedResults> bestSets, List<SpecDetails> specList) {
         if (bestSets.isPresent()) {
-            List<JobInfo> resultJobs = bestSets.get().resultJobs;
+            List<JobOutput> resultJobs = bestSets.get().resultJobs;
             long totalRating = multiRating(resultJobs, specList);
 
             Map<ItemRef, ItemData> commonFinal = bestSets.get().chosenMap;
@@ -344,24 +361,25 @@ public class FindMultiSpec {
                 SpecDetails spec = specList.get(i);
                 OutputText.printf("-------------- %s --------------\n", spec.label);
 
-                OutputText.println("DRAFTDRAFTDRAFT");
-                JobInfo draftJob = resultJobs.get(i);
+                JobOutput draftJob = resultJobs.get(i);
                 ItemSet draftSet = draftJob.resultSet.orElseThrow();
                 double draftSpecRating = draftJob.resultRating;
-                draftJob.printRecorder.outputNow();
-                draftSet.outputSet(spec.model);
-                AsWowSimJson.writeToOut(draftSet.items);
+                OutputText.println("DRAFT " + draftSpecRating);
 
-                OutputText.println("REVISEDREVISEDREVISED");
-                JobInfo revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal);
+                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal);
                 ItemSet revisedSet = revisedJob.resultSet.orElseThrow();
                 double revisedSpecRating = revisedJob.resultRating;
+
                 if (revisedSpecRating > draftSpecRating) {
-                    revisedJob.printRecorder.outputNow();
+                    OutputText.println("REVISED " + revisedSpecRating);
+                    revisedJob.input.printRecorder.outputNow();
                     revisedSet.outputSet(spec.model);
                     AsWowSimJson.writeToOut(revisedSet.items);
                 } else {
                     OutputText.println("Revised no better");
+                    draftJob.input.printRecorder.outputNow();
+                    draftSet.outputSet(spec.model);
+                    AsWowSimJson.writeToOut(draftSet.items);
                 }
 
                 double specRating = Math.max(draftSpecRating, revisedSpecRating);
@@ -445,9 +463,9 @@ public class FindMultiSpec {
         }
 
         public void prepareA(List<SpecDetails> allSpecs) {
-            itemOptions = ItemUtil.readAndLoad(false, gearFile, model.reforgeRules(), null);
+            itemOptions = ItemLoadUtil.readAndLoad(false, gearFile, model.reforgeRules(), null);
             if (upgradeCurrentItems)
-                itemOptions = ItemUtil.upgradeAllTo2(itemOptions);
+                itemOptions = ItemMapUtil.upgradeAllTo2(itemOptions);
             remapDuplicates();
         }
 
@@ -480,7 +498,7 @@ public class FindMultiSpec {
         }
 
         private void verifyNotAlreadyIncluded(int itemId) {
-            ItemData extraItem = ItemUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
+            ItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
             SlotEquip[] slots = extraItem.slot.toSlotEquipOptions();
             for (SlotEquip slot : slots) {
                 ItemData[] existing = itemOptions.get(slot);
@@ -509,11 +527,11 @@ public class FindMultiSpec {
         }
 
         private void loadAndGenerate(int itemId) {
-            ItemData extraItem = ItemUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
+            ItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
             if (overrideEnchant.containsKey(itemId)) {
                 extraItem = extraItem.changeFixed(overrideEnchant.get(itemId));
             } else {
-                extraItem = ItemUtil.defaultEnchants(extraItem, model, true);
+                extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true);
             }
 
             ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
@@ -537,6 +555,6 @@ public class FindMultiSpec {
         }
     }
 
-    private record ProposedResults(List<JobInfo> resultJobs, Map<ItemRef, ItemData> chosenMap) {
+    private record ProposedResults(List<JobOutput> resultJobs, Map<ItemRef, ItemData> chosenMap) {
     }
 }

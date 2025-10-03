@@ -1,7 +1,10 @@
 package au.nerago.mopgear.util;
 
-import java.util.*;
-import java.util.function.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.function.IntFunction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 

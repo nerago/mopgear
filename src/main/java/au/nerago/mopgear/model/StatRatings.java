@@ -3,7 +3,6 @@ package au.nerago.mopgear.model;
 import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
-import au.nerago.mopgear.util.BestHolder;
 import au.nerago.mopgear.util.LowHighHolder;
 
 import java.util.EnumMap;
