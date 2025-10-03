@@ -120,13 +120,4 @@ public class BigStreamUtil {
     public static <X, T> long estimateSets(Map<X, List<T>> commonMap) {
         return commonMap.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
     }
-
-//    <T> Stream<T> dropWhile(Predicate<? super T> predicate) {
-//        Objects.requireNonNull(predicate);
-//        // Reuses the unordered spliterator, which, when encounter is present,
-//        // is safe to use as long as it configured not to split
-//        return StreamSupport.stream(
-//                new WhileOps.UnorderedWhileSpliterator.OfRef.Dropping<>(spliterator(), true, predicate),
-//                isParallel()).onClose(this::close);
-//    }
 }

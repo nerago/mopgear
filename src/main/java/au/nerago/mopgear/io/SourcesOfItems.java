@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unused"})
 public class SourcesOfItems {
     public static final List<Integer> ignoredItems = List.of(
             63207, // org port cloak
@@ -562,19 +562,16 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateValorCelestialTank() {
-//        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(strengthPlateCelestialArray(), 483);
         CostedItem[] filteredCelestialArray = strengthPlateCelestialArray();
-        return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetCelestial(), strengthPallyRetSetCelestial());
+        return ArrayUtil.concat(new CostedItem[][]{filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetCelestial(), strengthPallyRetSetCelestial()});
     }
 
     public static CostedItem[] strengthPlateValorCelestialRet() {
-//        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, strengthPlateCelestialArray(), 483);
         CostedItem[] filteredCelestialArray = strengthPlateCelestialArray();
-        return ArrayUtil.concat(filteredCelestialArray, strengthPlateValorArray(), strengthPallyRetSetCelestial());
+        return ArrayUtil.concat(new CostedItem[][]{filteredCelestialArray, strengthPlateValorArray(), strengthPallyRetSetCelestial()});
     }
 
     public static CostedItem[] intellectLeatherValorCelestial() {
-//        CostedItem[] filteredCelestialArray = SourcesOfItems.filterItemLevel(itemCache, intellectLeatherCelestialArray(), 483);
         CostedItem[] tempArray = ArrayUtil.concat(intellectLeatherCelestialArray(), intellectLeatherValorArray());
         ArrayUtil.throwIfHasDuplicates(tempArray);
         return tempArray;

@@ -21,7 +21,7 @@ public class WowSimDB {
 
     // https://raw.githubusercontent.com/wowsims/mop/57251c327bbc745d1512b9c13e952f4bcf3deedb/assets/database/db.json
 
-    public static WowSimDB instance = new WowSimDB();
+    public final static WowSimDB instance = new WowSimDB();
 
     private WowSimDB() {
         readInput(Objects.requireNonNull(getClass().getClassLoader().getResource("wowsimdb.json")));
@@ -130,53 +130,105 @@ public class WowSimDB {
 
     private StatType blockIndexToStat(int index) {
         switch (index) {
-            case 0, 1, 3 -> { return StatType.Primary; }
-            case 2 -> { return StatType.Stam; }
-            case 4 -> {return StatType.Spirit;}
-            case 5 -> {return StatType.Hit;}
-            case 6 -> {return StatType.Crit;}
-            case 7 -> { return StatType.Haste;}
-            case 8 -> {return StatType.Expertise;}
-            case 9 -> {return StatType.Dodge;}
-            case 10 -> {return StatType.Parry;}
-            case 11 -> {return StatType.Mastery;}
-            case 15, 16 -> {return null; }//pvp
+            case 0, 1, 3 -> {
+                return StatType.Primary;
+            }
+            case 2 -> {
+                return StatType.Stam;
+            }
+            case 4 -> {
+                return StatType.Spirit;
+            }
+            case 5 -> {
+                return StatType.Hit;
+            }
+            case 6 -> {
+                return StatType.Crit;
+            }
+            case 7 -> {
+                return StatType.Haste;
+            }
+            case 8 -> {
+                return StatType.Expertise;
+            }
+            case 9 -> {
+                return StatType.Dodge;
+            }
+            case 10 -> {
+                return StatType.Parry;
+            }
+            case 11 -> {
+                return StatType.Mastery;
+            }
+            case 15, 16 -> {
+                return null;
+            }//pvp
             default -> throw new RuntimeException("unknown stat index " + index);
         }
     }
 
     private SocketType mapSocket(int num) {
-        switch (num) {
-            case 1: return SocketType.Meta;
-            case 2: return SocketType.Red;
-            case 3: return SocketType.Blue;
-            case 4: return SocketType.Yellow;
-            case 8: return SocketType.General; // flagging for a possible belt socket
-            case 9: return SocketType.Engineer;
-            case 10: return SocketType.Sha;
-            default: throw new RuntimeException("unknown socket " + num);
-        }
+        return switch (num) {
+            case 1 -> SocketType.Meta;
+            case 2 -> SocketType.Red;
+            case 3 -> SocketType.Blue;
+            case 4 -> SocketType.Yellow;
+            case 8 -> SocketType.General; // flagging for a possible belt socket
+            case 9 -> SocketType.Engineer;
+            case 10 -> SocketType.Sha;
+            default -> throw new RuntimeException("unknown socket " + num);
+        };
     }
 
     private static SlotItem mapSlot(int type, int weaponType, int handType) {
         switch (type) {
-            case 1 -> { return SlotItem.Head; }
-            case 2 -> { return SlotItem.Neck; }
-            case 3 -> { return SlotItem.Shoulder; }
-            case 4 -> { return SlotItem.Back; }
-            case 5 -> { return SlotItem.Chest; }
-            case 6 -> { return SlotItem.Wrist; }
-            case 7 -> { return SlotItem.Hand; }
-            case 8 -> { return SlotItem.Belt; }
-            case 9 -> { return SlotItem.Leg; }
-            case 10 -> { return SlotItem.Foot; }
-            case 11 -> { return SlotItem.Ring; }
-            case 12 -> { return SlotItem.Trinket; }
+            case 1 -> {
+                return SlotItem.Head;
+            }
+            case 2 -> {
+                return SlotItem.Neck;
+            }
+            case 3 -> {
+                return SlotItem.Shoulder;
+            }
+            case 4 -> {
+                return SlotItem.Back;
+            }
+            case 5 -> {
+                return SlotItem.Chest;
+            }
+            case 6 -> {
+                return SlotItem.Wrist;
+            }
+            case 7 -> {
+                return SlotItem.Hand;
+            }
+            case 8 -> {
+                return SlotItem.Belt;
+            }
+            case 9 -> {
+                return SlotItem.Leg;
+            }
+            case 10 -> {
+                return SlotItem.Foot;
+            }
+            case 11 -> {
+                return SlotItem.Ring;
+            }
+            case 12 -> {
+                return SlotItem.Trinket;
+            }
             case 13, 14 -> {
                 switch (handType) {
-                    case 1, 2 -> { return SlotItem.Weapon1H; }
-                    case 0, 4 -> { return SlotItem.Weapon2H; }
-                    case 3 -> { return SlotItem.Offhand; }
+                    case 1, 2 -> {
+                        return SlotItem.Weapon1H;
+                    }
+                    case 0, 4 -> {
+                        return SlotItem.Weapon2H;
+                    }
+                    case 3 -> {
+                        return SlotItem.Offhand;
+                    }
                     default -> throw new RuntimeException("unknown weapon " + weaponType);
                 }
             }

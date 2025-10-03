@@ -7,7 +7,7 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class JobOutput {
 
-    public JobInput input;
+    public final JobInput input;
 
     public Optional<ItemSet> resultSet;
     public long resultRating;

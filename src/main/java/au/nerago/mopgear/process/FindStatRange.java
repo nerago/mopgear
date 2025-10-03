@@ -111,13 +111,13 @@ public class FindStatRange {
         }
 
         int minExp = model.statRequirements().getMinimumExpertise(), maxExp = model.statRequirements().getMaximumExpertise();
-        if (minExp != 0 && itemTotal.expertise < minExp) {
-            int need = minExp - itemTotal.expertise;
-            print.printf("ADJUST Expertise Low %d NEED %d STEALING %d %s\n", itemTotal.expertise, minExp, need, takeStat);
+        if (minExp != 0 && itemTotal.expertise() < minExp) {
+            int need = minExp - itemTotal.expertise();
+            print.printf("ADJUST Expertise Low %d NEED %d STEALING %d %s\n", itemTotal.expertise(), minExp, need, takeStat);
             adjust = adjust.withChange(StatType.Expertise, need, takeStat, -need);
-        } else if (minExp != 0 && maxExp != Integer.MAX_VALUE && itemTotal.expertise > maxExp) {
-            int excess = itemTotal.expertise - maxExp;
-            print.printf("ADJUST Expertise High %d LIMIT %d GIFTING %d %s\n", itemTotal.expertise, maxExp, excess, giveStat);
+        } else if (minExp != 0 && maxExp != Integer.MAX_VALUE && itemTotal.expertise() > maxExp) {
+            int excess = itemTotal.expertise() - maxExp;
+            print.printf("ADJUST Expertise High %d LIMIT %d GIFTING %d %s\n", itemTotal.expertise(), maxExp, excess, giveStat);
             adjust = adjust.withChange(StatType.Expertise, -excess, giveStat, excess);
         }
 
@@ -218,9 +218,9 @@ public class FindStatRange {
         for (ItemSet set : proposedList) {
             PrintRecorder print = new PrintRecorder();
 
+            //noinspection deprecation
             ItemSet adjustedSet = adjustForCapsFinalSet(set.items.shallowClone(), model, print);
             if (!model.statRequirements().filter(adjustedSet)) {
-//                throw new IllegalStateException("adjust didn't fix caps " + set + " -> " + adjustedSet);
                 job.printf("ERROR adjust didn't fix caps " + set + " -> " + adjustedSet + " (or duplicate issues)");
                 continue;
             }

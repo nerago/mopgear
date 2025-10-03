@@ -1,31 +1,7 @@
 package au.nerago.mopgear.domain;
 
-import java.util.Objects;
-
-public final class StatBlock {
-    public final int primary;
-    public final int stam;
-    public final int mastery;
-    public final int crit;
-    public final int hit;
-    public final int haste;
-    public final int expertise;
-    public final int dodge;
-    public final int parry;
-    public final int spirit;
-
-    public StatBlock(int primary, int stam, int mastery, int crit, int hit, int haste, int expertise, int dodge, int parry, int spirit) {
-        this.primary = primary;
-        this.stam = stam;
-        this.mastery = mastery;
-        this.crit = crit;
-        this.hit = hit;
-        this.haste = haste;
-        this.expertise = expertise;
-        this.dodge = dodge;
-        this.parry = parry;
-        this.spirit = spirit;
-    }
+public record StatBlock(int primary, int stam, int mastery, int crit, int hit, int haste,
+                        int expertise, int dodge, int parry, int spirit) {
 
     public static StatBlock add(StatBlock a, StatBlock b) {
         if (a != null && b != null)
@@ -335,11 +311,6 @@ public final class StatBlock {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         return equalsStats((StatBlock) o);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
     }
 
     @Override

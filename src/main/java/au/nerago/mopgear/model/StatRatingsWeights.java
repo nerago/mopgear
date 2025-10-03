@@ -97,32 +97,32 @@ public class StatRatingsWeights extends StatRatings {
     @Override
     public long calcRating(StatBlock value) {
         int total = 0;
-        total += value.primary * weight.primary;
-        total += value.stam * weight.stam;
-        total += value.mastery * weight.mastery;
-        total += value.crit * weight.crit;
-        total += value.parry * weight.parry;
-        total += value.haste * weight.haste;
-        total += value.dodge * weight.dodge;
-            total += value.hit * weight.hit;
-            total += value.expertise * weight.expertise;
-            total += value.spirit * weight.spirit;
+        total += value.primary() * weight.primary();
+        total += value.stam() * weight.stam();
+        total += value.mastery() * weight.mastery();
+        total += value.crit() * weight.crit();
+        total += value.parry() * weight.parry();
+        total += value.haste() * weight.haste();
+        total += value.dodge() * weight.dodge();
+        total += value.hit() * weight.hit();
+        total += value.expertise() * weight.expertise();
+        total += value.spirit() * weight.spirit();
         return total;
     }
 
     @Override
     public long calcRating(StatBlock aaa, StatBlock bbb) {
         int total = 0;
-        total += (aaa.primary + bbb.primary) * weight.primary;
-        total += (aaa.stam + bbb.stam) * weight.stam;
-        total += (aaa.mastery + bbb.mastery) * weight.mastery;
-        total += (aaa.crit + bbb.crit) * weight.crit;
-        total += (aaa.parry + bbb.parry) * weight.parry;
-        total += (aaa.haste + bbb.haste) * weight.haste;
-        total += (aaa.dodge + bbb.dodge) * weight.dodge;
-            total += (aaa.hit + bbb.hit) * weight.hit;
-            total += (aaa.expertise + bbb.expertise) * weight.expertise;
-            total += (aaa.spirit + bbb.spirit) * weight.spirit;
+        total += (aaa.primary() + bbb.primary()) * weight.primary();
+        total += (aaa.stam() + bbb.stam()) * weight.stam();
+        total += (aaa.mastery() + bbb.mastery()) * weight.mastery();
+        total += (aaa.crit() + bbb.crit()) * weight.crit();
+        total += (aaa.parry() + bbb.parry()) * weight.parry();
+        total += (aaa.haste() + bbb.haste()) * weight.haste();
+        total += (aaa.dodge() + bbb.dodge()) * weight.dodge();
+        total += (aaa.hit() + bbb.hit()) * weight.hit();
+        total += (aaa.expertise() + bbb.expertise()) * weight.expertise();
+        total += (aaa.spirit() + bbb.spirit()) * weight.spirit();
         return total;
     }
 

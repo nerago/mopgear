@@ -41,7 +41,7 @@ public class SolverIndexed {
     }
 
     private static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount) {
-        Stream<Long> dumbStream = generateDumbStream(comboCount, 1).parallel();
+        Stream<Long> dumbStream = generateDumbStream(comboCount).parallel();
         return dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
     }
 
@@ -63,7 +63,6 @@ public class SolverIndexed {
     }
 
     private static ItemSet makeSet(EquipOptionsMap itemOptions, StatBlock adjustment, BigInteger mainIndex) {
-//        System.out.println(mainIndex);
         EquipMap map = EquipMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] list = itemOptions.get(slot);
@@ -79,14 +78,11 @@ public class SolverIndexed {
                 map.put(slot, choice);
             }
         }
-
-        ItemSet set = ItemSet.manyItems(map, adjustment);
-//        System.out.println(set.items.get(SlotEquip.Ring1) + " "  + set.items.get(SlotEquip.Ring2));
-        return set;
+        return ItemSet.manyItems(map, adjustment);
     }
 
-    private static Stream<Long> generateDumbStream(long max, long skip) {
-        return Stream.iterate(0L, x -> x < max, x -> x + skip);
+    private static Stream<Long> generateDumbStream(long max) {
+        return Stream.iterate(0L, x -> x < max, x -> x + 1);
     }
 
     private static Stream<BigInteger> generateDumbStream(BigInteger max, BigInteger skip) {

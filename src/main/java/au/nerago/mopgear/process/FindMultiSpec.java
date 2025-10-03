@@ -19,9 +19,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
 //    private static final int TARGET_COMBO_COUNT = 320000;
-    @SuppressWarnings("FieldCanBeLocal")
     private static final long individualRunSizeMultiply = 1L;
-    @SuppressWarnings("FieldCanBeLocal")
     private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();

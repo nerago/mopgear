@@ -63,7 +63,7 @@ public class ArrayUtil {
         }
     }
 
-    public static <T> T[] concat(T[]... components) {
+    public static <T> T[] concat(T[][] components) {
         if (components.length == 0)
             throw new IllegalArgumentException();
         int newLen = 0;

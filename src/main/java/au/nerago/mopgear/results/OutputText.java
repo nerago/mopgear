@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
+@SuppressWarnings("resource")
 public class OutputText {
     private static PrintWriter writer;
 

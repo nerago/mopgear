@@ -30,8 +30,7 @@ public class SolverCapPhased {
         fullItems = items;
         skinnyOptions = convertToSkinny(items);
 
-        long estimate = BigStreamUtil.estimateSets(skinnyOptions);
-        return estimate;
+        return BigStreamUtil.estimateSets(skinnyOptions);
     }
 
     public Optional<ItemSet> runSolver(boolean parallel, Predicate<ItemSet> specialFilter, Long topCombosMultiply) {

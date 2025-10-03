@@ -9,7 +9,6 @@ import au.nerago.mopgear.model.ModelCombined;
 import java.time.Instant;
 import java.util.function.Predicate;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class JobInput {
     public final PrintRecorder printRecorder = new PrintRecorder();
 

@@ -10,14 +10,6 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
 public class StatRequirements {
-//    private StatRequirements(int hit, int expertise, int exceed, boolean combine) {
-//        hitMin = hit;
-//        hitMax = hit + exceed;
-//        expertiseMin = expertise;
-//        expertiseMax = expertise + exceed;
-//        combineHitLike = combine;
-//    }
-
     public StatRequirements(int hitMin, int hitMax, int expertiseMin, int expertiseMax, boolean combineHitLike) {
         this.hitMin = hitMin;
         this.hitMax = hitMax;
@@ -114,19 +106,19 @@ public class StatRequirements {
 
     public int effectiveHit(StatBlock totals) {
         return hitMin == 0 ? 0
-                : combineHitLike ? totals.hit + totals.expertise + totals.spirit
-                : totals.hit;
+                : combineHitLike ? totals.hit() + totals.expertise() + totals.spirit()
+                : totals.hit();
     }
 
     public int effectiveHit(ItemData item) {
         if (hitMin == 0) {
             return 0;
         } else if (combineHitLike) {
-            return item.stat.hit + item.statFixed.hit +
-                   item.stat.expertise + item.statFixed.expertise +
-                   item.stat.spirit + item.statFixed.spirit;
+            return item.stat.hit() + item.statFixed.hit() +
+                   item.stat.expertise() + item.statFixed.expertise() +
+                   item.stat.spirit() + item.statFixed.spirit();
         } else {
-            return item.stat.hit + item.statFixed.hit;
+            return item.stat.hit() + item.statFixed.hit();
         }
     }
 
@@ -134,23 +126,15 @@ public class StatRequirements {
         if (combineHitLike || !hasExpertiseRange()) {
             return 0;
         } else {
-            return item.stat.expertise + item.statFixed.expertise;
+            return item.stat.expertise() + item.statFixed.expertise();
         }
     }
 
     public ToIntFunction<StatBlock> effectiveHitFunc() {
         return combineHitLike
-                ? totals -> totals.hit + totals.expertise + totals.spirit
-                : totals -> totals.hit;
+                ? totals -> totals.hit() + totals.expertise() + totals.spirit()
+                : totals -> totals.hit();
     }
-
-//    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
-//        return stream.filter(this::filter);
-//    }
-//
-//    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
-//        return stream.filter(set -> inRangeMax(set.getTotals()) && noDuplicates(set.items));
-//    }
 
     public boolean filter(ItemSet set) {
         return inRange(set.getTotals()) && set.validate();
@@ -164,7 +148,7 @@ public class StatRequirements {
                 return false;
         }
         if (expertiseMin != 0) {
-            if (totals.expertise < expertiseMin || totals.expertise > expertiseMax)
+            if (totals.expertise() < expertiseMin || totals.expertise() > expertiseMax)
                 return false;
         }
         return true;
@@ -178,7 +162,7 @@ public class StatRequirements {
                 return false;
         }
         if (expertiseMax != Integer.MAX_VALUE) {
-            if (totals.expertise > expertiseMax)
+            if (totals.expertise() > expertiseMax)
                 return false;
         }
         return true;
@@ -191,7 +175,7 @@ public class StatRequirements {
         if (minExp != 0 && maxExp != Integer.MAX_VALUE && minHit != 0 && maxHit != Integer.MAX_VALUE) {
             return setStream.filter(set -> {
                 StatBlock stats = set.getTotals();
-                int hit = stats.hit, expertise = stats.expertise;
+                int hit = stats.hit(), expertise = stats.expertise();
                 return hit >= minHit && hit <= maxHit && expertise >= minExp && expertise <= maxExp;
             });
         }
@@ -200,19 +184,19 @@ public class StatRequirements {
             if (minHit != 0 && maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
                     StatBlock stats = set.getTotals();
-                    int hit = stats.hit + stats.expertise + stats.spirit;
+                    int hit = stats.hit() + stats.expertise() + stats.spirit();
                     return hit >= minHit && hit <= maxHit;
                 });
             } else if (minHit != 0) {
                 setStream = setStream.filter(set -> {
                     StatBlock stats = set.getTotals();
-                    int hit = stats.hit + stats.expertise + stats.spirit;
+                    int hit = stats.hit() + stats.expertise() + stats.spirit();
                     return hit >= minHit;
                 });
             } else if (maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
                     StatBlock stats = set.getTotals();
-                    int hit = stats.hit + stats.expertise + stats.spirit;
+                    int hit = stats.hit() + stats.expertise() + stats.spirit();
                     return hit <= maxHit;
                 });
             }
@@ -220,19 +204,19 @@ public class StatRequirements {
             if (minHit != 0 && maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
                     StatBlock stats = set.getTotals();
-                    int hit = stats.hit;
+                    int hit = stats.hit();
                     return hit >= minHit && hit <= maxHit;
                 });
             } else if (minHit != 0) {
                 setStream = setStream.filter(set -> {
                     StatBlock stats = set.getTotals();
-                    int hit = stats.hit;
+                    int hit = stats.hit();
                     return hit >= minHit;
                 });
             } else if (maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
                     StatBlock stats = set.getTotals();
-                    int hit = stats.hit;
+                    int hit = stats.hit();
                     return hit <= maxHit;
                 });
             }
@@ -241,19 +225,19 @@ public class StatRequirements {
         if (minExp != 0 && maxExp != Integer.MAX_VALUE) {
             setStream = setStream.filter(set -> {
                 StatBlock stats = set.getTotals();
-                int expertise = stats.expertise;
+                int expertise = stats.expertise();
                 return expertise >= minExp && expertise <= maxExp;
             });
         } else if (minExp != 0) {
             setStream = setStream.filter(set -> {
                 StatBlock stats = set.getTotals();
-                int expertise = stats.expertise;
+                int expertise = stats.expertise();
                 return expertise >= minExp;
             });
         } else if (maxExp != Integer.MAX_VALUE) {
             setStream = setStream.filter(set -> {
                 StatBlock stats = set.getTotals();
-                int expertise = stats.expertise;
+                int expertise = stats.expertise();
                 return expertise <= maxExp;
             });
         }
@@ -269,7 +253,7 @@ public class StatRequirements {
             if (maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
                     StatBlock stats = set.getTotals();
-                    int hit = stats.hit + stats.expertise + stats.spirit;
+                    int hit = stats.hit() + stats.expertise() + stats.spirit();
                     return hit <= maxHit;
                 });
             }
@@ -277,7 +261,7 @@ public class StatRequirements {
             if (maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
                     StatBlock stats = set.getTotals();
-                    int hit = stats.hit;
+                    int hit = stats.hit();
                     return hit <= maxHit;
                 });
             }
@@ -286,7 +270,7 @@ public class StatRequirements {
         if (maxExp != Integer.MAX_VALUE) {
             setStream = setStream.filter(set -> {
                 StatBlock stats = set.getTotals();
-                int expertise = stats.expertise;
+                int expertise = stats.expertise();
                 return expertise <= maxExp;
             });
         }

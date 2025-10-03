@@ -70,9 +70,8 @@ public class ItemMapUtil {
 
     public static EquipOptionsMap upgradeAllTo2(EquipOptionsMap baseItems) {
         EquipOptionsMap result = EquipOptionsMap.empty();
-        baseItems.forEachPair((slot, itemArray) -> {
-            result.put(slot, ArrayUtil.mapAsNew(itemArray, ItemMapUtil::upgradeItemTo2, ItemData[]::new));
-        });
+        baseItems.forEachPair((slot, itemArray) ->
+                result.put(slot, ArrayUtil.mapAsNew(itemArray, ItemMapUtil::upgradeItemTo2, ItemData[]::new)));
         return result;
     }
 
