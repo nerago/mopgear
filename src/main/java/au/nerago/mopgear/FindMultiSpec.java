@@ -35,15 +35,17 @@ public class FindMultiSpec {
         overrideEnchant.put(id, stats);
     }
 
-    public void addSpec(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems, boolean challengeScale, Map<Integer, Integer> duplicatedItem) {
-        specs.add(new SpecDetails(label, gearFile, model, ratingMultiply, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems, challengeScale, duplicatedItem));
+    public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+        SpecDetails spec = new SpecDetails(label, gearFile, model, ratingMultiply, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
+        specs.add(spec);
+        return spec;
     }
 
     public void suppressSlotCheck(int id) {
         suppressSlotCheck.add(id);
     }
 
-    public void solve(Instant startTime, long targetComboCount) {
+    public void solve(long targetComboCount) {
         OutputText.println("PREPARING SPECS");
         for (SpecDetails spec : specs) {
             spec.prepareA(specs);
@@ -53,12 +55,15 @@ public class FindMultiSpec {
         }
 
         validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
+        OutputText.println();
 
         OutputText.println("PREPARING BASELINE SPEC RUNS");
         specs.stream().parallel().forEach(this::optimalWithoutCommon);
+        OutputText.println();
 
         OutputText.println("PREPARING COMMON ITEMS");
         Map<ItemRef, List<ItemData>> commonMap = commonInMultiSet(specs);
+        OutputText.println();
 
         long commonCombos = ItemUtil.estimateSets(commonMap);
         long skip;
@@ -75,6 +80,7 @@ public class FindMultiSpec {
         Stream<Map<ItemRef, ItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize);
         Stream<Map<ItemRef, ItemData>> commonStream = Stream.concat(commonStream1, commonStream2);
 
+        Instant startTime = Instant.now();
         commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 2, startTime, commonStream);
 
         Stream<ProposedResults> resultStream = commonStream
@@ -84,10 +90,14 @@ public class FindMultiSpec {
                 .parallel();
 
         OutputText.println("RUNNING");
-        Optional<ProposedResults> best = resultStream.collect(
-                new TopCollectorReporting<>(s -> multiRating(s.resultJobs, specs),
+        Optional<ProposedResults> best = resultStream
+                .filter(s -> checkGood(s.resultJobs, specs))
+                .collect(new TopCollectorReporting<>(
+                        s -> multiRating(s.resultJobs, specs),
                         s -> reportBetter(s.resultJobs, specs)));
         outputResultFinal(best, specs);
+
+        // TODO extra phase with revised common + common tweaker
     }
 
     private Map<ItemRef, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
@@ -151,8 +161,11 @@ public class FindMultiSpec {
         job.runSizeMultiply = individualRunSizeMultiply;
         job.hackAllow = hackAllow;
         Solver.runJob(job);
-        spec.optimalRating = spec.model.calcRating(job.resultSet.orElseThrow());
-        OutputText.printf("%s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
+
+        ItemSet set = job.resultSet.orElseThrow();
+        spec.optimalRating = job.resultRating;
+        OutputText.printf("BASELINE %s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
+        set.outputSet(spec.model);
     }
 
     private static List<ItemData> commonForges(List<ItemData> prior, List<ItemData> forges) {
@@ -259,12 +272,31 @@ public class FindMultiSpec {
         }
     }
 
+    private boolean checkGood(List<JobInfo> resultJobs, List<SpecDetails> specList) {
+        for (int i = 0; i < resultJobs.size(); ++i) {
+            JobInfo job = resultJobs.get(i);
+            SpecDetails spec = specList.get(i);
+            long jobRating = job.resultRating;
+
+            if (job.resultSet.isEmpty())
+                return false;
+
+            if (spec.worstCommonPenalty != 0) {
+                double penalty = jobRating / spec.optimalRating * 100.0;
+                if (penalty < spec.worstCommonPenalty)
+                    return false;
+            }
+        }
+        return true;
+    }
+
     private long multiRating(List<JobInfo> resultJobs, List<SpecDetails> specList) {
         long total = 0;
         for (int i = 0; i < resultJobs.size(); ++i) {
-            ItemSet set = resultJobs.get(i).resultSet.orElseThrow();
+            JobInfo job = resultJobs.get(i);
+//            ItemSet set = job.resultSet.orElseThrow();
             SpecDetails spec = specList.get(i);
-            long specRating = spec.model.calcRating(set);
+            long specRating = job.resultRating;
             total += specRating * spec.ratingMultiply;
         }
         return total;
@@ -315,7 +347,7 @@ public class FindMultiSpec {
                 OutputText.println("DRAFTDRAFTDRAFT");
                 JobInfo draftJob = resultJobs.get(i);
                 ItemSet draftSet = draftJob.resultSet.orElseThrow();
-                double draftSpecRating = spec.model.calcRating(draftSet);
+                double draftSpecRating = draftJob.resultRating;
                 draftJob.printRecorder.outputNow();
                 draftSet.outputSet(spec.model);
                 AsWowSimJson.writeToOut(draftSet.items);
@@ -323,7 +355,7 @@ public class FindMultiSpec {
                 OutputText.println("REVISEDREVISEDREVISED");
                 JobInfo revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal);
                 ItemSet revisedSet = revisedJob.resultSet.orElseThrow();
-                double revisedSpecRating = spec.model.calcRating(revisedSet);
+                double revisedSpecRating = revisedJob.resultRating;
                 if (revisedSpecRating > draftSpecRating) {
                     revisedJob.printRecorder.outputNow();
                     revisedSet.outputSet(spec.model);
@@ -341,7 +373,21 @@ public class FindMultiSpec {
         }
     }
 
-    private class SpecDetails {
+    public interface SpecDetailsInterface {
+        boolean isChallengeScale();
+
+        SpecDetailsInterface setChallengeScale(boolean challengeScale);
+
+        Map<Integer, Integer> getDuplicatedItems();
+
+        SpecDetailsInterface setDuplicatedItems(Map<Integer, Integer> duplicatedItems);
+
+        double getWorstCommonPenalty();
+
+        SpecDetailsInterface setWorstCommonPenalty(double penalty);
+    }
+
+    private class SpecDetails implements SpecDetailsInterface {
         final String label;
         final Path gearFile;
         final ModelCombined model;
@@ -349,12 +395,13 @@ public class FindMultiSpec {
         final int[] extraItems;
         final int extraItemsUpgradeLevel;
         final boolean upgradeCurrentItems;
-        final boolean challengeScale;
-        final Map<Integer, Integer> duplicatedItems;
+        boolean challengeScale;
+        double worstCommonPenalty;
+        Map<Integer, Integer> duplicatedItems;
         double optimalRating;
         EquipOptionsMap itemOptions;
 
-        private SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems, boolean challengeScale, Map<Integer, Integer> remapDuplicateId) {
+        private SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
             this.label = label;
             this.gearFile = gearFile;
             this.model = model;
@@ -362,8 +409,39 @@ public class FindMultiSpec {
             this.extraItems = extraItems;
             this.extraItemsUpgradeLevel = extraItemsUpgradeLevel;
             this.upgradeCurrentItems = upgradeCurrentItems;
+        }
+
+        @Override
+        public boolean isChallengeScale() {
+            return challengeScale;
+        }
+
+        @Override
+        public SpecDetailsInterface setChallengeScale(boolean challengeScale) {
             this.challengeScale = challengeScale;
-            this.duplicatedItems = remapDuplicateId;
+            return this;
+        }
+
+        @Override
+        public Map<Integer, Integer> getDuplicatedItems() {
+            return duplicatedItems;
+        }
+
+        @Override
+        public SpecDetailsInterface setDuplicatedItems(Map<Integer, Integer> duplicatedItems) {
+            this.duplicatedItems = duplicatedItems;
+            return this;
+        }
+
+        @Override
+        public double getWorstCommonPenalty() {
+            return worstCommonPenalty;
+        }
+
+        @Override
+        public SpecDetailsInterface setWorstCommonPenalty(double penalty) {
+            worstCommonPenalty = penalty;
+            return this;
         }
 
         public void prepareA(List<SpecDetails> allSpecs) {
@@ -387,7 +465,9 @@ public class FindMultiSpec {
         }
 
         private void remapDuplicates() {
-            itemOptions.forEachPair((slot, array) -> ArrayUtil.mapInPlace(array, this::remapDuplicate));
+            if (duplicatedItems != null) {
+                itemOptions.forEachPair((slot, array) -> ArrayUtil.mapInPlace(array, this::remapDuplicate));
+            }
         }
 
         private ItemData remapDuplicate(ItemData itemData) {

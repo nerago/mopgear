@@ -23,13 +23,13 @@ public class BigStreamUtil {
 
     public static <T> Stream<T> countProgress(long estimate, Instant startTime, Stream<T> inputStream) {
         final double percentMultiply = 100.0 / estimate;
-        final long reportFrequency = chooseReportFrequency(estimate);
+        final long reportFrequency = chooseReportFrequency(estimate, 1000000, 100000000);
         return coreCount(reportFrequency, percentMultiply, startTime, inputStream);
     }
 
     public static <T> Stream<T> countProgressSmall(long estimate, Instant startTime, Stream<T> inputStream) {
         final double percentMultiply = 100.0 / estimate;
-        final long reportFrequency = 100;
+        final long reportFrequency = chooseReportFrequency(estimate, 100, 10000);
         return coreCount(reportFrequency, percentMultiply, startTime, inputStream);
     }
 
@@ -52,7 +52,7 @@ public class BigStreamUtil {
         });
     }
 
-    private static long chooseReportFrequency(long estimate) {
+    private static long chooseReportFrequency(long estimate, long min, long max) {
         long freq = Math.round(estimate / 100.0);
         int digitCount = 0;
         while (freq >= 10) {
@@ -62,16 +62,15 @@ public class BigStreamUtil {
         for (int i = 0; i < digitCount; ++i) {
             freq *= 10;
         }
-        freq = Math.max(freq, 1000000);
-        freq = Math.min(freq, 100000000);
+        freq = Math.clamp(freq, min, max);
         return freq;
     }
 
     private static long chooseReportFrequency(BigInteger estimate) {
         if (estimate.compareTo(BigInteger.valueOf(Long.MAX_VALUE / 2)) > 0) {
-            return chooseReportFrequency(Long.MAX_VALUE / 2);
+            return chooseReportFrequency(Long.MAX_VALUE / 2, 100, 100000000);
         } else {
-            return chooseReportFrequency(estimate.longValueExact());
+            return chooseReportFrequency(estimate.longValueExact(), 100, 100000000);
         }
     }
 

@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 public class JobInfo {
     public final PrintRecorder printRecorder = new PrintRecorder();
     public Optional<ItemSet> resultSet;
+    public long resultRating;
     public boolean hackAllow;
     public int hackCount;
     public ModelCombined model;

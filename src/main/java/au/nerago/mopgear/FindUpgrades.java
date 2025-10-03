@@ -83,7 +83,7 @@ public class FindUpgrades {
 
         Optional<ItemSet> baseSet = job.resultSet;
         if (baseSet.isPresent()) {
-            double baseRating = model.calcRating(baseSet.get());
+            double baseRating = job.resultRating;
             OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.get().totals, baseRating);
 
             return baseRating;
@@ -212,7 +212,7 @@ public class FindUpgrades {
         job.printRecorder.outputNow();
         if (resultSet.isPresent()) {
             OutputText.println("SET STATS " + resultSet.get().totals);
-            double extraRating = job.model.calcRating(resultSet.get());
+            double extraRating = job.resultRating;
             double factor = extraRating / baseRating;
             OutputText.printf("UPGRADE RATING = %.0f FACTOR = %1.3f\n", extraRating, factor);
             job.factor = factor;

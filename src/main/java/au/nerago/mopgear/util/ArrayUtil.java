@@ -129,8 +129,9 @@ public class ArrayUtil {
     }
 
     public static ItemData rand(List<ItemData> itemList, Random random) {
-        if (itemList.size() > 1)
-            return itemList.get(random.nextInt(itemList.size()));
+        int size = itemList.size();
+        if (size > 1)
+            return itemList.get(random.nextInt(size));
         else
             return itemList.getFirst();
     }

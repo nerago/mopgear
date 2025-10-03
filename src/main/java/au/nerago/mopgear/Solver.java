@@ -61,6 +61,9 @@ public class Solver {
         }
 
         job.resultSet = proposed.map(itemSet -> Tweaker.tweak(itemSet, model, itemOptions));
+        if (!proposed.isEmpty()) {
+            job.resultRating = model.calcRating(proposed.get());
+        }
         return job;
     }
 

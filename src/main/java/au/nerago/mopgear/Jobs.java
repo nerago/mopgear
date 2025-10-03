@@ -360,9 +360,9 @@ public class Jobs {
         FindStatRange.checkSetReportOnly(model, runItems, job);
     }
 
-    public static void paladinMultiSpecSolve(Instant startTime) {
+    public static void paladinMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec();
-        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+//        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
 //        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
@@ -387,64 +387,63 @@ public class Jobs {
 //        multi.addFixedForge(84910, new ReforgeRecipe(Mastery, Haste)); // Shield
 //        multi.addFixedForge(8607, new ReforgeRecipe(Mastery, Haste)); // Shield
 
-        int extraUpgrade = 0;
-        boolean preUpgrade = false;
+        int extraUpgrade = 2;
+        boolean preUpgrade = true;
 
         multi.addSpec(
                 "RET",
                 DataLocation.gearRetFile,
                 ModelCombined.extendedRetModel(true, false),
-                4227,
+                2113,
                 new int[]{
 //                        88862, // tankiss
-//                        86742, // jasper clawfeet
 //                        84950, // pvp belt
-//                        89954, // warbelt pods
-//                        87060, // star-stealer waist
-//                        84949, // mal glad girdle accuracy
-//                        89280, // voice helm
-//                        87024, // null greathelm,
+//                        87024, // null greathelm
 //                        87036, // heroic soulgrasp
 //                        87026, // heroic peacock cloak
-//                        86822, // celestial overwhelm assault belt
 //                        86799, // starshatter
 //                        86905, // shinka
 //                        86880, // dread shadow ring
 //                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
+
+                        // possibly useful
+                        89954, // warbelt pods
+                        84949, // mal glad girdle accuracy
+                        89280, // voice helm
+                        86822, // celestial overwhelm assault belt
+                        87015, // clawfeet
                 },
                 extraUpgrade,
-                preUpgrade,
-                false,
-                Map.of()
+                preUpgrade
         );
 
         multi.addSpec(
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 ModelCombined.damageProtModel(),
-                676,
+                799,
                 new int[]{
 //                        84870, // pvp legs
 //                        86682, // white tiger gloves
 //                        86680, // white tiger legs
 //                        84949 // mal glad girdle accuracy
 //                        87026, // heroic peacock cloak
-                        86075, // steelskin basic
+//                        86075, // steelskin basic
 //                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
+//                        87015, // clawfeet
+//                        87062 // elegion heroic
                 },
                 extraUpgrade,
-                preUpgrade,
-                false,
-                Map.of()
-        );
+                preUpgrade
+        ).setWorstCommonPenalty(99.8);
 
         multi.addSpec(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 ModelCombined.defenceProtModel(),
-                241,
+                145,
                 new int[]{
 //                        89280, // voice amp
 ////                        87024, // null greathelm
@@ -456,24 +455,26 @@ public class Jobs {
 //                        90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
 //                        87036, // heroic soulgrasp
-                        87026, // heroic peacock cloak
+//                        87026, // heroic peacock cloak
 //                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
+//                        87015, // clawfeet
+//                        87062 // elegion heroic
                 },
                 extraUpgrade,
-                preUpgrade,
-                false,
-                Map.of(89934, 1)
-        );
+                preUpgrade
+        ).setDuplicatedItems(Map.of(89934, 1))
+                .setWorstCommonPenalty(99.5);
 
-        multi.suppressSlotCheck(86880);
+//        multi.suppressSlotCheck(86880);
 
-        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
+//        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-        multi.solve(startTime, 920000);
+        multi.solve(50000);
+//        multi.solve(820000);
     }
 
-    public static void druidMultiSpecSolve(Instant startTime) {
+    public static void druidMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec();
 
         multi.addSpec(
@@ -483,14 +484,13 @@ public class Jobs {
                 400,
                 new int[]{
 //                        86909 // regail dagger
-                        86694, // Eternal Blossom Mantle
-                        88885, // Clever Ashyo's Armbands
+//                        86694, // Eternal Blossom Mantle
+//                        88885, // Clever Ashyo's Armbands
                         86748, // Cape of Three Lanterns
+//                        89078, // sagewhisper cloak
                 },
                 0,
-                false,
-                false,
-                Map.of()
+                false
         );
 
         multi.addSpec(
@@ -502,14 +502,16 @@ public class Jobs {
 //                        86909 // regail dagger
                         88885, // Clever Ashyo's Armbands
                         86810, // Worldwaker Cabochon
+//                        89078, // sagewhisper cloak
                 },
                 0,
-                false,
-                false,
-                Map.of()
+                false
         );
 
-        multi.solve(startTime, 2000);
+        multi.overrideEnchant(86865, StatBlock.empty); // no sha gem
+        multi.overrideEnchant(86893, StatBlock.empty); // no sha gem
+
+        multi.solve(3000);
     }
 
     public static void compareBestReforgesWithCommon(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> commonOne, Map<Integer, List<ReforgeRecipe>> commonTwo) {
@@ -562,6 +564,15 @@ public class Jobs {
         OutputText.printf("RET        %,d\n", (long)rateRet);
         OutputText.println();
 
+        OutputText.printf("damageProtModel 15%% mitigation, 85%% dps\n");
+        long dmgMultiplyA = Math.round(targetCombined * 0.15 / rateMitigation);
+        long dmgMultiplyB = Math.round(targetCombined * 0.85 / rateTankDps);
+        OutputText.printf("USE mitigation %d dps %d\n", dmgMultiplyA, dmgMultiplyB);
+        double dmgTotal = dmgMultiplyA * rateMitigation + dmgMultiplyB * rateTankDps;
+        OutputText.printf("EFFECTIVE %.2f %.2f\n\n",
+                dmgMultiplyA * rateMitigation / dmgTotal,
+                dmgMultiplyB * rateTankDps / dmgTotal);
+
         OutputText.printf("defenceProtModel 90%% mitigation, 10%% dps\n");
         long defMultiplyA = Math.round(targetCombined * 0.9 / rateMitigation);
         long defMultiplyB = Math.round(targetCombined * 0.1 / rateTankDps);
@@ -571,27 +582,17 @@ public class Jobs {
                 defMultiplyA * rateMitigation / defTotal,
                 defMultiplyB * rateTankDps / defTotal);
 
-
-        OutputText.printf("damageProtModel 10%% mitigation, 90%% dps\n");
-        long dmgMultiplyA = Math.round(targetCombined * 0.1 / rateMitigation);
-        long dmgMultiplyB = Math.round(targetCombined * 0.9 / rateTankDps);
-        OutputText.printf("USE mitigation %d dps %d\n", dmgMultiplyA, dmgMultiplyB);
-        double dmgTotal = dmgMultiplyA * rateMitigation + dmgMultiplyB * rateTankDps;
-        OutputText.printf("EFFECTIVE %.2f %.2f\n\n",
-                dmgMultiplyA * rateMitigation / dmgTotal,
-                dmgMultiplyB * rateTankDps / dmgTotal);
-
         long multiTargetCombined = 1000000000000L;
-        OutputText.printf("multiSpec 10%% ret 30%% mitigation 70%% dmg_tank\n");
-        long multiA = Math.round(multiTargetCombined * 0.1 / rateRet);
-        long multiB = Math.round(multiTargetCombined * 0.25 / defTotal);
-        long multiC = Math.round(multiTargetCombined * 0.65 / dmgTotal);
-        OutputText.printf("USE ret %d mitigation %d dmg_tank %d\n", multiA, multiB, multiC);
-        double multiTotal = multiA * rateRet + multiB * defTotal + multiC * dmgTotal;
+        OutputText.printf("multiSpec 5%% ret 80%% dmg_tank 15%% mitigation\n");
+        long multiA = Math.round(multiTargetCombined * 0.05 / rateRet);
+        long multiB = Math.round(multiTargetCombined * 0.80 / dmgTotal);
+        long multiC = Math.round(multiTargetCombined * 0.15 / defTotal);
+        OutputText.printf("USE ret %d dmg_tank %d mitigation %d \n", multiA, multiB, multiC);
+        double multiTotal = multiA * rateRet + multiB * dmgTotal + multiC * defTotal;
         OutputText.printf("EFFECTIVE %.2f %.2f %.2f\n\n",
                 multiA * rateRet / multiTotal,
-                multiB * defTotal / multiTotal,
-                multiC * dmgTotal / multiTotal);
+                multiB * dmgTotal / multiTotal,
+                multiC * defTotal / multiTotal);
     }
 
     private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req) {

@@ -86,7 +86,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 1, statDps, 25, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 2, statDps, 24, standardGems);
         StatRequirements statRequirements = StatRequirements.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.prot();
