@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public class SolverCapPhased {
     public static final int TOP_HIT_COMBO_FILTER = 400;
     private final ModelCombined model;
-    private final StatRequirements.StatRequirementsSkinnyCompat requirements;
+    private final StatRequirements.StatRequirementsSkinnySupport requirements;
     private final StatBlock adjustment;
     private final PrintRecorder printRecorder;
     private EquipOptionsMap fullItems;
@@ -24,13 +24,13 @@ public class SolverCapPhased {
         if (!supportedModel(model))
             throw new IllegalArgumentException("can't use this model without skinny support");
         this.model = model;
-        this.requirements = (StatRequirements.StatRequirementsSkinnyCompat) model.statRequirements();
+        this.requirements = (StatRequirements.StatRequirementsSkinnySupport) model.statRequirements();
         this.adjustment = adjustment;
         this.printRecorder = printRecorder;
     }
 
     public static boolean supportedModel(ModelCombined model) {
-        return (model.statRequirements() instanceof StatRequirements.StatRequirementsSkinnyCompat);
+        return (model.statRequirements() instanceof StatRequirements.StatRequirementsSkinnySupport);
     }
 
     public long initAndCheckSizes(EquipOptionsMap items) {
@@ -64,7 +64,7 @@ public class SolverCapPhased {
         if (topCombosMultiply != null) {
             int actualTop = (int) (topCombosMultiply * TOP_HIT_COMBO_FILTER);
             printRecorder.printf("SKINNY COMBOS TOO BIG JUST CONSIDERING %,d\n", actualTop);
-            ToLongFunction<SkinnyItemSet> ratingFunc = ss -> ss.totalHit + ss.totalExpertise;
+            ToLongFunction<SkinnyItemSet> ratingFunc = is -> is.totalOne() + is.totalTwo();
 
 //            filteredSets = filteredSets.filter(new BottomNFilter<>(actualTop, ratingFunc));
 
@@ -79,19 +79,16 @@ public class SolverCapPhased {
     }
 
     private ItemSet makeFromSkinny(SkinnyItemSet skinnySet) {
-        StatRequirements.StatRequirementsSkinnyCompat statRequirements = requirements;
         EquipMap chosenItems = EquipMap.empty();
-        CurryQueue<SkinnyItem> itemQueue = skinnySet.items;
+        CurryQueue<SkinnyItem> itemQueue = skinnySet.items();
         while (itemQueue != null) {
             SkinnyItem skinny = itemQueue.item();
-            SlotEquip slot = skinny.slot;
+            SlotEquip slot = skinny.slot();
             ItemData[] fullSlotItems = fullItems.get(slot);
 
             BestHolder<ItemData> bestSlotItem = new BestHolder<>();
             for (ItemData item : fullSlotItems) {
-                int hit = statRequirements.effectiveHit(item);
-                int exp = statRequirements.effectiveExpertise(item);
-                if (skinny.hit == hit && skinny.expertise == exp) {
+                if (requirements.skinnyMatch(skinny, item)) {
                     long rating = model.statRatings().calcRating(item.stat, item.statFixed);
                     bestSlotItem.add(item, rating);
                 }
@@ -104,16 +101,13 @@ public class SolverCapPhased {
     }
 
     private List<SkinnyItem[]> convertToSkinny(EquipOptionsMap items) {
-        StatRequirements.StatRequirementsSkinnyCompat statRequirements = requirements;
         List<SkinnyItem[]> optionsList = new ArrayList<>();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] fullOptions = items.get(slot);
             if (fullOptions != null) {
                 HashSet<SkinnyItem> slotSet = new HashSet<>();
                 for (ItemData item : fullOptions) {
-                    int hit = statRequirements.effectiveHit(item);
-                    int expertise = statRequirements.effectiveExpertise(item);
-                    SkinnyItem skinny = new SkinnyItem(slot, hit, expertise);
+                    SkinnyItem skinny = requirements.toSkinny(slot, item);
                     slotSet.add(skinny);
                 }
                 SkinnyItem[] slotArray = slotSet.toArray(SkinnyItem[]::new);
@@ -143,10 +137,7 @@ public class SolverCapPhased {
     private Stream<SkinnyItemSet> addSlotToCombination(Stream<SkinnyItemSet> stream, SkinnyItem[] slotOptions) {
         return stream.mapMulti((set, next) -> {
             for (SkinnyItem item : slotOptions) {
-                next.accept(new SkinnyItemSet(
-                        set.totalHit + item.hit,
-                        set.totalExpertise + item.expertise,
-                        set.items().prepend(item)));
+                next.accept(set.withAddedItem(item));
             }
         });
     }
@@ -155,39 +146,8 @@ public class SolverCapPhased {
         final SkinnyItemSet[] initialSets = new SkinnyItemSet[slotOptions.length];
         for (int i = 0; i < slotOptions.length; ++i) {
             SkinnyItem item = slotOptions[i];
-            initialSets[i] = new SkinnyItemSet(item.hit, item.expertise, CurryQueue.single(item));
+            initialSets[i] = SkinnyItemSet.single(item);
         }
         return parallel ? ArrayUtil.arrayStream(initialSets) : Arrays.stream(initialSets);
-    }
-
-    public record SkinnyItem(SlotEquip slot, int hit, int expertise) {
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SkinnyItem that = (SkinnyItem) o;
-            return hit == that.hit && expertise == that.expertise && slot == that.slot;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(slot, hit, expertise);
-        }
-    }
-
-    public record SkinnyItemSet(int totalHit, int totalExpertise, CurryQueue<SkinnyItem> items) {
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SkinnyItemSet skinnySet = (SkinnyItemSet) o;
-            return totalHit == skinnySet.totalHit && totalExpertise == skinnySet.totalExpertise;
-        }
-
-        @Override
-        public int hashCode() {
-//            return Objects.hash(totalHit, totalExpertise, items);
-            return Objects.hash(totalHit, totalExpertise);
-        }
     }
 }

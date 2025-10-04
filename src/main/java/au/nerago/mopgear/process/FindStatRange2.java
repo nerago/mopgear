@@ -12,7 +12,7 @@ import au.nerago.mopgear.util.Tuple;
 
 public class FindStatRange2 {
     public static void checkSetReportOnly(ModelCombined model, EquipOptionsMap items, PrintRecorder job) {
-        if (model.statRequirements() instanceof StatRequirements.StatRequirementsHitExpertise requirements) {
+        if (model.statRequirements() instanceof StatRequirements.StatRequirementsWithHitExpertise requirements) {
             for (StatType statType : StatType.values()) {
                 Tuple.Tuple2<Integer, Integer> range = findRange(requirements, items, statType);
                 report(statType, range, requirements, job);
@@ -22,7 +22,7 @@ public class FindStatRange2 {
         }
     }
 
-    private static Tuple.Tuple2<Integer, Integer> findRange(StatRequirements.StatRequirementsHitExpertise requirements, EquipOptionsMap itemOptions, StatType statType) {
+    private static Tuple.Tuple2<Integer, Integer> findRange(StatRequirements.StatRequirementsWithHitExpertise requirements, EquipOptionsMap itemOptions, StatType statType) {
         LongHolder low = new LongHolder(), high = new LongHolder();
         itemOptions.forEachValue(array -> {
             LowHighHolder<ItemData> statRange = StatUtil.findMinMax(requirements, array, statType);
@@ -32,7 +32,7 @@ public class FindStatRange2 {
         return Tuple.create((int) low.value, (int) high.value);
     }
 
-    private static void report(StatType statType, Tuple.Tuple2<Integer, Integer> range, StatRequirements.StatRequirementsHitExpertise requirements, PrintRecorder job) {
+    private static void report(StatType statType, Tuple.Tuple2<Integer, Integer> range, StatRequirements.StatRequirementsWithHitExpertise requirements, PrintRecorder job) {
         int lowAvailable = range.a(), highAvailable = range.b();
         if (statType == StatType.Hit) {
             int minTarget = requirements.getMinimumHit(), maxTarget = requirements.getMaximumHit();

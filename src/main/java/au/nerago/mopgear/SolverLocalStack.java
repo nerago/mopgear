@@ -54,7 +54,7 @@ public class SolverLocalStack {
                     queue.addLast(new Step(nextIndex, prevSet.copyWithAddedItem(nextEntry.a(), item)));
                 }
             } else {
-                if (model.statRequirements().filter(prevSet)) {
+                if (model.filterOneSet(prevSet)) {
                     long rating = model.calcRating(prevSet);
                     best.add(prevSet, rating);
                 }

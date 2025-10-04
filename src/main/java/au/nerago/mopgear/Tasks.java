@@ -552,9 +552,9 @@ public class Tasks {
         EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
 
-        double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsOriginal.protFlexibleParry());
-        double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsOriginal.protFlexibleParry());
-        double rateRet = determineRatingMultipliersOne(retRet, itemsRet, StatRequirementsOriginal.ret());
+        double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry());
+        double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry());
+        double rateRet = determineRatingMultipliersOne(retRet, itemsRet, StatRequirementsHitExpertise.ret());
 
         double targetCombined = 1000000000;
 

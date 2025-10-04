@@ -6,7 +6,7 @@ import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.model.StatRequirementsOriginal;
+import au.nerago.mopgear.model.StatRequirementsHitExpertise;
 import au.nerago.mopgear.process.FindUpgrades;
 import au.nerago.mopgear.results.JobInput;
 import au.nerago.mopgear.results.JobOutput;
@@ -369,7 +369,7 @@ public class Main {
             }
         }
 
-        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsOriginal.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus());
+        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsHitExpertise.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus());
         Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null);
 
         OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");

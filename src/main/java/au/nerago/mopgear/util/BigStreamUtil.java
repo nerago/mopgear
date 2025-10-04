@@ -1,8 +1,8 @@
 package au.nerago.mopgear.util;
 
-import au.nerago.mopgear.SolverCapPhased;
 import au.nerago.mopgear.domain.EquipOptionsMap;
 import au.nerago.mopgear.domain.ItemSet;
+import au.nerago.mopgear.domain.SkinnyItem;
 import au.nerago.mopgear.model.ModelCombined;
 
 import java.math.BigInteger;
@@ -113,7 +113,7 @@ public class BigStreamUtil {
 //        return reforgedItems.entryStream().mapToLong(x -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
     }
 
-    public static long estimateSets(List<SolverCapPhased.SkinnyItem[]> skinnyOptions) {
+    public static long estimateSets(List<SkinnyItem[]> skinnyOptions) {
         return skinnyOptions.stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
     }
 

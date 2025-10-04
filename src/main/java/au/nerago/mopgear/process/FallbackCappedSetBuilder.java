@@ -18,20 +18,20 @@ public class FallbackCappedSetBuilder {
     public static Optional<ItemSet> fallbackLimits(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, JobOutput job) {
         job.println("NO SET FOUND USING NORMAL PROCESS");
 
-        @Nullable StatRequirements.StatRequirementsHitExpertise requirements =
-                model.statRequirements() instanceof StatRequirements.StatRequirementsHitExpertise
-                        ? (StatRequirements.StatRequirementsHitExpertise) model.statRequirements() : null;
+        @Nullable StatRequirements.StatRequirementsWithHitExpertise requirements =
+                model.statRequirements() instanceof StatRequirements.StatRequirementsWithHitExpertise
+                        ? (StatRequirements.StatRequirementsWithHitExpertise) model.statRequirements() : null;
 
         List<ItemSet> proposedList = setsAtLimits(itemOptions, adjustment, requirements);
         Optional<ItemSet> result = fallbackSimpleLimits(model, job, proposedList);
         if (result.isEmpty() && requirements != null) {
             // NOTE only works for some StatRequirements
-            result = fallbackLimitsWithAdjustment(job, proposedList, requirements, model.statRatings());
+            result = fallbackLimitsWithAdjustment(job, proposedList, model, requirements, model.statRatings());
         }
         return result;
     }
 
-    private static List<ItemSet> setsAtLimits(EquipOptionsMap itemOptions, StatBlock adjustment, @Nullable StatRequirements.StatRequirementsHitExpertise requirements) {
+    private static List<ItemSet> setsAtLimits(EquipOptionsMap itemOptions, StatBlock adjustment, @Nullable StatRequirements.StatRequirementsWithHitExpertise requirements) {
         List<ItemSet> setList = new ArrayList<>();
         for (StatType statType : StatType.values()) {
             findSets(itemOptions, adjustment, statType, setList, requirements);
@@ -40,7 +40,7 @@ public class FallbackCappedSetBuilder {
     }
 
     @SuppressWarnings("ConditionCoveredByFurtherCondition")
-    private static ItemSet adjustForCapsFinalSet(EquipMap setItems, PrintRecorder print, StatRatings ratings, @NotNull StatRequirements.StatRequirementsHitExpertise requirements) {
+    private static ItemSet adjustForCapsFinalSet(EquipMap setItems, PrintRecorder print, StatRatings ratings, @NotNull StatRequirements.StatRequirementsWithHitExpertise requirements) {
         StatBlock itemTotal = StatBlock.sum(setItems);
         StatBlock adjust = StatBlock.empty;
         StatType takeStat = ratings.bestNonHit(), giveStat = ratings.worstNonHit();
@@ -76,7 +76,7 @@ public class FallbackCappedSetBuilder {
         return ItemSet.manyItems(setItems, adjust);
     }
 
-    private static void findSets(EquipOptionsMap itemOptions, StatBlock adjustment, StatType statType, List<ItemSet> setList, @Nullable StatRequirements.StatRequirementsHitExpertise requirements) {
+    private static void findSets(EquipOptionsMap itemOptions, StatBlock adjustment, StatType statType, List<ItemSet> setList, @Nullable StatRequirements.StatRequirementsWithHitExpertise requirements) {
         Holder<ItemSet> lowSet = new Holder<>(), highSet = new Holder<>();
         itemOptions.forEachPair((slot, array) -> {
             LowHighHolder<ItemData> statRange = StatUtil.findMinMax(requirements, array, statType);
@@ -93,11 +93,10 @@ public class FallbackCappedSetBuilder {
     }
 
     private static Optional<ItemSet> fallbackSimpleLimits(ModelCombined model, JobOutput job, List<ItemSet> proposedList) {
-        StatRequirements requirements = model.statRequirements();
         BestHolder<ItemSet> bestHolder = new BestHolder<>();
 
         for (ItemSet set : proposedList) {
-            if (requirements.filter(set)) {
+            if (model.filterOneSet(set)) {
                 long rating = model.calcRating(set);
                 bestHolder.add(set, rating);
             }
@@ -113,7 +112,7 @@ public class FallbackCappedSetBuilder {
         }
     }
 
-    private static Optional<ItemSet> fallbackLimitsWithAdjustment(JobOutput job, List<ItemSet> proposedList, @NotNull StatRequirements.StatRequirementsHitExpertise requirements, StatRatings ratings) {
+    private static Optional<ItemSet> fallbackLimitsWithAdjustment(JobOutput job, List<ItemSet> proposedList, ModelCombined model, @NotNull StatRequirements.StatRequirementsWithHitExpertise requirements, StatRatings ratings) {
         BestHolder<Tuple.Tuple2<ItemSet, PrintRecorder>> bestHolder = new BestHolder<>();
 
         for (ItemSet set : proposedList) {
@@ -121,7 +120,7 @@ public class FallbackCappedSetBuilder {
 
             //noinspection deprecation
             ItemSet adjustedSet = adjustForCapsFinalSet(set.items.shallowClone(), print, ratings, requirements);
-            if (!requirements.filter(adjustedSet)) {
+            if (!model.filterOneSet(adjustedSet)) {
                 job.printf("ERROR adjust didn't fix caps " + set + " -> " + adjustedSet + " (or duplicate issues)");
                 continue;
             }

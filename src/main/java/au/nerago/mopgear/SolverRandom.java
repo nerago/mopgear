@@ -44,7 +44,7 @@ public class SolverRandom {
         BestHolder<ItemSet> best = new BestHolder<>();
         for (int i = 0; i < count; ++i) {
             ItemSet set = makeSet(items, adjustment, random);
-            if (require.filter(set) && (specialFilter == null || specialFilter.test(set))) {
+            if (model.filterOneSet(set) && (specialFilter == null || specialFilter.test(set))) {
                 best.add(set, model.calcRating(set));
             }
         }

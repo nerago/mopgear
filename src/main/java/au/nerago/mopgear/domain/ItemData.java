@@ -68,6 +68,10 @@ public final class ItemData {
             return stat.plus(statFixed);
     }
 
+    public int totalStat(StatType statType) {
+        return stat.get(statType) + stat.get(statType);
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{ ");

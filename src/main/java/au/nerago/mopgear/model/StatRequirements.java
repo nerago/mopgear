@@ -1,20 +1,17 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.SolverCapPhased;
-import au.nerago.mopgear.domain.ItemData;
-import au.nerago.mopgear.domain.ItemSet;
-import au.nerago.mopgear.domain.StatBlock;
+import au.nerago.mopgear.domain.*;
 
 import java.util.stream.Stream;
 
 public interface StatRequirements {
-    boolean filter(ItemSet set);
+    boolean filterOneSet(ItemSet set);
 
-    Stream<ItemSet> filterSets(Stream<ItemSet> setStream);
+    Stream<ItemSet> filterSets(Stream<ItemSet> stream);
 
-    Stream<ItemSet> filterSetsMax(Stream<ItemSet> setStream);
+    Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream);
 
-    interface StatRequirementsHitExpertise extends StatRequirements {
+    interface StatRequirementsWithHitExpertise extends StatRequirements {
         int effectiveHit(StatBlock totals);
 
         int getMinimumHit();
@@ -26,13 +23,23 @@ public interface StatRequirements {
         int getMaximumExpertise();
     }
 
-    interface StatRequirementsSkinnyCompat {
-        int effectiveHit(ItemData item);
+    interface StatRequirementsSkinnySupport extends StatRequirements {
+        Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> stream);
 
-        int effectiveExpertise(ItemData item);
+        Stream<SkinnyItemSet> filterSetsMaxSkinny(Stream<SkinnyItemSet> stream);
 
-        Stream<SolverCapPhased.SkinnyItemSet> filterSetsSkinny(Stream<SolverCapPhased.SkinnyItemSet> setStream);
+        boolean skinnyMatch(SkinnyItem skinny, ItemData item);
 
-        Stream<SolverCapPhased.SkinnyItemSet> filterSetsMaxSkinny(Stream<SolverCapPhased.SkinnyItemSet> setStream);
+        SkinnyItem toSkinny(SlotEquip slot, ItemData item);
     }
+
+    double RATING_PER_PERCENT = 339.9534;
+    int TARGET_RATING_CAST_DUNGEON = (int) Math.ceil(RATING_PER_PERCENT * 12); // 4080
+    double TARGET_PERCENT_MELEE = 7.5;
+    int TARGET_RATING_MELEE = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_MELEE); // 2550
+    double TARGET_PERCENT_TANK = 15;
+    int TARGET_RATING_TANK = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_TANK); // 5100
+    double TARGET_PERCENT_CAST = 15;
+    int TARGET_RATING_CAST = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_CAST); // 5100
+    int DEFAULT_CAP_ALLOW_EXCEED = 400;
 }

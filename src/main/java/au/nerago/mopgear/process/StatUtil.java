@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.ToIntFunction;
 
 public class StatUtil {
-    public static LowHighHolder<ItemData> findMinMax(@Nullable StatRequirements.StatRequirementsHitExpertise requirements, ItemData[] itemArray, StatType statType) {
+    public static LowHighHolder<ItemData> findMinMax(@Nullable StatRequirements.StatRequirementsWithHitExpertise requirements, ItemData[] itemArray, StatType statType) {
         if (statType == StatType.Hit && requirements != null)
             return findMinMaxHit(itemArray, requirements::effectiveHit);
         else

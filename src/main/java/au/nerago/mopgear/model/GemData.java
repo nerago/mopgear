@@ -135,7 +135,7 @@ public class GemData {
         map.put(4806, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0)); // caster shoulder
         map.put(4443, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)); // weapon
         map.put(4420, new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0, 0)); // chest stam
-        map.put(4421, new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0));// cloak hit
+        map.put(4421, new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0));// cloak one
         map.put(4993, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 170, 0));// shield
         map.put(4823, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// leg dps
         map.put(4429, new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0));// panda feet
