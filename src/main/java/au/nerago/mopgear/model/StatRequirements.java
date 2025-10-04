@@ -8,27 +8,31 @@ import au.nerago.mopgear.domain.StatBlock;
 import java.util.stream.Stream;
 
 public interface StatRequirements {
-    int effectiveHit(StatBlock totals);
-
-    int effectiveHit(ItemData item);
-
-    int effectiveExpertise(ItemData item);
-
     boolean filter(ItemSet set);
 
     Stream<ItemSet> filterSets(Stream<ItemSet> setStream);
 
     Stream<ItemSet> filterSetsMax(Stream<ItemSet> setStream);
 
-    Stream<SolverCapPhased.SkinnyItemSet> filterSetsSkinny(Stream<SolverCapPhased.SkinnyItemSet> setStream);
+    interface StatRequirementsHitExpertise extends StatRequirements {
+        int effectiveHit(StatBlock totals);
 
-    Stream<SolverCapPhased.SkinnyItemSet> filterSetsMaxSkinny(Stream<SolverCapPhased.SkinnyItemSet> setStream);
+        int getMinimumHit();
 
-    int getMinimumHit();
+        int getMinimumExpertise();
 
-    int getMinimumExpertise();
+        int getMaximumHit();
 
-    int getMaximumHit();
+        int getMaximumExpertise();
+    }
 
-    int getMaximumExpertise();
+    interface StatRequirementsSkinnyCompat {
+        int effectiveHit(ItemData item);
+
+        int effectiveExpertise(ItemData item);
+
+        Stream<SolverCapPhased.SkinnyItemSet> filterSetsSkinny(Stream<SolverCapPhased.SkinnyItemSet> setStream);
+
+        Stream<SolverCapPhased.SkinnyItemSet> filterSetsMaxSkinny(Stream<SolverCapPhased.SkinnyItemSet> setStream);
+    }
 }

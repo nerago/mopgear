@@ -4,7 +4,7 @@ import au.nerago.mopgear.domain.EquipOptionsMap;
 import au.nerago.mopgear.domain.ItemSet;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.process.FindStatRange;
+import au.nerago.mopgear.process.FallbackCappedSetBuilder;
 import au.nerago.mopgear.results.JobInput;
 import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.util.BigStreamUtil;
@@ -26,12 +26,17 @@ public class Solver {
         long runSizeMultiply = job.runSizeMultiply;
         StatBlock adjustment = job.adjustment;
         Instant startTime = job.startTime;
-
-        SolverCapPhased phased = new SolverCapPhased(model, adjustment, job.printRecorder);
-        long estimatePhase1Combos = phased.initAndCheckSizes(itemOptions);
         BigInteger estimateFullCombos = BigStreamUtil.estimateSets(itemOptions);
 
-        job.printf("COMBOS full=%,d skinny=%,d\n", estimateFullCombos, estimatePhase1Combos);
+        SolverCapPhased phased = null;
+        long estimatePhase1Combos = 0;
+        if (SolverCapPhased.supportedModel(model)) {
+            phased = new SolverCapPhased(model, adjustment, job.printRecorder);
+            estimatePhase1Combos = phased.initAndCheckSizes(itemOptions);
+            job.printf("COMBOS full=%,d skinny=%,d\n", estimateFullCombos, estimatePhase1Combos);
+        } else {
+            job.printf("COMBOS full=%,d no_skinny\n", estimateFullCombos);
+        }
 
         JobOutput output = new JobOutput(job);
         if (job.forceRandom) {
@@ -41,16 +46,13 @@ public class Solver {
         } else if (job.forceSkipIndex) {
             job.println("SOLVE skip index");
             output.resultSet = SolverIndexed.runSolverSkipping(model, itemOptions, adjustment, startTime, job.forcedRunSized, estimateFullCombos, job.specialFilter);
-//        } else if (job.forcePhasedSkip) {
-//            job.println("SOLVE phased skip");
-//            proposed = SolverIndexed.runSolverSkipping(model, itemOptions, adjustment, startTime, job.forcedRunSized, estimateFullCombos, job.specialFilter);
         } else if (estimateFullCombos.compareTo(BigInteger.valueOf(MAX_BASIC_FULL_SEARCH * runSizeMultiply)) < 0) {
             job.println("SOLVE full search");
             output.resultSet = SolverIndexed.runSolver(model, itemOptions, adjustment, startTime, estimateFullCombos.longValueExact(), job.specialFilter);
-        } else if (estimatePhase1Combos < MAX_SKINNY_FULL_SEARCH * runSizeMultiply) {
+        } else if (phased != null && estimatePhase1Combos < MAX_SKINNY_FULL_SEARCH * runSizeMultiply) {
             job.println("SOLVE phased full");
             output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, null);
-        } else if (estimatePhase1Combos < MAX_SKINNY_PHASED_ANY * runSizeMultiply) {
+        } else if (phased != null && estimatePhase1Combos < MAX_SKINNY_PHASED_ANY * runSizeMultiply) {
             job.println("SOLVE phased top only");
             output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, runSizeMultiply);
         } else {
@@ -60,7 +62,7 @@ public class Solver {
         }
 
         if (output.resultSet.isEmpty() && job.hackAllow) {
-            output.resultSet = FindStatRange.fallbackLimits(model, itemOptions, adjustment, output);
+            output.resultSet = FallbackCappedSetBuilder.fallbackLimits(model, itemOptions, adjustment, output);
         }
 
         output.resultSet.ifPresent(itemSet -> output.resultRating = model.calcRating(itemSet));

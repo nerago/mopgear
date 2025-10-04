@@ -356,7 +356,7 @@ public class Tasks {
     }
 
     private static void outputFailureDetails(ModelCombined model, EquipOptionsMap runItems, PrintRecorder job) {
-        FindStatRange.checkSetReportOnly(model, runItems, job);
+        FindStatRange2.checkSetReportOnly(model, runItems, job);
     }
 
     public static void paladinMultiSpecSolve() {

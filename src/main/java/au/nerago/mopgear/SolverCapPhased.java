@@ -12,18 +12,25 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class SolverCapPhased {
-//    public static final int TOP_HIT_COMBO_FILTER = 1000;
     public static final int TOP_HIT_COMBO_FILTER = 400;
     private final ModelCombined model;
+    private final StatRequirements.StatRequirementsSkinnyCompat requirements;
     private final StatBlock adjustment;
     private final PrintRecorder printRecorder;
     private EquipOptionsMap fullItems;
     private List<SkinnyItem[]> skinnyOptions;
 
     public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder) {
+        if (!supportedModel(model))
+            throw new IllegalArgumentException("can't use this model without skinny support");
         this.model = model;
+        this.requirements = (StatRequirements.StatRequirementsSkinnyCompat) model.statRequirements();
         this.adjustment = adjustment;
         this.printRecorder = printRecorder;
+    }
+
+    public static boolean supportedModel(ModelCombined model) {
+        return (model.statRequirements() instanceof StatRequirements.StatRequirementsSkinnyCompat);
     }
 
     public long initAndCheckSizes(EquipOptionsMap items) {
@@ -52,7 +59,7 @@ public class SolverCapPhased {
     private Stream<ItemSet> runSolverPartial(boolean parallel, Long topCombosMultiply) {
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 
-        Stream<SkinnyItemSet> filteredSets = model.statRequirements().filterSetsSkinny(initialSets);
+        Stream<SkinnyItemSet> filteredSets = requirements.filterSetsSkinny(initialSets);
 
         if (topCombosMultiply != null) {
             int actualTop = (int) (topCombosMultiply * TOP_HIT_COMBO_FILTER);
@@ -72,7 +79,7 @@ public class SolverCapPhased {
     }
 
     private ItemSet makeFromSkinny(SkinnyItemSet skinnySet) {
-        StatRequirements statReq = model.statRequirements();
+        StatRequirements.StatRequirementsSkinnyCompat statRequirements = requirements;
         EquipMap chosenItems = EquipMap.empty();
         CurryQueue<SkinnyItem> itemQueue = skinnySet.items;
         while (itemQueue != null) {
@@ -82,8 +89,8 @@ public class SolverCapPhased {
 
             BestHolder<ItemData> bestSlotItem = new BestHolder<>();
             for (ItemData item : fullSlotItems) {
-                int hit = statReq.effectiveHit(item);
-                int exp = statReq.effectiveExpertise(item);
+                int hit = statRequirements.effectiveHit(item);
+                int exp = statRequirements.effectiveExpertise(item);
                 if (skinny.hit == hit && skinny.expertise == exp) {
                     long rating = model.statRatings().calcRating(item.stat, item.statFixed);
                     bestSlotItem.add(item, rating);
@@ -97,7 +104,7 @@ public class SolverCapPhased {
     }
 
     private List<SkinnyItem[]> convertToSkinny(EquipOptionsMap items) {
-        StatRequirements statRequirements = model.statRequirements();
+        StatRequirements.StatRequirementsSkinnyCompat statRequirements = requirements;
         List<SkinnyItem[]> optionsList = new ArrayList<>();
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] fullOptions = items.get(slot);
@@ -127,7 +134,7 @@ public class SolverCapPhased {
             } else {
                 stream = addSlotToCombination(stream, slotOptions);
             }
-            stream = model.statRequirements().filterSetsMaxSkinny(stream);
+            stream = requirements.filterSetsMaxSkinny(stream);
         }
 
         return stream;

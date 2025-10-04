@@ -9,7 +9,7 @@ import au.nerago.mopgear.domain.StatBlock;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
-public class StatRequirementsOriginal implements StatRequirements {
+public class StatRequirementsOriginal implements StatRequirements.StatRequirementsHitExpertise, StatRequirements.StatRequirementsSkinnyCompat {
     public StatRequirementsOriginal(int hitMin, int hitMax, int expertiseMin, int expertiseMax, boolean combineHitLike) {
         this.hitMin = hitMin;
         this.hitMax = hitMax;
