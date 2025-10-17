@@ -20,7 +20,7 @@ public class StatUtil {
     private static LowHighHolder<ItemData> findMinMaxGeneric(ItemData[] itemArray, StatType statType) {
         LowHighHolder<ItemData> holder = new LowHighHolder<>();
         for (ItemData item : itemArray) {
-            int value = item.totalStatCopy().get(statType);
+            int value = item.totalStatCaps(statType);
             holder.add(item, value);
         }
         return holder;
@@ -29,7 +29,7 @@ public class StatUtil {
     private static LowHighHolder<ItemData> findMinMaxHit(ItemData[] itemArray, ToIntFunction<StatBlock> effectiveHit) {
         LowHighHolder<ItemData> holder = new LowHighHolder<>();
         for (ItemData item : itemArray) {
-            int value = effectiveHit.applyAsInt(item.totalStatCopy());
+            int value = effectiveHit.applyAsInt(item.totalStatCapsCopy());
             holder.add(item, value);
         }
         return holder;

@@ -36,14 +36,14 @@ public class ItemLevel {
     }
 
     private static ItemData scaleAll(ItemData item, double factor) {
-        StatBlock stats = scaleStatBlock(item.stat, factor);
+        StatBlock stats = scaleStatBlock(item.statBase, factor);
         if (item.slot != SlotItem.Trinket) {
             OutputText.println("SCALED " + item.name + " " + stats);
-            return item.changeStats(stats);
+            return item.changeStatsBase(stats);
         } else {
-            StatBlock statsFixed = scaleStatBlock(item.statFixed, factor);
+            StatBlock statsFixed = scaleStatBlock(item.statEnchant, factor);
             OutputText.println("SCALED TRINKET " + item.name + " " + stats + " " + statsFixed);
-            return item.changeStats(stats).changeFixed(statsFixed);
+            return item.changeStatsBase(stats).changeEnchant(statsFixed);
         }
     }
 

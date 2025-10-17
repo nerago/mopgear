@@ -66,7 +66,7 @@ public class ItemLoadUtil {
 
         if (equippedItem.gems().length > 0) {
             StatBlock gemStat = GemData.process(equippedItem.gems(), item.socketBonus, item.name);
-            item = item.changeFixed(gemStat);
+            item = item.changeEnchant(gemStat);
         }
 
         if (detailedOutput) {
@@ -81,7 +81,7 @@ public class ItemLoadUtil {
             } else {
                 OutputText.println(id + ": " + item.toStringExtended());
             }
-            if (item.stat.isEmpty()) {
+            if (item.statBase.isEmpty()) {
                 OutputText.println("MISSING STATS MISSING STATS MISSING STATS MISSING STATS");
             }
         }
@@ -127,7 +127,7 @@ public class ItemLoadUtil {
             return item;
         }
 
-        if (!item.statFixed.isEmpty() && !force) {
+        if (!item.statEnchant.isEmpty() && !force) {
             return item;
         }
 
@@ -167,6 +167,6 @@ public class ItemLoadUtil {
             total = total.plus(enchant);
         }
 
-        return item.changeFixed(total);
+        return item.changeEnchant(total);
     }
 }

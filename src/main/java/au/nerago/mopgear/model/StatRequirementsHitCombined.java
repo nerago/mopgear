@@ -14,15 +14,17 @@ public class StatRequirementsHitCombined implements StatRequirements.StatRequire
     }
 
     private int effectiveHit(ItemSet set) {
-        StatBlock totals = set.totals;
+        StatBlock totals = set.totalForCaps();
         return totals.hit() + totals.expertise() + totals.spirit();
     }
 
     private int effectiveHit(ItemData item) {
-        StatBlock stat = item.stat, statFixed = item.statFixed;
-        return stat.hit() + statFixed.hit() +
-                stat.expertise() + statFixed.expertise() +
-                stat.spirit() + statFixed.spirit();
+        StatBlock base = item.statBase, enchant = item.statEnchant;
+        if (item.slot.addEnchantToCap) {
+            return base.hit() + base.expertise() + base.spirit() + enchant.hit() + enchant.expertise() + enchant.spirit();
+        } else {
+            return base.hit() + base.expertise() + base.spirit();
+        }
     }
 
     @Override

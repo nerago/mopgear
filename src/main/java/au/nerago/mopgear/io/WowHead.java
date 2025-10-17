@@ -57,7 +57,7 @@ public class WowHead {
 
             ItemData item = buildItem(itemObject, itemId, itemLevel);
             OutputText.println(item.toString());
-            if (item.stat.isEmpty())
+            if (item.statBase.isEmpty())
                 OutputText.println("WARNWARNWARN item has no stats " + item);
             return item;
         }

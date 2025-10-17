@@ -23,12 +23,12 @@ public class Reforger {
 
         StatType[] target = rules.target();
         for (StatType sourceStat : rules.source()) {
-            int originalValue = baseItem.stat.get(sourceStat);
+            int originalValue = baseItem.statBase.get(sourceStat);
             if (originalValue != 0) {
                 int reforgeQuantity = (originalValue * 4) / 10;
                 int remainQuantity = originalValue - reforgeQuantity;
                 for (StatType targetStat : target) {
-                    if (baseItem.stat.get(targetStat) == 0) {
+                    if (baseItem.statBase.get(targetStat) == 0) {
                         ItemData modified = makeModified(baseItem, new ReforgeRecipe(sourceStat, targetStat), remainQuantity, reforgeQuantity);
                         outputItems.add(modified);
                     }
@@ -59,8 +59,8 @@ public class Reforger {
         } else if (sourceStat != null && targetStat != null)  {
             if (sourceStat == targetStat)
                 throw new RuntimeException("expected different stats");
-            int originalValue = baseItem.stat.get(sourceStat);
-            if (originalValue == 0 || baseItem.stat.get(targetStat) != 0)
+            int originalValue = baseItem.statBase.get(sourceStat);
+            if (originalValue == 0 || baseItem.statBase.get(targetStat) != 0)
                 throw new RuntimeException("expected non-zero and zero");
             int reforgeQuantity = (originalValue * 4) / 10;
             int remainQuantity = originalValue - reforgeQuantity;
@@ -72,7 +72,7 @@ public class Reforger {
 
     private static ItemData makeModified(ItemData baseItem, ReforgeRecipe recipe, int remainQuantity, int reforgeQuantity) {
         String name = baseItem.name + " (" + recipe.source() + "->" + recipe.dest() + ")";
-        StatBlock changedStats = baseItem.stat.withChange(recipe.source(), remainQuantity, recipe.dest(), reforgeQuantity);
+        StatBlock changedStats = baseItem.statBase.withChange(recipe.source(), remainQuantity, recipe.dest(), reforgeQuantity);
         return baseItem.changeNameAndStats(name, changedStats, recipe);
     }
 }

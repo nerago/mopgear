@@ -54,7 +54,7 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
                 spirit * multiply);
     }
 
-    public static StatBlock sum(EquipMap items) {
+    public static StatBlock sumForRating(EquipMap items) {
         int primary = 0;
         int stam = 0;
         int mastery = 0;
@@ -68,28 +68,73 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData item = items.get(slot);
             if (item != null) {
-                StatBlock stat = item.stat;
-                primary += stat.primary;
-                stam += stat.stam;
-                mastery += stat.mastery;
-                crit += stat.crit;
-                hit += stat.hit;
-                haste += stat.haste;
-                expertise += stat.expertise;
-                dodge += stat.dodge;
-                parry += stat.parry;
-                spirit += stat.spirit;
-                StatBlock fixed = item.statFixed;
-                primary += fixed.primary;
-                stam += fixed.stam;
-                mastery += fixed.mastery;
-                crit += fixed.crit;
-                hit += fixed.hit;
-                haste += fixed.haste;
-                expertise += fixed.expertise;
-                dodge += fixed.dodge;
-                parry += fixed.parry;
-                spirit += fixed.spirit;
+                StatBlock base = item.statBase;
+                primary += base.primary;
+                stam += base.stam;
+                mastery += base.mastery;
+                crit += base.crit;
+                hit += base.hit;
+                haste += base.haste;
+                expertise += base.expertise;
+                dodge += base.dodge;
+                parry += base.parry;
+                spirit += base.spirit;
+
+                StatBlock enchant = item.statEnchant;
+                primary += enchant.primary;
+                stam += enchant.stam;
+                mastery += enchant.mastery;
+                crit += enchant.crit;
+                hit += enchant.hit;
+                haste += enchant.haste;
+                expertise += enchant.expertise;
+                dodge += enchant.dodge;
+                parry += enchant.parry;
+                spirit += enchant.spirit;
+            }
+        }
+        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+    }
+
+    public static StatBlock sumForCaps(EquipMap items) {
+        int primary = 0;
+        int stam = 0;
+        int mastery = 0;
+        int crit = 0;
+        int hit = 0;
+        int haste = 0;
+        int expertise = 0;
+        int dodge = 0;
+        int parry = 0;
+        int spirit = 0;
+        for (SlotEquip slot : SlotEquip.values()) {
+            ItemData item = items.get(slot);
+            if (item != null) {
+                StatBlock base = item.statBase;
+                primary += base.primary;
+                stam += base.stam;
+                mastery += base.mastery;
+                crit += base.crit;
+                hit += base.hit;
+                haste += base.haste;
+                expertise += base.expertise;
+                dodge += base.dodge;
+                parry += base.parry;
+                spirit += base.spirit;
+
+                if (item.slot.addEnchantToCap) {
+                    StatBlock enchant = item.statEnchant;
+                    primary += enchant.primary;
+                    stam += enchant.stam;
+                    mastery += enchant.mastery;
+                    crit += enchant.crit;
+                    hit += enchant.hit;
+                    haste += enchant.haste;
+                    expertise += enchant.expertise;
+                    dodge += enchant.dodge;
+                    parry += enchant.parry;
+                    spirit += enchant.spirit;
+                }
             }
         }
         return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);

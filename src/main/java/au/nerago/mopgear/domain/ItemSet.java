@@ -3,60 +3,60 @@ package au.nerago.mopgear.domain;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.OutputText;
 
-public final class ItemSet {
-    public final EquipMap items;
-    public final StatBlock totals;
-
-    private ItemSet(EquipMap items, StatBlock totals) {
-        this.items = items;
-        this.totals = totals;
-    }
-
+public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap items) {
     public static ItemSet manyItems(EquipMap items, StatBlock adjustment) {
         // trust caller is creating unique maps
-        StatBlock totals = StatBlock.sum(items);
+        StatBlock rating = StatBlock.sumForRating(items);
+        StatBlock caps = StatBlock.sumForCaps(items);
         if (adjustment != null) {
-            totals = totals.plus(adjustment);
+            rating = rating.plus(adjustment);
+            caps = caps.plus(adjustment);
         }
-        return new ItemSet(items, totals);
+        return new ItemSet(rating, caps, items);
     }
 
     public static ItemSet singleItem(SlotEquip slot, ItemData item, StatBlock adjustment) {
         EquipMap itemMap = EquipMap.single(slot, item);
-        StatBlock total;
-        if (adjustment == null) {
-            total = item.totalStatCopy();
+        StatBlock rating, caps;
+        if (item.slot.addEnchantToCap) {
+            caps = item.totalStatRatingCopy();
+            if (adjustment != null) {
+                caps = caps.plus(adjustment);
+            }
+            rating = caps;
         } else {
-            total = adjustment.plus(item.stat, item.statFixed);
+            caps = item.statBase;
+            rating = item.totalStatRatingCopy();
+            if (adjustment != null) {
+                rating = rating.plus(adjustment);
+                caps = caps.plus(adjustment);
+            }
         }
-        return new ItemSet(itemMap, total);
+        return new ItemSet(rating, caps, itemMap);
     }
 
     public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {
         EquipMap itemMap = items.copyWithReplace(slot, item);
-        return new ItemSet(itemMap, totals.plus(item.stat, item.statFixed));
-    }
-
-    public StatBlock getTotals() {
-        return totals;
-    }
-
-    public EquipMap getItems() {
-        return items;
+        StatBlock rating = totalForRating.plus(item.statBase, item.statEnchant);
+        StatBlock caps = item.slot.addEnchantToCap
+                ? totalForCaps.plus(item.statBase, item.statEnchant)
+                : totalForCaps.plus(item.statBase);
+        return new ItemSet(rating, caps, itemMap);
     }
 
     public void outputSet(ModelCombined model) {
-        OutputText.println(getTotals().toStringExtended() + " " + model.calcRating(this));
-        getItems().forEachValue(it -> OutputText.println(it + " " + model.calcRating(it)));
+        OutputText.println(totalForRating.toStringExtended() + " " + model.calcRating(this));
+        items.forEachValue(it -> OutputText.println(it + " " + model.calcRating(it)));
     }
 
     public void outputSetDetailed(ModelCombined model) {
-        OutputText.println(getTotals().toStringExtended() + " " + model.calcRating(this));
-        getItems().forEachValue(it -> OutputText.println(it.toStringExtended() + " " + model.calcRating(it)));
+        OutputText.println("SET RATED " + totalForRating.toStringExtended() + " " + model.calcRating(this));
+        OutputText.println("SET CONSTANT " + totalForCaps.toStringExtended());
+        items.forEachValue(it -> OutputText.println(it.toStringExtended() + " " + model.calcRating(it)));
     }
 
     public void outputSetLight() {
-        getItems().forEachValue(it -> OutputText.printf("%s [%d]\n", it.name, it.ref.itemLevel()));
+        items.forEachValue(it -> OutputText.printf("%s [%d]\n", it.name, it.ref.itemLevel()));
     }
 
     public boolean validate() {
@@ -76,6 +76,6 @@ public final class ItemSet {
 
     @Override
     public String toString() {
-        return totals.toString();
+        return totalForRating.toString();
     }
 }

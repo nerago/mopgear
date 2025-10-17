@@ -1,31 +1,33 @@
 package au.nerago.mopgear.domain;
 
 public enum SlotItem {
-    Head(1, SlotEquip.Head),
-    Neck(2, SlotEquip.Neck),
-    Shoulder(3, SlotEquip.Shoulder),
-    Back(16, SlotEquip.Back),
-    Chest(5, SlotEquip.Chest),
-    Wrist(9, SlotEquip.Wrist),
-    Hand(10, SlotEquip.Hand),
-    Belt(6, SlotEquip.Belt),
-    Leg(7, SlotEquip.Leg),
-    Foot(8, SlotEquip.Foot),
-    Ring(11, SlotEquip.Ring1),
-    Trinket(12, SlotEquip.Trinket1),
-    Weapon2H(17, SlotEquip.Weapon),
-    Weapon1H(13, SlotEquip.Weapon),
-    Offhand(14, SlotEquip.Offhand);
+    Head(1, SlotEquip.Head, true),
+    Neck(2, SlotEquip.Neck, true),
+    Shoulder(3, SlotEquip.Shoulder, true),
+    Back(16, SlotEquip.Back, true),
+    Chest(5, SlotEquip.Chest, true),
+    Wrist(9, SlotEquip.Wrist, true),
+    Hand(10, SlotEquip.Hand, true),
+    Belt(6, SlotEquip.Belt, true),
+    Leg(7, SlotEquip.Leg, true),
+    Foot(8, SlotEquip.Foot, true),
+    Ring(11, SlotEquip.Ring1, true),
+    Trinket(12, SlotEquip.Trinket1, false),
+    Weapon2H(17, SlotEquip.Weapon, true),
+    Weapon1H(13, SlotEquip.Weapon, true),
+    Offhand(14, SlotEquip.Offhand, true);
 
     public static final SlotEquip[] ALL_RINGS = {SlotEquip.Ring1, SlotEquip.Ring2};
     public static final SlotEquip[] ALL_TRINKETS = {SlotEquip.Trinket1, SlotEquip.Trinket2};
 
     private final int wowHeadSlotNum;
     private final SlotEquip slotEquip;
+    public final boolean addEnchantToCap;
 
-    SlotItem(int wowHeadSlotNum, SlotEquip slotEquip) {
+    SlotItem(int wowHeadSlotNum, SlotEquip slotEquip, boolean addEnchantToCap) {
         this.wowHeadSlotNum = wowHeadSlotNum;
         this.slotEquip = slotEquip;
+        this.addEnchantToCap = addEnchantToCap;
     }
 
     public static SlotItem withNum(int wowHeadSlotNum) {

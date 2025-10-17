@@ -14,13 +14,13 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
                             DefaultEnchants enchants, SetBonus setBonus) {
 
     public long calcRating(ItemSet set) {
-        long value = statRatings.calcRating(set.getTotals());
-        value = value * setBonus.calc(set.items) / SetBonus.DENOMIATOR;
+        long value = statRatings.calcRating(set.totalForRating());
+        value = value * setBonus.calc(set) / SetBonus.DENOMIATOR;
         return value;
     }
 
     public long calcRating(ItemData it) {
-        return statRatings.calcRating(it.stat, it.statFixed);
+        return statRatings.calcRating(it.statBase, it.statEnchant);
     }
 
     public boolean filterOneSet(ItemSet set) {

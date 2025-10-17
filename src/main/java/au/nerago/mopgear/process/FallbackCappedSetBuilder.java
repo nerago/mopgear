@@ -41,7 +41,7 @@ public class FallbackCappedSetBuilder {
 
     @SuppressWarnings("ConditionCoveredByFurtherCondition")
     private static ItemSet adjustForCapsFinalSet(EquipMap setItems, PrintRecorder print, StatRatings ratings, @NotNull StatRequirements.StatRequirementsWithHitExpertise requirements) {
-        StatBlock itemTotal = StatBlock.sum(setItems);
+        StatBlock itemTotal = StatBlock.sumForCaps(setItems);
         StatBlock adjust = StatBlock.empty;
         StatType takeStat = ratings.bestNonHit(), giveStat = ratings.worstNonHit();
 
@@ -119,13 +119,13 @@ public class FallbackCappedSetBuilder {
             PrintRecorder print = new PrintRecorder();
 
             //noinspection deprecation
-            ItemSet adjustedSet = adjustForCapsFinalSet(set.items.shallowClone(), print, ratings, requirements);
+            ItemSet adjustedSet = adjustForCapsFinalSet(set.items().shallowClone(), print, ratings, requirements);
             if (!model.filterOneSet(adjustedSet)) {
                 job.printf("ERROR adjust didn't fix caps " + set + " -> " + adjustedSet + " (or duplicate issues)");
                 continue;
             }
 
-            long rating = ratings.calcRating(adjustedSet.getTotals());
+            long rating = ratings.calcRating(adjustedSet.totalForRating());
             bestHolder.add(Tuple.create(adjustedSet, print), rating);
         }
 

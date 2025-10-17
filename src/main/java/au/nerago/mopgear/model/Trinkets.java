@@ -64,7 +64,7 @@ public class Trinkets {
         }
 
         StatBlock stats = calcStats(trinketData);
-        return item.changeFixed(item.statFixed.plus(stats));
+        return item.changeEnchant(stats);
     }
 
     private static StatBlock calcStats(TrinketData data) {

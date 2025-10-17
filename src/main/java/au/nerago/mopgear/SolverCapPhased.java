@@ -89,7 +89,7 @@ public class SolverCapPhased {
             BestHolder<ItemData> bestSlotItem = new BestHolder<>();
             for (ItemData item : fullSlotItems) {
                 if (requirements.skinnyMatch(skinny, item)) {
-                    long rating = model.statRatings().calcRating(item.stat, item.statFixed);
+                    long rating = model.calcRating(item);
                     bestSlotItem.add(item, rating);
                 }
             }

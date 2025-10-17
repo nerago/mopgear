@@ -2,6 +2,7 @@ package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.EquipMap;
 import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.ItemSet;
 import au.nerago.mopgear.domain.SlotEquip;
 
 import java.util.ArrayList;
@@ -76,7 +77,11 @@ public class SetBonus {
         return set;
     }
 
-    public long calc(EquipMap itemMap) {
+    public long calc(ItemSet set) {
+        return calc(set.items());
+    }
+
+    private long calc(EquipMap itemMap) {
         if (activeSets.isEmpty()) {
             return DENOMIATOR;
         }

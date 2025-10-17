@@ -53,7 +53,7 @@ public class Tasks {
         job.forceSkipIndex = true;
         job.forcedRunSized = BILLION*4;
         job.printRecorder.outputImmediate = true;
-        job.specialFilter = set -> model.setBonus().countInSet(set.items) >= 4;
+        job.specialFilter = set -> model.setBonus().countInSet(set.items()) >= 4;
         JobOutput output = Solver.runJob(job);
 
         outputResultSimple(output.resultSet, model, true);
@@ -318,7 +318,7 @@ public class Tasks {
         OutputText.println("CHANGES vvvvvvvvvvvvvvv CHANGES");
         for (SlotEquip slot : SlotEquip.values()) {
             ItemData[] options = baseline.get(slot);
-            ItemData choice = best.getItems().get(slot);
+            ItemData choice = best.items().get(slot);
             if (choice != null) {
                 boolean existing = ArrayUtil.anyMatch(options, x -> x.ref.equalsTyped(choice.ref));
                 if (existing)
@@ -330,7 +330,7 @@ public class Tasks {
     }
 
     private static void outputReforgeJson(Optional<ItemSet> resultSet) {
-        AsWowSimJson.writeToOut(resultSet.orElseThrow().items);
+        AsWowSimJson.writeToOut(resultSet.orElseThrow().items());
     }
 
     public static void outputTweaked(Optional<ItemSet> bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
@@ -342,10 +342,11 @@ public class Tasks {
         if (bestSet != tweakSet) {
             OutputText.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
 
-            OutputText.println(tweakSet.getTotals().toStringExtended() + " " + model.calcRating(tweakSet));
+            OutputText.println(tweakSet.totalForRating().toStringExtended() + " " + model.calcRating(tweakSet));
+            OutputText.println(tweakSet.totalForCaps().toStringExtended());
             for (SlotEquip slot : SlotEquip.values()) {
-                ItemData orig = bestSet.items.get(slot);
-                ItemData change = tweakSet.items.get(slot);
+                ItemData orig = bestSet.items().get(slot);
+                ItemData change = tweakSet.items().get(slot);
                 if (orig != null && change != null) {
                     if (!ItemData.isIdenticalItem(orig, change)) {
                         OutputText.println(change + " " + model.calcRating(change));

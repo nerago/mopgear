@@ -288,7 +288,7 @@ public class Main {
         outputResultSimple(Optional.of(raidSet), model, false);
 
         Map<Integer, List<ReforgeRecipe>> presetReforge = commonFixedItems();
-        raidSet.getItems().forEachValue(item -> presetReforge.put(item.ref.itemId(), Collections.singletonList(item.reforge)));
+        raidSet.items().forEachValue(item -> presetReforge.put(item.ref.itemId(), Collections.singletonList(item.reforge)));
         presetReforge.put(89954, List.of(new ReforgeRecipe(Crit, Haste)));
 
         EquipOptionsMap map = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
@@ -310,18 +310,18 @@ public class Main {
 //            } else if (extraItem.id == 81113) { // Spike-Soled Stompers
 //                return extraItem.changeFixed(new StatBlock(60, 0, 0, 0, 160, 175 + 160, 0, 0, 0, 0));
             if (extraItem.ref.itemId() == 87060) { // Star-Stealer Waistguard
-                return extraItem.changeFixed(new StatBlock(0, 0, 0, 0, 160, 320 * 2 + 160, 0, 120, 0, 0));
+                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 0, 160, 320 * 2 + 160, 0, 120, 0, 0));
 //            } else if (extraItem.id == 86794) { // starcrusher gauntlets
 //                return extraItem.changeFixed(new StatBlock(170, 0, 0, 0, 160, 60 + 320 + 160, 0, 0, 0, 0));
 //            } else if (extraItem.id == 86145) { // jang-xi devastating legs
 //                return extraItem.changeFixed(new StatBlock(120, 430, 0, 0, 160, 160 * 2, 160, 0, 0, 0));
             } else if (extraItem.ref.itemId() == 77539) { // engineer helm
-                return extraItem.changeFixed(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
+                return extraItem.changeEnchant(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
             } else if (extraItem.ref.itemId() == 89503) { // Greenstone Drape
-                return extraItem.changeStats(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
-                        .changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
+                return extraItem.changeStatsBase(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
+                        .changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else if (extraItem.slot == SlotItem.Back) {
-                return extraItem.changeFixed(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
+                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else {
                 OutputText.println("DEFAULT ENCHANT " + extraItem);
                 return ItemLoadUtil.defaultEnchants(extraItem, model, false);
@@ -352,7 +352,7 @@ public class Main {
         outputResultSimple(Optional.of(bestScaledSet), model, true);
 
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData scaledChoice = bestScaledSet.items.get(slot);
+            ItemData scaledChoice = bestScaledSet.items().get(slot);
             if (scaledChoice != null) {
                 ItemData[] options = map.get(slot);
                 boolean inRaidDPSSet = inputSetItems.stream().anyMatch(x -> x.ref.itemId() == scaledChoice.ref.itemId());

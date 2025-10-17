@@ -14,62 +14,76 @@ public final class ItemData {
     @NotNull
     public final ReforgeRecipe reforge;
     @NotNull
-    public final StatBlock stat;
+    public final StatBlock statBase;
     @NotNull
-    public final StatBlock statFixed;
+    public final StatBlock statEnchant;
     @NotNull
     public final SocketType[] socketSlots;
     public final StatBlock socketBonus;
 
     private ItemData(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull ReforgeRecipe reforge,
-                     @NotNull StatBlock stat, @NotNull StatBlock statFixed, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
+                     @NotNull StatBlock statBase, @NotNull StatBlock statEnchant, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
         this.ref = ref;
         this.slot = slot;
         this.name = name;
         this.reforge = reforge;
-        this.stat = stat;
-        this.statFixed = statFixed;
+        this.statBase = statBase;
+        this.statEnchant = statEnchant;
         this.socketSlots = socketSlots;
         this.socketBonus = socketBonus;
     }
 
-    public static ItemData buildFromWowSim(ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
-        return new ItemData(ref, slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
+    public static ItemData buildFromWowSim(ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
+        return new ItemData(ref, slot, name, ReforgeRecipe.empty(), statBase, StatBlock.empty, socketSlots, socketBonus);
     }
 
-    public static ItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock stat, @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
-        return new ItemData(ItemRef.buildBasic(id, itemLevel), slot, name, ReforgeRecipe.empty(), stat, StatBlock.empty, socketSlots, socketBonus);
+    public static ItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
+        return new ItemData(ItemRef.buildBasic(id, itemLevel), slot, name, ReforgeRecipe.empty(), statBase, StatBlock.empty, socketSlots, socketBonus);
     }
 
     public ItemData changeNameAndStats(@NotNull String changedName, @NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
-        return new ItemData(ref, slot, changedName, recipe, changedStats, statFixed, socketSlots, socketBonus);
+        return new ItemData(ref, slot, changedName, recipe, changedStats, statEnchant, socketSlots, socketBonus);
     }
 
-    public ItemData changeStats(@NotNull StatBlock changedStats) {
-        return new ItemData(ref, slot, name, reforge, changedStats, statFixed, socketSlots, socketBonus);
+    public ItemData changeStatsBase(@NotNull StatBlock changedStats) {
+        return new ItemData(ref, slot, name, reforge, changedStats, statEnchant, socketSlots, socketBonus);
     }
 
-    public ItemData changeFixed(@NotNull StatBlock changedFixed) {
-        return new ItemData(ref, slot, name, reforge, stat, changedFixed, socketSlots, socketBonus);
+    public ItemData changeEnchant(@NotNull StatBlock changedEnchant) {
+        return new ItemData(ref, slot, name, reforge, statBase, changedEnchant, socketSlots, socketBonus);
     }
 
     public ItemData changeDuplicate(int dupNum) {
-        return new ItemData(ref.changeDuplicate(dupNum), slot, name, reforge, stat, statFixed, socketSlots, socketBonus);
+        return new ItemData(ref.changeDuplicate(dupNum), slot, name, reforge, statBase, statEnchant, socketSlots, socketBonus);
     }
 
     public ItemData changeItemLevel(int itemLevel) {
-        return new ItemData(ref.changeItemLevel(itemLevel), slot, name, reforge, stat, statFixed, socketSlots, socketBonus);
+        return new ItemData(ref.changeItemLevel(itemLevel), slot, name, reforge, statBase, statEnchant, socketSlots, socketBonus);
     }
 
-    public StatBlock totalStatCopy() {
-        if (statFixed.isEmpty())
-            return stat;
+    public StatBlock totalStatRatingCopy() {
+        if (statEnchant.isEmpty())
+            return statBase;
         else
-            return stat.plus(statFixed);
+            return statBase.plus(statEnchant);
     }
 
-    public int totalStat(StatType statType) {
-        return stat.get(statType) + stat.get(statType);
+    public StatBlock totalStatCapsCopy() {
+        if (slot.addEnchantToCap && !statEnchant.isEmpty()) {
+            return statBase.plus(statEnchant);
+        } else {
+            return statBase;
+        }
+    }
+
+    public int totalStatRating(StatType statType) {
+        return statBase.get(statType) + statEnchant.get(statType);
+    }
+
+    public int totalStatCaps(StatType statType) {
+        return slot.addEnchantToCap
+                ? statBase.get(statType) + statEnchant.get(statType)
+                : statBase.get(statType);
     }
 
     @Override
@@ -94,14 +108,13 @@ public final class ItemData {
         return item != null ? item.toStringExtended() : "null";
     }
 
-
     private void append(StringBuilder sb) {
         sb.append(slot).append(' ');
         sb.append('"').append(name).append("\" ");
-        stat.append(sb, false);
-        if (!statFixed.isEmpty()) {
-            sb.append("GEMS ");
-            statFixed.append(sb, false);
+        statBase.append(sb, false);
+        if (!statEnchant.isEmpty()) {
+            sb.append("ENCHANT ");
+            statEnchant.append(sb, false);
         }
     }
 
@@ -110,7 +123,7 @@ public final class ItemData {
     }
 
     public static boolean isIdenticalItem(ItemData a, ItemData b) {
-        return a.ref.equalsTyped(b.ref) && a.stat.equalsStats(b.stat) && a.statFixed.equalsStats(b.statFixed);
+        return a.ref.equalsTyped(b.ref) && a.statBase.equalsStats(b.statBase) && a.statEnchant.equalsStats(b.statEnchant);
     }
 
     @Override
@@ -118,12 +131,17 @@ public final class ItemData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ItemData itemData = (ItemData) o;
-        return ref.equalsTyped(itemData.ref) && slot == itemData.slot && Objects.equals(reforge, itemData.reforge) && Objects.equals(stat, itemData.stat) && Objects.equals(statFixed, itemData.statFixed);
+        return equalsTyped(itemData);
+    }
+
+    public boolean equalsTyped(ItemData other) {
+        return ref.equalsTyped(other.ref) && slot == other.slot && Objects.equals(reforge, other.reforge) &&
+                statBase.equalsStats(other.statBase) && statEnchant.equalsStats(other.statEnchant);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ref, slot, reforge, stat, statFixed);
+        return Objects.hash(ref, slot, reforge, statBase, statEnchant);
     }
 
     public boolean isUpgradable() {

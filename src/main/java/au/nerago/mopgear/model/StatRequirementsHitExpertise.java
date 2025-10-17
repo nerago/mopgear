@@ -45,21 +45,29 @@ public class StatRequirementsHitExpertise implements StatRequirements.StatRequir
 
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        int hit = item.stat.hit() + item.statFixed.hit();
-        int exp = item.stat.expertise() + item.statFixed.expertise();
+        int hit = item.statBase.hit();
+        int exp = item.statBase.expertise();
+        if (item.slot.addEnchantToCap) {
+            hit += item.statEnchant.hit();
+            exp += item.statEnchant.expertise();
+        }
         return skinny.one() == hit && skinny.two() == exp;
     }
 
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        int hit = item.stat.hit() + item.statFixed.hit();
-        int expertise = item.stat.expertise() + item.statFixed.expertise();
-        return new SkinnyItem(slot, hit, expertise);
+        int hit = item.statBase.hit();
+        int exp = item.statBase.expertise();
+        if (item.slot.addEnchantToCap) {
+            hit += item.statEnchant.hit();
+            exp += item.statEnchant.expertise();
+        }
+        return new SkinnyItem(slot, hit, exp);
     }
 
     @Override
     public boolean filterOneSet(ItemSet set) {
-        StatBlock totals = set.getTotals();
+        StatBlock totals = set.totalForCaps();
         int hit = totals.hit();
         int expertise = totals.expertise();
         return hitMin <= hit && hit <= hitMax && expertiseMin <= expertise && expertise <= expertiseMax;
@@ -68,7 +76,7 @@ public class StatRequirementsHitExpertise implements StatRequirements.StatRequir
     @Override
     public Stream<ItemSet> filterSets(Stream<ItemSet> setStream) {
         return setStream.filter(set -> {
-            StatBlock stats = set.getTotals();
+            StatBlock stats = set.totalForCaps();
             int hit = stats.hit(), expertise = stats.expertise();
             return hitMin <= hit && hit <= hitMax && expertiseMin <= expertise && expertise <= expertiseMax;
         });
@@ -77,7 +85,7 @@ public class StatRequirementsHitExpertise implements StatRequirements.StatRequir
     @Override
     public Stream<ItemSet> filterSetsMax(Stream<ItemSet> setStream) {
         return setStream.filter(set -> {
-            StatBlock stats = set.getTotals();
+            StatBlock stats = set.totalForCaps();
             int hit = stats.hit(), expertise = stats.expertise();
             return hit <= hitMax && expertise <= expertiseMax;
         });

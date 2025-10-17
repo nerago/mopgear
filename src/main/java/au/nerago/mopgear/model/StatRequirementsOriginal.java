@@ -47,11 +47,19 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
         if (hitMin == 0) {
             return 0;
         } else if (combineHitLike) {
-            return item.stat.hit() + item.statFixed.hit() +
-                   item.stat.expertise() + item.statFixed.expertise() +
-                   item.stat.spirit() + item.statFixed.spirit();
+            StatBlock base = item.statBase, enchant = item.statEnchant;
+            if (item.slot.addEnchantToCap) {
+                return base.hit() + base.expertise() + base.spirit() + enchant.hit() + enchant.expertise() + enchant.spirit();
+            } else {
+                return base.hit() + base.expertise() + base.spirit();
+            }
         } else {
-            return item.stat.hit() + item.statFixed.hit();
+            StatBlock base = item.statBase, enchant = item.statEnchant;
+            if (item.slot.addEnchantToCap) {
+                return base.hit() + enchant.hit();
+            } else {
+                return base.hit();
+            }
         }
     }
 
@@ -59,7 +67,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
         if (combineHitLike || !hasExpertiseRange()) {
             return 0;
         } else {
-            return item.stat.expertise() + item.statFixed.expertise();
+            return item.totalStatCaps(StatType.Expertise);
         }
     }
 
@@ -79,7 +87,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
 
     @Override
     public boolean filterOneSet(ItemSet set) {
-        return inRange(set.getTotals());
+        return inRange(set.totalForCaps());
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -103,7 +111,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
 
         if (minExp != 0 && maxExp != Integer.MAX_VALUE && minHit != 0 && maxHit != Integer.MAX_VALUE) {
             return setStream.filter(set -> {
-                StatBlock stats = set.getTotals();
+                StatBlock stats = set.totalForCaps();
                 int hit = stats.hit(), expertise = stats.expertise();
                 return hit >= minHit && hit <= maxHit && expertise >= minExp && expertise <= maxExp;
             });
@@ -112,19 +120,19 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
         if (combineHitLike) {
             if (minHit != 0 && maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
-                    StatBlock stats = set.getTotals();
+                    StatBlock stats = set.totalForCaps();
                     int hit = stats.hit() + stats.expertise() + stats.spirit();
                     return hit >= minHit && hit <= maxHit;
                 });
             } else if (minHit != 0) {
                 setStream = setStream.filter(set -> {
-                    StatBlock stats = set.getTotals();
+                    StatBlock stats = set.totalForCaps();
                     int hit = stats.hit() + stats.expertise() + stats.spirit();
                     return hit >= minHit;
                 });
             } else if (maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
-                    StatBlock stats = set.getTotals();
+                    StatBlock stats = set.totalForCaps();
                     int hit = stats.hit() + stats.expertise() + stats.spirit();
                     return hit <= maxHit;
                 });
@@ -132,19 +140,19 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
         } else {
             if (minHit != 0 && maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
-                    StatBlock stats = set.getTotals();
+                    StatBlock stats = set.totalForCaps();
                     int hit = stats.hit();
                     return hit >= minHit && hit <= maxHit;
                 });
             } else if (minHit != 0) {
                 setStream = setStream.filter(set -> {
-                    StatBlock stats = set.getTotals();
+                    StatBlock stats = set.totalForCaps();
                     int hit = stats.hit();
                     return hit >= minHit;
                 });
             } else if (maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
-                    StatBlock stats = set.getTotals();
+                    StatBlock stats = set.totalForCaps();
                     int hit = stats.hit();
                     return hit <= maxHit;
                 });
@@ -153,19 +161,19 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
 
         if (minExp != 0 && maxExp != Integer.MAX_VALUE) {
             setStream = setStream.filter(set -> {
-                StatBlock stats = set.getTotals();
+                StatBlock stats = set.totalForCaps();
                 int expertise = stats.expertise();
                 return expertise >= minExp && expertise <= maxExp;
             });
         } else if (minExp != 0) {
             setStream = setStream.filter(set -> {
-                StatBlock stats = set.getTotals();
+                StatBlock stats = set.totalForCaps();
                 int expertise = stats.expertise();
                 return expertise >= minExp;
             });
         } else if (maxExp != Integer.MAX_VALUE) {
             setStream = setStream.filter(set -> {
-                StatBlock stats = set.getTotals();
+                StatBlock stats = set.totalForCaps();
                 int expertise = stats.expertise();
                 return expertise <= maxExp;
             });
@@ -182,7 +190,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
         if (combineHitLike) {
             if (maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
-                    StatBlock stats = set.getTotals();
+                    StatBlock stats = set.totalForCaps();
                     int hit = stats.hit() + stats.expertise() + stats.spirit();
                     return hit <= maxHit;
                 });
@@ -190,7 +198,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
         } else {
             if (maxHit != Integer.MAX_VALUE) {
                 setStream = setStream.filter(set -> {
-                    StatBlock stats = set.getTotals();
+                    StatBlock stats = set.totalForCaps();
                     int hit = stats.hit();
                     return hit <= maxHit;
                 });
@@ -199,7 +207,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
 
         if (maxExp != Integer.MAX_VALUE) {
             setStream = setStream.filter(set -> {
-                StatBlock stats = set.getTotals();
+                StatBlock stats = set.totalForCaps();
                 int expertise = stats.expertise();
                 return expertise <= maxExp;
             });

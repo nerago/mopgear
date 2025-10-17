@@ -9,7 +9,8 @@ public class Tweaker {
         BestHolder<ItemSet> best = new BestHolder<>(baseSet, model.calcRating(baseSet));
 
         for (SlotEquip slot : SlotEquip.values()) {
-            EquipMap baseItems = best.get().getItems();
+            ItemSet itemSet = best.get();
+            EquipMap baseItems = itemSet.items();
             ItemData existing = baseItems.get(slot);
             ItemData[] slotItems = items.get(slot);
             if (existing == null && slotItems != null) {

@@ -98,6 +98,8 @@ public class FindMultiSpec {
         outputResultFinal(best, specs);
 
         // TODO extra phase with revised common + common tweaker
+
+        // TODO keep track of good indexes and search near
     }
 
     private Map<ItemRef, List<ItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
@@ -188,7 +190,7 @@ public class FindMultiSpec {
         common.entrySet().removeIf(entry -> {
                     ItemRef ref = entry.getKey();
                     long count = resultJobs.stream().flatMap(job -> job.resultSet.orElseThrow()
-                                    .items.entryStream().map(Tuple.Tuple2::b))
+                                    .items().entryStream().map(Tuple.Tuple2::b))
                             .filter(item -> ref.equalsTyped(item.ref))
                             .count();
                     if (count < 2)
@@ -327,7 +329,7 @@ public class FindMultiSpec {
                 SpecDetails spec = specList.get(i);
                 OutputText.printf("-------------- %s -------------- %s\n", spec.label, "<HACK>".repeat(job.hackCount));
                 job.input.printRecorder.outputNow();
-                set.outputSet(spec.model);
+                set.outputSetDetailed(spec.model);
             }
             OutputText.println("#######################################");
         }
@@ -371,13 +373,13 @@ public class FindMultiSpec {
                 if (revisedSpecRating > draftSpecRating) {
                     OutputText.println("REVISED " + revisedSpecRating);
                     revisedJob.input.printRecorder.outputNow();
-                    revisedSet.outputSet(spec.model);
-                    AsWowSimJson.writeToOut(revisedSet.items);
+                    revisedSet.outputSetDetailed(spec.model);
+                    AsWowSimJson.writeToOut(revisedSet.items());
                 } else {
                     OutputText.println("Revised no better");
                     draftJob.input.printRecorder.outputNow();
-                    draftSet.outputSet(spec.model);
-                    AsWowSimJson.writeToOut(draftSet.items);
+                    draftSet.outputSetDetailed(spec.model);
+                    AsWowSimJson.writeToOut(draftSet.items());
                 }
 
                 double specRating = Math.max(draftSpecRating, revisedSpecRating);
@@ -527,7 +529,7 @@ public class FindMultiSpec {
         private void loadAndGenerate(int itemId) {
             ItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
             if (overrideEnchant.containsKey(itemId)) {
-                extraItem = extraItem.changeFixed(overrideEnchant.get(itemId));
+                extraItem = extraItem.changeEnchant(overrideEnchant.get(itemId));
             } else {
                 extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true);
             }

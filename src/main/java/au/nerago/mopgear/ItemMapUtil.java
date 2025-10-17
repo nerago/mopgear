@@ -82,6 +82,6 @@ public class ItemMapUtil {
 
         ItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.ref.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
         loaded = Reforger.presetReforge(loaded, oldItem.reforge);
-        return loaded.changeFixed(oldItem.statFixed);
+        return loaded.changeEnchant(oldItem.statEnchant);
     }
 }
