@@ -15,6 +15,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
+import static au.nerago.mopgear.domain.StatType.*;
+
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Tasks {
     public static final long BILLION = 1000 * 1000 * 1000;
@@ -143,7 +145,7 @@ public class Tasks {
         JobInput job = new JobInput();
         job.printRecorder.outputImmediate = true;
         job.config(model, runItems, startTime, adjustment);
-        job.runSizeMultiply = 4;
+        job.runSizeMultiply = 8;
         JobOutput output = Solver.runJob(job);
 
         outputResultSimple(output.resultSet, model, true);
@@ -371,23 +373,14 @@ public class Tasks {
 //        multi.addFixedForge(89954, new ReforgeRecipe(StatType.Expertise, StatType.Haste));// warbelt
 //        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
 
-//        multi.addFixedForge(86852, new ReforgeRecipe(null, null)); // Foot Impaling Treads
-//        map.put(84807, List.of(new ReforgeRecipe(null, null))); // Back Malevolent Gladiator's Cloak of Alacrity
-//        map.put(85991, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker (Hit->Expertise)
-//        map.put(89069, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Ring of the Golden Stair (Expertise->Hit)
-//        map.put(90862, List.of(new ReforgeRecipe(Haste, Hit))); // Ring Seal of the Bloodseeker (Haste->Hit)
-//        multi.addFixedForge(87024, new ReforgeRecipe(Crit, Expertise)); // Head Nullification Greathelm (Crit->Expertise)
-////        map.put(86802, List.of(new ReforgeRecipe(null, null))); // Trinket Lei Shen's Final Orders
-//        multi.addFixedForge(86680, new ReforgeRecipe(Mastery, Haste)); // Leg White Tiger Legplates (Mastery->Haste)
-//        multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
-//        multi.addFixedForge(85339, new ReforgeRecipe(Hit, Expertise)); // Shoulder White Tiger Pauldrons (Hit->Expertise)
-//        multi.addFixedForge(86682, new ReforgeRecipe(Expertise, Haste)); // Hand White Tiger Gauntlets (Expertise->Haste)
-//        map.put(86906, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon Kilrak, Jaws of Terror (Mastery->Expertise)
-//        multi.addFixedForge(84910, new ReforgeRecipe(Mastery, Haste)); // Shield
-//        multi.addFixedForge(8607, new ReforgeRecipe(Mastery, Haste)); // Shield
+        multi.addFixedForge(86979, new ReforgeRecipe(Hit, Expertise)); // Foot Impaling Treads (Hit->Expertise)
+        multi.addFixedForge(87100, ReforgeRecipe.empty()); // Hand White Tiger Gauntlets
+        multi.addFixedForge(87026, ReforgeRecipe.empty()); // Back Cloak of Peacock Feathers
+        multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
+        multi.addFixedForge(86957, ReforgeRecipe.empty()); // Ring Ring of the Bladed Tempest
 
         int extraUpgrade = 2;
-        boolean preUpgrade = true;
+        boolean preUpgrade = false;
 
         multi.addSpec(
                 "RET",
@@ -400,18 +393,17 @@ public class Tasks {
 //                        87024, // null greathelm
 //                        87036, // heroic soulgrasp
 //                        87026, // heroic peacock cloak
-//                        86799, // starshatter
-//                        86905, // shinka
 //                        86880, // dread shadow ring
 //                        86955, // heroic overwhelm assault belt
-//                        86979, // heroic impaling treads
 
                         // possibly useful
-                        89954, // warbelt pods
-                        84949, // mal glad girdle accuracy
-                        89280, // voice helm
-                        86822, // celestial overwhelm assault belt
-                        87015, // clawfeet
+//                        89954, // warbelt pods
+//                        84949, // mal glad girdle accuracy
+//                        89280, // voice helm
+//                        86822, // celestial overwhelm assault belt
+//                        87015, // heroic clawfeet
+                          86979, // heroic impaling treads
+//                        86957, // heroic bladed tempest
                 },
                 extraUpgrade,
                 preUpgrade
@@ -433,10 +425,12 @@ public class Tasks {
 //                        86979, // heroic impaling treads
 //                        87015, // clawfeet
 //                        87062 // elegion heroic
+//                        86957, // heroic bladed tempest
                 },
                 extraUpgrade,
                 preUpgrade
-        ).setWorstCommonPenalty(99.8);
+        ).setDuplicatedItems(Map.of(89934, 1))
+                .setWorstCommonPenalty(99.7);
 
         multi.addSpec(
                 "PROT-DEFENCE",
@@ -450,7 +444,6 @@ public class Tasks {
 ////                        89345, // stonetoe spaulders
 //                        82980, // gauntlets ancient steel
 //                        85983, // bracers six oxen
-//                        89075, // yi cloak
 //                        90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
 //                        87036, // heroic soulgrasp
@@ -459,18 +452,25 @@ public class Tasks {
 //                        86979, // heroic impaling treads
 //                        87015, // clawfeet
 //                        87062 // elegion heroic
+//                        89075, // yi cloak
+//                        86957, // heroic bladed tempest
+                        86325 // normal daybreak drake
                 },
                 extraUpgrade,
                 preUpgrade
-        ).setDuplicatedItems(Map.of(89934, 1))
-                .setWorstCommonPenalty(99.5);
+        ).setDuplicatedItems(Map.of(89934, 2))
+                .setWorstCommonPenalty(99.0);
 
+//        multi.suppressSlotCheck(86957);
+//        multi.suppressSlotCheck(84829);
 //        multi.suppressSlotCheck(86880);
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-        multi.solve(50000);
-//        multi.solve(820000);
+//        multi.solve(3000);
+//        multi.solve(50000);
+        multi.solve(400000);
+//        multi.solve(4000000);
     }
 
     public static void druidMultiSpecSolve() {

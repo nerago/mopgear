@@ -279,11 +279,11 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
         if (crit != 0)
             sb.append("crit=").append(crit).append(' ');
         if (hit != 0)
-            sb.append("one=").append(hit).append(' ');
+            sb.append("hit=").append(hit).append(' ');
         if (haste != 0)
             sb.append("haste=").append(haste).append(' ');
         if (expertise != 0)
-            sb.append("two=").append(expertise).append(' ');
+            sb.append("expertise=").append(expertise).append(' ');
         if (dodge != 0)
             sb.append("dodge=").append(dodge).append(' ');
         if (parry != 0)

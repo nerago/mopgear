@@ -182,8 +182,8 @@ public class SourcesOfItems {
                 new CostedItem(87101, 604),
                 new CostedItem(87111, 604),
 
-                new CostedItem(90508, 609), // Shackle of Eversparks (protectors elite)
-                new CostedItem(90506, 609), // Bracers of Defiled Earth (protectors elite)
+//                new CostedItem(90508, 609), // Shackle of Eversparks (protectors elite)
+//                new CostedItem(90506, 609), // Bracers of Defiled Earth (protectors elite)
         };
     }
 
@@ -553,7 +553,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProtAllUpgradable() {
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDefenceFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.itemStream()
                 .filter(ItemData::isUpgradable)
                 .map(item -> new CostedItem(item.ref.itemId(), 0))

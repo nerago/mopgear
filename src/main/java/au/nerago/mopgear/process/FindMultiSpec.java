@@ -362,7 +362,7 @@ public class FindMultiSpec {
                 JobOutput draftJob = resultJobs.get(i);
                 ItemSet draftSet = draftJob.resultSet.orElseThrow();
                 double draftSpecRating = draftJob.resultRating;
-                OutputText.println("DRAFT " + draftSpecRating);
+                OutputText.printf("DRAFT %,d\n", (long) draftSpecRating);
 
                 JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal);
                 ItemSet revisedSet = revisedJob.resultSet.orElseThrow();

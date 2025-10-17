@@ -92,23 +92,24 @@ public class ItemLoadUtil {
         ItemCache itemCache = ItemCache.instance;
         ItemData item = itemCache.get(itemId, upgradeLevel);
         if (item == null) {
-            item = WowHead.fetchItem(itemId);
-            if (item != null) {
-                itemCache.put(item);
-                itemCache.cacheSave();
-            } else {
-                throw new RuntimeException("missing item " + itemId);
-            }
+            throw new RuntimeException("dont use this please, prefer wowsim data");
+//            item = WowHead.fetchItem(itemId);
+//            if (item != null) {
+//                itemCache.put(item);
+//                itemCache.cacheSave();
+//            } else {
+//                throw new RuntimeException("missing item " + itemId);
+//            }
 
-            if (upgradeLevel != 0) {
-                if (item.isUpgradable()) {
-                    OutputText.println("INACCURATE-UPGRADE " + item.toStringExtended());
-                    item = ItemLevel.upgrade(item, upgradeLevel);
-                    itemCache.put(item);
-                } else {
-                    OutputText.println("CANNOT-UPGRADE " + item.toStringExtended());
-                }
-            }
+//            if (upgradeLevel != 0) {
+//                if (item.isUpgradable()) {
+//                    OutputText.println("INACCURATE-UPGRADE " + item.toStringExtended());
+//                    item = ItemLevel.upgrade(item, upgradeLevel);
+//                    itemCache.put(item);
+//                } else {
+//                    OutputText.println("CANNOT-UPGRADE " + item.toStringExtended());
+//                }
+//            }
         }
         if (item.slot == SlotItem.Trinket) {
             item = Trinkets.updateTrinket(item);

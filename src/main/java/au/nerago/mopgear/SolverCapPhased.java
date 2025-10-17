@@ -121,6 +121,7 @@ public class SolverCapPhased {
         Stream<SkinnyItemSet> stream = null;
 
 //        optionsList.sort(Comparator.comparingInt(array -> array.length));
+        // TODO sort by biggest cap values so filter out faster
 
         for (SkinnyItem[] slotOptions : optionsList) {
             if (stream == null) {

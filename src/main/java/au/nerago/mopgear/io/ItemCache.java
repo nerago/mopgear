@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -14,26 +15,25 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 public class ItemCache {
     private static final Object writeSync = new Object();
     private final Map<ItemRef, ItemData> itemRefLookup;
     private final Map<Integer, Set<ItemData>> itemIdLookup;
-    private final Path file;
 
-    public static final ItemCache instance = new ItemCache(DataLocation.cacheFile);
+    public static final ItemCache instance = new ItemCache();
 
-    private ItemCache(Path file) {
-        this.file = file;
-
-        List<ItemData> itemList = cacheLoad(file);
+    private ItemCache() {
+        List<ItemData> itemList = cacheLoad();
 
         this.itemRefLookup = itemList.stream().collect(Collectors.toMap(item -> item.ref, item -> item, (a, b) -> a, HashMap::new));
 
         this.itemIdLookup = itemList.stream().collect(Collectors.groupingBy(item -> item.ref.itemId(), HashMap::new, Collectors.toSet()));
     }
 
-    private static List<ItemData> cacheLoad(Path file) {
-        try (BufferedReader reader = Files.newBufferedReader(file)) {
+    private static List<ItemData> cacheLoad() {
+        try (BufferedReader reader = Files.newBufferedReader(DataLocation.cacheFile)) {
             TypeToken<List<ItemData>> typeToken = new TypeToken<>() {
             };
             return new Gson().fromJson(reader, typeToken);
@@ -46,11 +46,32 @@ public class ItemCache {
 
     public void cacheSave() {
         synchronized (writeSync) {
-            try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+            Path destFile = DataLocation.cacheFile;
+            try (BufferedWriter writer = Files.newBufferedWriter(destFile)) {
                 List<ItemData> itemList = itemRefLookup.values().stream().toList();
                 new Gson().newBuilder().setPrettyPrinting().create().toJson(itemList, writer);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
+            }
+        }
+    }
+
+    public void cacheSaveMoveReplace() {
+        synchronized (writeSync) {
+            Path destFile = DataLocation.cacheFile;
+            Path tempFile = destFile.resolveSibling(destFile.getFileName().toString() + ".temp");
+
+            try (BufferedWriter writer = Files.newBufferedWriter(tempFile)) {
+                List<ItemData> itemList = itemRefLookup.values().stream().toList();
+                new Gson().newBuilder().setPrettyPrinting().create().toJson(itemList, writer);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            try {
+                Files.move(tempFile, destFile, REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
