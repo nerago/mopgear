@@ -1,4 +1,4 @@
-package au.nerago.mopgear;
+package au.nerago.mopgear.permute;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;

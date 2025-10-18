@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.*;
+import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.*;
 import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.ArrayUtil;
@@ -374,7 +375,7 @@ public class Tasks {
 //        multi.addFixedForge(89954, new ReforgeRecipe(StatType.Expertise, StatType.Haste));// warbelt
 //        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
 
-        multi.addFixedForge(86979, new ReforgeRecipe(Hit, Expertise)); // Foot Impaling Treads (Hit->Expertise)
+//        multi.addFixedForge(86979, new ReforgeRecipe(Hit, Expertise)); // Foot Impaling Treads (Hit->Expertise)
         multi.addFixedForge(87100, ReforgeRecipe.empty()); // Hand White Tiger Gauntlets
         multi.addFixedForge(87026, ReforgeRecipe.empty()); // Back Cloak of Peacock Feathers
         multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
@@ -430,7 +431,8 @@ public class Tasks {
                 },
                 extraUpgrade,
                 preUpgrade
-        ).setDuplicatedItems(Map.of(89934, 1))
+        )
+//                .setDuplicatedItems(Map.of(89934, 1))
                 .setWorstCommonPenalty(99.7);
 
         multi.addSpec(
@@ -455,11 +457,12 @@ public class Tasks {
 //                        87062 // elegion heroic
 //                        89075, // yi cloak
 //                        86957, // heroic bladed tempest
-                        86325 // normal daybreak drake
+//                        86325 // normal daybreak drake
                 },
                 extraUpgrade,
                 preUpgrade
-        ).setDuplicatedItems(Map.of(89934, 2))
+        )
+                .setDuplicatedItems(Map.of(89934, 2))
                 .setWorstCommonPenalty(99.0);
 
 //        multi.suppressSlotCheck(86957);
@@ -470,7 +473,7 @@ public class Tasks {
 
 //        multi.solve(3000);
 //        multi.solve(50000);
-        multi.solve(400000);
+        multi.solve(600000);
 //        multi.solve(4000000);
     }
 

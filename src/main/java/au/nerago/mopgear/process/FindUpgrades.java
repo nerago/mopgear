@@ -2,7 +2,7 @@ package au.nerago.mopgear.process;
 
 import au.nerago.mopgear.ItemLoadUtil;
 import au.nerago.mopgear.ItemMapUtil;
-import au.nerago.mopgear.Solver;
+import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ItemLevel;

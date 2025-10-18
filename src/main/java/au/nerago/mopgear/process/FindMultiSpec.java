@@ -3,6 +3,9 @@ package au.nerago.mopgear.process;
 import au.nerago.mopgear.*;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.permute.PossibleIndexed;
+import au.nerago.mopgear.permute.PossibleRandom;
+import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.results.AsWowSimJson;
 import au.nerago.mopgear.results.JobInput;
 import au.nerago.mopgear.results.JobOutput;
@@ -18,7 +21,6 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
-//    private static final int TARGET_COMBO_COUNT = 320000;
     private static final long individualRunSizeMultiply = 1L;
     private final boolean hackAllow = false;
 
@@ -160,7 +162,7 @@ public class FindMultiSpec {
         JobInput job = new JobInput();
         job.model = spec.model;
         job.itemOptions = spec.itemOptions;
-        job.runSizeMultiply = individualRunSizeMultiply;
+        job.runSizeMultiply = individualRunSizeMultiply * 4;
         job.hackAllow = hackAllow;
         JobOutput output = Solver.runJob(job);
 
