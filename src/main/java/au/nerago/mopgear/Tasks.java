@@ -473,8 +473,8 @@ public class Tasks {
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(3000);
-//        multi.solve(50000);
-        multi.solve(600000);
+        multi.solve(50000);
+//        multi.solve(600000);
 //        multi.solve(4000000);
     }
 

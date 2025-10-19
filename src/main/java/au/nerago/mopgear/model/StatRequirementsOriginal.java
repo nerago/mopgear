@@ -67,7 +67,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
         if (combineHitLike || !hasExpertiseRange()) {
             return 0;
         } else {
-            return item.totalStatCaps(StatType.Expertise);
+            return item.totalCap.get(StatType.Expertise);
         }
     }
 

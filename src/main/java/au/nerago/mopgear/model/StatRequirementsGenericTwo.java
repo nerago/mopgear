@@ -37,12 +37,13 @@ public class StatRequirementsGenericTwo implements StatRequirements {
 
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        return new SkinnyItem(slot, item.totalStatCaps(statOne), item.totalStatCaps(statTwo));
+        return new SkinnyItem(slot, item.totalCap.get(statOne), item.totalCap.get(statTwo));
     }
 
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        return skinny.one() == item.totalStatCaps(statOne) && skinny.two() == item.totalStatCaps(statTwo);
+        if (skinny.one() != item.totalCap.get(statOne)) return false;
+        return skinny.two() == item.totalCap.get(statTwo);
     }
 
     @Override

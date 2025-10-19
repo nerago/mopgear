@@ -18,6 +18,10 @@ public final class ItemData {
     @NotNull
     public final StatBlock statEnchant;
     @NotNull
+    public final StatBlock totalCap;
+    @NotNull
+    public final StatBlock totalRated;
+    @NotNull
     public final SocketType[] socketSlots;
     public final StatBlock socketBonus;
 
@@ -31,6 +35,15 @@ public final class ItemData {
         this.statEnchant = statEnchant;
         this.socketSlots = socketSlots;
         this.socketBonus = socketBonus;
+
+        if (statEnchant.isEmpty()) {
+            totalCap = totalRated = statBase;
+        } else if (slot.addEnchantToCap) {
+            totalCap = totalRated = statBase.plus(statEnchant);
+        } else {
+            totalCap = statBase;
+            totalRated = statBase.plus(statEnchant);
+        }
     }
 
     public static ItemData buildFromWowSim(ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
@@ -59,33 +72,6 @@ public final class ItemData {
 
     public ItemData changeItemLevel(int itemLevel) {
         return new ItemData(ref.changeItemLevel(itemLevel), slot, name, reforge, statBase, statEnchant, socketSlots, socketBonus);
-    }
-
-    // TODO try storing these
-
-    public StatBlock totalStatRatingCopy() {
-        if (statEnchant.isEmpty())
-            return statBase;
-        else
-            return statBase.plus(statEnchant);
-    }
-
-    public StatBlock totalStatCapsCopy() {
-        if (slot.addEnchantToCap && !statEnchant.isEmpty()) {
-            return statBase.plus(statEnchant);
-        } else {
-            return statBase;
-        }
-    }
-
-    public int totalStatRating(StatType statType) {
-        return statBase.get(statType) + statEnchant.get(statType);
-    }
-
-    public int totalStatCaps(StatType statType) {
-        return slot.addEnchantToCap
-                ? statBase.get(statType) + statEnchant.get(statType)
-                : statBase.get(statType);
     }
 
     @Override

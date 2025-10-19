@@ -19,14 +19,14 @@ public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap
         EquipMap itemMap = EquipMap.single(slot, item);
         StatBlock rating, caps;
         if (item.slot.addEnchantToCap) {
-            caps = item.totalStatRatingCopy();
+            caps = item.totalRated;
             if (adjustment != null) {
                 caps = caps.plus(adjustment);
             }
             rating = caps;
         } else {
             caps = item.statBase;
-            rating = item.totalStatRatingCopy();
+            rating = item.totalRated;
             if (adjustment != null) {
                 rating = rating.plus(adjustment);
                 caps = caps.plus(adjustment);

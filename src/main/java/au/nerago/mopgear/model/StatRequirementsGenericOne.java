@@ -27,12 +27,12 @@ public class StatRequirementsGenericOne implements StatRequirements {
 
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        return new SkinnyItem(slot, item.totalStatCaps(stat), 0);
+        return new SkinnyItem(slot, item.totalCap.get(stat), 0);
     }
 
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        return skinny.one() == item.totalStatCaps(stat);
+        return skinny.one() == item.totalCap.get(stat);
     }
 
     @Override
