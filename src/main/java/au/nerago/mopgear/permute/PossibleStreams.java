@@ -35,7 +35,7 @@ public class PossibleStreams {
         Map<ItemRef, ItemData>[] array = (Map<ItemRef, ItemData>[]) new Map[options.size()];
         for (int i = 0; i < options.size(); ++i) {
             ItemData item = options.get(i);
-            array[i] = Map.of(item.ref, item);
+            array[i] = Map.of(item.ref(), item);
         }
         return ArrayUtil.arrayStream(array);
     }
@@ -50,7 +50,7 @@ public class PossibleStreams {
 
     private static Map<ItemRef, ItemData> copyWithAddedItem(Map<ItemRef, ItemData> oldMap, ItemData add) {
         Map<ItemRef, ItemData> map = new HashMap<>(oldMap);
-        map.put(add.ref, add);
+        map.put(add.ref(), add);
         return map;
     }
 }

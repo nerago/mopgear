@@ -45,23 +45,15 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
 
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        int hit = item.statBase.hit();
-        int exp = item.statBase.expertise();
-        if (item.slot.addEnchantToCap) {
-            hit += item.statEnchant.hit();
-            exp += item.statEnchant.expertise();
-        }
+        int hit = item.totalCap.hit();
+        int exp = item.totalCap.expertise();
         return skinny.one() == hit && skinny.two() == exp;
     }
 
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        int hit = item.statBase.hit();
-        int exp = item.statBase.expertise();
-        if (item.slot.addEnchantToCap) {
-            hit += item.statEnchant.hit();
-            exp += item.statEnchant.expertise();
-        }
+        int hit = item.totalCap.hit();
+        int exp = item.totalCap.expertise();
         return new SkinnyItem(slot, hit, exp);
     }
 

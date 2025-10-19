@@ -141,7 +141,7 @@ public class FindUpgrades {
 
     private static void reportBySlot(List<UpgradeResultItem> jobList) {
         Map<SlotItem, RankedGroupsCollection<UpgradeResultItem>> grouped = jobList.stream().collect(
-                Collectors.groupingBy(j -> j.item().slot,
+                Collectors.groupingBy(j -> j.item().slot(),
                         RankedGroupsCollection.collector(UpgradeResultItem::factor)));
         for (SlotItem slot : SlotItem.values()) {
             RankedGroupsCollection<UpgradeResultItem> best = grouped.get(slot);
@@ -158,7 +158,7 @@ public class FindUpgrades {
             ItemData extraItem = extraItemInfo.item();
             int cost = extraItemInfo.cost();
 
-            for (SlotEquip slot : extraItem.slot.toSlotEquipOptions()) {
+            for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
                 if (canPerformSpecifiedUpgrade(extraItem, slot, baseItems)) {
                     OutputText.printf("JOB %s\n", extraItem.toStringExtended());
                     submitJob.accept(buildUpgradeJob(model, baseItems.deepClone(), extraItem, adjustment, slot, baseRating, cost));
@@ -176,12 +176,12 @@ public class FindUpgrades {
         if (plusPercent > 0.0) {
             if (cost >= 10) {
                 double plusPerCost = plusPercent / cost;
-                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\t %1.4f\n", item.slot, item.ref.itemLevel(), item.name, cost, plusPercent, stars, plusPerCost);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\t %1.4f\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars, plusPerCost);
             } else {
-                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\n", item.slot, item.ref.itemLevel(), item.name, cost, plusPercent, stars);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars);
             }
         } else {
-            OutputText.printf("%10s \t%d \t%35s \t$%d \t%2.2f%% %s\n", item.slot, item.ref.itemLevel(), item.name, cost, plusPercent, stars);
+            OutputText.printf("%10s \t%d \t%35s \t$%d \t%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars);
         }
     }
 
@@ -230,7 +230,7 @@ public class FindUpgrades {
     }
 
     private boolean canPerformSpecifiedUpgrade(ItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {
-        if (SourcesOfItems.ignoredItems.contains(extraItem.ref.itemId()))
+        if (SourcesOfItems.ignoredItems.contains(extraItem.itemId()))
             return false;
 
         if (reforgedItems.get(slot) == null) {
@@ -240,20 +240,20 @@ public class FindUpgrades {
 
         if (slot == SlotEquip.Weapon) {
             ItemData exampleWeapon = reforgedItems.get(SlotEquip.Weapon)[0];
-            if (extraItem.slot != exampleWeapon.slot) {
+            if (extraItem.slot() != exampleWeapon.slot()) {
                 OutputText.println("WRONG WEAPON TYPE " + extraItem.toStringExtended());
                 return false;
             }
         }
 
         SlotEquip pairedSlot = slot.pairedSlot();
-        if (reforgedItems.get(slot)[0].ref.equalsTyped(extraItem.ref) ||
-                (pairedSlot != null && reforgedItems.get(pairedSlot)[0].ref.equalsTyped(extraItem.ref))) {
+        if (reforgedItems.get(slot)[0].ref().equalsTyped(extraItem.ref()) ||
+                (pairedSlot != null && reforgedItems.get(pairedSlot)[0].ref().equalsTyped(extraItem.ref()))) {
             OutputText.println("SAME ITEM " + extraItem.toStringExtended());
             return false;
         }
 
-        if (pairedSlot != null && reforgedItems.get(pairedSlot)[0].ref.itemId() == extraItem.ref.itemId()) {
+        if (pairedSlot != null && reforgedItems.get(pairedSlot)[0].itemId() == extraItem.itemId()) {
             OutputText.println("SAME ITEM ID IN OTHER SLOT " + extraItem.toStringExtended());
             return false;
         }

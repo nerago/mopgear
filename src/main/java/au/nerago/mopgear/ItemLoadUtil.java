@@ -68,12 +68,12 @@ public class ItemLoadUtil {
         ItemData item = loadItemBasic(id, upgrade);
 
         if (equippedItem.gems().length > 0) {
-            StatBlock gemStat = GemData.process(equippedItem.gems(), item.socketBonus, item.name);
+            StatBlock gemStat = GemData.process(equippedItem.gems(), item.shared.socketBonus(), item.shared.name());
             item = item.changeEnchant(gemStat);
         }
 
         if (detailedOutput) {
-            if (expectedEnchant.contains(item.slot)) {
+            if (expectedEnchant.contains(item.slot())) {
                 if (equippedItem.enchant() != null) {
                     OutputText.println(id + ": " + item.toStringExtended() + " ENCHANT=" + equippedItem.enchant());
                 } else {
@@ -114,7 +114,7 @@ public class ItemLoadUtil {
 //                }
 //            }
         }
-        if (item.slot == SlotItem.Trinket) {
+        if (item.slot() == SlotItem.Trinket) {
             item = Trinkets.updateTrinket(item);
         }
         // TODO trinket vs upgrade ordering?
@@ -126,7 +126,7 @@ public class ItemLoadUtil {
     }
 
     public static ItemData defaultEnchants(ItemData item, ModelCombined model, boolean force) {
-        if (item.slot == SlotItem.Trinket) {
+        if (item.slot() == SlotItem.Trinket) {
             return item;
         }
 
@@ -134,11 +134,11 @@ public class ItemLoadUtil {
             return item;
         }
 
-        SocketType[] socketSlots = item.socketSlots;
+        SocketType[] socketSlots = item.shared.socketSlots();
 
-        if (model.enchants().isBlacksmith() && (item.slot == SlotItem.Wrist || item.slot == SlotItem.Hand))
+        if (model.enchants().isBlacksmith() && (item.slot() == SlotItem.Wrist || item.slot() == SlotItem.Hand))
             socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
-        else if (item.slot == SlotItem.Belt)
+        else if (item.slot() == SlotItem.Belt)
             socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
 
         StatBlock total = StatBlock.empty;
@@ -162,10 +162,10 @@ public class ItemLoadUtil {
                 }
             }
         }
-        if (item.socketBonus != null) {
-            total = total.plus(item.socketBonus);
+        if (item.shared.socketBonus() != null) {
+            total = total.plus(item.shared.socketBonus());
         }
-        StatBlock enchant = model.standardEnchant(item.slot);
+        StatBlock enchant = model.standardEnchant(item.slot());
         if (enchant != null) {
             total = total.plus(enchant);
         }

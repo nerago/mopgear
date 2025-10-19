@@ -187,7 +187,7 @@ public class GemData {
     }
 
     public static StatBlock getSocketBonus(ItemData item) {
-        return item.socketBonus;
+        return item.shared.socketBonus();
     }
 
     public static StatBlock getSocketBonus(String name, int socketBonus) {

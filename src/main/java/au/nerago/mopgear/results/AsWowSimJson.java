@@ -14,9 +14,9 @@ public class AsWowSimJson {
     private static void writeItem(ItemData item) {
         if (!item.reforge.isEmpty()) {
             int reforgeId = WowSimDB.instance.reforgeId(item.reforge);
-            OutputText.printf("{\"id\":%d,\"reforging\":%d},", item.ref.itemId(), reforgeId);
+            OutputText.printf("{\"id\":%d,\"reforging\":%d},", item.itemId(), reforgeId);
         } else {
-            OutputText.printf("{\"id\":%d},", item.ref.itemId());
+            OutputText.printf("{\"id\":%d},", item.itemId());
         }
     }
 }

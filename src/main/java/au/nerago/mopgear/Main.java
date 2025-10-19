@@ -55,8 +55,6 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
-//        ItemCache.instance.clear();
-//        WowSimDB.instance.itemStream().forEach(ItemCache.instance::put);
 //
 //        determineRatingMultipliers();
         paladinMultiSpecSolve();
@@ -288,7 +286,7 @@ public class Main {
         outputResultSimple(Optional.of(raidSet), model, false);
 
         Map<Integer, List<ReforgeRecipe>> presetReforge = commonFixedItems();
-        raidSet.items().forEachValue(item -> presetReforge.put(item.ref.itemId(), Collections.singletonList(item.reforge)));
+        raidSet.items().forEachValue(item -> presetReforge.put(item.itemId(), Collections.singletonList(item.reforge)));
         presetReforge.put(89954, List.of(new ReforgeRecipe(Crit, Haste)));
 
         EquipOptionsMap map = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
@@ -309,18 +307,18 @@ public class Main {
 //                return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0, 0));
 //            } else if (extraItem.id == 81113) { // Spike-Soled Stompers
 //                return extraItem.changeFixed(new StatBlock(60, 0, 0, 0, 160, 175 + 160, 0, 0, 0, 0));
-            if (extraItem.ref.itemId() == 87060) { // Star-Stealer Waistguard
+            if (extraItem.itemId() == 87060) { // Star-Stealer Waistguard
                 return extraItem.changeEnchant(new StatBlock(0, 0, 0, 0, 160, 320 * 2 + 160, 0, 120, 0, 0));
 //            } else if (extraItem.id == 86794) { // starcrusher gauntlets
 //                return extraItem.changeFixed(new StatBlock(170, 0, 0, 0, 160, 60 + 320 + 160, 0, 0, 0, 0));
 //            } else if (extraItem.id == 86145) { // jang-xi devastating legs
 //                return extraItem.changeFixed(new StatBlock(120, 430, 0, 0, 160, 160 * 2, 160, 0, 0, 0));
-            } else if (extraItem.ref.itemId() == 77539) { // engineer helm
+            } else if (extraItem.itemId() == 77539) { // engineer helm
                 return extraItem.changeEnchant(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
-            } else if (extraItem.ref.itemId() == 89503) { // Greenstone Drape
+            } else if (extraItem.itemId() == 89503) { // Greenstone Drape
                 return extraItem.changeStatsBase(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
                         .changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
-            } else if (extraItem.slot == SlotItem.Back) {
+            } else if (extraItem.slot() == SlotItem.Back) {
                 return extraItem.changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
             } else {
                 OutputText.println("DEFAULT ENCHANT " + extraItem);
@@ -355,16 +353,16 @@ public class Main {
             ItemData scaledChoice = bestScaledSet.items().get(slot);
             if (scaledChoice != null) {
                 ItemData[] options = map.get(slot);
-                boolean inRaidDPSSet = inputSetItems.stream().anyMatch(x -> x.ref.itemId() == scaledChoice.ref.itemId());
+                boolean inRaidDPSSet = inputSetItems.stream().anyMatch(x -> x.itemId() == scaledChoice.itemId());
 
                 if (inRaidDPSSet) {
                     // need exact item + forge but prescale
                     // note were using id match only, scaled stuff could confused normal "exact" match
                     // avoid engineering heads mixup
-                    ItemData match = ArrayUtil.findOne(options, x -> x.ref.itemId() == scaledChoice.ref.itemId() && Objects.equals(x.reforge, scaledChoice.reforge));
+                    ItemData match = ArrayUtil.findOne(options, x -> x.itemId() == scaledChoice.itemId() && Objects.equals(x.reforge, scaledChoice.reforge));
                     options = new ItemData[]{match};
                 } else {
-                    options = ArrayUtil.allMatch(options, x -> x.ref.itemId() == scaledChoice.ref.itemId());
+                    options = ArrayUtil.allMatch(options, x -> x.itemId() == scaledChoice.itemId());
                 }
 
                 map.put(slot, options);

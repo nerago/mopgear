@@ -58,7 +58,7 @@ public class Trinkets {
     }
 
     public static ItemData updateTrinket(ItemData item) {
-        TrinketData trinketData = knownTrinkets.get(item.ref.itemId());
+        TrinketData trinketData = knownTrinkets.get(item.itemId());
         if (trinketData == null) {
             throw new IllegalArgumentException("unknown trinket " + item.toStringExtended());
         }

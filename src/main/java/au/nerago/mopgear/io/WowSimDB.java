@@ -107,7 +107,7 @@ public class WowSimDB {
 
             ItemRef ref = ItemRef.buildAdvanced(id, itemLevel, baseItemLevel);
             ItemData item = ItemData.buildFromWowSim(ref, slot, name, block, sockets, socketBonusBlock);
-            itemMap.put(item.ref, item);
+            itemMap.put(item.ref(), item);
         }
     }
 

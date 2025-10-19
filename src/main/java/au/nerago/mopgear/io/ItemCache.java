@@ -24,11 +24,19 @@ public class ItemCache {
     public static final ItemCache instance = new ItemCache();
 
     private ItemCache() {
-        List<ItemData> itemList = cacheLoad();
+        if (loadFromDisk()) {
+            List<ItemData> itemList = cacheLoad();
+            this.itemRefLookup = itemList.stream().collect(Collectors.toMap(item -> item.shared.ref(), item -> item, (a, b) -> a, HashMap::new));
+            this.itemIdLookup = itemList.stream().collect(Collectors.groupingBy(ItemData::itemId, HashMap::new, Collectors.toSet()));
+        } else {
+            this.itemRefLookup = new HashMap<>();
+            this.itemIdLookup = new HashMap<>();
+            WowSimDB.instance.itemStream().forEach(this::put);
+        }
+    }
 
-        this.itemRefLookup = itemList.stream().collect(Collectors.toMap(item -> item.ref, item -> item, (a, b) -> a, HashMap::new));
-
-        this.itemIdLookup = itemList.stream().collect(Collectors.groupingBy(item -> item.ref.itemId(), HashMap::new, Collectors.toSet()));
+    private boolean loadFromDisk() {
+        return true;
     }
 
     private static List<ItemData> cacheLoad() {
@@ -83,7 +91,7 @@ public class ItemCache {
         Set<ItemData> itemList = itemIdLookup.get(itemId);
         if (itemList != null) {
             for (ItemData item : itemList) {
-                if (item.ref.upgradeLevel() == upgradeLevel)
+                if (item.ref().upgradeLevel() == upgradeLevel)
                     return item;
             }
         }
@@ -91,8 +99,8 @@ public class ItemCache {
     }
 
     public void put(ItemData item) {
-        itemRefLookup.put(item.ref, item);
-        itemIdLookup.computeIfAbsent(item.ref.itemId(), k -> new HashSet<>()).add(item);
+        itemRefLookup.put(item.ref(), item);
+        itemIdLookup.computeIfAbsent(item.itemId(), k -> new HashSet<>()).add(item);
     }
 
     public void clear() {

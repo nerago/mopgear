@@ -15,19 +15,13 @@ public class StatRequirementsHitOnly implements StatRequirements {
 
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        int hit = item.statBase.hit();
-        if (item.slot.addEnchantToCap) {
-            hit += item.statEnchant.hit();
-        }
+        int hit = item.totalCap.hit();
         return new SkinnyItem(slot, hit, 0);
     }
 
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        int hit = item.statBase.hit();
-        if (item.slot.addEnchantToCap) {
-            hit += item.statEnchant.hit();
-        }
+        int hit = item.totalCap.hit();
         return skinny.one() == hit;
     }
 

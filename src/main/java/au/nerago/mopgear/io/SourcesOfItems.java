@@ -532,23 +532,23 @@ public class SourcesOfItems {
     public static CostedItem[] strengthPlateCurrentItemsRet() {
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
         Stream<CostedItem> itemStream = items.entryStream()
-                .filter(it -> it.b()[0].slot != SlotItem.Weapon2H && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
-                .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
+                .filter(it -> it.b()[0].slot() != SlotItem.Weapon2H && it.b()[0].slot() != SlotItem.Trinket && it.b()[0].slot() != SlotItem.Ring)
+                .map(tup -> new CostedItem(tup.b()[0].itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProt() {
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.entryStream()
-                .filter(it -> it.b()[0].slot != SlotItem.Weapon1H && it.b()[0].slot != SlotItem.Trinket && it.b()[0].slot != SlotItem.Ring)
-                .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
+                .filter(it -> it.b()[0].slot() != SlotItem.Weapon1H && it.b()[0].slot() != SlotItem.Trinket && it.b()[0].slot() != SlotItem.Ring)
+                .map(tup -> new CostedItem(tup.b()[0].itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProtAll() {
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.entryStream()
-                .map(tup -> new CostedItem(tup.b()[0].ref.itemId(), 0));
+                .map(tup -> new CostedItem(tup.b()[0].itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }
 
@@ -556,7 +556,7 @@ public class SourcesOfItems {
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDefenceFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.itemStream()
                 .filter(ItemData::isUpgradable)
-                .map(item -> new CostedItem(item.ref.itemId(), 0))
+                .map(item -> new CostedItem(item.itemId(), 0))
                 .distinct();
         return itemStream.toArray(CostedItem[]::new);
     }

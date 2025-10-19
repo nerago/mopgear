@@ -6,11 +6,7 @@ import java.util.Objects;
 
 public final class ItemData {
     @NotNull
-    public final ItemRef ref;
-    @NotNull
-    public final SlotItem slot;
-    @NotNull
-    public final String name;
+    public final ItemShared shared;
     @NotNull
     public final ReforgeRecipe reforge;
     @NotNull
@@ -21,24 +17,17 @@ public final class ItemData {
     public final StatBlock totalCap;
     @NotNull
     public final StatBlock totalRated;
-    @NotNull
-    public final SocketType[] socketSlots;
-    public final StatBlock socketBonus;
 
-    private ItemData(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull ReforgeRecipe reforge,
-                     @NotNull StatBlock statBase, @NotNull StatBlock statEnchant, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
-        this.ref = ref;
-        this.slot = slot;
-        this.name = name;
+    private ItemData(@NotNull ItemShared shared, @NotNull ReforgeRecipe reforge,
+                     @NotNull StatBlock statBase, @NotNull StatBlock statEnchant) {
+        this.shared = shared;
         this.reforge = reforge;
         this.statBase = statBase;
         this.statEnchant = statEnchant;
-        this.socketSlots = socketSlots;
-        this.socketBonus = socketBonus;
 
         if (statEnchant.isEmpty()) {
             totalCap = totalRated = statBase;
-        } else if (slot.addEnchantToCap) {
+        } else if (slot().addEnchantToCap) {
             totalCap = totalRated = statBase.plus(statEnchant);
         } else {
             totalCap = statBase;
@@ -46,32 +35,39 @@ public final class ItemData {
         }
     }
 
-    public static ItemData buildFromWowSim(ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
-        return new ItemData(ref, slot, name, ReforgeRecipe.empty(), statBase, StatBlock.empty, socketSlots, socketBonus);
+    public static ItemData buildFromWowSim(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
+        ItemShared shared = ItemSharedCache.get(ref, slot, name, socketSlots, socketBonus);
+        return new ItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
     }
 
     public static ItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
-        return new ItemData(ItemRef.buildBasic(id, itemLevel), slot, name, ReforgeRecipe.empty(), statBase, StatBlock.empty, socketSlots, socketBonus);
+        ItemRef ref = ItemRef.buildBasic(id, itemLevel);
+        ItemShared shared = ItemSharedCache.get(ref, slot, name, socketSlots, socketBonus);
+        return new ItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
     }
 
-    public ItemData changeNameAndStats(@NotNull String changedName, @NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
-        return new ItemData(ref, slot, changedName, recipe, changedStats, statEnchant, socketSlots, socketBonus);
+    public ItemData changeForReforge(@NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
+        return new ItemData(shared, recipe, changedStats, statEnchant);
     }
 
     public ItemData changeStatsBase(@NotNull StatBlock changedStats) {
-        return new ItemData(ref, slot, name, reforge, changedStats, statEnchant, socketSlots, socketBonus);
+        return new ItemData(shared, reforge, changedStats, statEnchant);
     }
 
     public ItemData changeEnchant(@NotNull StatBlock changedEnchant) {
-        return new ItemData(ref, slot, name, reforge, statBase, changedEnchant, socketSlots, socketBonus);
+        return new ItemData(shared, reforge, statBase, changedEnchant);
     }
 
     public ItemData changeDuplicate(int dupNum) {
-        return new ItemData(ref.changeDuplicate(dupNum), slot, name, reforge, statBase, statEnchant, socketSlots, socketBonus);
+        ItemRef changeRef = ref().changeDuplicate(dupNum);
+        ItemShared changeShared = ItemSharedCache.get(changeRef, shared);
+        return new ItemData(changeShared, reforge, statBase, statEnchant);
     }
 
     public ItemData changeItemLevel(int itemLevel) {
-        return new ItemData(ref.changeItemLevel(itemLevel), slot, name, reforge, statBase, statEnchant, socketSlots, socketBonus);
+        ItemRef changeRef = ref().changeItemLevel(itemLevel);
+        ItemShared changeShared = ItemSharedCache.get(changeRef, shared);
+        return new ItemData(changeShared, reforge, statBase, statEnchant);
     }
 
     @Override
@@ -86,8 +82,8 @@ public final class ItemData {
         final StringBuilder sb = new StringBuilder("{ ");
         append(sb);
         sb.append("REF ");
-        sb.append("ilevel=").append(ref.itemLevel()).append(' ');
-        sb.append("itemId=").append(ref.itemId()).append(' ');
+        sb.append("ilevel=").append(ref().itemLevel()).append(' ');
+        sb.append("itemId=").append(itemId()).append(' ');
         sb.append('}');
         return sb.toString();
     }
@@ -96,9 +92,16 @@ public final class ItemData {
         return item != null ? item.toStringExtended() : "null";
     }
 
+    public String fullName() {
+        if (reforge.isEmpty())
+            return shared.name();
+        else
+            return shared.name() + " (" + reforge.source() + "->" + reforge.dest() + ")";
+    }
+
     private void append(StringBuilder sb) {
-        sb.append(slot).append(' ');
-        sb.append('"').append(name).append("\" ");
+        sb.append(slot()).append(' ');
+        sb.append('"').append(fullName()).append("\" ");
         statBase.append(sb, false);
         if (!statEnchant.isEmpty()) {
             sb.append("ENCHANT ");
@@ -107,11 +110,11 @@ public final class ItemData {
     }
 
     public static boolean isSameEquippedItem(ItemData a, ItemData b) {
-        return a.ref.equalsTyped(b.ref);
+        return a.shared.equalsTyped(b.shared);
     }
 
     public static boolean isIdenticalItem(ItemData a, ItemData b) {
-        return a.ref.equalsTyped(b.ref) && a.statBase.equalsStats(b.statBase) && a.statEnchant.equalsStats(b.statEnchant);
+        return a.shared.equalsTyped(b.shared) && a.statBase.equalsStats(b.statBase) && a.statEnchant.equalsStats(b.statEnchant);
     }
 
     @Override
@@ -123,16 +126,32 @@ public final class ItemData {
     }
 
     public boolean equalsTyped(ItemData other) {
-        return ref.equalsTyped(other.ref) && slot == other.slot && Objects.equals(reforge, other.reforge) &&
+        return shared.equalsTyped(other.shared) && Objects.equals(reforge, other.reforge) &&
                 statBase.equalsStats(other.statBase) && statEnchant.equalsStats(other.statEnchant);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ref, slot, reforge, statBase, statEnchant);
+        return Objects.hash(shared, reforge, statBase, statEnchant);
     }
 
     public boolean isUpgradable() {
-        return !name.contains("Gladiator");
+        return !shared.name().contains("Gladiator");
+    }
+
+    public ItemRef ref() {
+        return shared.ref();
+    }
+
+    public SlotItem slot() {
+        return shared.slot();
+    }
+
+    public int itemId() {
+        return shared.ref().itemId();
+    }
+
+    public int itemLevel() {
+        return shared.ref().itemLevel();
     }
 }

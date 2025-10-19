@@ -19,12 +19,8 @@ public class StatRequirementsHitCombined implements StatRequirements {
     }
 
     private int effectiveHit(ItemData item) {
-        StatBlock base = item.statBase, enchant = item.statEnchant;
-        if (item.slot.addEnchantToCap) {
-            return base.hit() + base.expertise() + base.spirit() + enchant.hit() + enchant.expertise() + enchant.spirit();
-        } else {
-            return base.hit() + base.expertise() + base.spirit();
-        }
+        StatBlock cap = item.totalCap;
+        return cap.hit() + cap.expertise() + cap.spirit();
     }
 
     @Override

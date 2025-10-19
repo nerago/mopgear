@@ -47,19 +47,11 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
         if (hitMin == 0) {
             return 0;
         } else if (combineHitLike) {
-            StatBlock base = item.statBase, enchant = item.statEnchant;
-            if (item.slot.addEnchantToCap) {
-                return base.hit() + base.expertise() + base.spirit() + enchant.hit() + enchant.expertise() + enchant.spirit();
-            } else {
-                return base.hit() + base.expertise() + base.spirit();
-            }
+            StatBlock cap = item.totalCap;
+            return cap.hit() + cap.expertise() + cap.spirit();
         } else {
-            StatBlock base = item.statBase, enchant = item.statEnchant;
-            if (item.slot.addEnchantToCap) {
-                return base.hit() + enchant.hit();
-            } else {
-                return base.hit();
-            }
+            StatBlock cap = item.totalCap;
+            return cap.hit();
         }
     }
 

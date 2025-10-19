@@ -122,7 +122,7 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
                 parry += base.parry;
                 spirit += base.spirit;
 
-                if (item.slot.addEnchantToCap) {
+                if (item.slot().addEnchantToCap) {
                     StatBlock enchant = item.statEnchant;
                     primary += enchant.primary;
                     stam += enchant.stam;

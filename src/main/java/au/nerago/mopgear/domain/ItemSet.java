@@ -17,30 +17,19 @@ public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap
 
     public static ItemSet singleItem(SlotEquip slot, ItemData item, StatBlock adjustment) {
         EquipMap itemMap = EquipMap.single(slot, item);
-        StatBlock rating, caps;
-        if (item.slot.addEnchantToCap) {
-            caps = item.totalRated;
-            if (adjustment != null) {
-                caps = caps.plus(adjustment);
-            }
-            rating = caps;
-        } else {
-            caps = item.statBase;
-            rating = item.totalRated;
-            if (adjustment != null) {
-                rating = rating.plus(adjustment);
-                caps = caps.plus(adjustment);
-            }
+        StatBlock rating = item.totalRated;
+        StatBlock caps = item.totalCap;
+        if (adjustment != null) {
+            rating = rating.plus(adjustment);
+            caps = caps.plus(adjustment);
         }
         return new ItemSet(rating, caps, itemMap);
     }
 
     public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {
         EquipMap itemMap = items.copyWithReplace(slot, item);
-        StatBlock rating = totalForRating.plus(item.statBase, item.statEnchant);
-        StatBlock caps = item.slot.addEnchantToCap
-                ? totalForCaps.plus(item.statBase, item.statEnchant)
-                : totalForCaps.plus(item.statBase);
+        StatBlock rating = totalForRating.plus(item.totalRated);
+        StatBlock caps = totalForCaps.plus(item.totalCap);
         return new ItemSet(rating, caps, itemMap);
     }
 
@@ -56,22 +45,22 @@ public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap
     }
 
     public void outputSetLight() {
-        items.forEachValue(it -> OutputText.printf("%s [%d]\n", it.name, it.ref.itemLevel()));
+        items.forEachValue(it -> OutputText.printf("%s [%d]\n", it.fullName(), it.ref().itemLevel()));
     }
 
     public boolean validate() {
         ItemData weapon = items.getWeapon();
         if (weapon == null)
             throw new IllegalStateException("no weapon in set");
-        if (weapon.slot == SlotItem.Weapon2H && items.getOffhand() != null)
+        if (weapon.slot() == SlotItem.Weapon2H && items.getOffhand() != null)
             throw new IllegalStateException("weapon 2H with unexpected offhand");
-        if (weapon.slot == SlotItem.Weapon1H && items.getOffhand() == null)
+        if (weapon.slot() == SlotItem.Weapon1H && items.getOffhand() == null)
             throw new IllegalStateException("weapon 1H with missing offhand");
 
         ItemData t1 = items.getTrinket1(), t2 = items.getTrinket2();
         ItemData r1 = items.getRing1(), r2 = items.getRing2();
-        return (t1 == null || t2 == null || t1.ref.itemId() != t2.ref.itemId()) &&
-                (r1 == null || r2 == null || r1.ref.itemId() != r2.ref.itemId());
+        return (t1 == null || t2 == null || t1.itemId() != t2.itemId()) &&
+                (r1 == null || r2 == null || r1.itemId() != r2.itemId());
     }
 
     @Override

@@ -26,7 +26,7 @@ public class ItemLevel {
     }
 
     private static ItemData scaleForChallengeMode(ItemData item) {
-        int level = item.ref.itemLevel();
+        int level = item.itemLevel();
         if (level <= CHALLENGE_TARGET_LEVEL) {
             return item;
         }
@@ -37,12 +37,12 @@ public class ItemLevel {
 
     private static ItemData scaleAll(ItemData item, double factor) {
         StatBlock stats = scaleStatBlock(item.statBase, factor);
-        if (item.slot != SlotItem.Trinket) {
-            OutputText.println("SCALED " + item.name + " " + stats);
+        if (item.slot() != SlotItem.Trinket) {
+            OutputText.println("SCALED " + item.fullName() + " " + stats);
             return item.changeStatsBase(stats);
         } else {
             StatBlock statsFixed = scaleStatBlock(item.statEnchant, factor);
-            OutputText.println("SCALED TRINKET " + item.name + " " + stats + " " + statsFixed);
+            OutputText.println("SCALED TRINKET " + item.fullName() + " " + stats + " " + statsFixed);
             return item.changeStatsBase(stats).changeEnchant(statsFixed);
         }
     }
@@ -51,8 +51,9 @@ public class ItemLevel {
         if (upgradeLevel < 0 || upgradeLevel > 2)
             throw new IllegalArgumentException("invalid upgrade level");
 
-        int currentLevel = item.ref.itemLevel();
-        int baseItemLevel = item.ref.itemLevelBase();
+        ItemRef ref = item.shared.ref();
+        int currentLevel = ref.itemLevel();
+        int baseItemLevel = ref.itemLevelBase();
         int targetLevel = baseItemLevel + upgradeLevel * ITEM_LEVELS_PER_UPGRADE_LEVEL;
 
         if (currentLevel != targetLevel) {

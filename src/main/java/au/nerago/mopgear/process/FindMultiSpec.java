@@ -112,7 +112,7 @@ public class FindMultiSpec {
         // initially group items by id/upgrade, filtering common forges for each
         for (SpecDetails spec : mapArray) {
             spec.itemOptions.itemStream()
-               .collect(Collectors.groupingBy(item -> item.ref))
+               .collect(Collectors.groupingBy(ItemData::ref))
                .forEach((ref, forges) -> {
                     seenIn.computeIfAbsent(ref, r -> new HashSet<>()).add(spec.label);
                     commonOptions.compute(ref, (r, prior) -> commonForges(prior, forges));
@@ -126,7 +126,7 @@ public class FindMultiSpec {
                 List<ItemData> forgeList = commonOptions.get(ref);
                 forgeList = onlyMatchingForge(forgeList, entry.getValue());
                 commonOptions.put(ref, forgeList);
-                OutputText.println("FIXED " + forgeList.getFirst().name);
+                OutputText.println("FIXED " + forgeList.getFirst().fullName());
             }
         }
 
@@ -146,14 +146,14 @@ public class FindMultiSpec {
             // check for empty lists
             if (lst.isEmpty()) {
                 Optional<ItemData> any = mapArray.stream().flatMap(x -> x.itemOptions.itemStream())
-                        .filter(item -> ref.equalsTyped(item.ref)).findFirst();
+                        .filter(item -> ref.equalsTyped(item.ref())).findFirst();
                 throw new IllegalArgumentException("No common forge for " + any);
             }
 
             // print common item
             ItemData item = lst.getFirst();
             Set<String> specs = seenIn.get(ref);
-            OutputText.println("COMMON " + ref.itemId() + " " + item.name + " " + item.ref.itemLevel() + " " + String.join(" ", specs));
+            OutputText.println("COMMON " + item.itemId() + " " + item.fullName() + " " + item.shared.ref().itemLevel() + " " + String.join(" ", specs));
         }
 
         return commonOptions;
@@ -194,7 +194,7 @@ public class FindMultiSpec {
                     ItemRef ref = entry.getKey();
                     long count = resultJobs.stream().flatMap(job -> job.resultSet.orElseThrow()
                                     .items().entryStream().map(Tuple.Tuple2::b))
-                            .filter(item -> ref.equalsTyped(item.ref))
+                            .filter(item -> ref.equalsTyped(item.ref()))
                             .count();
                     if (count < 2)
                         OutputText.println("REMOVING COMMON " + entry.getValue());
@@ -244,7 +244,7 @@ public class FindMultiSpec {
         HashSet<ItemRef> chosenToAdd = new HashSet<>();
 
         for (ItemData item : options) {
-            ItemRef ref = item.ref;
+            ItemRef ref = item.ref();
             if (chosenMap.containsKey(ref)) {
                 chosenToAdd.add(ref);
             } else {
@@ -265,7 +265,7 @@ public class FindMultiSpec {
         for (EquipOptionsMap map : mapsParam) {
             map.forEachPair((slot, array) -> {
                 for (ItemData item : array) {
-                    int itemId = item.ref.itemId();
+                    int itemId = item.itemId();
                     SlotEquip val = seen.get(itemId);
                     if (val == null) {
                         seen.put(itemId, slot);
@@ -352,9 +352,9 @@ public class FindMultiSpec {
             OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
             commonFinal.values().forEach(item -> {
                 if (item.reforge.isEmpty())
-                    OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(null, null))); // %s %s\n", item.ref.itemId(), item.slot, item.name);
+                    OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(null, null))); // %s %s\n", item.itemId(), item.slot(), item.shared.name());
                 else
-                    OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(%s, %s))); // %s %s\n", item.ref.itemId(), item.reforge.source(), item.reforge.dest(), item.slot, item.name);
+                    OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(%s, %s))); // %s %s\n", item.itemId(), item.reforge.source(), item.reforge.dest(), item.slot(), item.shared.name());
             });
 
             OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
@@ -492,7 +492,7 @@ public class FindMultiSpec {
         }
 
         private ItemData remapDuplicate(ItemData itemData) {
-            Integer duplicateId = duplicatedItems.get(itemData.ref.itemId());
+            Integer duplicateId = duplicatedItems.get(itemData.itemId());
             if (duplicateId != null && duplicateId != 0) {
                 return itemData.changeDuplicate(duplicateId);
             } else {
@@ -502,10 +502,10 @@ public class FindMultiSpec {
 
         private void verifyNotAlreadyIncluded(int itemId) {
             ItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
-            SlotEquip[] slots = extraItem.slot.toSlotEquipOptions();
+            SlotEquip[] slots = extraItem.slot().toSlotEquipOptions();
             for (SlotEquip slot : slots) {
                 ItemData[] existing = itemOptions.get(slot);
-                if (ArrayUtil.anyMatch(existing, item -> item.ref.itemId() == itemId))
+                if (ArrayUtil.anyMatch(existing, item -> item.itemId() == itemId))
                     throw new IllegalArgumentException("{SET " + label + "} item already included " + itemId + " " + extraItem);
             }
         }
@@ -513,12 +513,12 @@ public class FindMultiSpec {
         private boolean copyFromOtherSpec(int itemId, List<SpecDetails> allSpecs) {
             ItemData[] otherCopies = allSpecs.stream()
                     .flatMap(spec -> spec.itemOptions.itemStream())
-                    .filter(item -> item.ref.itemId() == itemId)
+                    .filter(item -> item.itemId() == itemId)
                     .distinct()
                     .toArray(ItemData[]::new);
 
             if (otherCopies.length > 0) {
-                SlotEquip[] slotOptions = otherCopies[0].slot.toSlotEquipOptions();
+                SlotEquip[] slotOptions = otherCopies[0].slot().toSlotEquipOptions();
                 for (SlotEquip slot : slotOptions) {
                     ItemData[] existing = itemOptions.get(slot);
                     itemOptions.put(slot, ArrayUtil.concat(existing, otherCopies));
@@ -539,7 +539,7 @@ public class FindMultiSpec {
 
             ItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
-            SlotEquip[] slotOptions = extraItem.slot.toSlotEquipOptions();
+            SlotEquip[] slotOptions = extraItem.slot().toSlotEquipOptions();
             for (SlotEquip slot : slotOptions) {
                 ItemData[] existing = itemOptions.get(slot);
                 itemOptions.put(slot, ArrayUtil.concat(existing, extraForged));
@@ -551,7 +551,7 @@ public class FindMultiSpec {
             ItemData[] slotArray = itemOptions.get(slot);
             HashSet<ItemRef> seen = new HashSet<>();
             ArrayUtil.forEach(slotArray, it -> {
-                if (seen.add(it.ref)) {
+                if (seen.add(it.ref())) {
                     OutputText.println("OPTION " + slot + " " + it);
                 }
             });

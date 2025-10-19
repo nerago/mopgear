@@ -13,7 +13,7 @@ public class ItemMapUtil {
     public static EquipOptionsMap standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
         EquipOptionsMap map = EquipOptionsMap.empty();
         for (ItemData item : items) {
-            SlotEquip slot = item.slot.toSlotEquip();
+            SlotEquip slot = item.slot().toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 map.put(SlotEquip.Ring2, Reforger.reforgeItem(rules, item));
             } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
@@ -29,7 +29,7 @@ public class ItemMapUtil {
                                                             Map<Integer, List<ReforgeRecipe>> presetForge) {
         EquipOptionsMap map = EquipOptionsMap.empty();
         for (ItemData item : items) {
-            SlotEquip slot = item.slot.toSlotEquip();
+            SlotEquip slot = item.slot().toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 slot = SlotEquip.Ring2;
             } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
@@ -38,8 +38,8 @@ public class ItemMapUtil {
                 throw new IllegalArgumentException("duplicate item");
             }
 
-            if (presetForge.containsKey(item.ref.itemId())) {
-                ItemData[] forged = presetForge.get(item.ref.itemId()).stream()
+            if (presetForge.containsKey(item.itemId())) {
+                ItemData[] forged = presetForge.get(item.itemId()).stream()
                         .map(preset -> Reforger.presetReforge(item, preset))
                         .toArray(ItemData[]::new);
                 map.put(slot, forged);
@@ -53,7 +53,7 @@ public class ItemMapUtil {
     public static EquipMap chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, ReforgeRecipe> presetForge) {
         EquipMap map = EquipMap.empty();
         for (ItemData item : items) {
-            SlotEquip slot = item.slot.toSlotEquip();
+            SlotEquip slot = item.slot().toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 slot = SlotEquip.Ring2;
             } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
@@ -76,11 +76,11 @@ public class ItemMapUtil {
     }
 
     private static ItemData upgradeItemTo2(ItemData oldItem) {
-        if (!oldItem.isUpgradable() || oldItem.ref.upgradeLevel() == ItemLevel.MAX_UPGRADE_LEVEL) {
+        if (!oldItem.isUpgradable() || oldItem.ref().upgradeLevel() == ItemLevel.MAX_UPGRADE_LEVEL) {
             return oldItem;
         }
 
-        ItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.ref.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
+        ItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
         loaded = Reforger.presetReforge(loaded, oldItem.reforge);
         return loaded.changeEnchant(oldItem.statEnchant);
     }

@@ -71,8 +71,7 @@ public class Reforger {
     }
 
     private static ItemData makeModified(ItemData baseItem, ReforgeRecipe recipe, int remainQuantity, int reforgeQuantity) {
-        String name = baseItem.name + " (" + recipe.source() + "->" + recipe.dest() + ")";
         StatBlock changedStats = baseItem.statBase.withChange(recipe.source(), remainQuantity, recipe.dest(), reforgeQuantity);
-        return baseItem.changeNameAndStats(name, changedStats, recipe);
+        return baseItem.changeForReforge(changedStats, recipe);
     }
 }
