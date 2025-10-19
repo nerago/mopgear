@@ -4,7 +4,10 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.WowHead;
-import au.nerago.mopgear.model.*;
+import au.nerago.mopgear.model.GemData;
+import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.model.ReforgeRules;
+import au.nerago.mopgear.model.Trinkets;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 

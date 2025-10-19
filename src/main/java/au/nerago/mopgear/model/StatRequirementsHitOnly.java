@@ -4,7 +4,7 @@ import au.nerago.mopgear.domain.*;
 
 import java.util.stream.Stream;
 
-public class StatRequirementsHitOnly implements StatRequirements.StatRequirementsSkinnySupport {
+public class StatRequirementsHitOnly implements StatRequirements {
     private final long minimum;
     private final long maximum;
 
@@ -29,6 +29,11 @@ public class StatRequirementsHitOnly implements StatRequirements.StatRequirement
             hit += item.statEnchant.hit();
         }
         return skinny.one() == hit;
+    }
+
+    @Override
+    public boolean skinnyRecommended() {
+        return true;
     }
 
     @Override

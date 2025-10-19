@@ -4,7 +4,7 @@ import au.nerago.mopgear.domain.*;
 
 import java.util.stream.Stream;
 
-public class StatRequirementsGenericOne implements StatRequirements.StatRequirementsSkinnySupport {
+public class StatRequirementsGenericOne implements StatRequirements {
     private final StatType stat;
     private final long minimum;
     private final long maximum;
@@ -33,6 +33,11 @@ public class StatRequirementsGenericOne implements StatRequirements.StatRequirem
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
         return skinny.one() == item.totalStatCaps(stat);
+    }
+
+    @Override
+    public boolean skinnyRecommended() {
+        return true;
     }
 
     @Override

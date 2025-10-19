@@ -1,7 +1,5 @@
 package au.nerago.mopgear.io;
 
-import java.nio.file.Path;
-
 public class ReadLog {
     // C:\games\World of Warcraft\_classic_\Logs\WoWCombatLog-101625_212717.txt
     // ENCOUNTER_START,1505,"Tsulong",5,10,996,19

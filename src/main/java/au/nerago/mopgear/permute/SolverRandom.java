@@ -3,7 +3,6 @@ package au.nerago.mopgear.permute;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
-import au.nerago.mopgear.model.StatRequirementsOriginal;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BestHolder;
 import au.nerago.mopgear.util.BigStreamUtil;

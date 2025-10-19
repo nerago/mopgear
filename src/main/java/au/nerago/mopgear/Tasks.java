@@ -16,7 +16,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
-import static au.nerago.mopgear.domain.StatType.*;
+import static au.nerago.mopgear.domain.StatType.Crit;
+import static au.nerago.mopgear.domain.StatType.Expertise;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Tasks {

@@ -6,7 +6,10 @@ import au.nerago.mopgear.model.StatRatings;
 import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.PrintRecorder;
-import au.nerago.mopgear.util.*;
+import au.nerago.mopgear.util.BestHolder;
+import au.nerago.mopgear.util.Holder;
+import au.nerago.mopgear.util.LowHighHolder;
+import au.nerago.mopgear.util.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

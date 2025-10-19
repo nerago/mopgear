@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 public class SolverCapPhased {
     public static final int TOP_HIT_COMBO_FILTER = 400;
     private final ModelCombined model;
-    private final StatRequirements.StatRequirementsSkinnySupport requirements;
+    private final StatRequirements requirements;
     private final StatBlock adjustment;
     private final PrintRecorder printRecorder;
     private EquipOptionsMap fullItems;
@@ -24,13 +24,13 @@ public class SolverCapPhased {
         if (!supportedModel(model))
             throw new IllegalArgumentException("can't use this model without skinny support");
         this.model = model;
-        this.requirements = (StatRequirements.StatRequirementsSkinnySupport) model.statRequirements();
+        this.requirements = model.statRequirements();
         this.adjustment = adjustment;
         this.printRecorder = printRecorder;
     }
 
     public static boolean supportedModel(ModelCombined model) {
-        return (model.statRequirements() instanceof StatRequirements.StatRequirementsSkinnySupport);
+        return model.statRequirements().skinnyRecommended();
     }
 
     public long initAndCheckSizes(EquipOptionsMap items) {

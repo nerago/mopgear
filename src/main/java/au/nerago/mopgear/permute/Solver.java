@@ -30,7 +30,7 @@ public class Solver {
 
         SolverCapPhased phased = null;
         long estimatePhase1Combos = 0;
-        if (SolverCapPhased.supportedModel(model)) {
+        if (true) {
             phased = new SolverCapPhased(model, adjustment, job.printRecorder);
             estimatePhase1Combos = phased.initAndCheckSizes(itemOptions);
             job.printf("COMBOS full=%,d skinny=%,d\n", estimateFullCombos, estimatePhase1Combos);

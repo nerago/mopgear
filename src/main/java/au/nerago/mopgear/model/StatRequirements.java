@@ -11,6 +11,16 @@ public interface StatRequirements {
 
     Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream);
 
+    Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> stream);
+
+    Stream<SkinnyItemSet> filterSetsMaxSkinny(Stream<SkinnyItemSet> stream);
+
+    boolean skinnyMatch(SkinnyItem skinny, ItemData item);
+
+    SkinnyItem toSkinny(SlotEquip slot, ItemData item);
+
+    boolean skinnyRecommended();
+
     interface StatRequirementsWithHitExpertise extends StatRequirements {
         int effectiveHit(StatBlock totals);
 
@@ -21,16 +31,6 @@ public interface StatRequirements {
         int getMaximumHit();
 
         int getMaximumExpertise();
-    }
-
-    interface StatRequirementsSkinnySupport extends StatRequirements {
-        Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> stream);
-
-        Stream<SkinnyItemSet> filterSetsMaxSkinny(Stream<SkinnyItemSet> stream);
-
-        boolean skinnyMatch(SkinnyItem skinny, ItemData item);
-
-        SkinnyItem toSkinny(SlotEquip slot, ItemData item);
     }
 
     double RATING_PER_PERCENT = 339.9534;

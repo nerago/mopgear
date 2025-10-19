@@ -61,6 +61,8 @@ public final class ItemData {
         return new ItemData(ref.changeItemLevel(itemLevel), slot, name, reforge, statBase, statEnchant, socketSlots, socketBonus);
     }
 
+    // TODO try storing these
+
     public StatBlock totalStatRatingCopy() {
         if (statEnchant.isEmpty())
             return statBase;

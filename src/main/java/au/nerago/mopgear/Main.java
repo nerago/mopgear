@@ -24,10 +24,10 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static au.nerago.mopgear.permute.Solver.chooseEngineAndRun;
 import static au.nerago.mopgear.Tasks.*;
 import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.io.SourcesOfItems.*;
+import static au.nerago.mopgear.permute.Solver.chooseEngineAndRun;
 
 @SuppressWarnings({"SameParameterValue", "unused", "ConstantValue"})
 public class Main {

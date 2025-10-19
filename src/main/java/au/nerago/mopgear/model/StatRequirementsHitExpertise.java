@@ -4,7 +4,7 @@ import au.nerago.mopgear.domain.*;
 
 import java.util.stream.Stream;
 
-public class StatRequirementsHitExpertise implements StatRequirements.StatRequirementsSkinnySupport, StatRequirements.StatRequirementsWithHitExpertise {
+public class StatRequirementsHitExpertise implements StatRequirements, StatRequirements.StatRequirementsWithHitExpertise {
     private final int hitMin, hitMax;
     private final int expertiseMin, expertiseMax;
 
@@ -63,6 +63,11 @@ public class StatRequirementsHitExpertise implements StatRequirements.StatRequir
             exp += item.statEnchant.expertise();
         }
         return new SkinnyItem(slot, hit, exp);
+    }
+
+    @Override
+    public boolean skinnyRecommended() {
+        return true;
     }
 
     @Override
