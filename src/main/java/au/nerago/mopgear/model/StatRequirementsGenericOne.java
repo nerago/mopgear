@@ -26,13 +26,13 @@ public class StatRequirementsGenericOne implements StatRequirements {
     }
 
     @Override
-    public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        return new SkinnyItem(slot, item.totalCap.get(stat), 0);
+    public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
+        return new SkinnyItem(slot, item.totalCap().get(stat), 0);
     }
 
     @Override
-    public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        return skinny.one() == item.totalCap.get(stat);
+    public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
+        return skinny.one() == item.totalCap().get(stat);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class StatRequirementsGenericOne implements StatRequirements {
     }
 
     @Override
-    public boolean filterOneSet(ItemSet set) {
+    public boolean filterOneSet(SolvableItemSet set) {
         int value = set.totalForCaps().get(stat);
         if (hasMaximum()) {
             return minimum <= value && value <= maximum;
@@ -51,7 +51,7 @@ public class StatRequirementsGenericOne implements StatRequirements {
     }
 
     @Override
-    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream) {
         if (hasMaximum()) {
             return stream.filter(set -> {
                 int value = set.totalForCaps().get(stat);
@@ -66,7 +66,7 @@ public class StatRequirementsGenericOne implements StatRequirements {
     }
 
     @Override
-    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> stream) {
         if (hasMaximum()) {
             return stream.filter(set -> {
                 int value = set.totalForCaps().get(stat);

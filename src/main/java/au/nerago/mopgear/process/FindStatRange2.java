@@ -1,7 +1,7 @@
 package au.nerago.mopgear.process;
 
 import au.nerago.mopgear.domain.EquipOptionsMap;
-import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.SolvableItem;
 import au.nerago.mopgear.domain.StatType;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
@@ -25,7 +25,7 @@ public class FindStatRange2 {
     private static Tuple.Tuple2<Integer, Integer> findRange(StatRequirements.StatRequirementsWithHitExpertise requirements, EquipOptionsMap itemOptions, StatType statType) {
         LongHolder low = new LongHolder(), high = new LongHolder();
         itemOptions.forEachValue(array -> {
-            LowHighHolder<ItemData> statRange = StatUtil.findMinMax(requirements, array, statType);
+            LowHighHolder<SolvableItem> statRange = StatUtil.findMinMax(requirements, array, statType);
             low.value += statRange.getLowRating();
             high.value += statRange.getHighRating();
         });

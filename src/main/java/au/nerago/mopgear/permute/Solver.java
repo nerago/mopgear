@@ -1,6 +1,7 @@
 package au.nerago.mopgear.permute;
 
 import au.nerago.mopgear.domain.EquipOptionsMap;
+import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.ItemSet;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.model.ModelCombined;
@@ -22,7 +23,7 @@ public class Solver {
 
     public static JobOutput runJob(JobInput job) {
         ModelCombined model = job.model;
-        EquipOptionsMap itemOptions = job.itemOptions;
+        SolvableEquipOptionsMap itemOptions = job.itemOptions;
         long runSizeMultiply = job.runSizeMultiply;
         StatBlock adjustment = job.adjustment;
         Instant startTime = job.startTime;
@@ -30,7 +31,7 @@ public class Solver {
 
         SolverCapPhased phased = null;
         long estimatePhase1Combos = 0;
-        if (true) {
+        if (SolverCapPhased.supportedModel(model)) {
             phased = new SolverCapPhased(model, adjustment, job.printRecorder);
             estimatePhase1Combos = phased.initAndCheckSizes(itemOptions);
             job.printf("COMBOS full=%,d skinny=%,d\n", estimateFullCombos, estimatePhase1Combos);
@@ -65,15 +66,20 @@ public class Solver {
             output.resultSet = FallbackCappedSetBuilder.fallbackLimits(model, itemOptions, adjustment, output);
         }
 
+        // TODO tweaker??
+
         output.resultSet.ifPresent(itemSet -> output.resultRating = model.calcRating(itemSet));
         return output;
     }
 
     public static Optional<ItemSet> chooseEngineAndRun(ModelCombined model, EquipOptionsMap itemOptions, Instant startTime, StatBlock adjustment) {
         JobInput job = new JobInput();
-        job.config(model, itemOptions, startTime, adjustment);
+        job.model = model;
+        job.setItemOptions(itemOptions);
+        job.startTime = startTime;
+        job.adjustment = adjustment;
         JobOutput output = runJob(job);
         job.printRecorder.outputNow();
-        return output.resultSet;
+        return output.getFinalResultSet();
     }
 }

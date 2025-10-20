@@ -17,7 +17,7 @@ public class SolverCapPhased {
     private final StatRequirements requirements;
     private final StatBlock adjustment;
     private final PrintRecorder printRecorder;
-    private EquipOptionsMap fullItems;
+    private SolvableEquipOptionsMap fullItems;
     private List<SkinnyItem[]> skinnyOptions;
 
     public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder) {
@@ -33,17 +33,17 @@ public class SolverCapPhased {
         return model.statRequirements().skinnyRecommended();
     }
 
-    public long initAndCheckSizes(EquipOptionsMap items) {
+    public long initAndCheckSizes(SolvableEquipOptionsMap items) {
         fullItems = items;
         skinnyOptions = convertToSkinny(items);
 
         return BigStreamUtil.estimateSets(skinnyOptions);
     }
 
-    public Optional<ItemSet> runSolver(boolean parallel, Predicate<ItemSet> specialFilter, Long topCombosMultiply) {
+    public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter, Long topCombosMultiply) {
         try {
-            Stream<ItemSet> partialSets = runSolverPartial(parallel, topCombosMultiply);
-            Stream<ItemSet> finalSets = model.filterSets(partialSets, true);
+            Stream<SolvableItemSet> partialSets = runSolverPartial(parallel, topCombosMultiply);
+            Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
             if (specialFilter != null)
                 finalSets = finalSets.filter(specialFilter);
             return BigStreamUtil.findBest(model, finalSets);
@@ -56,7 +56,7 @@ public class SolverCapPhased {
 //        System.out.printf("PHASED COUNTS est=%d init=%d filter=%d filter2=%d\n", estimate, initCount.get(), filterCount.get(), filter2Count.get());
     }
 
-    private Stream<ItemSet> runSolverPartial(boolean parallel, Long topCombosMultiply) {
+    private Stream<SolvableItemSet> runSolverPartial(boolean parallel, Long topCombosMultiply) {
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 
         Stream<SkinnyItemSet> filteredSets = requirements.filterSetsSkinny(initialSets);
@@ -78,16 +78,16 @@ public class SolverCapPhased {
         return filteredSets.map(this::makeFromSkinny);
     }
 
-    private ItemSet makeFromSkinny(SkinnyItemSet skinnySet) {
-        EquipMap chosenItems = EquipMap.empty();
+    private SolvableItemSet makeFromSkinny(SkinnyItemSet skinnySet) {
+        SolvableEquipMap chosenItems = SolvableEquipMap.empty();
         CurryQueue<SkinnyItem> itemQueue = skinnySet.items();
         while (itemQueue != null) {
             SkinnyItem skinny = itemQueue.item();
             SlotEquip slot = skinny.slot();
-            ItemData[] fullSlotItems = fullItems.get(slot);
+            SolvableItem[] fullSlotItems = fullItems.get(slot);
 
-            BestHolder<ItemData> bestSlotItem = new BestHolder<>();
-            for (ItemData item : fullSlotItems) {
+            BestHolder<SolvableItem> bestSlotItem = new BestHolder<>();
+            for (SolvableItem item : fullSlotItems) {
                 if (requirements.skinnyMatch(skinny, item)) {
                     long rating = model.calcRating(item);
                     bestSlotItem.add(item, rating);
@@ -97,16 +97,16 @@ public class SolverCapPhased {
             chosenItems.put(slot, bestSlotItem.get());
             itemQueue = itemQueue.tail();
         }
-        return ItemSet.manyItems(chosenItems, adjustment);
+        return SolvableItemSet.manyItems(chosenItems, adjustment);
     }
 
-    private List<SkinnyItem[]> convertToSkinny(EquipOptionsMap items) {
+    private List<SkinnyItem[]> convertToSkinny(SolvableEquipOptionsMap items) {
         List<SkinnyItem[]> optionsList = new ArrayList<>();
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] fullOptions = items.get(slot);
+            SolvableItem[] fullOptions = items.get(slot);
             if (fullOptions != null) {
                 HashSet<SkinnyItem> slotSet = new HashSet<>();
-                for (ItemData item : fullOptions) {
+                for (SolvableItem item : fullOptions) {
                     SkinnyItem skinny = requirements.toSkinny(slot, item);
                     slotSet.add(skinny);
                 }

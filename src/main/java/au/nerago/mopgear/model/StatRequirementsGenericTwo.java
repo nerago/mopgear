@@ -36,14 +36,14 @@ public class StatRequirementsGenericTwo implements StatRequirements {
     }
 
     @Override
-    public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        return new SkinnyItem(slot, item.totalCap.get(statOne), item.totalCap.get(statTwo));
+    public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
+        return new SkinnyItem(slot, item.totalCap().get(statOne), item.totalCap().get(statTwo));
     }
 
     @Override
-    public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        if (skinny.one() != item.totalCap.get(statOne)) return false;
-        return skinny.two() == item.totalCap.get(statTwo);
+    public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
+        if (skinny.one() != item.totalCap().get(statOne)) return false;
+        return skinny.two() == item.totalCap().get(statTwo);
     }
 
     @Override
@@ -52,13 +52,13 @@ public class StatRequirementsGenericTwo implements StatRequirements {
     }
 
     @Override
-    public boolean filterOneSet(ItemSet set) {
+    public boolean filterOneSet(SolvableItemSet set) {
         int one = set.totalForCaps().get(statOne), two = set.totalForCaps().get(statTwo);
         return minimumOne <= one && one <= maximumOne && minimumTwo <= two && two <= maximumTwo;
     }
 
     @Override
-    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream) {
         if (maximumOne < Long.MAX_VALUE && maximumTwo < Long.MAX_VALUE) {
             return stream.filter(set -> {
                 int one = set.totalForCaps().get(statOne), two = set.totalForCaps().get(statTwo);
@@ -83,7 +83,7 @@ public class StatRequirementsGenericTwo implements StatRequirements {
     }
 
     @Override
-    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> stream) {
         if (maximumOne < Long.MAX_VALUE && maximumTwo < Long.MAX_VALUE) {
             return stream.filter(set -> {
                 int one = set.totalForCaps().get(statOne), two = set.totalForCaps().get(statTwo);

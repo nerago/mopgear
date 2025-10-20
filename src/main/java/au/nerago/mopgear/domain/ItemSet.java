@@ -4,6 +4,10 @@ import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.OutputText;
 
 public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap items) {
+    public ItemSet(SolvableItemSet other) {
+        this(other.totalForRating(), other.totalForCaps(), new EquipMap(other.items()));
+    }
+
     public static ItemSet manyItems(EquipMap items, StatBlock adjustment) {
         // trust caller is creating unique maps
         StatBlock rating = StatBlock.sumForRating(items);
@@ -17,8 +21,8 @@ public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap
 
     public static ItemSet singleItem(SlotEquip slot, ItemData item, StatBlock adjustment) {
         EquipMap itemMap = EquipMap.single(slot, item);
-        StatBlock rating = item.totalRated;
-        StatBlock caps = item.totalCap;
+        StatBlock rating = item.totalRated();
+        StatBlock caps = item.totalCap();
         if (adjustment != null) {
             rating = rating.plus(adjustment);
             caps = caps.plus(adjustment);
@@ -28,8 +32,8 @@ public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap
 
     public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {
         EquipMap itemMap = items.copyWithReplace(slot, item);
-        StatBlock rating = totalForRating.plus(item.totalRated);
-        StatBlock caps = totalForCaps.plus(item.totalCap);
+        StatBlock rating = totalForRating.plus(item.totalRated());
+        StatBlock caps = totalForCaps.plus(item.totalCap());
         return new ItemSet(rating, caps, itemMap);
     }
 

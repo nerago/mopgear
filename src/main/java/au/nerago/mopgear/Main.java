@@ -344,7 +344,7 @@ public class Main {
         job.forceRandom = true;
         job.forcedRunSized = BILLION;
         JobOutput output = Solver.runJob(job);
-        ItemSet bestScaledSet = output.resultSet.orElseThrow();
+        ItemSet bestScaledSet = output.getFinalResultSet().orElseThrow();
 
         OutputText.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
         outputResultSimple(Optional.of(bestScaledSet), model, true);

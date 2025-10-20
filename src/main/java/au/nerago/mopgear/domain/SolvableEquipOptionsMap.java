@@ -1,6 +1,5 @@
 package au.nerago.mopgear.domain;
 
-import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
 
 import java.util.Arrays;
@@ -10,73 +9,55 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class EquipOptionsMap {
-    ItemData[] head;
-    ItemData[] neck;
-    ItemData[] shoulder;
-    ItemData[] back;
-    ItemData[] chest;
-    ItemData[] wrist;
-    ItemData[] hand;
-    ItemData[] belt;
-    ItemData[] leg;
-    ItemData[] foot;
-    ItemData[] ring1;
-    ItemData[] ring2;
-    ItemData[] trinket1;
-    ItemData[] trinket2;
-    ItemData[] weapon;
-    ItemData[] offhand;
+public final class SolvableEquipOptionsMap {
+    private final SolvableItem[] head;
+    private final SolvableItem[] neck;
+    private final SolvableItem[] shoulder;
+    private final SolvableItem[] back;
+    private final SolvableItem[] chest;
+    private final SolvableItem[] wrist;
+    private final SolvableItem[] hand;
+    private final SolvableItem[] belt;
+    private final SolvableItem[] leg;
+    private final SolvableItem[] foot;
+    private final SolvableItem[] ring1;
+    private final SolvableItem[] ring2;
+    private final SolvableItem[] trinket1;
+    private final SolvableItem[] trinket2;
+    private final SolvableItem[] weapon;
+    private final SolvableItem[] offhand;
 
-    public static EquipOptionsMap empty() {
-        return new EquipOptionsMap();
+    public SolvableEquipOptionsMap(EquipOptionsMap other) {
+        this.head = copyAndCast(other.head);
+        this.neck = copyAndCast(other.neck);
+        this.shoulder = copyAndCast(other.shoulder);
+        this.back = copyAndCast(other.back);
+        this.chest = copyAndCast(other.chest);
+        this.wrist = copyAndCast(other.wrist);
+        this.hand = copyAndCast(other.hand);
+        this.belt = copyAndCast(other.belt);
+        this.leg = copyAndCast(other.leg);
+        this.foot = copyAndCast(other.foot);
+        this.ring1 = copyAndCast(other.ring1);
+        this.ring2 = copyAndCast(other.ring2);
+        this.trinket1 = copyAndCast(other.trinket1);
+        this.trinket2 = copyAndCast(other.trinket2);
+        this.weapon = copyAndCast(other.weapon);
+        this.offhand = copyAndCast(other.offhand);
     }
 
-    private EquipOptionsMap() {
+    private SolvableItem[] copyAndCast(ItemData[] array) {
+        if (array == null)
+            return null;
+
+        SolvableItem[] result = new SolvableItem[array.length];
+        System.arraycopy(array, 0, result, 0, array.length);
+//        for (int i = 0; i < array.length; ++i)
+//            result[i] = array[i];
+        return result;
     }
 
-    private EquipOptionsMap(EquipOptionsMap other) {
-        this.head = other.head;
-        this.neck = other.neck;
-        this.shoulder = other.shoulder;
-        this.back = other.back;
-        this.chest = other.chest;
-        this.wrist = other.wrist;
-        this.hand = other.hand;
-        this.belt = other.belt;
-        this.leg = other.leg;
-        this.foot = other.foot;
-        this.ring1 = other.ring1;
-        this.ring2 = other.ring2;
-        this.trinket1 = other.trinket1;
-        this.trinket2 = other.trinket2;
-        this.weapon = other.weapon;
-        this.offhand = other.offhand;
-    }
-
-    private EquipOptionsMap(
-            ItemData[] head, ItemData[] neck, ItemData[] shoulder, ItemData[] back, ItemData[] chest, ItemData[] wrist,
-            ItemData[] hand, ItemData[] belt, ItemData[] leg, ItemData[] foot, ItemData[] ring1, ItemData[] ring2,
-            ItemData[] trinket1, ItemData[] trinket2, ItemData[] weapon, ItemData[] offhand) {
-        this.head = head;
-        this.neck = neck;
-        this.shoulder = shoulder;
-        this.back = back;
-        this.chest = chest;
-        this.wrist = wrist;
-        this.hand = hand;
-        this.belt = belt;
-        this.leg = leg;
-        this.foot = foot;
-        this.ring1 = ring1;
-        this.ring2 = ring2;
-        this.trinket1 = trinket1;
-        this.trinket2 = trinket2;
-        this.weapon = weapon;
-        this.offhand = offhand;
-    }
-
-    public ItemData[] get(SlotEquip slot) {
+    public SolvableItem[] get(SlotEquip slot) {
         return switch (slot) {
             case Head -> head;
             case Neck -> neck;
@@ -118,78 +99,7 @@ public final class EquipOptionsMap {
         };
     }
 
-    public void put(SlotEquip slot, ItemData[] value) {
-        switch (slot) {
-            case Head -> head = value;
-            case Neck -> neck = value;
-            case Shoulder -> shoulder = value;
-            case Back -> back = value;
-            case Chest -> chest = value;
-            case Wrist -> wrist = value;
-            case Hand -> hand = value;
-            case Belt -> belt = value;
-            case Leg -> leg = value;
-            case Foot -> foot = value;
-            case Ring1 -> ring1 = value;
-            case Ring2 -> ring2 = value;
-            case Trinket1 -> trinket1 = value;
-            case Trinket2 -> trinket2 = value;
-            case Weapon -> weapon = value;
-            case Offhand -> offhand = value;
-            default -> throw new IllegalArgumentException();
-        }
-    }
-
-    public void put(SlotEquip slot, ItemData item) {
-        put(slot, new ItemData[]{item});
-    }
-
-    public void replaceWithFirstOption(SlotEquip slot) {
-        ItemData[] array = get(slot);
-        put(slot, array[0]);
-    }
-
-    public void replaceWithSpecificForge(SlotEquip slot, ReforgeRecipe reforgeRecipe) {
-        ItemData[] array = get(slot);
-        ItemData choice = ArrayUtil.findOne(array, item -> reforgeRecipe.equalsTyped(item.reforge()));
-        put(slot, choice);
-    }
-
-    //    @Deprecated(since = "avoid extra allocation")
-    public EquipOptionsMap shallowClone() {
-        return new EquipOptionsMap(this);
-    }
-
-    //    @Deprecated(since = "avoid extra allocation")
-    public EquipOptionsMap deepClone() {
-        return new EquipOptionsMap(
-                ArrayUtil.clone(head),
-                ArrayUtil.clone(neck),
-                ArrayUtil.clone(shoulder),
-                ArrayUtil.clone(back),
-                ArrayUtil.clone(chest),
-                ArrayUtil.clone(wrist),
-                ArrayUtil.clone(hand),
-                ArrayUtil.clone(belt),
-                ArrayUtil.clone(leg),
-                ArrayUtil.clone(foot),
-                ArrayUtil.clone(ring1),
-                ArrayUtil.clone(ring2),
-                ArrayUtil.clone(trinket1),
-                ArrayUtil.clone(trinket2),
-                ArrayUtil.clone(weapon),
-                ArrayUtil.clone(offhand)
-        );
-    }
-
-    public EquipOptionsMap copyWithReplaceSingle(SlotEquip slot, ItemData replace) {
-        EquipOptionsMap other = new EquipOptionsMap(this);
-        other.put(slot, new ItemData[]{replace});
-        return other;
-    }
-
-    //    @Deprecated(since = "avoid bad performance")
-    public void forEachValue(Consumer<ItemData[]> func) {
+    public void forEachValue(Consumer<SolvableItem[]> func) {
         if (head != null) func.accept(head);
         if (neck != null) func.accept(neck);
         if (shoulder != null) func.accept(shoulder);
@@ -208,8 +118,7 @@ public final class EquipOptionsMap {
         if (offhand != null) func.accept(offhand);
     }
 
-    //    @Deprecated(since = "avoid bad performance")
-    public void forEachPair(BiConsumer<SlotEquip, ItemData[]> func) {
+    public void forEachPair(BiConsumer<SlotEquip, SolvableItem[]> func) {
         if (head != null) func.accept(SlotEquip.Head, head);
         if (neck != null) func.accept(SlotEquip.Neck, neck);
         if (shoulder != null) func.accept(SlotEquip.Shoulder, shoulder);
@@ -228,11 +137,11 @@ public final class EquipOptionsMap {
         if (offhand != null) func.accept(SlotEquip.Offhand, offhand);
     }
 
-    public Stream<Tuple.Tuple2<SlotEquip, ItemData[]>> entryStream() {
+    public Stream<Tuple.Tuple2<SlotEquip, SolvableItem[]>> entryStream() {
         return StreamSupport.stream(new OptionsSpliterator(), true);
     }
 
-    public Stream<ItemData> itemStream() {
+    public Stream<SolvableItem> itemStream() {
         return entryStream().flatMap(entry -> Arrays.stream(entry.b()));
     }
 
@@ -240,7 +149,7 @@ public final class EquipOptionsMap {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        EquipOptionsMap that = (EquipOptionsMap) o;
+        SolvableEquipOptionsMap that = (SolvableEquipOptionsMap) o;
         return Arrays.equals(head, that.head) && Arrays.equals(neck, that.neck) && Arrays.equals(shoulder, that.shoulder) && Arrays.equals(back, that.back) && Arrays.equals(chest, that.chest) && Arrays.equals(wrist, that.wrist) && Arrays.equals(hand, that.hand) && Arrays.equals(belt, that.belt) && Arrays.equals(leg, that.leg) && Arrays.equals(foot, that.foot) && Arrays.equals(ring1, that.ring1) && Arrays.equals(ring2, that.ring2) && Arrays.equals(trinket1, that.trinket1) && Arrays.equals(trinket2, that.trinket2) && Arrays.equals(weapon, that.weapon) && Arrays.equals(offhand, that.offhand);
     }
 
@@ -265,15 +174,15 @@ public final class EquipOptionsMap {
         return result;
     }
 
-    private class OptionsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, ItemData[]>> {
+    private class OptionsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, SolvableItem[]>> {
         static final SlotEquip[] slotArray = SlotEquip.values();
         int index = 0;
 
         @Override
-        public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, ItemData[]>> action) {
+        public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, SolvableItem[]>> action) {
             while (index < slotArray.length) {
                 SlotEquip slot = slotArray[index++];
-                ItemData[] value = EquipOptionsMap.this.get(slot);
+                SolvableItem[] value = SolvableEquipOptionsMap.this.get(slot);
                 if (value != null) {
                     action.accept(Tuple.create(slot, value));
                     return true;
@@ -283,7 +192,7 @@ public final class EquipOptionsMap {
         }
 
         @Override
-        public Spliterator<Tuple.Tuple2<SlotEquip, ItemData[]>> trySplit() {
+        public Spliterator<Tuple.Tuple2<SlotEquip, SolvableItem[]>> trySplit() {
             return null;
         }
 

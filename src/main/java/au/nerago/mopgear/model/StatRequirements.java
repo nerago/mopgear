@@ -5,19 +5,19 @@ import au.nerago.mopgear.domain.*;
 import java.util.stream.Stream;
 
 public interface StatRequirements {
-    boolean filterOneSet(ItemSet set);
+    boolean filterOneSet(SolvableItemSet set);
 
-    Stream<ItemSet> filterSets(Stream<ItemSet> stream);
+    Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream);
 
-    Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream);
+    Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> stream);
 
     Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> stream);
 
     Stream<SkinnyItemSet> filterSetsMaxSkinny(Stream<SkinnyItemSet> stream);
 
-    boolean skinnyMatch(SkinnyItem skinny, ItemData item);
+    boolean skinnyMatch(SkinnyItem skinny, SolvableItem item);
 
-    SkinnyItem toSkinny(SlotEquip slot, ItemData item);
+    SkinnyItem toSkinny(SlotEquip slot, SolvableItem item);
 
     boolean skinnyRecommended();
 

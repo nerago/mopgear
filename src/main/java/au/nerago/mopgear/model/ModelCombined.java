@@ -19,23 +19,29 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return value;
     }
 
-    public long calcRating(ItemData it) {
-        return statRatings.calcRating(it.statBase, it.statEnchant);
+    public long calcRating(SolvableItemSet set) {
+        long value = statRatings.calcRating(set.totalForRating());
+        value = value * setBonus.calc(set) / SetBonus.DENOMIATOR;
+        return value;
     }
 
-    public boolean filterOneSet(ItemSet set) {
+    public long calcRating(SolvableItem it) {
+        return statRatings.calcRating(it.totalRated());
+    }
+
+    public boolean filterOneSet(SolvableItemSet set) {
         return statRequirements.filterOneSet(set) && set.validate();
     }
 
-    public Stream<ItemSet> filterSets(Stream<ItemSet> stream, boolean isFinal) {
-        Stream<ItemSet> filtered = statRequirements.filterSets(stream);
+    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream, boolean isFinal) {
+        Stream<SolvableItemSet> filtered = statRequirements.filterSets(stream);
         if (isFinal) {
-            filtered = filtered.filter(ItemSet::validate);
+            filtered = filtered.filter(SolvableItemSet::validate);
         }
         return filtered;
     }
 
-    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> stream) {
         return statRequirements.filterSetsMax(stream);
     }
 

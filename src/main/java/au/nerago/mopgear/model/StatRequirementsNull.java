@@ -6,17 +6,17 @@ import java.util.stream.Stream;
 
 public class StatRequirementsNull implements StatRequirements {
     @Override
-    public boolean filterOneSet(ItemSet set) {
+    public boolean filterOneSet(SolvableItemSet set) {
         return true;
     }
 
     @Override
-    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream) {
         return stream;
     }
 
     @Override
-    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> stream) {
         return stream;
     }
 
@@ -31,12 +31,12 @@ public class StatRequirementsNull implements StatRequirements {
     }
 
     @Override
-    public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
+    public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
         return true;
     }
 
     @Override
-    public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
+    public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
         return new SkinnyItem(slot, 0, 0);
     }
 

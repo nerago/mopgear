@@ -1,8 +1,9 @@
 package au.nerago.mopgear.util;
 
-import au.nerago.mopgear.domain.EquipOptionsMap;
+import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.ItemSet;
 import au.nerago.mopgear.domain.SkinnyItem;
+import au.nerago.mopgear.domain.SolvableItemSet;
 import au.nerago.mopgear.model.ModelCombined;
 
 import java.math.BigInteger;
@@ -16,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class BigStreamUtil {
-    public static Stream<ItemSet> countProgress(BigInteger estimate, Instant startTime, Stream<ItemSet> inputStream) {
+    public static Stream<SolvableItemSet> countProgress(BigInteger estimate, Instant startTime, Stream<SolvableItemSet> inputStream) {
 //        final double percentMultiply = BigDecimal.valueOf(100).divide(new BigDecimal(estimate), 4, RoundingMode.UP).doubleValue();
         final double percentMultiply = 100.0 / estimate.doubleValue();
         final long reportFrequency = chooseReportFrequency(estimate);
@@ -86,7 +87,7 @@ public class BigStreamUtil {
         return totalEstimate.minus(timeTaken);
     }
 
-    public static Optional<ItemSet> findBest(ModelCombined model, Stream<ItemSet> finalSets) {
+    public static Optional<SolvableItemSet> findBest(ModelCombined model, Stream<SolvableItemSet> finalSets) {
         return finalSets.collect(new TopCollector1<>(model::calcRating));
 //        return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
@@ -103,7 +104,7 @@ public class BigStreamUtil {
         });
     }
 
-    public static BigInteger estimateSets(EquipOptionsMap reforgedItems) {
+    public static BigInteger estimateSets(SolvableEquipOptionsMap reforgedItems) {
         Optional<BigInteger> number = reforgedItems.entryStream().map(x -> BigInteger.valueOf(x.b().length)).reduce(BigInteger::multiply);
         if (number.isPresent()) {
             return number.get();

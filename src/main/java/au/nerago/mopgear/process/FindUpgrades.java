@@ -78,14 +78,14 @@ public class FindUpgrades {
     private double findBase(EquipOptionsMap baseItems, StatBlock adjustment) {
         JobInput job = new JobInput();
         job.model = model;
-        job.itemOptions = baseItems;
+        job.setItemOptions(baseItems);
         job.runSizeMultiply = runSizeMultiply;
         job.adjustment = adjustment;
         job.hackAllow = hackAllow;
         JobOutput output = Solver.runJob(job);
         job.printRecorder.outputNow();
 
-        Optional<ItemSet> baseSet = output.resultSet;
+        Optional<ItemSet> baseSet = output.getFinalResultSet();
         if (baseSet.isPresent()) {
             double baseRating = output.resultRating;
             OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.get().totalForRating(), baseRating);
@@ -212,7 +212,7 @@ public class FindUpgrades {
     }
 
     private UpgradeResultItem handleResult(JobOutput job, double baseRating) {
-        Optional<ItemSet> resultSet = job.resultSet;
+        Optional<ItemSet> resultSet = job.getFinalResultSet();
         job.input.printRecorder.outputNow();
 
         double factor;

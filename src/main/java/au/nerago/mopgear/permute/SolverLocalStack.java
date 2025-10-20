@@ -10,20 +10,20 @@ import java.util.List;
 import java.util.Optional;
 
 public class SolverLocalStack {
-    private final List<Tuple.Tuple2<SlotEquip, ItemData[]>> slotItems;
+    private final List<Tuple.Tuple2<SlotEquip, SolvableItem[]>> slotItems;
     private final ArrayDeque<Step> queue;
-    private BestHolder<ItemSet> best;
+    private BestHolder<SolvableItemSet> best;
     private final ModelCombined model;
     private final StatBlock adjustment;
 
-    public SolverLocalStack(ModelCombined model, EquipOptionsMap items, StatBlock adjustment) {
+    public SolverLocalStack(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment) {
         this.slotItems = items.entryStream().toList();
         this.model = model;
         this.adjustment = adjustment;
         this.queue = new ArrayDeque<>();
     }
 
-    public Optional<ItemSet> runSolver() {
+    public Optional<SolvableItemSet> runSolver() {
         best = new BestHolder<>();
         addFirstItem();
         mainLoop();
@@ -35,9 +35,9 @@ public class SolverLocalStack {
     }
 
     private void addFirstItem() {
-        Tuple.Tuple2<SlotEquip, ItemData[]> first = slotItems.getFirst();
-        for (ItemData item : first.b()) {
-            queue.addLast(new Step(1, ItemSet.singleItem(first.a(), item, adjustment)));
+        Tuple.Tuple2<SlotEquip, SolvableItem[]> first = slotItems.getFirst();
+        for (SolvableItem item : first.b()) {
+            queue.addLast(new Step(1, SolvableItemSet.singleItem(first.a(), item, adjustment)));
         }
     }
 
@@ -45,12 +45,12 @@ public class SolverLocalStack {
         int itemsSize = slotItems.size();
         while (!queue.isEmpty()) {
             Step prev = queue.removeLast();
-            ItemSet prevSet = prev.set;
+            SolvableItemSet prevSet = prev.set;
             int index = prev.nextIndex();
             if (index < itemsSize) {
-                Tuple.Tuple2<SlotEquip, ItemData[]> nextEntry = slotItems.get(index);
+                Tuple.Tuple2<SlotEquip, SolvableItem[]> nextEntry = slotItems.get(index);
                 int nextIndex = index + 1;
-                for (ItemData item : nextEntry.b()) {
+                for (SolvableItem item : nextEntry.b()) {
                     queue.addLast(new Step(nextIndex, prevSet.copyWithAddedItem(nextEntry.a(), item)));
                 }
             } else {
@@ -62,6 +62,6 @@ public class SolverLocalStack {
         }
     }
 
-    private record Step(int nextIndex, ItemSet set) {
+    private record Step(int nextIndex, SolvableItemSet set) {
     }
 }

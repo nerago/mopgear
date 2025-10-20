@@ -120,14 +120,14 @@ public class ArrayUtil {
         return false;
     }
 
-    public static ItemData rand(ItemData[] itemList, Random random) {
+    public static <T> T rand(T[] itemList, Random random) {
         if (itemList.length > 1)
             return itemList[random.nextInt(itemList.length)];
         else
             return itemList[0];
     }
 
-    public static ItemData rand(List<ItemData> itemList, Random random) {
+    public static <T> T rand(List<T> itemList, Random random) {
         int size = itemList.size();
         if (size > 1)
             return itemList.get(random.nextInt(size));
@@ -186,7 +186,7 @@ public class ArrayUtil {
         return StreamSupport.stream(split, true);
     }
 
-    public static ItemData[] clone(ItemData[] array) {
+    public static <T> T[] clone(T[] array) {
         if (array != null) {
             return Arrays.copyOf(array, array.length);
         } else {

@@ -17,9 +17,9 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
 public class SolverRandom {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count, boolean parallel, Predicate<ItemSet> specialFilter) {
+    public static Optional<SolvableItemSet> runSolver(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, Instant startTime, long count, boolean parallel, Predicate<SolvableItemSet> specialFilter) {
         if (parallel) {
-            Stream<ItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
+            Stream<SolvableItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
             if (specialFilter != null)
                 finalSets = finalSets.filter(specialFilter);
             return finalSets.max(Comparator.comparingLong(model::calcRating));
@@ -28,21 +28,21 @@ public class SolverRandom {
         }
     }
 
-    public static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
+    public static Stream<SolvableItemSet> runSolverPartial(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
         Stream<Long> dumbStream = generateDumbStream(count);
-        Stream<ItemSet> setStream = dumbStream.parallel()
+        Stream<SolvableItemSet> setStream = dumbStream.parallel()
                                               .map(x -> makeSet(items, adjustment));
         if (startTime != null)
             setStream = BigStreamUtil.countProgress(count, startTime, setStream);
         return model.filterSets(setStream, true);
     }
 
-    public static Optional<ItemSet> runSolverSingleThread(ModelCombined model, EquipOptionsMap items, StatBlock adjustment, long count, Predicate<ItemSet> specialFilter) {
+    public static Optional<SolvableItemSet> runSolverSingleThread(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, long count, Predicate<SolvableItemSet> specialFilter) {
         Random random = ThreadLocalRandom.current();
         StatRequirements require = model.statRequirements();
-        BestHolder<ItemSet> best = new BestHolder<>();
+        BestHolder<SolvableItemSet> best = new BestHolder<>();
         for (int i = 0; i < count; ++i) {
-            ItemSet set = makeSet(items, adjustment, random);
+            SolvableItemSet set = makeSet(items, adjustment, random);
             if (model.filterOneSet(set) && (specialFilter == null || specialFilter.test(set))) {
                 best.add(set, model.calcRating(set));
             }
@@ -50,21 +50,21 @@ public class SolverRandom {
         return Optional.ofNullable(best.get());
     }
 
-    private static ItemSet makeSet(EquipOptionsMap items, StatBlock adjustment) {
+    private static SolvableItemSet makeSet(SolvableEquipOptionsMap items, StatBlock adjustment) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         return makeSet(items, adjustment, random);
     }
 
-    private static ItemSet makeSet(EquipOptionsMap items, StatBlock adjustment, Random random) {
-        EquipMap chosen = EquipMap.empty();
+    private static SolvableItemSet makeSet(SolvableEquipOptionsMap items, StatBlock adjustment, Random random) {
+        SolvableEquipMap chosen = SolvableEquipMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] itemList = items.get(slot);
+            SolvableItem[] itemList = items.get(slot);
             if (itemList != null) {
-                ItemData item = ArrayUtil.rand(itemList, random);
+                SolvableItem item = ArrayUtil.rand(itemList, random);
                 chosen.put(slot, item);
             }
         }
-        return ItemSet.manyItems(chosen, adjustment);
+        return SolvableItemSet.manyItems(chosen, adjustment);
     }
 
     private static Stream<Long> generateDumbStream(long count) {

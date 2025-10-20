@@ -1,9 +1,6 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.domain.EquipMap;
-import au.nerago.mopgear.domain.ItemData;
-import au.nerago.mopgear.domain.ItemSet;
-import au.nerago.mopgear.domain.SlotEquip;
+import au.nerago.mopgear.domain.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -78,16 +75,22 @@ public class SetBonus {
     }
 
     public long calc(ItemSet set) {
-        return calc(set.items());
-    }
-
-    private long calc(EquipMap itemMap) {
         if (activeSets.isEmpty()) {
             return DENOMIATOR;
         }
+        int[] setCounts = countBySet(set.items());
+        return calcMuliplier(setCounts);
+    }
 
-        int[] setCounts = countBySet(itemMap);
+    public long calc(SolvableItemSet set) {
+        if (activeSets.isEmpty()) {
+            return DENOMIATOR;
+        }
+        int[] setCounts = countBySet(set.items());
+        return calcMuliplier(setCounts);
+    }
 
+    private long calcMuliplier(int[] setCounts) {
         int result = DENOMIATOR;
         for (int i = 0; i < activeSets.size(); ++i) {
             int numInSet = setCounts[i];
@@ -101,11 +104,12 @@ public class SetBonus {
         return result;
     }
 
-    private int[] countBySet(EquipMap itemMap) {
+    private int[] countBySet(IEquipMap itemMap) {
+        // TODO consider more optimising
         int activeSetCount = activeSets.size();
         int[] setCounts = new int[activeSetCount];
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData item = itemMap.get(slot);
+            SolvableItem item = itemMap.get(slot);
             if (item != null) {
                 int itemId = item.itemId();
                 for (int i = 0; i < activeSetCount; ++i) {
@@ -118,7 +122,7 @@ public class SetBonus {
         return setCounts;
     }
 
-    public int countInSet(EquipMap itemMap) {
+    public int countInSet(SolvableEquipMap itemMap) {
         int[] counts = countBySet(itemMap);
         int total = 0;
         for (int val : counts) {

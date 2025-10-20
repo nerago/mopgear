@@ -16,8 +16,6 @@ public abstract class StatRatings {
 
     public abstract long calcRating(StatBlock totals);
 
-    public abstract long calcRating(StatBlock partA, StatBlock partB);
-
     public abstract long calcRating(StatType stat, int value);
 
     protected void chooseGems() {

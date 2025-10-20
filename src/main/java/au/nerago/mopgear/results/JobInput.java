@@ -1,9 +1,6 @@
 package au.nerago.mopgear.results;
 
-import au.nerago.mopgear.domain.EquipOptionsMap;
-import au.nerago.mopgear.domain.ItemData;
-import au.nerago.mopgear.domain.ItemSet;
-import au.nerago.mopgear.domain.StatBlock;
+import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
 
 import java.time.Instant;
@@ -13,7 +10,7 @@ public class JobInput {
     public final PrintRecorder printRecorder = new PrintRecorder();
 
     public ModelCombined model;
-    public EquipOptionsMap itemOptions;
+    public SolvableEquipOptionsMap itemOptions;
     public Instant startTime;
     public StatBlock adjustment;
 
@@ -26,13 +23,17 @@ public class JobInput {
 
     public ItemData extraItem;
     public int cost;
-    public Predicate<ItemSet> specialFilter;
+    public Predicate<SolvableItemSet> specialFilter;
 
     public void config(ModelCombined model, EquipOptionsMap itemOptions, Instant startTime, StatBlock adjustment) {
         this.model = model;
-        this.itemOptions = itemOptions;
+        setItemOptions(itemOptions);
         this.startTime = startTime;
         this.adjustment = adjustment;
+    }
+
+    public void setItemOptions(EquipOptionsMap itemOptions) {
+        this.itemOptions = new SolvableEquipOptionsMap(itemOptions);
     }
 
     public void println(String str) {

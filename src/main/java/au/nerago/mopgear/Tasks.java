@@ -50,7 +50,7 @@ public class Tasks {
 
         JobInput job = new JobInput();
         job.model = model;
-        job.itemOptions = optionsMap;
+        job.setItemOptions(optionsMap);
         job.startTime = startTime;
         job.forceSkipIndex = true;
         job.forcedRunSized = BILLION*4;
@@ -58,7 +58,7 @@ public class Tasks {
         job.specialFilter = set -> model.setBonus().countInSet(set.items()) >= 4;
         JobOutput output = Solver.runJob(job);
 
-        outputResultSimple(output.resultSet, model, true);
+        outputResultSimple(output.getFinalResultSet(), model, true);
     }
 
     public static void findBestBySlot(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel) {
@@ -126,9 +126,10 @@ public class Tasks {
         job.runSizeMultiply = 8;
         job.config(model, itemOptions, startTime, null);
         JobOutput output = Solver.runJob(job);
+        Optional<ItemSet> resultSet = output.getFinalResultSet();
 
-        outputResultSimple(output.resultSet, model, true);
-        outputReforgeJson(output.resultSet);
+        outputResultSimple(resultSet, model, true);
+        outputReforgeJson(resultSet);
         outputTweaked(output.resultSet, itemOptions, model);
     }
 
@@ -149,9 +150,10 @@ public class Tasks {
         job.config(model, runItems, startTime, adjustment);
         job.runSizeMultiply = 8;
         JobOutput output = Solver.runJob(job);
+        Optional<ItemSet> resultSet = output.getFinalResultSet();
 
-        outputResultSimple(output.resultSet, model, true);
-        if (output.resultSet.isEmpty()) {
+        outputResultSimple(resultSet, model, true);
+        if (resultSet.isEmpty()) {
             outputFailureDetails(model, runItems, job.printRecorder);
         }
     }
@@ -230,9 +232,10 @@ public class Tasks {
         job.runSizeMultiply = 16;
         job.printRecorder.outputImmediate = true;
         JobOutput output = Solver.runJob(job);
+        Optional<ItemSet> resultSet = output.getFinalResultSet();
 
-        outputResultSimple(output.resultSet, model, true);
-        if (output.resultSet.isEmpty()) {
+        outputResultSimple(resultSet, model, true);
+        if (resultSet.isEmpty()) {
             outputFailureDetails(model, runItems, job.printRecorder);
         }
     }
@@ -258,14 +261,14 @@ public class Tasks {
 
         JobInput job = new JobInput();
         job.model = model;
-        job.itemOptions = items;
+        job.setItemOptions(items);
         job.startTime = startTime;
         job.printRecorder.outputImmediate = true;
         job.runSizeMultiply = 12;
         JobOutput output = Solver.runJob(job);
         job.printRecorder.outputNow();
-        Optional<ItemSet> best = output.resultSet;
-        outputResultSimple(best, model, true);
+        Optional<ItemSet> resultSet = output.getFinalResultSet();
+        outputResultSimple(resultSet, model, true);
     }
 
     public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, List<EquippedItem> extraItems) {
@@ -290,13 +293,13 @@ public class Tasks {
 
         JobInput job = new JobInput();
         job.model = model;
-        job.itemOptions = items;
+        job.setItemOptions(items);
         job.startTime = startTime;
         job.printRecorder.outputImmediate = true;
         job.runSizeMultiply = 20;
         JobOutput output = Solver.runJob(job);
         job.printRecorder.outputNow();
-        ItemSet best = output.resultSet.orElseThrow();
+        ItemSet best = output.getFinalResultSet().orElseThrow();
         outputResultChanges(itemsOriginal, best, model);
     }
 
@@ -335,22 +338,22 @@ public class Tasks {
         AsWowSimJson.writeToOut(resultSet.orElseThrow().items());
     }
 
-    public static void outputTweaked(Optional<ItemSet> bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
+    public static void outputTweaked(Optional<SolvableItemSet> bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
         bestSet.ifPresent(itemSet -> outputTweaked(itemSet, reforgedItems, model));
     }
 
-    public static void outputTweaked(ItemSet bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
-        ItemSet tweakSet = Tweaker.tweak(bestSet, model, reforgedItems);
+    public static void outputTweaked(SolvableItemSet bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
+        SolvableItemSet tweakSet = Tweaker.tweak(bestSet, model, reforgedItems);
         if (bestSet != tweakSet) {
             OutputText.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
 
             OutputText.println(tweakSet.totalForRating().toStringExtended() + " " + model.calcRating(tweakSet));
             OutputText.println(tweakSet.totalForCaps().toStringExtended());
             for (SlotEquip slot : SlotEquip.values()) {
-                ItemData orig = bestSet.items().get(slot);
-                ItemData change = tweakSet.items().get(slot);
+                SolvableItem orig = bestSet.items().get(slot);
+                SolvableItem change = tweakSet.items().get(slot);
                 if (orig != null && change != null) {
-                    if (!ItemData.isIdenticalItem(orig, change)) {
+                    if (!orig.isIdenticalItem(change)) {
                         OutputText.println(change + " " + model.calcRating(change));
                     }
                 } else if (orig != null || change != null) {
@@ -528,23 +531,25 @@ public class Tasks {
         jobOne.printRecorder.outputImmediate = true;
         jobOne.runSizeMultiply = runSizeMultiply;
         jobOne.model = model;
-        jobOne.itemOptions = optionsOne;
+        jobOne.setItemOptions(optionsOne);
         JobOutput outputOne = Solver.runJob(jobOne);
+        Optional<ItemSet> resultOne = outputOne.getFinalResultSet();
 
         OutputText.println("111111111111111111111111111111111111");
-        outputOne.resultSet.orElseThrow().outputSetDetailed(model);
-        double ratingOne = model.calcRating(outputOne.resultSet.orElseThrow());
+        resultOne.orElseThrow().outputSetDetailed(model);
+        double ratingOne = model.calcRating(resultOne.orElseThrow());
 
         JobInput jobTwo = new JobInput();
         jobTwo.printRecorder.outputImmediate = true;
         jobTwo.runSizeMultiply = runSizeMultiply;
         jobTwo.model = model;
-        jobTwo.itemOptions = optionsTwo;
+        jobTwo.setItemOptions(optionsTwo);
         JobOutput outputTwo = Solver.runJob(jobTwo);
+        Optional<ItemSet> resultTwo = outputTwo.getFinalResultSet();
 
         OutputText.println("22222222222222222222222222222222222222");
-        outputTwo.resultSet.orElseThrow().outputSetDetailed(model);
-        double ratingTwo = model.calcRating(outputTwo.resultSet.orElseThrow());
+        resultTwo.orElseThrow().outputSetDetailed(model);
+        double ratingTwo = model.calcRating(resultTwo.orElseThrow());
 
         OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", ratingOne / ratingTwo * 100);
     }
@@ -603,9 +608,9 @@ public class Tasks {
         ModelCombined model = new ModelCombined(weights, req, ReforgeRules.prot(), null, new SetBonus());
         JobInput job = new JobInput();
         job.model = model;
-        job.itemOptions = items;
+        job.setItemOptions(items);
         JobOutput output = Solver.runJob(job);
-        ItemSet set = output.resultSet.orElseThrow();
+        ItemSet set = output.getFinalResultSet().orElseThrow();
         return model.calcRating(set);
     }
 }

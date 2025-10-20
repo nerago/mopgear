@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public final class ItemData {
+public final class ItemData implements SolvableItem {
     @NotNull
     public final ItemShared shared;
     @NotNull
@@ -118,6 +118,16 @@ public final class ItemData {
     }
 
     @Override
+    public boolean isIdenticalItem(SolvableItem other) {
+        return isIdenticalItem(this, (ItemData) other);
+    }
+
+    @Override
+    public boolean isSameItem(ItemRef ref) {
+        return shared.ref().equalsTyped(ref);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -143,15 +153,32 @@ public final class ItemData {
         return shared.ref();
     }
 
-    public SlotItem slot() {
+    @Override
+    public @NotNull SlotItem slot() {
         return shared.slot();
     }
 
+    @Override
     public int itemId() {
         return shared.ref().itemId();
     }
 
     public int itemLevel() {
         return shared.ref().itemLevel();
+    }
+
+    @Override
+    public @NotNull ReforgeRecipe reforge() {
+        return reforge;
+    }
+
+    @Override
+    public @NotNull StatBlock totalRated() {
+        return totalRated;
+    }
+
+    @Override
+    public @NotNull StatBlock totalCap() {
+        return totalCap;
     }
 }

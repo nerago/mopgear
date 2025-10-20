@@ -43,35 +43,35 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
                 : totals.hit();
     }
 
-    private int effectiveHit(ItemData item) {
+    private int effectiveHit(SolvableItem item) {
         if (hitMin == 0) {
             return 0;
         } else if (combineHitLike) {
-            StatBlock cap = item.totalCap;
+            StatBlock cap = item.totalCap();
             return cap.hit() + cap.expertise() + cap.spirit();
         } else {
-            StatBlock cap = item.totalCap;
+            StatBlock cap = item.totalCap();
             return cap.hit();
         }
     }
 
-    private int effectiveExpertise(ItemData item) {
+    private int effectiveExpertise(SolvableItem item) {
         if (combineHitLike || !hasExpertiseRange()) {
             return 0;
         } else {
-            return item.totalCap.get(StatType.Expertise);
+            return item.totalCap().get(StatType.Expertise);
         }
     }
 
     @Override
-    public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
+    public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
         int hit = effectiveHit(item);
         int exp = effectiveExpertise(item);
         return skinny.one() == hit && skinny.two() == exp;
     }
 
     @Override
-    public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
+    public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
         int hit = effectiveHit(item);
         int expertise = effectiveExpertise(item);
         return new SkinnyItem(slot, hit, expertise);
@@ -83,7 +83,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
     }
 
     @Override
-    public boolean filterOneSet(ItemSet set) {
+    public boolean filterOneSet(SolvableItemSet set) {
         return inRange(set.totalForCaps());
     }
 
@@ -102,7 +102,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
     }
 
     @Override
-    public Stream<ItemSet> filterSets(Stream<ItemSet> setStream) {
+    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> setStream) {
         final int minHit = hitMin, maxHit = hitMax;
         final int minExp = expertiseMin, maxExp = expertiseMax;
 
@@ -180,7 +180,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
     }
 
     @Override
-    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> setStream) {
+    public Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> setStream) {
         final int maxHit = hitMax;
         final int maxExp = expertiseMax;
 

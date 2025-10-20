@@ -44,16 +44,16 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
     }
 
     @Override
-    public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        int hit = item.totalCap.hit();
-        int exp = item.totalCap.expertise();
+    public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
+        int hit = item.totalCap().hit();
+        int exp = item.totalCap().expertise();
         return skinny.one() == hit && skinny.two() == exp;
     }
 
     @Override
-    public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        int hit = item.totalCap.hit();
-        int exp = item.totalCap.expertise();
+    public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
+        int hit = item.totalCap().hit();
+        int exp = item.totalCap().expertise();
         return new SkinnyItem(slot, hit, exp);
     }
 
@@ -63,7 +63,7 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
     }
 
     @Override
-    public boolean filterOneSet(ItemSet set) {
+    public boolean filterOneSet(SolvableItemSet set) {
         StatBlock totals = set.totalForCaps();
         int hit = totals.hit();
         int expertise = totals.expertise();
@@ -71,7 +71,7 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
     }
 
     @Override
-    public Stream<ItemSet> filterSets(Stream<ItemSet> setStream) {
+    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> setStream) {
         return setStream.filter(set -> {
             StatBlock stats = set.totalForCaps();
             int hit = stats.hit(), expertise = stats.expertise();
@@ -80,7 +80,7 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
     }
 
     @Override
-    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> setStream) {
+    public Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> setStream) {
         return setStream.filter(set -> {
             StatBlock stats = set.totalForCaps();
             int hit = stats.hit(), expertise = stats.expertise();

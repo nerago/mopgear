@@ -162,12 +162,12 @@ public class FindMultiSpec {
     private void optimalWithoutCommon(SpecDetails spec) {
         JobInput job = new JobInput();
         job.model = spec.model;
-        job.itemOptions = spec.itemOptions;
+        job.setItemOptions(spec.itemOptions);
         job.runSizeMultiply = individualRunSizeMultiply * 4;
         job.hackAllow = hackAllow;
         JobOutput output = Solver.runJob(job);
 
-        ItemSet set = output.resultSet.orElseThrow();
+        ItemSet set = output.getFinalResultSet().orElseThrow();
         spec.optimalRating = output.resultRating;
         OutputText.printf("BASELINE %s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
         set.outputSet(spec.model);
@@ -192,9 +192,9 @@ public class FindMultiSpec {
     private void filterCommonActuallyUsed(Map<ItemRef, ItemData> common, List<JobOutput> resultJobs) {
         common.entrySet().removeIf(entry -> {
                     ItemRef ref = entry.getKey();
-                    long count = resultJobs.stream().flatMap(job -> job.resultSet.orElseThrow()
-                                    .items().entryStream().map(Tuple.Tuple2::b))
-                            .filter(item -> ref.equalsTyped(item.ref()))
+                    long count = resultJobs.stream()
+                            .flatMap(job -> job.resultSet.orElseThrow().items().itemStream())
+                            .filter(item -> item.isSameItem(ref))
                             .count();
                     if (count < 2)
                         OutputText.println("REMOVING COMMON " + entry.getValue());
@@ -221,7 +221,7 @@ public class FindMultiSpec {
 
         JobInput job = new JobInput();
         job.model = model;
-        job.itemOptions = submitMap;
+        job.setItemOptions(submitMap);
         job.runSizeMultiply = individualRunSizeMultiply;
         job.hackAllow = hackAllow;
         return Solver.runJob(job);
@@ -328,7 +328,7 @@ public class FindMultiSpec {
             OutputText.printf("^^^^^^^^^ %s ^^^^^^^ %d ^^^^^^^^^\n", LocalDateTime.now(), rating);
             for (int i = 0; i < resultJobs.size(); ++i) {
                 JobOutput job = resultJobs.get(i);
-                ItemSet set = job.resultSet.orElseThrow();
+                ItemSet set = job.getFinalResultSet().orElseThrow();
                 SpecDetails spec = specList.get(i);
                 OutputText.printf("-------------- %s -------------- %s\n", spec.label, "<HACK>".repeat(job.hackCount));
                 job.input.printRecorder.outputNow();
@@ -365,12 +365,12 @@ public class FindMultiSpec {
                 OutputText.printf("-------------- %s --------------\n", spec.label);
 
                 JobOutput draftJob = resultJobs.get(i);
-                ItemSet draftSet = draftJob.resultSet.orElseThrow();
+                ItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
                 double draftSpecRating = draftJob.resultRating;
                 OutputText.printf("DRAFT %,d\n", (long) draftSpecRating);
 
                 JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal);
-                ItemSet revisedSet = revisedJob.resultSet.orElseThrow();
+                ItemSet revisedSet = revisedJob.getFinalResultSet().orElseThrow();
                 double revisedSpecRating = revisedJob.resultRating;
 
                 if (revisedSpecRating > draftSpecRating) {
@@ -394,6 +394,7 @@ public class FindMultiSpec {
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public interface SpecDetailsInterface {
         boolean isChallengeScale();
 

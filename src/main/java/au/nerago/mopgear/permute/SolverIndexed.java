@@ -14,19 +14,19 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class SolverIndexed {
-    public static Optional<ItemSet> runSolver(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount, Predicate<ItemSet> specialFilter) {
-        Stream<ItemSet> partialSets = runSolverPartial(model, itemOptions, adjustment, startTime, comboCount);
+    public static Optional<SolvableItemSet> runSolver(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount, Predicate<SolvableItemSet> specialFilter) {
+        Stream<SolvableItemSet> partialSets = runSolverPartial(model, itemOptions, adjustment, startTime, comboCount);
         return finishToResult(model, specialFilter, partialSets);
     }
 
-    private static Optional<ItemSet> finishToResult(ModelCombined model, Predicate<ItemSet> specialFilter, Stream<ItemSet> partialSets) {
-        Stream<ItemSet> finalSets = model.filterSets(partialSets, true);
+    private static Optional<SolvableItemSet> finishToResult(ModelCombined model, Predicate<SolvableItemSet> specialFilter, Stream<SolvableItemSet> partialSets) {
+        Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
         if (specialFilter != null)
             finalSets = finalSets.filter(specialFilter);
         return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 
-    public static Optional<ItemSet> runSolverSkipping(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long desiredRunSize, BigInteger estimateFullCombos, Predicate<ItemSet> specialFilter) {
+    public static Optional<SolvableItemSet> runSolverSkipping(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long desiredRunSize, BigInteger estimateFullCombos, Predicate<SolvableItemSet> specialFilter) {
         BigInteger skipSize = estimateFullCombos.divide(BigInteger.valueOf(desiredRunSize));
         if (skipSize.compareTo(BigInteger.ONE) < 0)
             skipSize = BigInteger.ONE;
@@ -35,37 +35,37 @@ public class SolverIndexed {
         BigInteger plannedCount = estimateFullCombos.divide(skipSize);
 
         Stream<BigInteger> dumbStream = generateDumbStream(estimateFullCombos, skipSize).parallel();
-        Stream<ItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
+        Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
         partialSets = BigStreamUtil.countProgress(plannedCount, startTime, partialSets);
         return finishToResult(model, specialFilter, partialSets);
     }
 
-    private static Stream<ItemSet> runSolverPartial(ModelCombined model, EquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount) {
+    private static Stream<SolvableItemSet> runSolverPartial(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount) {
         Stream<Long> dumbStream = generateDumbStream(comboCount).parallel();
         return dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
     }
 
-    private static ItemSet makeSet(EquipOptionsMap itemOptions, StatBlock adjustment, long mainIndex) {
-        EquipMap map = EquipMap.empty();
+    private static SolvableItemSet makeSet(SolvableEquipOptionsMap itemOptions, StatBlock adjustment, long mainIndex) {
+        SolvableEquipMap map = SolvableEquipMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] list = itemOptions.get(slot);
+            SolvableItem[] list = itemOptions.get(slot);
             if (list != null) {
                 int size = list.length;
 
                 int thisIndex = (int) (mainIndex % size);
                 mainIndex /= size;
 
-                ItemData choice = list[thisIndex];
+                SolvableItem choice = list[thisIndex];
                 map.put(slot, choice);
             }
         }
-        return ItemSet.manyItems(map, adjustment);
+        return SolvableItemSet.manyItems(map, adjustment);
     }
 
-    private static ItemSet makeSet(EquipOptionsMap itemOptions, StatBlock adjustment, BigInteger mainIndex) {
-        EquipMap map = EquipMap.empty();
+    private static SolvableItemSet makeSet(SolvableEquipOptionsMap itemOptions, StatBlock adjustment, BigInteger mainIndex) {
+        SolvableEquipMap map = SolvableEquipMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] list = itemOptions.get(slot);
+            SolvableItem[] list = itemOptions.get(slot);
             if (list != null) {
                 int size = list.length;
 
@@ -74,11 +74,11 @@ public class SolverIndexed {
                 int thisIndex = divRem[1].intValueExact();
                 mainIndex = divRem[0];
 
-                ItemData choice = list[thisIndex];
+                SolvableItem choice = list[thisIndex];
                 map.put(slot, choice);
             }
         }
-        return ItemSet.manyItems(map, adjustment);
+        return SolvableItemSet.manyItems(map, adjustment);
     }
 
     private static Stream<Long> generateDumbStream(long max) {

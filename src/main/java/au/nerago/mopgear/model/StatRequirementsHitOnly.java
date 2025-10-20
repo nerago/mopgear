@@ -14,14 +14,14 @@ public class StatRequirementsHitOnly implements StatRequirements {
     }
 
     @Override
-    public SkinnyItem toSkinny(SlotEquip slot, ItemData item) {
-        int hit = item.totalCap.hit();
+    public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
+        int hit = item.totalCap().hit();
         return new SkinnyItem(slot, hit, 0);
     }
 
     @Override
-    public boolean skinnyMatch(SkinnyItem skinny, ItemData item) {
-        int hit = item.totalCap.hit();
+    public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
+        int hit = item.totalCap().hit();
         return skinny.one() == hit;
     }
 
@@ -31,13 +31,13 @@ public class StatRequirementsHitOnly implements StatRequirements {
     }
 
     @Override
-    public boolean filterOneSet(ItemSet set) {
+    public boolean filterOneSet(SolvableItemSet set) {
         int value = set.totalForCaps().hit();
         return minimum <= value && value <= maximum;
     }
 
     @Override
-    public Stream<ItemSet> filterSets(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream) {
         return stream.filter(set -> {
             int value = set.totalForCaps().hit();
             return minimum <= value && value <= maximum;
@@ -45,7 +45,7 @@ public class StatRequirementsHitOnly implements StatRequirements {
     }
 
     @Override
-    public Stream<ItemSet> filterSetsMax(Stream<ItemSet> stream) {
+    public Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> stream) {
         return stream.filter(set -> {
             int value = set.totalForCaps().hit();
             return value <= maximum;

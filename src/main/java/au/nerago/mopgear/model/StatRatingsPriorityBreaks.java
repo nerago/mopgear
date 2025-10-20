@@ -77,40 +77,6 @@ public class StatRatingsPriorityBreaks extends StatRatings {
     }
 
     @Override
-    public long calcRating(StatBlock partA, StatBlock partB) {
-        long result = 0;
-        long multiply = INITIAL;
-        int breakpointValue = partA.get(firstAndLastStat) + partB.get(firstAndLastStat);
-        if (breakpointValue > breakpointTarget) {
-            result += breakpointTarget * multiply;
-            result += breakpointValue - breakpointTarget;
-            multiply /= STEP;
-
-            for (StatType[] rank : remainPriority) {
-                int value = 0;
-                for (StatType stat : rank) {
-                    value += partA.get(stat) + partB.get(stat);
-                }
-                result += value * multiply;
-                multiply /= STEP;
-            }
-        } else {
-            result += breakpointValue * multiply;
-            multiply /= STEP;
-
-            for (StatType[] rank : remainPriority) {
-                int value = 0;
-                for (StatType stat : rank) {
-                    value += partA.get(stat) + partB.get(stat);
-                }
-                result += value * multiply;
-                multiply /= STEP;
-            }
-        }
-        return result * OUTPUT_MULTIPLY;
-    }
-
-    @Override
     public long calcRating(StatType queryStat, int value) {
         if (queryStat == firstAndLastStat) {
             if (value > breakpointTarget) {
