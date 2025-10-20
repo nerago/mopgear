@@ -1,8 +1,8 @@
 package au.nerago.mopgear.permute;
 
 import au.nerago.mopgear.domain.EquipOptionsMap;
-import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.ItemSet;
+import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.process.FallbackCappedSetBuilder;
@@ -49,7 +49,7 @@ public class Solver {
             output.resultSet = SolverIndexed.runSolverSkipping(model, itemOptions, adjustment, startTime, job.forcedRunSized, estimateFullCombos, job.specialFilter);
         } else if (estimateFullCombos.compareTo(BigInteger.valueOf(MAX_BASIC_FULL_SEARCH * runSizeMultiply)) < 0) {
             job.println("SOLVE full search");
-            output.resultSet = SolverIndexed.runSolver(model, itemOptions, adjustment, startTime, estimateFullCombos.longValueExact(), job.specialFilter);
+            output.resultSet = SolverIndexed.runSolver(model, itemOptions, adjustment, estimateFullCombos.longValueExact(), job.specialFilter);
         } else if (phased != null && estimatePhase1Combos < MAX_SKINNY_FULL_SEARCH * runSizeMultiply) {
             job.println("SOLVE phased full");
             output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, null);

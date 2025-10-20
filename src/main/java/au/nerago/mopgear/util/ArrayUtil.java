@@ -1,6 +1,5 @@
 package au.nerago.mopgear.util;
 
-import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.StatType;
 
 import java.lang.reflect.Array;

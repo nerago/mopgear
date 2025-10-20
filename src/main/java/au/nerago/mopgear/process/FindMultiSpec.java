@@ -11,7 +11,10 @@ import au.nerago.mopgear.results.AsWowSimJson;
 import au.nerago.mopgear.results.JobInput;
 import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.OutputText;
-import au.nerago.mopgear.util.*;
+import au.nerago.mopgear.util.ArrayUtil;
+import au.nerago.mopgear.util.BigStreamUtil;
+import au.nerago.mopgear.util.Primes;
+import au.nerago.mopgear.util.TopCollectorReporting;
 
 import java.nio.file.Path;
 import java.time.Instant;

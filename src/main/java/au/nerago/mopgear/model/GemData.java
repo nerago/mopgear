@@ -1,6 +1,5 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.domain.ItemData;
 import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
@@ -184,10 +183,6 @@ public class GemData {
                 return 320;
             }
         }
-    }
-
-    public static StatBlock getSocketBonus(ItemData item) {
-        return item.shared.socketBonus();
     }
 
     public static StatBlock getSocketBonus(String name, int socketBonus) {

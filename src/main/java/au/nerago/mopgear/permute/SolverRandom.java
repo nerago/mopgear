@@ -2,7 +2,6 @@ package au.nerago.mopgear.permute;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BestHolder;
 import au.nerago.mopgear.util.BigStreamUtil;
@@ -39,7 +38,6 @@ public class SolverRandom {
 
     public static Optional<SolvableItemSet> runSolverSingleThread(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, long count, Predicate<SolvableItemSet> specialFilter) {
         Random random = ThreadLocalRandom.current();
-        StatRequirements require = model.statRequirements();
         BestHolder<SolvableItemSet> best = new BestHolder<>();
         for (int i = 0; i < count; ++i) {
             SolvableItemSet set = makeSet(items, adjustment, random);

@@ -3,6 +3,7 @@ package au.nerago.mopgear.util;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("unused")
 public class ThreadCounters {
     private final Map<Long, LongHolder> holderMap;
     private final ThreadLocal<LongHolder> threadLocal;

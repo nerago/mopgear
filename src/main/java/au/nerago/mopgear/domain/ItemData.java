@@ -89,10 +89,6 @@ public final class ItemData implements IItem {
         return sb.toString();
     }
 
-    public static String toStringExtended(ItemData item) {
-        return item != null ? item.toStringExtended() : "null";
-    }
-
     public String fullName() {
         if (reforge.isEmpty())
             return shared.name();

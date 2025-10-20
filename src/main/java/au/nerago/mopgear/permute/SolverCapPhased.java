@@ -41,19 +41,11 @@ public class SolverCapPhased {
     }
 
     public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter, Long topCombosMultiply) {
-        try {
-            Stream<SolvableItemSet> partialSets = runSolverPartial(parallel, topCombosMultiply);
-            Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
-            if (specialFilter != null)
-                finalSets = finalSets.filter(specialFilter);
-            return BigStreamUtil.findBest(model, finalSets);
-        } finally {
-            postSolve();
-        }
-    }
-
-    private void postSolve() {
-//        System.out.printf("PHASED COUNTS est=%d init=%d filter=%d filter2=%d\n", estimate, initCount.get(), filterCount.get(), filter2Count.get());
+        Stream<SolvableItemSet> partialSets = runSolverPartial(parallel, topCombosMultiply);
+        Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
+        if (specialFilter != null)
+            finalSets = finalSets.filter(specialFilter);
+        return BigStreamUtil.findBest(model, finalSets);
     }
 
     private Stream<SolvableItemSet> runSolverPartial(boolean parallel, Long topCombosMultiply) {
@@ -72,7 +64,7 @@ public class SolverCapPhased {
             filteredSets = filteredSets.collect(new BottomCollectorN<>(actualTop, ratingFunc))
                     .parallelStream();
 
-            // TODO multiple sets with equal superhit may be lost
+            // TODO multiple sets with equal combohit may be lost
         }
 
         return filteredSets.map(this::makeFromSkinny);
@@ -122,6 +114,8 @@ public class SolverCapPhased {
 
 //        optionsList.sort(Comparator.comparingInt(array -> array.length));
         // TODO sort by biggest cap values so filter out faster
+
+        // TODO move to indexed, away from CurryQueue
 
         for (SkinnyItem[] slotOptions : optionsList) {
             if (stream == null) {

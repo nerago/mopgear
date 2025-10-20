@@ -144,16 +144,16 @@ public final class EquipOptionsMap {
         put(slot, new ItemData[]{item});
     }
 
-    public void replaceWithFirstOption(SlotEquip slot) {
-        ItemData[] array = get(slot);
-        put(slot, array[0]);
-    }
+//    public void replaceWithFirstOption(SlotEquip slot) {
+//        ItemData[] array = get(slot);
+//        put(slot, array[0]);
+//    }
 
-    public void replaceWithSpecificForge(SlotEquip slot, ReforgeRecipe reforgeRecipe) {
-        ItemData[] array = get(slot);
-        ItemData choice = ArrayUtil.findOne(array, item -> reforgeRecipe.equalsTyped(item.reforge()));
-        put(slot, choice);
-    }
+//    public void replaceWithSpecificForge(SlotEquip slot, ReforgeRecipe reforgeRecipe) {
+//        ItemData[] array = get(slot);
+//        ItemData choice = ArrayUtil.findOne(array, item -> reforgeRecipe.equalsTyped(item.reforge()));
+//        put(slot, choice);
+//    }
 
     //    @Deprecated(since = "avoid extra allocation")
     public EquipOptionsMap shallowClone() {
@@ -182,13 +182,12 @@ public final class EquipOptionsMap {
         );
     }
 
-    public EquipOptionsMap copyWithReplaceSingle(SlotEquip slot, ItemData replace) {
-        EquipOptionsMap other = new EquipOptionsMap(this);
-        other.put(slot, new ItemData[]{replace});
-        return other;
-    }
+//    public EquipOptionsMap copyWithReplaceSingle(SlotEquip slot, ItemData replace) {
+//        EquipOptionsMap other = new EquipOptionsMap(this);
+//        other.put(slot, new ItemData[]{replace});
+//        return other;
+//    }
 
-    //    @Deprecated(since = "avoid bad performance")
     public void forEachValue(Consumer<ItemData[]> func) {
         if (head != null) func.accept(head);
         if (neck != null) func.accept(neck);

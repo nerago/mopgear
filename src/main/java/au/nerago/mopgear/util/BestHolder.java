@@ -18,6 +18,7 @@ public class BestHolder<T> {
         return bestObject;
     }
 
+    @SuppressWarnings("unused")
     public long getRating() {
         return bestRating;
     }

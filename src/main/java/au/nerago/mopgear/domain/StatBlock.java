@@ -141,109 +141,63 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
     }
 
     public static StatBlock sumForRating(SolvableEquipMap items) {
-        // NOTE we could do these as previous but trying to slim down the statBase references and such
-        StatBlock result = StatBlock.empty;
+        int primary = 0;
+        int stam = 0;
+        int mastery = 0;
+        int crit = 0;
+        int hit = 0;
+        int haste = 0;
+        int expertise = 0;
+        int dodge = 0;
+        int parry = 0;
+        int spirit = 0;
         for (SlotEquip slot : SlotEquip.values()) {
             SolvableItem item = items.get(slot);
             if (item != null) {
-                result = result.plus(item.totalRated());
+                StatBlock base = item.totalRated();
+                primary += base.primary;
+                stam += base.stam;
+                mastery += base.mastery;
+                crit += base.crit;
+                hit += base.hit;
+                haste += base.haste;
+                expertise += base.expertise;
+                dodge += base.dodge;
+                parry += base.parry;
+                spirit += base.spirit;
             }
         }
-        return result;
-
-//        int primary = 0;
-//        int stam = 0;
-//        int mastery = 0;
-//        int crit = 0;
-//        int hit = 0;
-//        int haste = 0;
-//        int expertise = 0;
-//        int dodge = 0;
-//        int parry = 0;
-//        int spirit = 0;
-//        for (SlotEquip slot : SlotEquip.values()) {
-//            ItemSolvable item = items.get(slot);
-//            if (item != null) {
-//                StatBlock base = item.statBase;
-//                primary += base.primary;
-//                stam += base.stam;
-//                mastery += base.mastery;
-//                crit += base.crit;
-//                hit += base.hit;
-//                haste += base.haste;
-//                expertise += base.expertise;
-//                dodge += base.dodge;
-//                parry += base.parry;
-//                spirit += base.spirit;
-//
-//                StatBlock enchant = item.statEnchant;
-//                primary += enchant.primary;
-//                stam += enchant.stam;
-//                mastery += enchant.mastery;
-//                crit += enchant.crit;
-//                hit += enchant.hit;
-//                haste += enchant.haste;
-//                expertise += enchant.expertise;
-//                dodge += enchant.dodge;
-//                parry += enchant.parry;
-//                spirit += enchant.spirit;
-//            }
-//        }
-//        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
     }
 
     public static StatBlock sumForCaps(SolvableEquipMap items) {
-        // NOTE we could do these as previous but trying to slim down the statBase references and such
-        StatBlock result = StatBlock.empty;
+        int primary = 0;
+        int stam = 0;
+        int mastery = 0;
+        int crit = 0;
+        int hit = 0;
+        int haste = 0;
+        int expertise = 0;
+        int dodge = 0;
+        int parry = 0;
+        int spirit = 0;
         for (SlotEquip slot : SlotEquip.values()) {
             SolvableItem item = items.get(slot);
             if (item != null) {
-                result = result.plus(item.totalCap());
+                StatBlock base = item.totalCap();
+                primary += base.primary;
+                stam += base.stam;
+                mastery += base.mastery;
+                crit += base.crit;
+                hit += base.hit;
+                haste += base.haste;
+                expertise += base.expertise;
+                dodge += base.dodge;
+                parry += base.parry;
+                spirit += base.spirit;
             }
         }
-        return result;
-
-//        int primary = 0;
-//        int stam = 0;
-//        int mastery = 0;
-//        int crit = 0;
-//        int hit = 0;
-//        int haste = 0;
-//        int expertise = 0;
-//        int dodge = 0;
-//        int parry = 0;
-//        int spirit = 0;
-//        for (SlotEquip slot : SlotEquip.values()) {
-//            ItemSolvable item = items.get(slot);
-//            if (item != null) {
-//                StatBlock base = item.statBase;
-//                primary += base.primary;
-//                stam += base.stam;
-//                mastery += base.mastery;
-//                crit += base.crit;
-//                hit += base.hit;
-//                haste += base.haste;
-//                expertise += base.expertise;
-//                dodge += base.dodge;
-//                parry += base.parry;
-//                spirit += base.spirit;
-//
-//                if (item.slot().addEnchantToCap) {
-//                    StatBlock enchant = item.statEnchant;
-//                    primary += enchant.primary;
-//                    stam += enchant.stam;
-//                    mastery += enchant.mastery;
-//                    crit += enchant.crit;
-//                    hit += enchant.hit;
-//                    haste += enchant.haste;
-//                    expertise += enchant.expertise;
-//                    dodge += enchant.dodge;
-//                    parry += enchant.parry;
-//                    spirit += enchant.spirit;
-//                }
-//            }
-//        }
-//        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
     }
 
     public int get(StatType stat) {
@@ -442,7 +396,7 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
         if (spirit != 0)
             sb.append("spirit=").append(spirit).append(' ');
         if (extended && (hit != 0 || expertise != 0 || spirit != 0))
-            sb.append("superhit=").append(hit + expertise + spirit).append(' ');
+            sb.append("combohit=").append(hit + expertise + spirit).append(' ');
     }
 
     public final static StatBlock empty = new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);

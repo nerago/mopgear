@@ -3,6 +3,7 @@ package au.nerago.mopgear.util;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+@SuppressWarnings("unused")
 public class AtomicDoubleOptional {
     private final AtomicReference<Optional<Double>> ref;
 

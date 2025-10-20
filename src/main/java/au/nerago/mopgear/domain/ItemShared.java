@@ -3,7 +3,6 @@ package au.nerago.mopgear.domain;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 public record ItemShared(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull SocketType[] socketSlots, @Nullable StatBlock socketBonus) {

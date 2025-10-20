@@ -1,6 +1,9 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.domain.ItemSet;
+import au.nerago.mopgear.domain.SlotEquip;
+import au.nerago.mopgear.domain.SolvableEquipMap;
+import au.nerago.mopgear.domain.SolvableItemSet;
 
 import java.util.ArrayList;
 import java.util.HashSet;

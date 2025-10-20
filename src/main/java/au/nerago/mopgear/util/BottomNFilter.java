@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
 
+@SuppressWarnings("unused")
 public class BottomNFilter<T> implements Predicate<T> {
     private final int size;
     private final ToLongFunction<T> getValue;

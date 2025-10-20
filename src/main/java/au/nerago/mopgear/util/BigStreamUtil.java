@@ -1,8 +1,7 @@
 package au.nerago.mopgear.util;
 
-import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
-import au.nerago.mopgear.domain.ItemSet;
 import au.nerago.mopgear.domain.SkinnyItem;
+import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.SolvableItemSet;
 import au.nerago.mopgear.model.ModelCombined;
 

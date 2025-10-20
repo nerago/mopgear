@@ -1,10 +1,10 @@
 package au.nerago.mopgear.results;
 
 import au.nerago.mopgear.ItemMapUtil;
-import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.domain.ItemSet;
+import au.nerago.mopgear.domain.SolvableItemSet;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class JobOutput {

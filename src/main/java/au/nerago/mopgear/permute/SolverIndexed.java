@@ -14,8 +14,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class SolverIndexed {
-    public static Optional<SolvableItemSet> runSolver(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount, Predicate<SolvableItemSet> specialFilter) {
-        Stream<SolvableItemSet> partialSets = runSolverPartial(model, itemOptions, adjustment, startTime, comboCount);
+    public static Optional<SolvableItemSet> runSolver(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, long comboCount, Predicate<SolvableItemSet> specialFilter) {
+        Stream<SolvableItemSet> partialSets = runSolverPartial(itemOptions, adjustment, comboCount);
         return finishToResult(model, specialFilter, partialSets);
     }
 
@@ -40,7 +40,7 @@ public class SolverIndexed {
         return finishToResult(model, specialFilter, partialSets);
     }
 
-    private static Stream<SolvableItemSet> runSolverPartial(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long comboCount) {
+    private static Stream<SolvableItemSet> runSolverPartial(SolvableEquipOptionsMap itemOptions, StatBlock adjustment, long comboCount) {
         Stream<Long> dumbStream = generateDumbStream(comboCount).parallel();
         return dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
     }

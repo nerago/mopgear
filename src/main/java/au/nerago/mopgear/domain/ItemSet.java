@@ -21,24 +21,6 @@ public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap
         return new ItemSet(rating, caps, items);
     }
 
-    public static ItemSet singleItem(SlotEquip slot, ItemData item, StatBlock adjustment) {
-        EquipMap itemMap = EquipMap.single(slot, item);
-        StatBlock rating = item.totalRated();
-        StatBlock caps = item.totalCap();
-        if (adjustment != null) {
-            rating = rating.plus(adjustment);
-            caps = caps.plus(adjustment);
-        }
-        return new ItemSet(rating, caps, itemMap);
-    }
-
-    public ItemSet copyWithAddedItem(SlotEquip slot, ItemData item) {
-        EquipMap itemMap = items.copyWithReplace(slot, item);
-        StatBlock rating = totalForRating.plus(item.totalRated());
-        StatBlock caps = totalForCaps.plus(item.totalCap());
-        return new ItemSet(rating, caps, itemMap);
-    }
-
     public void outputSet(ModelCombined model) {
         OutputText.println(totalForRating.toStringExtended() + " " + model.calcRating(this));
         items.forEachValue(it -> OutputText.println(it + " " + model.calcRating(it)));
