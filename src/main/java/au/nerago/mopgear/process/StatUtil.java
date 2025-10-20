@@ -3,6 +3,7 @@ package au.nerago.mopgear.process;
 import au.nerago.mopgear.domain.SolvableItem;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
+import au.nerago.mopgear.model.IItem;
 import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.util.LowHighHolder;
 import org.jetbrains.annotations.Nullable;

@@ -3,9 +3,11 @@ package au.nerago.mopgear.domain;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.OutputText;
 
+import java.util.function.Function;
+
 public record ItemSet(StatBlock totalForRating, StatBlock totalForCaps, EquipMap items) {
-    public ItemSet(SolvableItemSet other) {
-        this(other.totalForRating(), other.totalForCaps(), new EquipMap(other.items()));
+    public static ItemSet ofSolvable(SolvableItemSet other, Function<SolvableItem, ItemData> itemConverter) {
+        return new ItemSet(other.totalForRating(), other.totalForCaps(), new EquipMap(other.items(), itemConverter));
     }
 
     public static ItemSet manyItems(EquipMap items, StatBlock adjustment) {

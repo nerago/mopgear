@@ -109,7 +109,7 @@ public class SetBonus {
         int activeSetCount = activeSets.size();
         int[] setCounts = new int[activeSetCount];
         for (SlotEquip slot : SlotEquip.values()) {
-            SolvableItem item = itemMap.get(slot);
+            IItem item = itemMap.get(slot);
             if (item != null) {
                 int itemId = item.itemId();
                 for (int i = 0; i < activeSetCount; ++i) {

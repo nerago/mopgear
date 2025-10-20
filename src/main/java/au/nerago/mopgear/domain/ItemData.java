@@ -1,10 +1,11 @@
 package au.nerago.mopgear.domain;
 
+import au.nerago.mopgear.model.IItem;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public final class ItemData implements SolvableItem {
+public final class ItemData implements IItem {
     @NotNull
     public final ItemShared shared;
     @NotNull
@@ -114,12 +115,11 @@ public final class ItemData implements SolvableItem {
     }
 
     public static boolean isIdenticalItem(ItemData a, ItemData b) {
-        return a.shared.equalsTyped(b.shared) && a.statBase.equalsStats(b.statBase) && a.statEnchant.equalsStats(b.statEnchant);
+        return a.isIdenticalItem(b.shared.ref(), b.totalCap, b.totalRated);
     }
 
-    @Override
-    public boolean isIdenticalItem(SolvableItem other) {
-        return isIdenticalItem(this, (ItemData) other);
+    public boolean isIdenticalItem(ItemRef otherRef, StatBlock otherTotalCap, StatBlock otherTotalRated) {
+        return shared.ref().equalsTyped(otherRef) && totalCap.equalsStats(otherTotalCap) && totalRated.equalsStats(otherTotalRated);
     }
 
     @Override

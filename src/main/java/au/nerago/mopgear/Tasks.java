@@ -338,12 +338,12 @@ public class Tasks {
         AsWowSimJson.writeToOut(resultSet.orElseThrow().items());
     }
 
-    public static void outputTweaked(Optional<SolvableItemSet> bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
-        bestSet.ifPresent(itemSet -> outputTweaked(itemSet, reforgedItems, model));
+    public static void outputTweaked(Optional<SolvableItemSet> bestSet, EquipOptionsMap itemOptions, ModelCombined model) {
+        bestSet.ifPresent(itemSet -> outputTweaked(itemSet, new SolvableEquipOptionsMap(itemOptions), model));
     }
 
-    public static void outputTweaked(SolvableItemSet bestSet, EquipOptionsMap reforgedItems, ModelCombined model) {
-        SolvableItemSet tweakSet = Tweaker.tweak(bestSet, model, reforgedItems);
+    public static void outputTweaked(SolvableItemSet bestSet, SolvableEquipOptionsMap itemOptions, ModelCombined model) {
+        SolvableItemSet tweakSet = Tweaker.tweak(bestSet, model, itemOptions);
         if (bestSet != tweakSet) {
             OutputText.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
 

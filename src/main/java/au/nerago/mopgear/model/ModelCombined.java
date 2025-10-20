@@ -29,6 +29,10 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return statRatings.calcRating(it.totalRated());
     }
 
+    public long calcRating(ItemData it) {
+        return statRatings.calcRating(it.totalRated());
+    }
+
     public boolean filterOneSet(SolvableItemSet set) {
         return statRequirements.filterOneSet(set) && set.validate();
     }

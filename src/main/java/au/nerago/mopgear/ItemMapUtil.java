@@ -8,6 +8,8 @@ import au.nerago.mopgear.util.ArrayUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class ItemMapUtil {
     public static EquipOptionsMap standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
@@ -83,5 +85,19 @@ public class ItemMapUtil {
         ItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
         loaded = Reforger.presetReforge(loaded, oldItem.reforge);
         return loaded.changeEnchant(oldItem.statEnchant);
+    }
+
+    public static Function<SolvableItem, ItemData> mapperToFullItems(EquipOptionsMap map) {
+        return solvableItem -> {
+            if (solvableItem != null) {
+                ItemRef ref = new ItemRef(solvableItem.itemId(), solvableItem.itemLevel(), solvableItem.itemLevelBase(), solvableItem.duplicateNum());
+                Optional<ItemData> itemData = map.itemStream()
+                        .filter(it -> it.isIdenticalItem(ref, solvableItem.totalCap(), solvableItem.totalRated()))
+                        .findFirst();
+                return itemData.orElseThrow();
+            } else {
+                return null;
+            }
+        };
     }
 }

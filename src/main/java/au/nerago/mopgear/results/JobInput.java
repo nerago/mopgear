@@ -10,6 +10,7 @@ public class JobInput {
     public final PrintRecorder printRecorder = new PrintRecorder();
 
     public ModelCombined model;
+    public EquipOptionsMap fullItemOptions;
     public SolvableEquipOptionsMap itemOptions;
     public Instant startTime;
     public StatBlock adjustment;
@@ -33,6 +34,7 @@ public class JobInput {
     }
 
     public void setItemOptions(EquipOptionsMap itemOptions) {
+        this.fullItemOptions = itemOptions;
         this.itemOptions = new SolvableEquipOptionsMap(itemOptions);
     }
 

@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -61,23 +62,23 @@ public final class EquipMap implements IEquipMap {
         this.offhand = other.offhand;
     }
 
-    public EquipMap(SolvableEquipMap other) {
-        this.head = (ItemData) other.head;
-        this.neck = (ItemData) other.neck;
-        this.shoulder = (ItemData) other.shoulder;
-        this.back = (ItemData) other.back;
-        this.chest = (ItemData) other.chest;
-        this.wrist = (ItemData) other.wrist;
-        this.hand = (ItemData) other.hand;
-        this.belt = (ItemData) other.belt;
-        this.leg = (ItemData) other.leg;
-        this.foot = (ItemData) other.foot;
-        this.ring1 = (ItemData) other.ring1;
-        this.ring2 = (ItemData) other.ring2;
-        this.trinket1 = (ItemData) other.trinket1;
-        this.trinket2 = (ItemData) other.trinket2;
-        this.weapon = (ItemData) other.weapon;
-        this.offhand = (ItemData) other.offhand;
+    public EquipMap(SolvableEquipMap other, Function<SolvableItem, ItemData> itemConverter) {
+        this.head = itemConverter.apply(other.head);
+        this.neck = itemConverter.apply(other.neck);
+        this.shoulder = itemConverter.apply(other.shoulder);
+        this.back = itemConverter.apply(other.back);
+        this.chest = itemConverter.apply(other.chest);
+        this.wrist = itemConverter.apply(other.wrist);
+        this.hand = itemConverter.apply(other.hand);
+        this.belt = itemConverter.apply(other.belt);
+        this.leg = itemConverter.apply(other.leg);
+        this.foot = itemConverter.apply(other.foot);
+        this.ring1 = itemConverter.apply(other.ring1);
+        this.ring2 = itemConverter.apply(other.ring2);
+        this.trinket1 = itemConverter.apply(other.trinket1);
+        this.trinket2 = itemConverter.apply(other.trinket2);
+        this.weapon = itemConverter.apply(other.weapon);
+        this.offhand = itemConverter.apply(other.offhand);
     }
 
     public ItemData get(SlotEquip slot) {

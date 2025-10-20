@@ -5,7 +5,7 @@ import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.util.BestHolder;
 
 public class Tweaker {
-    public static SolvableItemSet tweak(SolvableItemSet baseSet, ModelCombined model, EquipOptionsMap items) {
+    public static SolvableItemSet tweak(SolvableItemSet baseSet, ModelCombined model, SolvableEquipOptionsMap items) {
         BestHolder<SolvableItemSet> best = new BestHolder<>(baseSet, model.calcRating(baseSet));
 
         for (SlotEquip slot : SlotEquip.values()) {

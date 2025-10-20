@@ -111,7 +111,6 @@ public class BigStreamUtil {
         } else {
             throw new RuntimeException("unable to determine item combination estimate");
         }
-//        return reforgedItems.entryStream().mapToLong(x -> (long) x.b().length).reduce((a, b) -> a * b).orElse(0);
     }
 
     public static long estimateSets(List<SkinnyItem[]> skinnyOptions) {

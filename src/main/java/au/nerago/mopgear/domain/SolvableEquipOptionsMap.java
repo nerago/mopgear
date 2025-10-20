@@ -1,5 +1,6 @@
 package au.nerago.mopgear.domain;
 
+import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
 
 import java.util.Arrays;
@@ -9,52 +10,47 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class SolvableEquipOptionsMap {
-    private final SolvableItem[] head;
-    private final SolvableItem[] neck;
-    private final SolvableItem[] shoulder;
-    private final SolvableItem[] back;
-    private final SolvableItem[] chest;
-    private final SolvableItem[] wrist;
-    private final SolvableItem[] hand;
-    private final SolvableItem[] belt;
-    private final SolvableItem[] leg;
-    private final SolvableItem[] foot;
-    private final SolvableItem[] ring1;
-    private final SolvableItem[] ring2;
-    private final SolvableItem[] trinket1;
-    private final SolvableItem[] trinket2;
-    private final SolvableItem[] weapon;
-    private final SolvableItem[] offhand;
+public record SolvableEquipOptionsMap(SolvableItem[] head,
+                                      SolvableItem[] neck,
+                                      SolvableItem[] shoulder,
+                                      SolvableItem[] back,
+                                      SolvableItem[] chest,
+                                      SolvableItem[] wrist,
+                                      SolvableItem[] hand,
+                                      SolvableItem[] belt,
+                                      SolvableItem[] leg,
+                                      SolvableItem[] foot,
+                                      SolvableItem[] ring1,
+                                      SolvableItem[] ring2,
+                                      SolvableItem[] trinket1,
+                                      SolvableItem[] trinket2,
+                                      SolvableItem[] weapon,
+                                      SolvableItem[] offhand) {
+
 
     public SolvableEquipOptionsMap(EquipOptionsMap other) {
-        this.head = copyAndCast(other.head);
-        this.neck = copyAndCast(other.neck);
-        this.shoulder = copyAndCast(other.shoulder);
-        this.back = copyAndCast(other.back);
-        this.chest = copyAndCast(other.chest);
-        this.wrist = copyAndCast(other.wrist);
-        this.hand = copyAndCast(other.hand);
-        this.belt = copyAndCast(other.belt);
-        this.leg = copyAndCast(other.leg);
-        this.foot = copyAndCast(other.foot);
-        this.ring1 = copyAndCast(other.ring1);
-        this.ring2 = copyAndCast(other.ring2);
-        this.trinket1 = copyAndCast(other.trinket1);
-        this.trinket2 = copyAndCast(other.trinket2);
-        this.weapon = copyAndCast(other.weapon);
-        this.offhand = copyAndCast(other.offhand);
+        this(copyAndCast(other.head),
+                copyAndCast(other.neck),
+                copyAndCast(other.shoulder),
+                copyAndCast(other.back),
+                copyAndCast(other.chest),
+                copyAndCast(other.wrist),
+                copyAndCast(other.hand),
+                copyAndCast(other.belt),
+                copyAndCast(other.leg),
+                copyAndCast(other.foot),
+                copyAndCast(other.ring1),
+                copyAndCast(other.ring2),
+                copyAndCast(other.trinket1),
+                copyAndCast(other.trinket2),
+                copyAndCast(other.weapon),
+                copyAndCast(other.offhand));
     }
 
-    private SolvableItem[] copyAndCast(ItemData[] array) {
+    private static SolvableItem[] copyAndCast(ItemData[] array) {
         if (array == null)
             return null;
-
-        SolvableItem[] result = new SolvableItem[array.length];
-        System.arraycopy(array, 0, result, 0, array.length);
-//        for (int i = 0; i < array.length; ++i)
-//            result[i] = array[i];
-        return result;
+        return ArrayUtil.mapAsNew(array, SolvableItem::of, SolvableItem[]::new);
     }
 
     public SolvableItem[] get(SlotEquip slot) {
@@ -139,10 +135,6 @@ public final class SolvableEquipOptionsMap {
 
     public Stream<Tuple.Tuple2<SlotEquip, SolvableItem[]>> entryStream() {
         return StreamSupport.stream(new OptionsSpliterator(), true);
-    }
-
-    public Stream<SolvableItem> itemStream() {
-        return entryStream().flatMap(entry -> Arrays.stream(entry.b()));
     }
 
     @Override

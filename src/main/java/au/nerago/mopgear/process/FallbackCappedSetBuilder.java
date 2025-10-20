@@ -1,6 +1,7 @@
 package au.nerago.mopgear.process;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.model.IItem;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRatings;
 import au.nerago.mopgear.model.StatRequirements;

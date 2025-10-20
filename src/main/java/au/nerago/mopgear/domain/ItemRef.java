@@ -33,8 +33,8 @@ public record ItemRef(int itemId, int itemLevel, int itemLevelBase, int duplicat
         return equalsTyped(itemRef);
     }
 
-    public boolean equalsTyped(ItemRef itemRef) {
-        return itemId == itemRef.itemId && itemLevel == itemRef.itemLevel && duplicateNum == itemRef.duplicateNum;
+    public boolean equalsTyped(ItemRef other) {
+        return itemId == other.itemId && itemLevel == other.itemLevel && duplicateNum == other.duplicateNum;
     }
 
     @Override
