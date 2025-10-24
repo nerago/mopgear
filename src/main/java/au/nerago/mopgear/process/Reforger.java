@@ -1,6 +1,6 @@
 package au.nerago.mopgear.process;
 
-import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.FullItemData;
 import au.nerago.mopgear.domain.ReforgeRecipe;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Reforger {
-    public static ItemData[] reforgeItem(ReforgeRules rules, ItemData baseItem) {
-        List<ItemData> outputItems = reforgeItemToList(rules, baseItem);
-        return outputItems.toArray(ItemData[]::new);
+    public static FullItemData[] reforgeItem(ReforgeRules rules, FullItemData baseItem) {
+        List<FullItemData> outputItems = reforgeItemToList(rules, baseItem);
+        return outputItems.toArray(FullItemData[]::new);
     }
 
-    private static List<ItemData> reforgeItemToList(ReforgeRules rules, ItemData baseItem) {
-        List<ItemData> outputItems = new ArrayList<>();
+    private static List<FullItemData> reforgeItemToList(ReforgeRules rules, FullItemData baseItem) {
+        List<FullItemData> outputItems = new ArrayList<>();
         outputItems.add(baseItem);
 
         StatType[] target = rules.target();
@@ -29,7 +29,7 @@ public class Reforger {
                 int remainQuantity = originalValue - reforgeQuantity;
                 for (StatType targetStat : target) {
                     if (baseItem.statBase.get(targetStat) == 0) {
-                        ItemData modified = makeModified(baseItem, new ReforgeRecipe(sourceStat, targetStat), remainQuantity, reforgeQuantity);
+                        FullItemData modified = makeModified(baseItem, new ReforgeRecipe(sourceStat, targetStat), remainQuantity, reforgeQuantity);
                         outputItems.add(modified);
                     }
                 }
@@ -38,16 +38,16 @@ public class Reforger {
         return outputItems;
     }
 
-    public static ItemData[] reforgeItemBest(ModelCombined model, ItemData baseItem) {
-        List<ItemData> reforgedItems = reforgeItemToList(model.reforgeRules(), baseItem);
-        BestHolder<ItemData> best = new BestHolder<>();
-        for (ItemData item : reforgedItems) {
+    public static FullItemData[] reforgeItemBest(ModelCombined model, FullItemData baseItem) {
+        List<FullItemData> reforgedItems = reforgeItemToList(model.reforgeRules(), baseItem);
+        BestHolder<FullItemData> best = new BestHolder<>();
+        for (FullItemData item : reforgedItems) {
             best.add(item, model.calcRating(item));
         }
-        return new ItemData[] { best.get() };
+        return new FullItemData[] { best.get() };
     }
 
-    public static ItemData presetReforge(ItemData baseItem, ReforgeRecipe statChange) {
+    public static FullItemData presetReforge(FullItemData baseItem, ReforgeRecipe statChange) {
         if (statChange == null) {
             return baseItem;
         }
@@ -70,7 +70,7 @@ public class Reforger {
         }
     }
 
-    private static ItemData makeModified(ItemData baseItem, ReforgeRecipe recipe, int remainQuantity, int reforgeQuantity) {
+    private static FullItemData makeModified(FullItemData baseItem, ReforgeRecipe recipe, int remainQuantity, int reforgeQuantity) {
         StatBlock changedStats = baseItem.statBase.withChange(recipe.source(), remainQuantity, recipe.dest(), reforgeQuantity);
         return baseItem.changeForReforge(changedStats, recipe);
     }

@@ -1,6 +1,6 @@
 package au.nerago.mopgear.permute;
 
-import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.FullItemData;
 import au.nerago.mopgear.domain.ItemRef;
 import au.nerago.mopgear.util.ArrayUtil;
 
@@ -10,15 +10,15 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class PossibleStreams {
-    public static Stream<Map<ItemRef, ItemData>> runSolverPartial(Map<Integer, List<ItemData>> items) {
-        Stream<Map<ItemRef, ItemData>> initialSets = generateItemCombinations(items);
+    public static Stream<Map<ItemRef, FullItemData>> runSolverPartial(Map<Integer, List<FullItemData>> items) {
+        Stream<Map<ItemRef, FullItemData>> initialSets = generateItemCombinations(items);
         return initialSets.parallel();
     }
 
-    private static Stream<Map<ItemRef, ItemData>> generateItemCombinations(Map<Integer, List<ItemData>> items) {
-        Stream<Map<ItemRef, ItemData>> stream = null;
+    private static Stream<Map<ItemRef, FullItemData>> generateItemCombinations(Map<Integer, List<FullItemData>> items) {
+        Stream<Map<ItemRef, FullItemData>> stream = null;
 
-        for (Map.Entry<Integer, List<ItemData>> slotEntry : items.entrySet()) {
+        for (Map.Entry<Integer, List<FullItemData>> slotEntry : items.entrySet()) {
             if (stream == null) {
                 stream = newCombinationStream(slotEntry.getValue());
             } else {
@@ -31,25 +31,25 @@ public class PossibleStreams {
     }
 
     @SuppressWarnings("unchecked")
-    private static Stream<Map<ItemRef, ItemData>> newCombinationStream(List<ItemData> options) {
-        Map<ItemRef, ItemData>[] array = (Map<ItemRef, ItemData>[]) new Map[options.size()];
+    private static Stream<Map<ItemRef, FullItemData>> newCombinationStream(List<FullItemData> options) {
+        Map<ItemRef, FullItemData>[] array = (Map<ItemRef, FullItemData>[]) new Map[options.size()];
         for (int i = 0; i < options.size(); ++i) {
-            ItemData item = options.get(i);
+            FullItemData item = options.get(i);
             array[i] = Map.of(item.ref(), item);
         }
         return ArrayUtil.arrayStream(array);
     }
 
-    private static Stream<Map<ItemRef, ItemData>> applyItemsToCombination(Stream<Map<ItemRef, ItemData>> stream, List<ItemData> options) {
+    private static Stream<Map<ItemRef, FullItemData>> applyItemsToCombination(Stream<Map<ItemRef, FullItemData>> stream, List<FullItemData> options) {
         return stream.mapMulti((map, sink) -> {
-            for (ItemData add : options) {
+            for (FullItemData add : options) {
                 sink.accept(copyWithAddedItem(map, add));
             }
         });
     }
 
-    private static Map<ItemRef, ItemData> copyWithAddedItem(Map<ItemRef, ItemData> oldMap, ItemData add) {
-        Map<ItemRef, ItemData> map = new HashMap<>(oldMap);
+    private static Map<ItemRef, FullItemData> copyWithAddedItem(Map<ItemRef, FullItemData> oldMap, FullItemData add) {
+        Map<ItemRef, FullItemData> map = new HashMap<>(oldMap);
         map.put(add.ref(), add);
         return map;
     }

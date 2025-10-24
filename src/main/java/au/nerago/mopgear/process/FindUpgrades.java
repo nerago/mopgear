@@ -85,7 +85,7 @@ public class FindUpgrades {
         JobOutput output = Solver.runJob(job);
         job.printRecorder.outputNow();
 
-        Optional<ItemSet> baseSet = output.getFinalResultSet();
+        Optional<FullItemSet> baseSet = output.getFinalResultSet();
         if (baseSet.isPresent()) {
             double baseRating = output.resultRating;
             OutputText.printf("\n%s\nBASE RATING    = %.0f\n\n", baseSet.get().totalForRating(), baseRating);
@@ -107,7 +107,7 @@ public class FindUpgrades {
         RankedGroupsCollection<UpgradeResultItem> grouped = new RankedGroupsCollection<>();
 
         jobList.forEach(resultItem -> {
-            ItemData item = resultItem.item();
+            FullItemData item = resultItem.item();
             int cost = resultItem.cost();
             if (cost >= 10) {
                 double plusPerCost = (resultItem.factor() - 1.0) * 100 / cost;
@@ -155,7 +155,7 @@ public class FindUpgrades {
 
     private Stream<JobInput> makeJobs(ModelCombined model, EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment, double baseRating) {
         return extraItemList.parallelStream().mapMulti((extraItemInfo, submitJob) -> {
-            ItemData extraItem = extraItemInfo.item();
+            FullItemData extraItem = extraItemInfo.item();
             int cost = extraItemInfo.cost();
 
             for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
@@ -168,7 +168,7 @@ public class FindUpgrades {
     }
 
     private static void reportItem(UpgradeResultItem resultItem) {
-        ItemData item = resultItem.item();
+        FullItemData item = resultItem.item();
         double factor = resultItem.factor();
         int cost = resultItem.cost();
         String stars = ArrayUtil.repeat('*', resultItem.hackCount());
@@ -185,7 +185,7 @@ public class FindUpgrades {
         }
     }
 
-    private JobInput buildUpgradeJob(ModelCombined model, EquipOptionsMap items, ItemData extraItem, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
+    private JobInput buildUpgradeJob(ModelCombined model, EquipOptionsMap items, FullItemData extraItem, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
         JobInput job = new JobInput();
 //        job.singleThread = true;
 
@@ -193,7 +193,7 @@ public class FindUpgrades {
         job.println("OFFER " + extraItem.toStringExtended());
         job.println("REPLACING " + (items.get(slot) != null ? items.get(slot)[0].toStringExtended() : "NOTHING"));
 
-        ItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
+        FullItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
         items.put(slot, extraOptions);
         ArrayUtil.mapInPlace(items.get(slot), x -> ItemLoadUtil.defaultEnchants(x, model, true)); // redundant?
 
@@ -212,7 +212,7 @@ public class FindUpgrades {
     }
 
     private UpgradeResultItem handleResult(JobOutput job, double baseRating) {
-        Optional<ItemSet> resultSet = job.getFinalResultSet();
+        Optional<FullItemSet> resultSet = job.getFinalResultSet();
         job.input.printRecorder.outputNow();
 
         double factor;
@@ -229,7 +229,7 @@ public class FindUpgrades {
         return new UpgradeResultItem(job.input.extraItem, factor, job.hackCount, job.input.cost);
     }
 
-    private boolean canPerformSpecifiedUpgrade(ItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {
+    private boolean canPerformSpecifiedUpgrade(FullItemData extraItem, SlotEquip slot, EquipOptionsMap reforgedItems) {
         if (SourcesOfItems.ignoredItems.contains(extraItem.itemId()))
             return false;
 
@@ -239,7 +239,7 @@ public class FindUpgrades {
         }
 
         if (slot == SlotEquip.Weapon) {
-            ItemData exampleWeapon = reforgedItems.get(SlotEquip.Weapon)[0];
+            FullItemData exampleWeapon = reforgedItems.get(SlotEquip.Weapon)[0];
             if (extraItem.slot() != exampleWeapon.slot()) {
                 OutputText.println("WRONG WEAPON TYPE " + extraItem.toStringExtended());
                 return false;

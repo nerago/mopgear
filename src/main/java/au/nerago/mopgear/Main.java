@@ -277,11 +277,11 @@ public class Main {
         // CHALLENGE MODE SET
 
         List<EquippedItem> itemIds = InputGearParser.readInput(DataLocation.gearRetFile);
-        List<ItemData> inputSetItems = ItemLoadUtil.loadItems(itemIds, true);
+        List<FullItemData> inputSetItems = ItemLoadUtil.loadItems(itemIds, true);
 
         OutputText.println("FINDING EXPECTED REFORGE IN RAID RET");
         EquipOptionsMap raidMap = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, commonFixedItems());
-        ItemSet raidSet = chooseEngineAndRun(model, raidMap, null, null).orElseThrow();
+        FullItemSet raidSet = chooseEngineAndRun(model, raidMap, null, null).orElseThrow();
         OutputText.println("FOUND REFORGE RAID RET");
         outputResultSimple(Optional.of(raidSet), model, false);
 
@@ -300,7 +300,7 @@ public class Main {
                 89526, 82822, 82814
         };
 
-        Function<ItemData, ItemData> customiseItem = extraItem -> {
+        Function<FullItemData, FullItemData> customiseItem = extraItem -> {
 //            if (extraItem.id == 82812) { // Pyretic Legguards
 //                return extraItem.changeFixed(new StatBlock(285, 0, 0, 165, 160, 160 + 60, 0, 0, 0, 0));
 //            } else if (extraItem.id == 81284) { // Anchoring Sabatons
@@ -330,7 +330,7 @@ public class Main {
             ReforgeRecipe reforge = null;
             if (presetReforge.containsKey(extraId))
                 reforge = presetReforge.get(extraId).getFirst();
-            ItemData extraItem = addExtra(map, model, extraId, 0, customiseItem, reforge, false, false, false);
+            FullItemData extraItem = addExtra(map, model, extraId, 0, customiseItem, reforge, false, false, false);
             if (extraItem != null)
                 OutputText.println("EXTRA " + extraItem);
         }
@@ -344,23 +344,23 @@ public class Main {
         job.forceRandom = true;
         job.forcedRunSized = BILLION;
         JobOutput output = Solver.runJob(job);
-        ItemSet bestScaledSet = output.getFinalResultSet().orElseThrow();
+        FullItemSet bestScaledSet = output.getFinalResultSet().orElseThrow();
 
         OutputText.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
         outputResultSimple(Optional.of(bestScaledSet), model, true);
 
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData scaledChoice = bestScaledSet.items().get(slot);
+            FullItemData scaledChoice = bestScaledSet.items().get(slot);
             if (scaledChoice != null) {
-                ItemData[] options = map.get(slot);
+                FullItemData[] options = map.get(slot);
                 boolean inRaidDPSSet = inputSetItems.stream().anyMatch(x -> x.itemId() == scaledChoice.itemId());
 
                 if (inRaidDPSSet) {
                     // need exact item + forge but prescale
                     // note were using id match only, scaled stuff could confused normal "exact" match
                     // avoid engineering heads mixup
-                    ItemData match = ArrayUtil.findOne(options, x -> x.itemId() == scaledChoice.itemId() && Objects.equals(x.reforge, scaledChoice.reforge));
-                    options = new ItemData[]{match};
+                    FullItemData match = ArrayUtil.findOne(options, x -> x.itemId() == scaledChoice.itemId() && Objects.equals(x.reforge, scaledChoice.reforge));
+                    options = new FullItemData[]{match};
                 } else {
                     options = ArrayUtil.allMatch(options, x -> x.itemId() == scaledChoice.itemId());
                 }
@@ -370,7 +370,7 @@ public class Main {
         }
 
         ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsHitExpertise.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus());
-        Optional<ItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null);
+        Optional<FullItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null);
 
         OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
         outputResultSimple(bestSetFinal, model, true);
@@ -381,9 +381,9 @@ public class Main {
         ModelCombined modelProt = ModelCombined.defenceProtModel();
 
         OutputText.println("RET GEAR CURRENT");
-        List<ItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), true);
+        List<FullItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), true);
         OutputText.println("PROT GEAR CURRENT");
-        List<ItemData> protItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), true);
+        List<FullItemData> protItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), true);
 
         Map<SlotEquip, ReforgeRecipe> reforgeRet = new EnumMap<>(SlotEquip.class);
         reforgeRet.put(SlotEquip.Head, new ReforgeRecipe(null, null));
@@ -421,10 +421,10 @@ public class Main {
         reforgeProt.put(SlotEquip.Offhand, new ReforgeRecipe(StatType.Parry, StatType.Hit));
 
         EquipMap retForgedItems = ItemMapUtil.chosenItemsReforgedToMap(retItems, reforgeRet);
-        ItemSet retSet = ItemSet.manyItems(retForgedItems, null);
+        FullItemSet retSet = FullItemSet.manyItems(retForgedItems, null);
 
         EquipMap protForgedItems = ItemMapUtil.chosenItemsReforgedToMap(protItems, reforgeProt);
-        ItemSet protSet = ItemSet.manyItems(protForgedItems, null);
+        FullItemSet protSet = FullItemSet.manyItems(protForgedItems, null);
 
         retSet.outputSet(modelRet);
         OutputText.println("---------------------" + (modelRet.calcRating(retSet) + modelProt.calcRating(protSet)));

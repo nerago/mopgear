@@ -1,7 +1,7 @@
 package au.nerago.mopgear.permute;
 
 import au.nerago.mopgear.domain.EquipOptionsMap;
-import au.nerago.mopgear.domain.ItemSet;
+import au.nerago.mopgear.domain.FullItemSet;
 import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.model.ModelCombined;
@@ -72,7 +72,7 @@ public class Solver {
         return output;
     }
 
-    public static Optional<ItemSet> chooseEngineAndRun(ModelCombined model, EquipOptionsMap itemOptions, Instant startTime, StatBlock adjustment) {
+    public static Optional<FullItemSet> chooseEngineAndRun(ModelCombined model, EquipOptionsMap itemOptions, Instant startTime, StatBlock adjustment) {
         JobInput job = new JobInput();
         job.model = model;
         job.setItemOptions(itemOptions);

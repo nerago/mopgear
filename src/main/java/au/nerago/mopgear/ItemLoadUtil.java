@@ -36,7 +36,7 @@ public class ItemLoadUtil {
 
     public static EquipOptionsMap readAndLoad(boolean detailedOutput, Path file, ReforgeRules rules, Map<Integer, List<ReforgeRecipe>> presetForge) {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
-        List<ItemData> items = loadItems(itemIds, detailedOutput);
+        List<FullItemData> items = loadItems(itemIds, detailedOutput);
         EquipOptionsMap result = presetForge != null
                 ? ItemMapUtil.limitedItemsReforgedToMap(rules, items, presetForge)
                 : ItemMapUtil.standardItemsReforgedToMap(rules, items);
@@ -48,24 +48,24 @@ public class ItemLoadUtil {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
         for (EquippedItem equippedItem : itemIds) {
             int id = equippedItem.itemId();
-            ItemData item = WowHead.fetchItem(id);
+            FullItemData item = WowHead.fetchItem(id);
             itemCache.put(item);
         }
         itemCache.cacheSave();
     }
 
-    public static List<ItemData> loadItems(List<EquippedItem> itemIds, boolean detailedOutput) {
-        List<ItemData> items = new ArrayList<>();
+    public static List<FullItemData> loadItems(List<EquippedItem> itemIds, boolean detailedOutput) {
+        List<FullItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
-            ItemData item = loadItem(equippedItem, detailedOutput);
+            FullItemData item = loadItem(equippedItem, detailedOutput);
             items.add(item);
         }
         return items;
     }
 
-    public static ItemData loadItem(EquippedItem equippedItem, boolean detailedOutput) {
+    public static FullItemData loadItem(EquippedItem equippedItem, boolean detailedOutput) {
         int id = equippedItem.itemId(), upgrade = equippedItem.upgradeStep();
-        ItemData item = loadItemBasic(id, upgrade);
+        FullItemData item = loadItemBasic(id, upgrade);
 
         if (equippedItem.gems().length > 0) {
             StatBlock gemStat = GemData.process(equippedItem.gems(), item.shared.socketBonus(), item.shared.name());
@@ -91,9 +91,9 @@ public class ItemLoadUtil {
         return item;
     }
 
-    public static ItemData loadItemBasic(int itemId, int upgradeLevel) {
+    public static FullItemData loadItemBasic(int itemId, int upgradeLevel) {
         ItemCache itemCache = ItemCache.instance;
-        ItemData item = itemCache.get(itemId, upgradeLevel);
+        FullItemData item = itemCache.get(itemId, upgradeLevel);
         if (item == null) {
             throw new RuntimeException("dont use this please, prefer wowsim data");
 //            item = WowHead.fetchItem(itemId);
@@ -125,7 +125,7 @@ public class ItemLoadUtil {
         itemMap.forEachValue(array -> ArrayUtil.mapInPlace(array, item -> defaultEnchants(item, model, force)));
     }
 
-    public static ItemData defaultEnchants(ItemData item, ModelCombined model, boolean force) {
+    public static FullItemData defaultEnchants(FullItemData item, ModelCombined model, boolean force) {
         if (item.slot() == SlotItem.Trinket) {
             return item;
         }

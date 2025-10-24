@@ -1,6 +1,6 @@
 package au.nerago.mopgear.io;
 
-import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.FullItemData;
 import au.nerago.mopgear.domain.SlotItem;
 import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class WowHead {
-    public static ItemData fetchItem(int itemId) {
+    public static FullItemData fetchItem(int itemId) {
         String url = "https://www.wowhead.com/mop-classic/item=" + itemId;
         String htmlContent = fetchHTML(url);
 
@@ -55,7 +55,7 @@ public class WowHead {
 
             int itemLevel = readItemLevel(htmlContent);
 
-            ItemData item = buildItem(itemObject, itemId, itemLevel);
+            FullItemData item = buildItem(itemObject, itemId, itemLevel);
             OutputText.println(item.toString());
             if (item.statBase.isEmpty())
                 OutputText.println("WARNWARNWARN item has no stats " + item);
@@ -94,7 +94,7 @@ public class WowHead {
 //    "jsonequip":{"appearances":{"0":[104069,""]},"armor":2995,"buyprice":946846,"classes":2,"displayid":104069,"dura":100,"exprtng":277,"hitrtng":237,"itemset":1064,"nsockets":2,"races":2099199,"reqlevel":85,"sellprice":189369,"slotbak":1,"socket1":1,"socket2":2,"socketbonus":4158,"sta":646,"str":371},
 //    "attainable":0,"flags2":134242304,"displayName":"","qualityTier":0}
 
-    private static ItemData buildItem(JsonObject itemObject, int itemId, int itemLevel) {
+    private static FullItemData buildItem(JsonObject itemObject, int itemId, int itemLevel) {
         String name = objectGetString(itemObject, "name_enus");
         Objects.requireNonNull(name);
 
@@ -125,7 +125,7 @@ public class WowHead {
         }
         SocketType[] socketArray = sockets.toArray(SocketType[]::new);
 
-        return ItemData.buildFromWowHead(itemId, slot, name, statBlock, socketArray, socketBonusBlock, itemLevel);
+        return FullItemData.buildFromWowHead(itemId, slot, name, statBlock, socketArray, socketBonusBlock, itemLevel);
     }
 
     @SuppressWarnings("SameParameterValue")

@@ -22,7 +22,7 @@ public class JobInput {
     public long forcedRunSized;
     public boolean singleThread;
 
-    public ItemData extraItem;
+    public FullItemData extraItem;
     public int cost;
     public Predicate<SolvableItemSet> specialFilter;
 

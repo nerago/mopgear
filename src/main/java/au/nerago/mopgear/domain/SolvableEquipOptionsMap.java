@@ -47,7 +47,7 @@ public record SolvableEquipOptionsMap(SolvableItem[] head,
                 copyAndCast(other.offhand));
     }
 
-    private static SolvableItem[] copyAndCast(ItemData[] array) {
+    private static SolvableItem[] copyAndCast(FullItemData[] array) {
         if (array == null)
             return null;
         return ArrayUtil.mapAsNew(array, SolvableItem::of, SolvableItem[]::new);

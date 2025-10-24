@@ -11,22 +11,22 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public final class EquipOptionsMap {
-    ItemData[] head;
-    ItemData[] neck;
-    ItemData[] shoulder;
-    ItemData[] back;
-    ItemData[] chest;
-    ItemData[] wrist;
-    ItemData[] hand;
-    ItemData[] belt;
-    ItemData[] leg;
-    ItemData[] foot;
-    ItemData[] ring1;
-    ItemData[] ring2;
-    ItemData[] trinket1;
-    ItemData[] trinket2;
-    ItemData[] weapon;
-    ItemData[] offhand;
+    FullItemData[] head;
+    FullItemData[] neck;
+    FullItemData[] shoulder;
+    FullItemData[] back;
+    FullItemData[] chest;
+    FullItemData[] wrist;
+    FullItemData[] hand;
+    FullItemData[] belt;
+    FullItemData[] leg;
+    FullItemData[] foot;
+    FullItemData[] ring1;
+    FullItemData[] ring2;
+    FullItemData[] trinket1;
+    FullItemData[] trinket2;
+    FullItemData[] weapon;
+    FullItemData[] offhand;
 
     public static EquipOptionsMap empty() {
         return new EquipOptionsMap();
@@ -55,9 +55,9 @@ public final class EquipOptionsMap {
     }
 
     private EquipOptionsMap(
-            ItemData[] head, ItemData[] neck, ItemData[] shoulder, ItemData[] back, ItemData[] chest, ItemData[] wrist,
-            ItemData[] hand, ItemData[] belt, ItemData[] leg, ItemData[] foot, ItemData[] ring1, ItemData[] ring2,
-            ItemData[] trinket1, ItemData[] trinket2, ItemData[] weapon, ItemData[] offhand) {
+            FullItemData[] head, FullItemData[] neck, FullItemData[] shoulder, FullItemData[] back, FullItemData[] chest, FullItemData[] wrist,
+            FullItemData[] hand, FullItemData[] belt, FullItemData[] leg, FullItemData[] foot, FullItemData[] ring1, FullItemData[] ring2,
+            FullItemData[] trinket1, FullItemData[] trinket2, FullItemData[] weapon, FullItemData[] offhand) {
         this.head = head;
         this.neck = neck;
         this.shoulder = shoulder;
@@ -76,7 +76,7 @@ public final class EquipOptionsMap {
         this.offhand = offhand;
     }
 
-    public ItemData[] get(SlotEquip slot) {
+    public FullItemData[] get(SlotEquip slot) {
         return switch (slot) {
             case Head -> head;
             case Neck -> neck;
@@ -118,7 +118,7 @@ public final class EquipOptionsMap {
         };
     }
 
-    public void put(SlotEquip slot, ItemData[] value) {
+    public void put(SlotEquip slot, FullItemData[] value) {
         switch (slot) {
             case Head -> head = value;
             case Neck -> neck = value;
@@ -140,8 +140,8 @@ public final class EquipOptionsMap {
         }
     }
 
-    public void put(SlotEquip slot, ItemData item) {
-        put(slot, new ItemData[]{item});
+    public void put(SlotEquip slot, FullItemData item) {
+        put(slot, new FullItemData[]{item});
     }
 
 //    public void replaceWithFirstOption(SlotEquip slot) {
@@ -188,7 +188,7 @@ public final class EquipOptionsMap {
 //        return other;
 //    }
 
-    public void forEachValue(Consumer<ItemData[]> func) {
+    public void forEachValue(Consumer<FullItemData[]> func) {
         if (head != null) func.accept(head);
         if (neck != null) func.accept(neck);
         if (shoulder != null) func.accept(shoulder);
@@ -208,7 +208,7 @@ public final class EquipOptionsMap {
     }
 
     //    @Deprecated(since = "avoid bad performance")
-    public void forEachPair(BiConsumer<SlotEquip, ItemData[]> func) {
+    public void forEachPair(BiConsumer<SlotEquip, FullItemData[]> func) {
         if (head != null) func.accept(SlotEquip.Head, head);
         if (neck != null) func.accept(SlotEquip.Neck, neck);
         if (shoulder != null) func.accept(SlotEquip.Shoulder, shoulder);
@@ -227,11 +227,11 @@ public final class EquipOptionsMap {
         if (offhand != null) func.accept(SlotEquip.Offhand, offhand);
     }
 
-    public Stream<Tuple.Tuple2<SlotEquip, ItemData[]>> entryStream() {
+    public Stream<Tuple.Tuple2<SlotEquip, FullItemData[]>> entryStream() {
         return StreamSupport.stream(new OptionsSpliterator(), true);
     }
 
-    public Stream<ItemData> itemStream() {
+    public Stream<FullItemData> itemStream() {
         return entryStream().flatMap(entry -> Arrays.stream(entry.b()));
     }
 
@@ -264,15 +264,15 @@ public final class EquipOptionsMap {
         return result;
     }
 
-    private class OptionsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, ItemData[]>> {
+    private class OptionsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, FullItemData[]>> {
         static final SlotEquip[] slotArray = SlotEquip.values();
         int index = 0;
 
         @Override
-        public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, ItemData[]>> action) {
+        public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, FullItemData[]>> action) {
             while (index < slotArray.length) {
                 SlotEquip slot = slotArray[index++];
-                ItemData[] value = EquipOptionsMap.this.get(slot);
+                FullItemData[] value = EquipOptionsMap.this.get(slot);
                 if (value != null) {
                     action.accept(Tuple.create(slot, value));
                     return true;
@@ -282,7 +282,7 @@ public final class EquipOptionsMap {
         }
 
         @Override
-        public Spliterator<Tuple.Tuple2<SlotEquip, ItemData[]>> trySplit() {
+        public Spliterator<Tuple.Tuple2<SlotEquip, FullItemData[]>> trySplit() {
             return null;
         }
 

@@ -13,28 +13,28 @@ import java.util.stream.StreamSupport;
 
 @SuppressWarnings("unused")
 public final class EquipMap implements IEquipMap {
-    private ItemData head;
-    private ItemData neck;
-    private ItemData shoulder;
-    private ItemData back;
-    private ItemData chest;
-    private ItemData wrist;
-    private ItemData hand;
-    private ItemData belt;
-    private ItemData leg;
-    private ItemData foot;
-    private ItemData ring1;
-    private ItemData ring2;
-    private ItemData trinket1;
-    private ItemData trinket2;
-    private ItemData weapon;
-    private ItemData offhand;
+    private FullItemData head;
+    private FullItemData neck;
+    private FullItemData shoulder;
+    private FullItemData back;
+    private FullItemData chest;
+    private FullItemData wrist;
+    private FullItemData hand;
+    private FullItemData belt;
+    private FullItemData leg;
+    private FullItemData foot;
+    private FullItemData ring1;
+    private FullItemData ring2;
+    private FullItemData trinket1;
+    private FullItemData trinket2;
+    private FullItemData weapon;
+    private FullItemData offhand;
 
     public static EquipMap empty() {
         return new EquipMap();
     }
 
-    public static EquipMap single(SlotEquip slot, ItemData item) {
+    public static EquipMap single(SlotEquip slot, FullItemData item) {
         EquipMap map = new EquipMap();
         map.put(slot, item);
         return map;
@@ -62,7 +62,7 @@ public final class EquipMap implements IEquipMap {
         this.offhand = other.offhand;
     }
 
-    public EquipMap(SolvableEquipMap other, Function<SolvableItem, ItemData> itemConverter) {
+    public EquipMap(SolvableEquipMap other, Function<SolvableItem, FullItemData> itemConverter) {
         this.head = itemConverter.apply(other.head);
         this.neck = itemConverter.apply(other.neck);
         this.shoulder = itemConverter.apply(other.shoulder);
@@ -81,7 +81,7 @@ public final class EquipMap implements IEquipMap {
         this.offhand = itemConverter.apply(other.offhand);
     }
 
-    public ItemData get(SlotEquip slot) {
+    public FullItemData get(SlotEquip slot) {
         return switch (slot) {
             case Head -> head;
             case Neck -> neck;
@@ -123,7 +123,7 @@ public final class EquipMap implements IEquipMap {
         };
     }
 
-    public void put(SlotEquip slot, ItemData value) {
+    public void put(SlotEquip slot, FullItemData value) {
         switch (slot) {
             case Head -> head = value;
             case Neck -> neck = value;
@@ -150,13 +150,13 @@ public final class EquipMap implements IEquipMap {
         return new EquipMap(this);
     }
 
-    public EquipMap copyWithReplace(SlotEquip slot, ItemData replace) {
+    public EquipMap copyWithReplace(SlotEquip slot, FullItemData replace) {
         EquipMap other = new EquipMap(this);
         other.put(slot, replace);
         return other;
     }
 
-    public void forEachValue(Consumer<ItemData> func) {
+    public void forEachValue(Consumer<FullItemData> func) {
         if (head != null) func.accept(head);
         if (neck != null) func.accept(neck);
         if (shoulder != null) func.accept(shoulder);
@@ -175,7 +175,7 @@ public final class EquipMap implements IEquipMap {
         if (offhand != null) func.accept(offhand);
     }
 
-    public void forEachPair(BiConsumer<SlotEquip, ItemData> func) {
+    public void forEachPair(BiConsumer<SlotEquip, FullItemData> func) {
         if (head != null) func.accept(SlotEquip.Head, head);
         if (neck != null) func.accept(SlotEquip.Neck, neck);
         if (shoulder != null) func.accept(SlotEquip.Shoulder, shoulder);
@@ -194,67 +194,67 @@ public final class EquipMap implements IEquipMap {
         if (offhand != null) func.accept(SlotEquip.Offhand, offhand);
     }
 
-    public ItemData getHead() {
+    public FullItemData getHead() {
         return head;
     }
 
-    public ItemData getNeck() {
+    public FullItemData getNeck() {
         return neck;
     }
 
-    public ItemData getShoulder() {
+    public FullItemData getShoulder() {
         return shoulder;
     }
 
-    public ItemData getBack() {
+    public FullItemData getBack() {
         return back;
     }
 
-    public ItemData getChest() {
+    public FullItemData getChest() {
         return chest;
     }
 
-    public ItemData getWrist() {
+    public FullItemData getWrist() {
         return wrist;
     }
 
-    public ItemData getHand() {
+    public FullItemData getHand() {
         return hand;
     }
 
-    public ItemData getBelt() {
+    public FullItemData getBelt() {
         return belt;
     }
 
-    public ItemData getLeg() {
+    public FullItemData getLeg() {
         return leg;
     }
 
-    public ItemData getFoot() {
+    public FullItemData getFoot() {
         return foot;
     }
 
-    public ItemData getRing1() {
+    public FullItemData getRing1() {
         return ring1;
     }
 
-    public ItemData getRing2() {
+    public FullItemData getRing2() {
         return ring2;
     }
 
-    public ItemData getTrinket1() {
+    public FullItemData getTrinket1() {
         return trinket1;
     }
 
-    public ItemData getTrinket2() {
+    public FullItemData getTrinket2() {
         return trinket2;
     }
 
-    public ItemData getWeapon() {
+    public FullItemData getWeapon() {
         return weapon;
     }
 
-    public ItemData getOffhand() {
+    public FullItemData getOffhand() {
         return offhand;
     }
 
@@ -271,19 +271,19 @@ public final class EquipMap implements IEquipMap {
         return Objects.hash(head, neck, shoulder, back, chest, wrist, hand, belt, leg, foot, ring1, ring2, trinket1, trinket2, weapon, offhand);
     }
 
-    public Stream<Tuple.Tuple2<SlotEquip, ItemData>> entryStream() {
+    public Stream<Tuple.Tuple2<SlotEquip, FullItemData>> entryStream() {
         return StreamSupport.stream(new ItemsSpliterator(), true);
     }
 
-    private class ItemsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, ItemData>> {
+    private class ItemsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, FullItemData>> {
         static final SlotEquip[] slotArray = SlotEquip.values();
         int index = 0;
 
         @Override
-        public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, ItemData>> action) {
+        public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, FullItemData>> action) {
             while (index < slotArray.length) {
                 SlotEquip slot = slotArray[index++];
-                ItemData value = EquipMap.this.get(slot);
+                FullItemData value = EquipMap.this.get(slot);
                 if (value != null) {
                     action.accept(Tuple.create(slot, value));
                     return true;
@@ -293,7 +293,7 @@ public final class EquipMap implements IEquipMap {
         }
 
         @Override
-        public Spliterator<Tuple.Tuple2<SlotEquip, ItemData>> trySplit() {
+        public Spliterator<Tuple.Tuple2<SlotEquip, FullItemData>> trySplit() {
             return null;
         }
 

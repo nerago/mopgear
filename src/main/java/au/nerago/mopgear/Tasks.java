@@ -42,7 +42,7 @@ public class Tasks {
                 .forEach(item -> {
                     item = ItemLoadUtil.defaultEnchants(item, model, true);
                     SlotEquip[] slotOptions = item.slot().toSlotEquipOptions();
-                    ItemData[] reforged = Reforger.reforgeItem(model.reforgeRules(), item);
+                    FullItemData[] reforged = Reforger.reforgeItem(model.reforgeRules(), item);
                     for (SlotEquip slot : slotOptions) {
                         optionsMap.put(slot, ArrayUtil.concatNullSafe(optionsMap.get(slot), reforged));
                     }
@@ -71,7 +71,7 @@ public class Tasks {
                 .forEach(item -> {
                     item = ItemLoadUtil.defaultEnchants(item, model, true);
                     SlotEquip[] slotOptions = item.slot().toSlotEquipOptions();
-                    ItemData[] reforged = Reforger.reforgeItemBest(model, item);
+                    FullItemData[] reforged = Reforger.reforgeItemBest(model, item);
 //                    ItemData[] reforged = new ItemData[] { item };
                     for (SlotEquip slot : slotOptions) {
                         optionsMap.put(slot, ArrayUtil.concatNullSafe(optionsMap.get(slot), reforged));
@@ -81,7 +81,7 @@ public class Tasks {
         optionsMap.entryStream().forEach(
                 tuple -> {
                     SlotEquip slot = tuple.a();
-                    ItemData[] options = tuple.b();
+                    FullItemData[] options = tuple.b();
 //                    OutputText.printf("##### %s #####\n", slot);
                     Arrays.stream(options).sorted(Comparator.comparingLong(model::calcRating))
                             .forEach(item ->
@@ -97,17 +97,17 @@ public class Tasks {
     }
 
     public static void rankAlternativeCombos(EquipOptionsMap baseOptions, ModelCombined model, Instant startTime, List<List<Integer>> comboListList) {
-        BestHolder<List<ItemData>> best = new BestHolder<>();
+        BestHolder<List<FullItemData>> best = new BestHolder<>();
         for (List<Integer> combo : comboListList) {
-            Function<ItemData, ItemData> enchants = t -> ItemLoadUtil.defaultEnchants(t, model, true);
+            Function<FullItemData, FullItemData> enchants = t -> ItemLoadUtil.defaultEnchants(t, model, true);
             EquipOptionsMap submitMap = baseOptions.deepClone();
-            List<ItemData> optionItems = new ArrayList<>();
+            List<FullItemData> optionItems = new ArrayList<>();
             for (int extraId : combo) {
-                ItemData item = addExtra(submitMap, model, extraId, 0, enchants, null, true, true, true);
+                FullItemData item = addExtra(submitMap, model, extraId, 0, enchants, null, true, true, true);
                 optionItems.add(item);
             }
 
-            ItemSet set = Solver.chooseEngineAndRun(model, submitMap, null, null).orElseThrow();
+            FullItemSet set = Solver.chooseEngineAndRun(model, submitMap, null, null).orElseThrow();
             set.outputSet(model);
             long rating = model.calcRating(set);
             OutputText.println("RATING " + rating);
@@ -126,7 +126,7 @@ public class Tasks {
         job.runSizeMultiply = 8;
         job.config(model, itemOptions, startTime, null);
         JobOutput output = Solver.runJob(job);
-        Optional<ItemSet> resultSet = output.getFinalResultSet();
+        Optional<FullItemSet> resultSet = output.getFinalResultSet();
 
         outputResultSimple(resultSet, model, true);
         outputReforgeJson(resultSet);
@@ -135,9 +135,9 @@ public class Tasks {
 
     @SuppressWarnings("SameParameterValue")
     public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
-        ItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
+        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
 
-        Function<ItemData, ItemData> enchanting = defaultEnchants ? x -> ItemLoadUtil.defaultEnchants(x, model, true) : Function.identity();
+        Function<FullItemData, FullItemData> enchanting = defaultEnchants ? x -> ItemLoadUtil.defaultEnchants(x, model, true) : Function.identity();
         if (slot == null)
             slot = extraItem.slot().toSlotEquip();
 
@@ -150,7 +150,7 @@ public class Tasks {
         job.config(model, runItems, startTime, adjustment);
         job.runSizeMultiply = 8;
         JobOutput output = Solver.runJob(job);
-        Optional<ItemSet> resultSet = output.getFinalResultSet();
+        Optional<FullItemSet> resultSet = output.getFinalResultSet();
 
         outputResultSimple(resultSet, model, true);
         if (resultSet.isEmpty()) {
@@ -158,33 +158,33 @@ public class Tasks {
         }
     }
 
-    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
-        ItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
+    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, Function<FullItemData, FullItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
         return addExtra(reforgedItems, model, extraItem, customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
     }
 
-    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
-        ItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
+    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, Function<FullItemData, FullItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
         return addExtra(reforgedItems, model, extraItem, slot, customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
     }
 
-    public static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, ItemData extraItem, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, FullItemData extraItem, Function<FullItemData, FullItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         return addExtra(reforgedItems, model, extraItem, extraItem.slot().toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
     }
 
     @Nullable
-    private static ItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, ItemData extraItem, SlotEquip slot, Function<ItemData, ItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+    private static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, FullItemData extraItem, SlotEquip slot, Function<FullItemData, FullItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
         extraItem = customiseItem.apply(extraItem);
         ItemRef ref = extraItem.ref();
-        ItemData[] existing = reforgedItems.get(slot);
+        FullItemData[] existing = reforgedItems.get(slot);
 
         if (slot == SlotEquip.Weapon && existing != null && extraItem.slot() != existing[0].slot()) {
             OutputText.println("WRONG WEAPON " + extraItem);
             return null;
         }
 
-        ItemData[] extraForged = reforge != null ?
-                new ItemData[]{Reforger.presetReforge(extraItem, reforge)} :
+        FullItemData[] extraForged = reforge != null ?
+                new FullItemData[]{Reforger.presetReforge(extraItem, reforge)} :
                 Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
         if (replace) {
@@ -200,7 +200,7 @@ public class Tasks {
             reforgedItems.put(slot, ArrayUtil.concatNullSafe(existing, extraForged));
         }
 
-        ItemData[] slotArray = reforgedItems.get(slot);
+        FullItemData[] slotArray = reforgedItems.get(slot);
         if (customiseOthersInSlot) {
             ArrayUtil.mapInPlace(slotArray, customiseItem);
         }
@@ -216,14 +216,14 @@ public class Tasks {
 
     @SuppressWarnings("SameParameterValue")
     public static void reforgeProcessPlusPlus(EquipOptionsMap runItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2, int upgradeLevel, boolean replace, StatBlock adjustment) {
-        Function<ItemData, ItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
+        Function<FullItemData, FullItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
 //        Function<ItemData, ItemData> enchant2 = x -> x.changeFixed(new StatBlock(285,90,0,165,0,0,320,0,0,0));
 
-        ItemData extraItem1 = addExtra(runItems, model, extraItemId1, upgradeLevel, enchant, null, replace, true, true);
+        FullItemData extraItem1 = addExtra(runItems, model, extraItemId1, upgradeLevel, enchant, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem1);
         OutputText.println();
 
-        ItemData extraItem2 = addExtra(runItems, model, extraItemId2, upgradeLevel, enchant, null, replace, true, true);
+        FullItemData extraItem2 = addExtra(runItems, model, extraItemId2, upgradeLevel, enchant, null, replace, true, true);
         OutputText.println("EXTRA " + extraItem2);
         OutputText.println();
 
@@ -232,7 +232,7 @@ public class Tasks {
         job.runSizeMultiply = 16;
         job.printRecorder.outputImmediate = true;
         JobOutput output = Solver.runJob(job);
-        Optional<ItemSet> resultSet = output.getFinalResultSet();
+        Optional<FullItemSet> resultSet = output.getFinalResultSet();
 
         outputResultSimple(resultSet, model, true);
         if (resultSet.isEmpty()) {
@@ -241,14 +241,14 @@ public class Tasks {
     }
 
     public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel) {
-        Function<ItemData, ItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
+        Function<FullItemData, FullItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
 
         for (CostedItem entry : extraItems) {
             int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
-            ItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
+            FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
             for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
-                ItemData[] existing = items.get(slot);
+                FullItemData[] existing = items.get(slot);
                 if (existing == null) {
                     OutputText.println("SKIP SLOT NOT NEEDED " + extraItem);
                 } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(extraItem.ref()))) {
@@ -267,20 +267,20 @@ public class Tasks {
         job.runSizeMultiply = 12;
         JobOutput output = Solver.runJob(job);
         job.printRecorder.outputNow();
-        Optional<ItemSet> resultSet = output.getFinalResultSet();
+        Optional<FullItemSet> resultSet = output.getFinalResultSet();
         outputResultSimple(resultSet, model, true);
     }
 
     public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, List<EquippedItem> extraItems) {
-        Function<ItemData, ItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
+        Function<FullItemData, FullItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
 
         EquipOptionsMap itemsOriginal = items.deepClone();
 
         for (EquippedItem entry : extraItems) {
             if (SourcesOfItems.ignoredItems.contains(entry.itemId())) continue;
-            ItemData extraItem = ItemLoadUtil.loadItem(entry, true);
+            FullItemData extraItem = ItemLoadUtil.loadItem(entry, true);
             for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
-                ItemData[] existing = items.get(slot);
+                FullItemData[] existing = items.get(slot);
                 if (existing == null) {
                     OutputText.println("SKIP SLOT NOT NEEDED " + extraItem);
                 } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(extraItem.ref()))) {
@@ -299,11 +299,11 @@ public class Tasks {
         job.runSizeMultiply = 20;
         JobOutput output = Solver.runJob(job);
         job.printRecorder.outputNow();
-        ItemSet best = output.getFinalResultSet().orElseThrow();
+        FullItemSet best = output.getFinalResultSet().orElseThrow();
         outputResultChanges(itemsOriginal, best, model);
     }
 
-    public static void outputResultSimple(Optional<ItemSet> bestSet, ModelCombined model, boolean detailedOutput) {
+    public static void outputResultSimple(Optional<FullItemSet> bestSet, ModelCombined model, boolean detailedOutput) {
         if (bestSet.isPresent()) {
             if (detailedOutput) {
                 bestSet.get().outputSetDetailed(model);
@@ -316,14 +316,14 @@ public class Tasks {
         }
     }
 
-    private static void outputResultChanges(EquipOptionsMap baseline, ItemSet best, ModelCombined model) {
+    private static void outputResultChanges(EquipOptionsMap baseline, FullItemSet best, ModelCombined model) {
         best.outputSetDetailed(model);
         best.outputSetLight();
 
         OutputText.println("CHANGES vvvvvvvvvvvvvvv CHANGES");
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] options = baseline.get(slot);
-            ItemData choice = best.items().get(slot);
+            FullItemData[] options = baseline.get(slot);
+            FullItemData choice = best.items().get(slot);
             if (choice != null) {
                 boolean existing = ArrayUtil.anyMatch(options, x -> x.ref().equalsTyped(choice.ref()));
                 if (existing)
@@ -334,7 +334,7 @@ public class Tasks {
         }
     }
 
-    private static void outputReforgeJson(Optional<ItemSet> resultSet) {
+    private static void outputReforgeJson(Optional<FullItemSet> resultSet) {
         AsWowSimJson.writeToOut(resultSet.orElseThrow().items());
     }
 
@@ -380,8 +380,8 @@ public class Tasks {
 //        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
 
 //        multi.addFixedForge(86979, new ReforgeRecipe(Hit, Expertise)); // Foot Impaling Treads (Hit->Expertise)
-        multi.addFixedForge(87100, ReforgeRecipe.empty()); // Hand White Tiger Gauntlets
-        multi.addFixedForge(87026, ReforgeRecipe.empty()); // Back Cloak of Peacock Feathers
+//        multi.addFixedForge(87100, ReforgeRecipe.empty()); // Hand White Tiger Gauntlets
+//        multi.addFixedForge(87026, ReforgeRecipe.empty()); // Back Cloak of Peacock Feathers
         multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
         multi.addFixedForge(86957, ReforgeRecipe.empty()); // Ring Ring of the Bladed Tempest
 
@@ -476,8 +476,8 @@ public class Tasks {
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(3000);
-        multi.solve(50000);
-//        multi.solve(600000);
+//        multi.solve(50000);
+        multi.solve(600000);
 //        multi.solve(4000000);
     }
 
@@ -533,7 +533,7 @@ public class Tasks {
         jobOne.model = model;
         jobOne.setItemOptions(optionsOne);
         JobOutput outputOne = Solver.runJob(jobOne);
-        Optional<ItemSet> resultOne = outputOne.getFinalResultSet();
+        Optional<FullItemSet> resultOne = outputOne.getFinalResultSet();
 
         OutputText.println("111111111111111111111111111111111111");
         resultOne.orElseThrow().outputSetDetailed(model);
@@ -545,7 +545,7 @@ public class Tasks {
         jobTwo.model = model;
         jobTwo.setItemOptions(optionsTwo);
         JobOutput outputTwo = Solver.runJob(jobTwo);
-        Optional<ItemSet> resultTwo = outputTwo.getFinalResultSet();
+        Optional<FullItemSet> resultTwo = outputTwo.getFinalResultSet();
 
         OutputText.println("22222222222222222222222222222222222222");
         resultTwo.orElseThrow().outputSetDetailed(model);
@@ -610,7 +610,7 @@ public class Tasks {
         job.model = model;
         job.setItemOptions(items);
         JobOutput output = Solver.runJob(job);
-        ItemSet set = output.getFinalResultSet().orElseThrow();
+        FullItemSet set = output.getFinalResultSet().orElseThrow();
         return model.calcRating(set);
     }
 }

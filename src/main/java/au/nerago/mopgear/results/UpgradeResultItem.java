@@ -1,6 +1,6 @@
 package au.nerago.mopgear.results;
 
-import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.FullItemData;
 
-public record UpgradeResultItem(ItemData item, double factor, int hackCount, int cost) {
+public record UpgradeResultItem(FullItemData item, double factor, int hackCount, int cost) {
 }

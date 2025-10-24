@@ -13,7 +13,7 @@ import static au.nerago.mopgear.domain.StatType.*;
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
                             DefaultEnchants enchants, SetBonus setBonus) {
 
-    public long calcRating(ItemSet set) {
+    public long calcRating(FullItemSet set) {
         long value = statRatings.calcRating(set.totalForRating());
         value = value * setBonus.calc(set) / SetBonus.DENOMIATOR;
         return value;
@@ -29,7 +29,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return statRatings.calcRating(it.totalRated());
     }
 
-    public long calcRating(ItemData it) {
+    public long calcRating(FullItemData it) {
         return statRatings.calcRating(it.totalRated());
     }
 

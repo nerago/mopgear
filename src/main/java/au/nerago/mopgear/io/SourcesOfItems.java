@@ -555,7 +555,7 @@ public class SourcesOfItems {
     public static CostedItem[] strengthPlateCurrentItemsProtAllUpgradable() {
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDefenceFile, ReforgeRules.prot(), null);
         Stream<CostedItem> itemStream = items.itemStream()
-                .filter(ItemData::isUpgradable)
+                .filter(FullItemData::isUpgradable)
                 .map(item -> new CostedItem(item.itemId(), 0))
                 .distinct();
         return itemStream.toArray(CostedItem[]::new);

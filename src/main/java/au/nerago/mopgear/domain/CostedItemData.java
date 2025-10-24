@@ -1,4 +1,4 @@
 package au.nerago.mopgear.domain;
 
-public record CostedItemData(ItemData item, int cost) {
+public record CostedItemData(FullItemData item, int cost) {
 }

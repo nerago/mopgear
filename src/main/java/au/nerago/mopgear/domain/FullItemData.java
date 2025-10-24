@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public final class ItemData implements IItem {
+public final class FullItemData implements IItem {
     @NotNull
     public final ItemShared shared;
     @NotNull
@@ -19,8 +19,8 @@ public final class ItemData implements IItem {
     @NotNull
     public final StatBlock totalRated;
 
-    private ItemData(@NotNull ItemShared shared, @NotNull ReforgeRecipe reforge,
-                     @NotNull StatBlock statBase, @NotNull StatBlock statEnchant) {
+    private FullItemData(@NotNull ItemShared shared, @NotNull ReforgeRecipe reforge,
+                         @NotNull StatBlock statBase, @NotNull StatBlock statEnchant) {
         this.shared = shared;
         this.reforge = reforge;
         this.statBase = statBase;
@@ -36,39 +36,39 @@ public final class ItemData implements IItem {
         }
     }
 
-    public static ItemData buildFromWowSim(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
+    public static FullItemData buildFromWowSim(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
         ItemShared shared = ItemSharedCache.get(ref, slot, name, socketSlots, socketBonus);
-        return new ItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
+        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
     }
 
-    public static ItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
+    public static FullItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
         ItemRef ref = ItemRef.buildBasic(id, itemLevel);
         ItemShared shared = ItemSharedCache.get(ref, slot, name, socketSlots, socketBonus);
-        return new ItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
+        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
     }
 
-    public ItemData changeForReforge(@NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
-        return new ItemData(shared, recipe, changedStats, statEnchant);
+    public FullItemData changeForReforge(@NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
+        return new FullItemData(shared, recipe, changedStats, statEnchant);
     }
 
-    public ItemData changeStatsBase(@NotNull StatBlock changedStats) {
-        return new ItemData(shared, reforge, changedStats, statEnchant);
+    public FullItemData changeStatsBase(@NotNull StatBlock changedStats) {
+        return new FullItemData(shared, reforge, changedStats, statEnchant);
     }
 
-    public ItemData changeEnchant(@NotNull StatBlock changedEnchant) {
-        return new ItemData(shared, reforge, statBase, changedEnchant);
+    public FullItemData changeEnchant(@NotNull StatBlock changedEnchant) {
+        return new FullItemData(shared, reforge, statBase, changedEnchant);
     }
 
-    public ItemData changeDuplicate(int dupNum) {
+    public FullItemData changeDuplicate(int dupNum) {
         ItemRef changeRef = ref().changeDuplicate(dupNum);
         ItemShared changeShared = ItemSharedCache.get(changeRef, shared);
-        return new ItemData(changeShared, reforge, statBase, statEnchant);
+        return new FullItemData(changeShared, reforge, statBase, statEnchant);
     }
 
-    public ItemData changeItemLevel(int itemLevel) {
+    public FullItemData changeItemLevel(int itemLevel) {
         ItemRef changeRef = ref().changeItemLevel(itemLevel);
         ItemShared changeShared = ItemSharedCache.get(changeRef, shared);
-        return new ItemData(changeShared, reforge, statBase, statEnchant);
+        return new FullItemData(changeShared, reforge, statBase, statEnchant);
     }
 
     @Override
@@ -106,11 +106,11 @@ public final class ItemData implements IItem {
         }
     }
 
-    public static boolean isSameEquippedItem(ItemData a, ItemData b) {
+    public static boolean isSameEquippedItem(FullItemData a, FullItemData b) {
         return a.shared.equalsTyped(b.shared);
     }
 
-    public static boolean isIdenticalItem(ItemData a, ItemData b) {
+    public static boolean isIdenticalItem(FullItemData a, FullItemData b) {
         return a.isIdenticalItem(b.shared.ref(), b.totalCap, b.totalRated);
     }
 
@@ -127,11 +127,11 @@ public final class ItemData implements IItem {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ItemData itemData = (ItemData) o;
+        FullItemData itemData = (FullItemData) o;
         return equalsTyped(itemData);
     }
 
-    public boolean equalsTyped(ItemData other) {
+    public boolean equalsTyped(FullItemData other) {
         return shared.equalsTyped(other.shared) && Objects.equals(reforge, other.reforge) &&
                 statBase.equalsStats(other.statBase) && statEnchant.equalsStats(other.statEnchant);
     }

@@ -17,7 +17,7 @@ public class ItemLevel {
     public static EquipOptionsMap scaleForChallengeMode(EquipOptionsMap itemMap) {
         EquipOptionsMap result = EquipOptionsMap.empty();
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData[] items = itemMap.get(slot);
+            FullItemData[] items = itemMap.get(slot);
             if (items != null) {
                 result.put(slot, ArrayUtil.mapAsNew(items, ItemLevel::scaleForChallengeMode));
             }
@@ -25,7 +25,7 @@ public class ItemLevel {
         return result;
     }
 
-    private static ItemData scaleForChallengeMode(ItemData item) {
+    private static FullItemData scaleForChallengeMode(FullItemData item) {
         int level = item.itemLevel();
         if (level <= CHALLENGE_TARGET_LEVEL) {
             return item;
@@ -35,7 +35,7 @@ public class ItemLevel {
         return scaleAll(item, factor);
     }
 
-    private static ItemData scaleAll(ItemData item, double factor) {
+    private static FullItemData scaleAll(FullItemData item, double factor) {
         StatBlock stats = scaleStatBlock(item.statBase, factor);
         if (item.slot() != SlotItem.Trinket) {
             OutputText.println("SCALED " + item.fullName() + " " + stats);
@@ -47,7 +47,7 @@ public class ItemLevel {
         }
     }
 
-    public static ItemData upgrade(ItemData item, int upgradeLevel) {
+    public static FullItemData upgrade(FullItemData item, int upgradeLevel) {
         if (upgradeLevel < 0 || upgradeLevel > 2)
             throw new IllegalArgumentException("invalid upgrade level");
 

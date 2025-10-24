@@ -12,9 +12,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class ItemMapUtil {
-    public static EquipOptionsMap standardItemsReforgedToMap(ReforgeRules rules, List<ItemData> items) {
+    public static EquipOptionsMap standardItemsReforgedToMap(ReforgeRules rules, List<FullItemData> items) {
         EquipOptionsMap map = EquipOptionsMap.empty();
-        for (ItemData item : items) {
+        for (FullItemData item : items) {
             SlotEquip slot = item.slot().toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 map.put(SlotEquip.Ring2, Reforger.reforgeItem(rules, item));
@@ -27,10 +27,10 @@ public class ItemMapUtil {
         return map;
     }
 
-    public static EquipOptionsMap limitedItemsReforgedToMap(ReforgeRules rules, List<ItemData> items,
+    public static EquipOptionsMap limitedItemsReforgedToMap(ReforgeRules rules, List<FullItemData> items,
                                                             Map<Integer, List<ReforgeRecipe>> presetForge) {
         EquipOptionsMap map = EquipOptionsMap.empty();
-        for (ItemData item : items) {
+        for (FullItemData item : items) {
             SlotEquip slot = item.slot().toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 slot = SlotEquip.Ring2;
@@ -41,9 +41,9 @@ public class ItemMapUtil {
             }
 
             if (presetForge.containsKey(item.itemId())) {
-                ItemData[] forged = presetForge.get(item.itemId()).stream()
+                FullItemData[] forged = presetForge.get(item.itemId()).stream()
                         .map(preset -> Reforger.presetReforge(item, preset))
-                        .toArray(ItemData[]::new);
+                        .toArray(FullItemData[]::new);
                 map.put(slot, forged);
             } else {
                 map.put(slot, Reforger.reforgeItem(rules, item));
@@ -52,9 +52,9 @@ public class ItemMapUtil {
         return map;
     }
 
-    public static EquipMap chosenItemsReforgedToMap(List<ItemData> items, Map<SlotEquip, ReforgeRecipe> presetForge) {
+    public static EquipMap chosenItemsReforgedToMap(List<FullItemData> items, Map<SlotEquip, ReforgeRecipe> presetForge) {
         EquipMap map = EquipMap.empty();
-        for (ItemData item : items) {
+        for (FullItemData item : items) {
             SlotEquip slot = item.slot().toSlotEquip();
             if (slot == SlotEquip.Ring1 && map.has(slot)) {
                 slot = SlotEquip.Ring2;
@@ -73,25 +73,25 @@ public class ItemMapUtil {
     public static EquipOptionsMap upgradeAllTo2(EquipOptionsMap baseItems) {
         EquipOptionsMap result = EquipOptionsMap.empty();
         baseItems.forEachPair((slot, itemArray) ->
-                result.put(slot, ArrayUtil.mapAsNew(itemArray, ItemMapUtil::upgradeItemTo2, ItemData[]::new)));
+                result.put(slot, ArrayUtil.mapAsNew(itemArray, ItemMapUtil::upgradeItemTo2, FullItemData[]::new)));
         return result;
     }
 
-    private static ItemData upgradeItemTo2(ItemData oldItem) {
+    private static FullItemData upgradeItemTo2(FullItemData oldItem) {
         if (!oldItem.isUpgradable() || oldItem.ref().upgradeLevel() == ItemLevel.MAX_UPGRADE_LEVEL) {
             return oldItem;
         }
 
-        ItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
+        FullItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
         loaded = Reforger.presetReforge(loaded, oldItem.reforge);
         return loaded.changeEnchant(oldItem.statEnchant);
     }
 
-    public static Function<SolvableItem, ItemData> mapperToFullItems(EquipOptionsMap map) {
+    public static Function<SolvableItem, FullItemData> mapperToFullItems(EquipOptionsMap map) {
         return solvableItem -> {
             if (solvableItem != null) {
                 ItemRef ref = new ItemRef(solvableItem.itemId(), solvableItem.itemLevel(), solvableItem.itemLevelBase(), solvableItem.duplicateNum());
-                Optional<ItemData> itemData = map.itemStream()
+                Optional<FullItemData> itemData = map.itemStream()
                         .filter(it -> it.isIdenticalItem(ref, solvableItem.totalCap(), solvableItem.totalRated()))
                         .findFirst();
                 return itemData.orElseThrow();

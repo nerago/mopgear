@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class WowSimDB {
-    private final Map<ItemRef, ItemData> itemMap = new HashMap<>();
+    private final Map<ItemRef, FullItemData> itemMap = new HashMap<>();
     private final Map<ReforgeRecipe, Integer> reforgeIds = new HashMap<>();
 
     // https://raw.githubusercontent.com/wowsims/mop/57251c327bbc745d1512b9c13e952f4bcf3deedb/assets/database/db.json
@@ -106,7 +106,7 @@ public class WowSimDB {
             }
 
             ItemRef ref = ItemRef.buildAdvanced(id, itemLevel, baseItemLevel);
-            ItemData item = ItemData.buildFromWowSim(ref, slot, name, block, sockets, socketBonusBlock);
+            FullItemData item = FullItemData.buildFromWowSim(ref, slot, name, block, sockets, socketBonusBlock);
             itemMap.put(item.ref(), item);
         }
     }
@@ -268,11 +268,11 @@ public class WowSimDB {
             return defaultValue;
     }
 
-    public ItemData lookupItem(ItemRef ref) {
+    public FullItemData lookupItem(ItemRef ref) {
         return itemMap.get(ref);
     }
 
-    public Stream<ItemData> itemStream() {
+    public Stream<FullItemData> itemStream() {
         return itemMap.values().stream();
     }
 

@@ -1,7 +1,7 @@
 package au.nerago.mopgear.results;
 
 import au.nerago.mopgear.ItemMapUtil;
-import au.nerago.mopgear.domain.ItemSet;
+import au.nerago.mopgear.domain.FullItemSet;
 import au.nerago.mopgear.domain.SolvableItemSet;
 
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class JobOutput {
         input.printRecorder.printf(format, args);
     }
 
-    public Optional<ItemSet> getFinalResultSet() {
-        return resultSet.map(set -> ItemSet.ofSolvable(set, ItemMapUtil.mapperToFullItems(input.fullItemOptions)));
+    public Optional<FullItemSet> getFinalResultSet() {
+        return resultSet.map(set -> FullItemSet.ofSolvable(set, ItemMapUtil.mapperToFullItems(input.fullItemOptions)));
     }
 }

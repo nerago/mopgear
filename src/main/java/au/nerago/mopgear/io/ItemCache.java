@@ -1,6 +1,6 @@
 package au.nerago.mopgear.io;
 
-import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.FullItemData;
 import au.nerago.mopgear.domain.ItemRef;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -18,16 +18,16 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class ItemCache {
     private static final Object writeSync = new Object();
-    private final Map<ItemRef, ItemData> itemRefLookup;
-    private final Map<Integer, Set<ItemData>> itemIdLookup;
+    private final Map<ItemRef, FullItemData> itemRefLookup;
+    private final Map<Integer, Set<FullItemData>> itemIdLookup;
 
     public static final ItemCache instance = new ItemCache();
 
     private ItemCache() {
         if (loadFromDisk()) {
-            List<ItemData> itemList = cacheLoad();
+            List<FullItemData> itemList = cacheLoad();
             this.itemRefLookup = itemList.stream().collect(Collectors.toMap(item -> item.shared.ref(), item -> item, (a, b) -> a, HashMap::new));
-            this.itemIdLookup = itemList.stream().collect(Collectors.groupingBy(ItemData::itemId, HashMap::new, Collectors.toSet()));
+            this.itemIdLookup = itemList.stream().collect(Collectors.groupingBy(FullItemData::itemId, HashMap::new, Collectors.toSet()));
         } else {
             this.itemRefLookup = new HashMap<>();
             this.itemIdLookup = new HashMap<>();
@@ -39,9 +39,9 @@ public class ItemCache {
         return true;
     }
 
-    private static List<ItemData> cacheLoad() {
+    private static List<FullItemData> cacheLoad() {
         try (BufferedReader reader = Files.newBufferedReader(DataLocation.cacheFile)) {
-            TypeToken<List<ItemData>> typeToken = new TypeToken<>() {
+            TypeToken<List<FullItemData>> typeToken = new TypeToken<>() {
             };
             return new Gson().fromJson(reader, typeToken);
         } catch (NoSuchFileException ex) {
@@ -55,7 +55,7 @@ public class ItemCache {
         synchronized (writeSync) {
             Path destFile = DataLocation.cacheFile;
             try (BufferedWriter writer = Files.newBufferedWriter(destFile)) {
-                List<ItemData> itemList = itemRefLookup.values().stream().toList();
+                List<FullItemData> itemList = itemRefLookup.values().stream().toList();
                 new Gson().newBuilder().setPrettyPrinting().create().toJson(itemList, writer);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -69,7 +69,7 @@ public class ItemCache {
             Path tempFile = destFile.resolveSibling(destFile.getFileName().toString() + ".temp");
 
             try (BufferedWriter writer = Files.newBufferedWriter(tempFile)) {
-                List<ItemData> itemList = itemRefLookup.values().stream().toList();
+                List<FullItemData> itemList = itemRefLookup.values().stream().toList();
                 new Gson().newBuilder().setPrettyPrinting().create().toJson(itemList, writer);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
@@ -83,14 +83,14 @@ public class ItemCache {
         }
     }
 
-    public ItemData get(ItemRef ref) {
+    public FullItemData get(ItemRef ref) {
         return itemRefLookup.get(ref);
     }
 
-    public ItemData get(int itemId, int upgradeLevel) {
-        Set<ItemData> itemList = itemIdLookup.get(itemId);
+    public FullItemData get(int itemId, int upgradeLevel) {
+        Set<FullItemData> itemList = itemIdLookup.get(itemId);
         if (itemList != null) {
-            for (ItemData item : itemList) {
+            for (FullItemData item : itemList) {
                 if (item.ref().upgradeLevel() == upgradeLevel)
                     return item;
             }
@@ -98,7 +98,7 @@ public class ItemCache {
         return null;
     }
 
-    public void put(ItemData item) {
+    public void put(FullItemData item) {
         itemRefLookup.put(item.ref(), item);
         itemIdLookup.computeIfAbsent(item.itemId(), k -> new HashSet<>()).add(item);
     }

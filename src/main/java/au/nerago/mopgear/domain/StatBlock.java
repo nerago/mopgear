@@ -66,7 +66,7 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
         int parry = 0;
         int spirit = 0;
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData item = items.get(slot);
+            FullItemData item = items.get(slot);
             if (item != null) {
                 StatBlock base = item.statBase;
                 primary += base.primary;
@@ -108,7 +108,7 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
         int parry = 0;
         int spirit = 0;
         for (SlotEquip slot : SlotEquip.values()) {
-            ItemData item = items.get(slot);
+            FullItemData item = items.get(slot);
             if (item != null) {
                 StatBlock base = item.statBase;
                 primary += base.primary;

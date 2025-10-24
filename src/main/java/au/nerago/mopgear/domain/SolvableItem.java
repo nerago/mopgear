@@ -8,7 +8,7 @@ import java.util.Objects;
 public record SolvableItem(int itemId, int itemLevel, int itemLevelBase, int duplicateNum, @NotNull SlotItem slot,
                            @NotNull ReforgeRecipe reforge, @NotNull StatBlock totalRated, @NotNull StatBlock totalCap)
         implements IItem {
-    public static SolvableItem of(ItemData item) {
+    public static SolvableItem of(FullItemData item) {
         // TODO can we drop some of ref
         return new SolvableItem(item.shared.ref().itemId(), item.shared.ref().itemLevel(), item.shared.ref().itemLevelBase(), item.shared.ref().duplicateNum(),
                 item.slot(), item.reforge, item.totalRated, item.totalCap);

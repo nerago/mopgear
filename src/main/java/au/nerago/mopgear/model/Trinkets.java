@@ -1,6 +1,6 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.domain.ItemData;
+import au.nerago.mopgear.domain.FullItemData;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 
@@ -57,7 +57,7 @@ public class Trinkets {
         return map;
     }
 
-    public static ItemData updateTrinket(ItemData item) {
+    public static FullItemData updateTrinket(FullItemData item) {
         TrinketData trinketData = knownTrinkets.get(item.itemId());
         if (trinketData == null) {
             throw new IllegalArgumentException("unknown trinket " + item.toStringExtended());

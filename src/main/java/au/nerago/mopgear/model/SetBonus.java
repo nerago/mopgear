@@ -1,6 +1,6 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.domain.ItemSet;
+import au.nerago.mopgear.domain.FullItemSet;
 import au.nerago.mopgear.domain.SlotEquip;
 import au.nerago.mopgear.domain.SolvableEquipMap;
 import au.nerago.mopgear.domain.SolvableItemSet;
@@ -77,7 +77,7 @@ public class SetBonus {
         return set;
     }
 
-    public long calc(ItemSet set) {
+    public long calc(FullItemSet set) {
         if (activeSets.isEmpty()) {
             return DENOMIATOR;
         }
