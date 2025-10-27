@@ -1,9 +1,6 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.domain.FullItemSet;
-import au.nerago.mopgear.domain.SlotEquip;
-import au.nerago.mopgear.domain.SolvableEquipMap;
-import au.nerago.mopgear.domain.SolvableItemSet;
+import au.nerago.mopgear.domain.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,6 +12,10 @@ public class SetBonus {
     public static final int DEFAULT_BONUS = 1025;
     public static final int DENOMIATOR = 1000;
 
+    public static SetBonus forSpec(SpecType spec) {
+        throw new IllegalArgumentException("TODO");
+    }
+
     private final List<SetInfo> activeSets = new ArrayList<>();
 
     // <<<<<<<<<<<<< PALADIN PROT TEIR 14 >>>>>>>>>>>>>>>>
@@ -23,6 +24,7 @@ public class SetBonus {
             85321, 85319, 85323, 85322, 85320,
             87111, 87113, 87109, 87110, 87112
     });
+
     public SetBonus activateWhiteTigerPlate() {
         activeSets.add(new SetInfo(whiteTigerPlate, DEFAULT_BONUS, DEFAULT_BONUS));
         return this;

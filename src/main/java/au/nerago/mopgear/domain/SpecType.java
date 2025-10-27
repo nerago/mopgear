@@ -1,16 +1,19 @@
 package au.nerago.mopgear.domain;
 
 public enum SpecType {
-    PaladinProt,
+    PaladinProtMitigation,
+    PaladinProtDps,
     PaladinRet,
     PaladinHoly,
     WarriorProt,
     WarriorArms,
+    DruidBear,
     DruidTree,
     DruidBoom,
     Mage,
     ShadowPriest,
     RogueUnknown,
     WarlockDestruction,
-    ShamanRestoration
+    ShamanRestoration,
+    Hunter
 }

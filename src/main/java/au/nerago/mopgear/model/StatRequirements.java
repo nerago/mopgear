@@ -34,7 +34,7 @@ public interface StatRequirements {
     }
 
     double RATING_PER_PERCENT = 339.9534;
-    int TARGET_RATING_CAST_DUNGEON = (int) Math.ceil(RATING_PER_PERCENT * 12); // 4080
+//    int TARGET_RATING_CAST_DUNGEON = (int) Math.ceil(RATING_PER_PERCENT * 12); // 4080
     double TARGET_PERCENT_MELEE = 7.5;
     int TARGET_RATING_MELEE = (int) Math.ceil(RATING_PER_PERCENT * TARGET_PERCENT_MELEE); // 2550
     double TARGET_PERCENT_TANK = 15;

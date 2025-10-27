@@ -3,6 +3,7 @@ package au.nerago.mopgear;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
+import au.nerago.mopgear.io.StandardModels;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.*;
@@ -391,7 +392,7 @@ public class Tasks {
         multi.addSpec(
                 "RET",
                 DataLocation.gearRetFile,
-                ModelCombined.extendedRetModel(true, false),
+                StandardModels.modelFor(SpecType.PaladinRet),
                 2113,
                 new int[]{
 //                        88862, // tankiss
@@ -418,7 +419,7 @@ public class Tasks {
         multi.addSpec(
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
-                ModelCombined.damageProtModel(),
+                StandardModels.modelFor(SpecType.PaladinProtDps),
                 799,
                 new int[]{
 //                        84870, // pvp legs
@@ -442,7 +443,7 @@ public class Tasks {
         multi.addSpec(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
-                ModelCombined.defenceProtModel(),
+                StandardModels.modelFor(SpecType.PaladinProtMitigation),
                 145,
                 new int[]{
 //                        89280, // voice amp
@@ -487,7 +488,7 @@ public class Tasks {
         multi.addSpec(
                 "BOOM",
                 DataLocation.gearBoomFile,
-                ModelCombined.standardBoomModel(),
+                StandardModels.modelFor(SpecType.DruidBoom),
                 400,
                 new int[]{
 //                        86909 // regail dagger
@@ -503,7 +504,7 @@ public class Tasks {
         multi.addSpec(
                 "TREE",
                 DataLocation.gearTreeFile,
-                ModelCombined.standardTreeModel(),
+                StandardModels.modelFor(SpecType.DruidTree),
                 1,
                 new int[]{
 //                        86909 // regail dagger
@@ -555,12 +556,12 @@ public class Tasks {
     }
 
     public static void determineRatingMultipliers() {
-        StatRatingsWeights tankMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
-        StatRatingsWeights tankDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
-        StatRatingsWeights retRet = new StatRatingsWeights(DataLocation.weightRetFile);
+        StatRatingsWeights tankMitigation = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
+        StatRatingsWeights tankDps = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtDps), false, true, false);
+        StatRatingsWeights retRet = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinRet));
 
-        EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.ret(), null);
-        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.prot(), null);
+        EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.melee(), null);
+        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.tank(), null);
 
         double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry());
         double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry());
@@ -605,7 +606,7 @@ public class Tasks {
     }
 
     private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req) {
-        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.prot(), null, new SetBonus());
+        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, new SetBonus());
         JobInput job = new JobInput();
         job.model = model;
         job.setItemOptions(items);

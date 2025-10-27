@@ -1,10 +1,7 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.DataLocation;
-import au.nerago.mopgear.io.InputGearParser;
-import au.nerago.mopgear.io.ItemCache;
-import au.nerago.mopgear.io.ReadLog;
+import au.nerago.mopgear.io.*;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirementsHitExpertise;
@@ -56,10 +53,10 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
-        new ReadLog().run();
+//        new ReadLog().run();
 //
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
@@ -74,10 +71,7 @@ public class Main {
     }
 
     private void reforgeRet(Instant startTime) {
-//        ModelCombined model = ModelCombined.standardRetModel();
-//        ModelCombined model = ModelCombined.extendedRetModel(true, true);
-        ModelCombined model = ModelCombined.extendedRetModel(true, true);
-//        ModelCombined model = ModelCombined.priorityRetModel();
+        ModelCombined model = StandardModels.modelFor(SpecType.PaladinRet);
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -121,10 +115,10 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = ModelCombined.damageProtModel();
+        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
         Path file = DataLocation.gearProtDpsFile;
 
-//        ModelCombined model = ModelCombined.defenceProtModel();
+//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
 //        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
@@ -182,7 +176,7 @@ public class Main {
     }
 
     private void reforgeBoom(Instant startTime) {
-        ModelCombined model = ModelCombined.standardBoomModel();
+        ModelCombined model = StandardModels.modelFor(SpecType.DruidBoom);
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearBoomFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime);
@@ -213,7 +207,7 @@ public class Main {
     }
 
     private void reforgeTree(Instant startTime) {
-        ModelCombined model = ModelCombined.standardTreeModel();
+        ModelCombined model = StandardModels.modelFor(SpecType.DruidTree);
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearTreeFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime);
@@ -231,8 +225,7 @@ public class Main {
     }
 
     private void reforgeBear(Instant startTime) {
-        ModelCombined model = ModelCombined.standardBearModel();
-//        ItemUtil.forceReload(itemCache, DataLocation.gearBearFile);
+        ModelCombined model = StandardModels.modelFor(SpecType.DruidBear);
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearBearFile, model.reforgeRules(), null);
 
         reforgeProcess(items, model, startTime);
@@ -240,7 +233,7 @@ public class Main {
     }
 
     private void reforgeWarlock(Instant startTime) {
-        ModelCombined model = ModelCombined.standardWarlockModel();
+        ModelCombined model = StandardModels.modelFor(SpecType.WarlockDestruction);
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime);
@@ -379,8 +372,8 @@ public class Main {
     }
 
     private void multiSpecSpecifiedRating() {
-        ModelCombined modelRet = ModelCombined.extendedRetModel(true, true);
-        ModelCombined modelProt = ModelCombined.defenceProtModel();
+        ModelCombined modelRet = StandardModels.modelFor(SpecType.PaladinRet);
+        ModelCombined modelProt = StandardModels.modelFor(SpecType.PaladinProtMitigation);
 
         OutputText.println("RET GEAR CURRENT");
         List<FullItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), true);

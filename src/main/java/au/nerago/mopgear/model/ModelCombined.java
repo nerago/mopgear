@@ -2,13 +2,9 @@ package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.ServiceEntry;
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.DataLocation;
 
 import java.nio.file.Path;
-import java.util.EnumMap;
 import java.util.stream.Stream;
-
-import static au.nerago.mopgear.domain.StatType.*;
 
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
                             DefaultEnchants enchants, SetBonus setBonus) {
@@ -71,101 +67,6 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return enchants.standardEnchant(slot);
     }
 
-    private static EnumMap<SocketType, StatBlock> protGems() {
-        EnumMap<SocketType, StatBlock> gems = new EnumMap<>(SocketType.class);
-        gems.put(SocketType.Red, StatBlock.of(Haste, 160, Expertise, 160));
-        gems.put(SocketType.Blue, StatBlock.of(Haste, 160, Hit, 160));
-        gems.put(SocketType.Yellow, StatBlock.of(Haste, 320));
-        gems.put(SocketType.General, StatBlock.of(Haste, 320));
-        gems.put(SocketType.Meta, StatBlock.of(Primary, 216));
-        return gems;
-    }
-
-    public static ModelCombined defenceProtModel() {
-        StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
-        StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
-        EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 13, statDps, 3, standardGems);
-//        StatRequirements statRequirements = StatRequirements.protFullExpertise();
-        StatRequirements statRequirements = StatRequirementsHitExpertise.protFlexibleParry();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProt, true);
-        ReforgeRules reforge = ReforgeRules.prot();
-        SetBonus setBonus = new SetBonus().activateWhiteTigerPlate();
-        return new ModelCombined(statMix, statRequirements, reforge, enchants, setBonus);
-    }
-
-    public static ModelCombined damageProtModel() {
-        StatRatingsWeights statMitigation = new StatRatingsWeights(DataLocation.weightProtMitigationFile, false, true, false);
-        StatRatingsWeights statDps = new StatRatingsWeights(DataLocation.weightProtDpsFile, false, true, false);
-        EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 2, statDps, 24, standardGems);
-        StatRequirements statRequirements = StatRequirementsHitExpertise.protFlexibleParry();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
-        ReforgeRules reforge = ReforgeRules.prot();
-        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegearOnly4pc();
-        return new ModelCombined(statMix, statRequirements, reforge, enchants, setBonus);
-    }
-
-    public static ModelCombined extendedRetModel(boolean wideHitRange, boolean extraReforge) {
-        StatRatingsWeights statRatings = new StatRatingsWeights(DataLocation.weightRetFile);
-        StatRequirements statRequirements = wideHitRange ? StatRequirementsHitExpertise.retWideCapRange() : StatRequirementsHitExpertise.ret();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
-        ReforgeRules reforge = extraReforge ? ReforgeRules.retExtended() : ReforgeRules.ret();
-        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
-        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);
-    }
-
-    public static ModelCombined priorityRetModel() {
-        StatRatings statRatings = new StatRatingsPriority(new StatType[]{Primary, Haste, Mastery, Crit});
-        StatRequirements statRequirements = StatRequirementsHitExpertise.retWideCapRange();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
-        ReforgeRules reforge = ReforgeRules.retExtended();
-        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
-        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);
-    }
-
-    public static ModelCombined standardBoomModel() {
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBoomFile);
-        StatRequirements statRequirements = new StatRequirementsHitCombined(
-                StatRequirements.TARGET_RATING_CAST, StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false); // TODO check same
-        SetBonus setBonus = new SetBonus().activateRegaliaEternalBlossom();
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, setBonus);
-    }
-
-    public static ModelCombined standardTreeModel() {
-        StatRatings statRatings = new StatRatingsPriorityBreaks(Haste, 3043,
-                new StatType[][]{
-                        new StatType[]{Primary},
-                        new StatType[]{Spirit, Mastery},
-                        new StatType[]{Crit}
-                }
-        );
-        StatRequirements statRequirements = new StatRequirementsNull();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        SetBonus setBonus = new SetBonus().activateVestmentsEternalBlossom();
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.boom(), enchants, setBonus);
-    }
-
-    public static ModelCombined standardBearModel() {
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightBearFile);
-        StatRequirements statRequirements = new StatRequirementsHitExpertise(
-                StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED,
-                StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_TANK + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, false); // TODO check same
-        SetBonus setBonus = new SetBonus();
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.bear(), enchants, setBonus);
-    }
-
-    public static ModelCombined standardWarlockModel() {
-        StatRatings statRatings = new StatRatingsWeights(DataLocation.weightWarlockFile);
-        StatRequirements statRequirements = new StatRequirementsHitOnly(
-                StatRequirements.TARGET_RATING_CAST_DUNGEON, StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        SetBonus setBonus = new SetBonus();
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.warlock(), enchants, setBonus);
-    }
-
     public static ModelCombined load(ServiceEntry.ServiceModel modelParam) {
         StatRatingsWeights rating;
         if (modelParam.weight().size() == 1) {
@@ -187,10 +88,6 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRequirements statRequirements = StatRequirementsOriginal.load(modelParam.required());
         DefaultEnchants enchants = new DefaultEnchants(modelParam.defaultEnchants(), modelParam.blacksmith());
         SetBonus setBonus = new SetBonus();
-        return new ModelCombined(rating, statRequirements, ReforgeRules.warlock(), enchants, setBonus);
-    }
-
-    public static ModelCombined nullMixedModel() {
-        return new ModelCombined(null, new StatRequirementsNull(), ReforgeRules.common(), null, new SetBonus());
+        return new ModelCombined(rating, statRequirements, ReforgeRules.casterPure(), enchants, setBonus);
     }
 }
