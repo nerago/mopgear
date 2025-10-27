@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.io.ItemCache;
+import au.nerago.mopgear.io.ReadLog;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirementsHitExpertise;
@@ -55,9 +56,10 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
+        new ReadLog().run();
 //
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
