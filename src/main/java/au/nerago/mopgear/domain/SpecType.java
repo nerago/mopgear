@@ -15,5 +15,10 @@ public enum SpecType {
     RogueUnknown,
     WarlockDestruction,
     ShamanRestoration,
-    Hunter
+    Hunter,
+    MonkBrewmaster,
+    ShamanElemental,
+    PriestHoly,
+    MonkMistweaver,
+    DeathKnightBlood
 }

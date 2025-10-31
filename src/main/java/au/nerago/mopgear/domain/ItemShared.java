@@ -5,7 +5,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public record ItemShared(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull SocketType[] socketSlots, @Nullable StatBlock socketBonus) {
+public record ItemShared(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name,
+                         @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
+                         @NotNull SocketType[] socketSlots, @Nullable StatBlock socketBonus) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

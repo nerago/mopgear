@@ -53,10 +53,12 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
-//        new ReadLog().run();
+        new ReadLog().run();
+//        SourcesOfItemsRaid.findNormalVariants();
+
 //
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
@@ -115,14 +117,14 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
-        Path file = DataLocation.gearProtDpsFile;
+//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
+//        Path file = DataLocation.gearProtDpsFile;
 
-//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
-//        Path file = DataLocation.gearProtDefenceFile;
+        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
+        Path file = DataLocation.gearProtDefenceFile;
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, file, model.reforgeRules(), commonItems);
 
@@ -141,8 +143,8 @@ public class Main {
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
-//        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear()), model, true, null);
-        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
+        findUpgrade(items, strengthPlateHeartOfFear(), model, true, null, 2);
+//        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
 //        findUpgrade(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateTerraceHeroic()), model, true, null, 2);
 //        findUpgrade(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateMsvHeroicArray()), model, true, null, 2);

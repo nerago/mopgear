@@ -36,14 +36,20 @@ public final class FullItemData implements IItem {
         }
     }
 
-    public static FullItemData buildFromWowSim(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
-        ItemShared shared = ItemSharedCache.get(ref, slot, name, socketSlots, socketBonus);
+    public static FullItemData buildFromWowSim(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name,
+                                               @NotNull StatBlock statBase,
+                                               @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
+                                               @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
+        ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus);
         return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
     }
 
-    public static FullItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name, @NotNull StatBlock statBase, @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
+    public static FullItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name,
+                                                @NotNull StatBlock statBase,
+                                                @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
+                                                @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
         ItemRef ref = ItemRef.buildBasic(id, itemLevel);
-        ItemShared shared = ItemSharedCache.get(ref, slot, name, socketSlots, socketBonus);
+        ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus);
         return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
     }
 

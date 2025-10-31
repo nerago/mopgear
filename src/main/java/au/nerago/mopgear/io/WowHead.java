@@ -1,13 +1,11 @@
 package au.nerago.mopgear.io;
 
-import au.nerago.mopgear.domain.FullItemData;
-import au.nerago.mopgear.domain.SlotItem;
-import au.nerago.mopgear.domain.SocketType;
-import au.nerago.mopgear.domain.StatBlock;
+import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.GemData;
 import au.nerago.mopgear.results.OutputText;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +14,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static au.nerago.mopgear.domain.ArmorType.NotApplicable;
 
 public class WowHead {
     public static FullItemData fetchItem(int itemId) {
@@ -115,17 +115,36 @@ public class WowHead {
                 objectGetInt(equipObject, "parryrtng"),
                 objectGetInt(equipObject, "spi"));
 
-        List<SocketType> sockets = new ArrayList<>();
-        for (int i = 1; i <= 5; ++i) {
-            int socketTypeNum = objectGetInt(equipObject, "socket" + i);
-            if (socketTypeNum != 0) {
-                SocketType type = SocketType.withNum(socketTypeNum);
-                sockets.add(type);
-            }
+        PrimaryStatType primaryStatType;
+        int primaryCount = (equipObject.has("str") ? 1 : 0) + (equipObject.has("int") ? 1 : 0) + (equipObject.has("agi") ? 1 : 0);
+        if (primaryCount > 1) {
+            throw new IllegalArgumentException("primary stat conflict");
+        } else if (primaryCount == 0) {
+            primaryStatType = PrimaryStatType.NotApplicable;
+        } else if (equipObject.has("str")) {
+            primaryStatType = PrimaryStatType.Strength;
+        } else if (equipObject.has("int")) {
+            primaryStatType = PrimaryStatType.Intellect;
+        } else if (equipObject.has("agi")) {
+            primaryStatType = PrimaryStatType.Agility;
+        } else {
+            throw new IllegalArgumentException("primary stat unknown");
         }
-        SocketType[] socketArray = sockets.toArray(SocketType[]::new);
 
-        return FullItemData.buildFromWowHead(itemId, slot, name, statBlock, socketArray, socketBonusBlock, itemLevel);
+        @NotNull ArmorType armorType = NotApplicable;
+        throw new RuntimeException("don't know how to determine armor type");
+
+//        List<SocketType> sockets = new ArrayList<>();
+//        for (int i = 1; i <= 5; ++i) {
+//            int socketTypeNum = objectGetInt(equipObject, "socket" + i);
+//            if (socketTypeNum != 0) {
+//                SocketType type = SocketType.withNum(socketTypeNum);
+//                sockets.add(type);
+//            }
+//        }
+//        SocketType[] socketArray = sockets.toArray(SocketType[]::new);
+//
+//        return FullItemData.buildFromWowHead(itemId, slot, name, statBlock, primaryStatType, armorType, socketArray, socketBonusBlock, itemLevel);
     }
 
     @SuppressWarnings("SameParameterValue")

@@ -13,10 +13,24 @@ public class SetBonus {
     public static final int DENOMIATOR = 1000;
 
     public static SetBonus forSpec(SpecType spec) {
-        throw new IllegalArgumentException("TODO");
+        SetBonus setBonus = new SetBonus();
+        SetInfo specified = allSets.stream().filter(s -> s.spec == spec).findAny().orElseThrow();
+        setBonus.activeSets.add(specified);
+        return setBonus;
     }
 
     private final List<SetInfo> activeSets = new ArrayList<>();
+    private static final List<SetInfo> allSets = buildSets();
+
+    private static List<SetInfo> buildSets() {
+        List<SetInfo> sets = new ArrayList<>();
+        sets.add(new SetInfo(whiteTigerPlate, SpecType.PaladinProtMitigation, DEFAULT_BONUS, DEFAULT_BONUS));
+        sets.add(new SetInfo(whiteTigerBattlegear, SpecType.PaladinRet, WHITE_TIGER_BATTLEGEAR_2, WHITE_TIGER_BATTLEGEAR_4));
+        sets.add(new SetInfo(regaliaEternalBlossom, SpecType.DruidBoom, DEFAULT_BONUS, DEFAULT_BONUS));
+        sets.add(new SetInfo(vestmentsEternalBlossom, SpecType.DruidTree, DEFAULT_BONUS, DEFAULT_BONUS));
+        return sets;
+    }
+
 
     // <<<<<<<<<<<<< PALADIN PROT TEIR 14 >>>>>>>>>>>>>>>>
     private static final Set<Integer> whiteTigerPlate = makeHashSet(new int[]{
@@ -24,11 +38,6 @@ public class SetBonus {
             85321, 85319, 85323, 85322, 85320,
             87111, 87113, 87109, 87110, 87112
     });
-
-    public SetBonus activateWhiteTigerPlate() {
-        activeSets.add(new SetInfo(whiteTigerPlate, DEFAULT_BONUS, DEFAULT_BONUS));
-        return this;
-    }
 
     // <<<<<<<<<<<<< PALADIN RET TEIR 14 >>>>>>>>>>>>>>>>
     private static final Set<Integer> whiteTigerBattlegear = makeHashSet(new int[]{
@@ -40,13 +49,13 @@ public class SetBonus {
     private static final int WHITE_TIGER_BATTLEGEAR_2 = 1032;
     // seal,judge +10%
     private static final int WHITE_TIGER_BATTLEGEAR_4 = 1024;
+
     public SetBonus activateWhiteTigerBattlegear() {
-        activeSets.add(new SetInfo(whiteTigerBattlegear, WHITE_TIGER_BATTLEGEAR_2, WHITE_TIGER_BATTLEGEAR_4));
+        activeSets.addAll(allSets.stream().filter(s -> s.spec == SpecType.PaladinRet).toList());
         return this;
     }
     public SetBonus activateWhiteTigerBattlegearOnly4pc() {
-//        activeSets.add(new SetInfo(whiteTigerBattlegear, DENOMIATOR, WHITE_TIGER_BATTLEGEAR_4));
-        activeSets.add(new SetInfo(whiteTigerBattlegear, DENOMIATOR, 1050));
+        activeSets.add(new SetInfo(whiteTigerBattlegear, SpecType.PaladinRet, DENOMIATOR, 1050));
         return this;
     }
 
@@ -57,7 +66,7 @@ public class SetBonus {
             86934, 86937, 86936, 86933, 86935
     });
     public SetBonus activateRegaliaEternalBlossom() {
-        activeSets.add(new SetInfo(regaliaEternalBlossom, DEFAULT_BONUS, DEFAULT_BONUS));
+        activeSets.addAll(allSets.stream().filter(s -> s.spec == SpecType.DruidBoom).toList());
         return this;
     }
 
@@ -68,7 +77,7 @@ public class SetBonus {
             86929, 86932, 86931, 86928, 86930
     });
     public SetBonus activateVestmentsEternalBlossom() {
-        activeSets.add(new SetInfo(vestmentsEternalBlossom, DEFAULT_BONUS, DEFAULT_BONUS));
+        activeSets.addAll(allSets.stream().filter(s -> s.spec == SpecType.DruidTree).toList());
         return this;
     }
 
@@ -136,7 +145,18 @@ public class SetBonus {
         return total;
     }
 
-    private record SetInfo(Set<Integer> items, int bonus2, int bonus4) {
+    public static SpecType forGear(List<LogItemInfo> itemInfoList) {
+        for (SetInfo set : allSets) {
+            for (LogItemInfo item : itemInfoList) {
+                if (set.items.contains(item.itemId())) {
+                    return set.spec;
+                }
+            }
+        }
+        return null;
+    }
+
+    private record SetInfo(Set<Integer> items, SpecType spec, int bonus2, int bonus4) {
 
     }
 }

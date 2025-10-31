@@ -1,20 +1,26 @@
 package au.nerago.mopgear.io;
 
+import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.util.ArrayUtil;
+import au.nerago.mopgear.util.Tuple;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collector;
 
 public class ReadLog {
     static final private Path path = Path.of("C:\\games\\World of Warcraft\\_classic_\\Logs\\warcraftlogsarchive\\WoWCombatLog-102325_212056.txt");
 
     private final Map<String, String> names = new HashMap<>();
-    private final Map<String, List<LogItemInfo>> gearMap = new HashMap<>();
+    private final Map<Tuple.Tuple2<String, SpecType>, List<LogItemInfo>> gearMap = new HashMap<>();
 
-    public void run() {
+    private final Set<Integer> ignoreItems = Set.of(89193, 69210, 53, 43157, 45583); // shirt/tabard
+
+    public List<LogPlayerInfo> run() {
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             parseReader(reader);
+            return gearMap.entrySet().stream().map(e -> new LogPlayerInfo(e.getKey().a(), e.getKey().b(), e.getValue())).toList();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -35,10 +41,18 @@ public class ReadLog {
 
     private void parseCombatant(String line) throws IOException {
         String playerId = betweenFirstDeliminatorPair(line, ',', ',');
-        System.out.println(names.get(playerId));
+        String playerName = names.get(playerId);
+        if (playerName == null || playerName.isBlank())
+            throwParseError("Unknown player " + playerId);
+
+//        if (playerName.contains("Viiolate") || playerName.contains("Ragnoroth") || playerName.contains("Komui") || playerName.contains("Neravi"))
+//            System.out.println(line);
+
+//        String[] lineParts = line.split(",");
+//        int specId = Integer.parseInt(lineParts[24]);
+//        System.out.printf("%s %d\n", playerName, specId);
+
         String gearInfo = betweenFirstDeliminatorPair(line, '[', ']');
-        System.out.println(playerId);
-        System.out.println(gearInfo);
 
         List<LogItemInfo> itemInfoList = new ArrayList<>();
         StringReader input = new StringReader(gearInfo);
@@ -48,7 +62,6 @@ public class ReadLog {
                 break;
             else if (firstChar != '(')
                 throwParseError("expected (");
-//            readExpected(input, '(');
 
             int itemId = readRequiredInt(input);
             readExpected(input, ',');
@@ -85,7 +98,7 @@ public class ReadLog {
                 }
             }
 
-            if (itemId != 0) {
+            if (itemId != 0 && !ignoreItems.contains(itemId)) {
                 LogItemInfo info = new LogItemInfo(itemId, itemLevel, enchantId, gemIdList.stream().mapToInt(x -> x).toArray());
                 itemInfoList.add(info);
             }
@@ -95,6 +108,24 @@ public class ReadLog {
             if (lastChar == ')')
                 break;
         }
+
+        printInfo(playerName, itemInfoList);
+        SpecType spec = PlayerSpecs.findSpec(itemInfoList);
+
+        gearMap.put(Tuple.create(playerName, spec), itemInfoList);
+    }
+
+    private void printInfo(String playerName, List<LogItemInfo> itemInfoList) {
+        StringBuilder build = new StringBuilder();
+        build.append(playerName).append(": ");
+        for (LogItemInfo item : itemInfoList) {
+            FullItemData itemData = ItemCache.instance.get(item.itemId(), 0);
+            if (itemData == null)
+                throw new RuntimeException("unknown item " + item.itemId());
+//            WowSimDB.instance.lookupItem(ItemRef.buildBasic())
+            build.append(itemData.shared.name()).append(" | ");
+        }
+        System.out.println(build);
     }
 
     private static int readRequiredInt(StringReader input) throws IOException {
@@ -169,17 +200,6 @@ public class ReadLog {
             String fullName = parts[2];
             String name = fullName.substring(1).split("-")[0];
             names.put(playerId, name);
-        }
-    }
-
-    private record LogItemInfo(int itemId, int itemLevel, OptionalInt enchantId, int[] gems) {
-        @Override
-        public String toString() {
-            return "LogItemInfo{" + "itemId=" + itemId +
-                    ", itemLevel=" + itemLevel +
-                    ", enchantId=" + enchantId +
-                    ", gems=" + Arrays.toString(gems) +
-                    '}';
         }
     }
 

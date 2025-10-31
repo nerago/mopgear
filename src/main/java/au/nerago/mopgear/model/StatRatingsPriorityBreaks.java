@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class StatRatingsPriorityBreaks extends StatRatings {
-    public static final int STEP = 2;
+    public static final int STEP = 4;
     public static final long INITIAL = 0x100000;
     private final StatType firstAndLastStat;
     private final int breakpointTarget;
@@ -80,12 +80,12 @@ public class StatRatingsPriorityBreaks extends StatRatings {
     public long calcRating(StatType queryStat, int value) {
         if (queryStat == firstAndLastStat) {
             if (value > breakpointTarget) {
-                return (breakpointTarget * INITIAL) + (value - breakpointTarget);
+                return ((breakpointTarget * INITIAL) + (value - breakpointTarget)) * OUTPUT_MULTIPLY;
             } else {
-                return value * INITIAL;
+                return value * INITIAL * OUTPUT_MULTIPLY;
             }
         } else {
-            long multiply = INITIAL;
+            long multiply = INITIAL / STEP;
             for (StatType[] rank : remainPriority) {
                 for (StatType stat : rank) {
                     if (stat == queryStat) {

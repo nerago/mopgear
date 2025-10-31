@@ -23,7 +23,7 @@ public class StandardModels {
             case PaladinProtDps -> {
                 return pallyProtDpsModel();
             }
-            case DruidBear, WarriorProt -> {
+            case DruidBear, WarriorProt, MonkBrewmaster, DeathKnightBlood -> {
                 return standardTankModel(spec);
             }
             case PaladinRet, RogueUnknown, WarriorArms, Hunter -> {
@@ -32,18 +32,24 @@ public class StandardModels {
             case Mage, WarlockDestruction -> {
                 return standardCasterModel(spec);
             }
-            case DruidBoom, ShadowPriest -> {
+            case DruidBoom, ShadowPriest, ShamanElemental -> {
                 return standardHybridCasterModel(spec);
             }
             case DruidTree -> {
                 return druidTreeModel();
             }
-
-//            case PaladinHoly -> {
-//            }
-//            case ShamanRestoration -> {
-//            }
-
+            case PaladinHoly -> {
+                return paladinHolyModel();
+            }
+            case ShamanRestoration -> {
+                return shamanRestoration();
+            }
+            case PriestHoly -> {
+                return priestHoly();
+            }
+            case MonkMistweaver -> {
+                return monkMistweaver();
+            }
             default -> throw new IllegalArgumentException("no model for " + spec);
         }
     }
@@ -111,7 +117,8 @@ public class StandardModels {
     }
 
     private static ModelCombined druidTreeModel() {
-        StatRatings statRatings = new StatRatingsPriorityBreaks(Haste, 3043,
+        StatRatings statRatings = new StatRatingsPriorityBreaks(
+                Haste, 3043,
                 new StatType[][]{
                         new StatType[]{Primary},
                         new StatType[]{Spirit, Mastery},
@@ -121,6 +128,52 @@ public class StandardModels {
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
         SetBonus setBonus = new SetBonus().activateVestmentsEternalBlossom();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
+    }
+
+    private static ModelCombined paladinHolyModel() {
+        StatRatings statRatings = new StatRatingsPriority(
+                new StatType[]{Primary, Spirit, Mastery, Haste, Crit}
+        );
+        StatRequirements statRequirements = new StatRequirementsNull();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        SetBonus setBonus = new SetBonus();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
+    }
+
+    private static ModelCombined shamanRestoration() {
+        StatRatings statRatings = new StatRatingsPriorityBreaksMultiple(
+                Haste,
+                new int[]{1345, 2017, 3379, 8085, 8785, 10118, 14170, 14846, 18207, 19557, 21596, 26308},
+                new StatType[]{Primary, Spirit, Crit, Mastery}
+        );
+        StatRequirements statRequirements = new StatRequirementsNull();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        SetBonus setBonus = new SetBonus();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
+    }
+
+    private static ModelCombined priestHoly() {
+        StatRatings statRatings = new StatRatingsPriority(
+                new StatType[]{Primary, Spirit, Crit, Mastery, Haste}
+        );
+        StatRequirements statRequirements = new StatRequirementsNull();
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        SetBonus setBonus = new SetBonus();
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
+    }
+
+    private static ModelCombined monkMistweaver() {
+        StatRatings statRatings = new StatRatingsPriorityBreaksMultiple(
+                Haste,
+                new int[]{154, 887, 1578, 2348, 3145, 4719, 5376, 6141, 7062, 7864, 9158, 11033},
+                new StatType[]{Primary, Crit, Mastery}
+        );
+        // TODO Haste remaining should value over Mastery
+        // https://www.icy-veins.com/mists-of-pandaria-classic/mistweaver-monk-pve-stat-priority
+        StatRequirements statRequirements = new StatRequirementsGenericOne(Spirit, 5100);
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        SetBonus setBonus = new SetBonus();
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
     }
 

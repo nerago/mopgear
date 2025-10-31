@@ -36,7 +36,7 @@ public class ItemCache {
     }
 
     private boolean loadFromDisk() {
-        return true;
+        return false;
     }
 
     private static List<FullItemData> cacheLoad() {

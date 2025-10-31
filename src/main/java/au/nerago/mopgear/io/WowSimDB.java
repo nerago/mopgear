@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -73,6 +74,8 @@ public class WowSimDB {
         int handType = getIntOrDefault(object, "handType", 0);
         SlotItem slot = mapSlot(type, weaponType, handType);
 
+        ArmorType armorType = convertArmorType(getIntOrDefault(object, "armorType", -1));
+
         SocketType[] sockets = new SocketType[0];
         JsonArray gemSockets = object.getAsJsonArray("gemSockets");
         if (gemSockets != null) {
@@ -92,8 +95,11 @@ public class WowSimDB {
         for (Map.Entry<String, JsonElement> entry : scalingOptions.entrySet()) {
             JsonObject scaleEntry = entry.getValue().getAsJsonObject();
             int itemLevel = scaleEntry.get("ilvl").getAsInt();
+
             JsonObject stats = scaleEntry.getAsJsonObject("stats");
+            boolean hasStr = false, hasInt = false, hasAgi = false;
             StatBlock block = StatBlock.empty;
+
             if (stats != null) {
                 for (Map.Entry<String, JsonElement> statEntry : stats.entrySet()) {
                     String statKey = statEntry.getKey();
@@ -102,12 +108,51 @@ public class WowSimDB {
                     if (statType != null) {
                         block = block.withChange(statType, value);
                     }
+                    switch (statKey) {
+                        case "0" -> hasStr = true;
+                        case "1" -> hasAgi = true;
+                        case "3" -> hasInt = true;
+                    }
                 }
             }
 
+            PrimaryStatType primaryStatType = selectPrimaryStat(hasStr, hasInt, hasAgi);
+
             ItemRef ref = ItemRef.buildAdvanced(id, itemLevel, baseItemLevel);
-            FullItemData item = FullItemData.buildFromWowSim(ref, slot, name, block, sockets, socketBonusBlock);
+            FullItemData item = FullItemData.buildFromWowSim(ref, slot, name, block, primaryStatType, armorType, sockets, socketBonusBlock);
             itemMap.put(item.ref(), item);
+        }
+    }
+
+    private PrimaryStatType selectPrimaryStat(boolean hasStr, boolean hasInt, boolean hasAgi) {
+        int primaryCount = (hasStr ? 1 : 0) + (hasInt ? 1 : 0) + (hasAgi ? 1 : 0);
+        if (primaryCount > 1) {
+            throw new IllegalArgumentException("primary stat conflict");
+        } else if (primaryCount == 0) {
+            return PrimaryStatType.NotApplicable;
+        } else if (hasStr) {
+            return PrimaryStatType.Strength;
+        } else if (hasInt) {
+            return PrimaryStatType.Intellect;
+        } else {
+            return PrimaryStatType.Agility;
+        }
+    }
+
+    private ArmorType convertArmorType(int armorType) {
+        switch (armorType) {
+            case -1:
+                return ArmorType.NotApplicable;
+            case 1:
+                return ArmorType.Cloth;
+            case 2:
+                return ArmorType.Leather;
+            case 3:
+                return ArmorType.Mail;
+            case 4:
+                return ArmorType.Plate;
+            default:
+                throw new RuntimeException("unexpected armor type " + armorType);
         }
     }
 
