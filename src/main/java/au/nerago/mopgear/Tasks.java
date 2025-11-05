@@ -4,7 +4,6 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.io.StandardModels;
-import au.nerago.mopgear.io.WowSimDB;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.*;
@@ -280,7 +279,7 @@ public class Tasks {
 
         for (EquippedItem entry : extraItems) {
             if (SourcesOfItems.ignoredItems.contains(entry.itemId())) continue;
-            FullItemData extraItem = ItemLoadUtil.loadItem(entry, true);
+            FullItemData extraItem = ItemLoadUtil.loadItem(entry, model.enchants(), true);
             for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
                 FullItemData[] existing = items.get(slot);
                 if (existing == null) {
@@ -309,6 +308,7 @@ public class Tasks {
         if (bestSet.isPresent()) {
             if (detailedOutput) {
                 bestSet.get().outputSetDetailed(model);
+                AsWowSimJson.writeToOut(bestSet.get().items());
                 bestSet.get().outputSetLight();
             } else {
                 bestSet.get().outputSet(model);
@@ -394,7 +394,7 @@ public class Tasks {
                 "RET",
                 DataLocation.gearRetFile,
                 StandardModels.modelFor(SpecType.PaladinRet),
-                2113,
+                2023,
                 new int[]{
 //                        88862, // tankiss
 //                        84950, // pvp belt
@@ -409,8 +409,8 @@ public class Tasks {
 //                        84949, // mal glad girdle accuracy
 //                        89280, // voice helm
 //                        86822, // celestial overwhelm assault belt
-//                        87015, // heroic clawfeet
-                          86979, // heroic impaling treads
+                        87015, // heroic clawfeet
+//                          86979, // heroic impaling treads
 //                        86957, // heroic bladed tempest
                 },
                 extraUpgrade,
@@ -421,7 +421,7 @@ public class Tasks {
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 StandardModels.modelFor(SpecType.PaladinProtDps),
-                799,
+                686,
                 new int[]{
 //                        84870, // pvp legs
 //                        86682, // white tiger gloves
@@ -445,7 +445,7 @@ public class Tasks {
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 StandardModels.modelFor(SpecType.PaladinProtMitigation),
-                145,
+                253,
                 new int[]{
 //                        89280, // voice amp
 ////                        87024, // null greathelm
@@ -457,7 +457,7 @@ public class Tasks {
 //                        84807, // mav glad cloak alacrity
 //                        87036, // heroic soulgrasp
 //                        87026, // heroic peacock cloak
-//                        86955, // heroic overwhelm assault belt
+                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
 //                        87015, // clawfeet
 //                        87062 // elegion heroic
@@ -477,9 +477,9 @@ public class Tasks {
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-//        multi.solve(3000);
+        multi.solve(3000);
 //        multi.solve(50000);
-        multi.solve(600000);
+//        multi.solve(600000);
 //        multi.solve(4000000);
     }
 
@@ -524,8 +524,8 @@ public class Tasks {
     }
 
     public static void compareBestReforgesWithCommon(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> commonOne, Map<Integer, List<ReforgeRecipe>> commonTwo) {
-        EquipOptionsMap optionsOne = ItemLoadUtil.readAndLoad(true, file, model.reforgeRules(), commonOne);
-        EquipOptionsMap optionsTwo = ItemLoadUtil.readAndLoad(true, file, model.reforgeRules(), commonTwo);
+        EquipOptionsMap optionsOne = ItemLoadUtil.readAndLoad(file, model, commonOne, true);
+        EquipOptionsMap optionsTwo = ItemLoadUtil.readAndLoad(file, model, commonTwo, true);
 
         int runSizeMultiply = 2;
 
@@ -561,8 +561,8 @@ public class Tasks {
         StatRatingsWeights tankDps = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights retRet = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinRet));
 
-        EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(true, DataLocation.gearRetFile, ReforgeRules.melee(), null);
-        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(true, DataLocation.gearProtDpsFile, ReforgeRules.tank(), null);
+        EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, ReforgeRules.melee(), new DefaultEnchants(SpecType.PaladinRet, true), null, true);
+        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, true);
 
         double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry());
         double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry());
@@ -575,29 +575,38 @@ public class Tasks {
         OutputText.printf("RET        %,d\n", (long)rateRet);
         OutputText.println();
 
-        OutputText.printf("damageProtModel 15%% mitigation, 85%% dps\n");
-        long dmgMultiplyA = Math.round(targetCombined * 0.15 / rateMitigation);
-        long dmgMultiplyB = Math.round(targetCombined * 0.85 / rateTankDps);
+        int dmgPercentMit = 10, dmgPercentDps = 100 - dmgPercentMit;
+        OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
+        long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation);
+        long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps);
         OutputText.printf("USE mitigation %d dps %d\n", dmgMultiplyA, dmgMultiplyB);
         double dmgTotal = dmgMultiplyA * rateMitigation + dmgMultiplyB * rateTankDps;
-        OutputText.printf("EFFECTIVE %.2f %.2f\n\n",
+        OutputText.printf("EFFECTIVE %.2f %.2f\n",
                 dmgMultiplyA * rateMitigation / dmgTotal,
                 dmgMultiplyB * rateTankDps / dmgTotal);
+        StatRatingsWeights dmgMix = StatRatingsWeights.mix(tankMitigation, (int) dmgMultiplyA, tankDps, (int) dmgMultiplyB, null);
+        StatType dmgBestStat = dmgMix.bestNonHit();
+        OutputText.printf("BEST STAT %s\n\n", dmgBestStat);
 
-        OutputText.printf("defenceProtModel 90%% mitigation, 10%% dps\n");
-        long defMultiplyA = Math.round(targetCombined * 0.9 / rateMitigation);
-        long defMultiplyB = Math.round(targetCombined * 0.1 / rateTankDps);
+        int defPercentMit = 85, defPercentDps = 100 - defPercentMit;
+        OutputText.printf("defenceProtModel 85%% mitigation, 15%% dps\n");
+        long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation);
+        long defMultiplyB = Math.round(targetCombined * (defPercentDps / 100.0) / rateTankDps);
         OutputText.printf("USE mitigation %d dps %d\n", defMultiplyA, defMultiplyB);
         double defTotal = defMultiplyA * rateMitigation + defMultiplyB * rateTankDps;
-        OutputText.printf("EFFECTIVE %.2f %.2f\n\n",
+        OutputText.printf("EFFECTIVE %.2f %.2f\n",
                 defMultiplyA * rateMitigation / defTotal,
                 defMultiplyB * rateTankDps / defTotal);
+        StatRatingsWeights defMix = StatRatingsWeights.mix(tankMitigation, (int) defMultiplyA, tankDps, (int) defMultiplyB, null);
+        StatType defBestStat = defMix.bestNonHit();
+        OutputText.printf("BEST STAT %s\n\n", defBestStat);
 
-        long multiTargetCombined = 1000000000000L;
-        OutputText.printf("multiSpec 5%% ret 80%% dmg_tank 15%% mitigation\n");
-        long multiA = Math.round(multiTargetCombined * 0.05 / rateRet);
-        long multiB = Math.round(multiTargetCombined * 0.80 / dmgTotal);
-        long multiC = Math.round(multiTargetCombined * 0.15 / defTotal);
+        double multiTargetCombined = 1000000000000L;
+        int multiRet = 5, multiDmg = 70, multiDef = 25;
+        OutputText.printf("multiSpec %d%% ret %d%% dmg_tank %d%% mitigation\n", multiRet, multiDmg, multiDef);
+        long multiA = Math.round(multiTargetCombined * (multiRet / 100.0) / rateRet);
+        long multiB = Math.round(multiTargetCombined * (multiDmg / 100.0) / dmgTotal);
+        long multiC = Math.round(multiTargetCombined * (multiDef / 100.0) / defTotal);
         OutputText.printf("USE ret %d dmg_tank %d mitigation %d \n", multiA, multiB, multiC);
         double multiTotal = multiA * rateRet + multiB * dmgTotal + multiC * defTotal;
         OutputText.printf("EFFECTIVE %.2f %.2f %.2f\n\n",

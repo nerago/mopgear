@@ -26,7 +26,7 @@ public class StatRequirementsHitCombined implements StatRequirements {
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
         int value = effectiveHit(item);
-        return new SkinnyItem(slot, value, 0);
+        return new SkinnyItem(slot, value, 0, 0);
     }
 
     @Override

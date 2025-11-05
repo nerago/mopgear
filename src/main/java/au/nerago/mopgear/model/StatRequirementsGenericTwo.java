@@ -37,7 +37,7 @@ public class StatRequirementsGenericTwo implements StatRequirements {
 
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
-        return new SkinnyItem(slot, item.totalCap().get(statOne), item.totalCap().get(statTwo));
+        return new SkinnyItem(slot, item.totalCap().get(statOne), item.totalCap().get(statTwo), 0);
     }
 
     @Override

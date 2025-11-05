@@ -470,7 +470,7 @@ public class FindMultiSpec {
         }
 
         public void prepareA(List<SpecDetails> allSpecs) {
-            itemOptions = ItemLoadUtil.readAndLoad(false, gearFile, model.reforgeRules(), null);
+            itemOptions = ItemLoadUtil.readAndLoad(gearFile, model, null, false);
             if (upgradeCurrentItems)
                 itemOptions = ItemMapUtil.upgradeAllTo2(itemOptions);
             remapDuplicates();

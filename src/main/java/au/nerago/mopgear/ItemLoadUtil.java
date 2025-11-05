@@ -4,10 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.WowHead;
-import au.nerago.mopgear.model.GemData;
-import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.model.ReforgeRules;
-import au.nerago.mopgear.model.Trinkets;
+import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 
@@ -34,12 +31,17 @@ public class ItemLoadUtil {
         return set;
     }
 
-    public static EquipOptionsMap readAndLoad(boolean detailedOutput, Path file, ReforgeRules rules, Map<Integer, List<ReforgeRecipe>> presetForge) {
+
+    public static EquipOptionsMap readAndLoad(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> presetForge, boolean detailedOutput) {
+        return readAndLoad(file, model.reforgeRules(), model.enchants(), presetForge, detailedOutput);
+    }
+
+    public static EquipOptionsMap readAndLoad(Path file, ReforgeRules reforge, DefaultEnchants enchants, Map<Integer, List<ReforgeRecipe>> presetForge, boolean detailedOutput) {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
-        List<FullItemData> items = loadItems(itemIds, detailedOutput);
+        List<FullItemData> items = loadItems(itemIds, enchants, detailedOutput);
         EquipOptionsMap result = presetForge != null
-                ? ItemMapUtil.limitedItemsReforgedToMap(rules, items, presetForge)
-                : ItemMapUtil.standardItemsReforgedToMap(rules, items);
+                ? ItemMapUtil.limitedItemsReforgedToMap(reforge, items, presetForge)
+                : ItemMapUtil.standardItemsReforgedToMap(reforge, items);
         ItemCache.instance.cacheSave();
         return result;
     }
@@ -54,16 +56,16 @@ public class ItemLoadUtil {
         itemCache.cacheSave();
     }
 
-    public static List<FullItemData> loadItems(List<EquippedItem> itemIds, boolean detailedOutput) {
+    public static List<FullItemData> loadItems(List<EquippedItem> itemIds, DefaultEnchants enchants, boolean detailedOutput) {
         List<FullItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
-            FullItemData item = loadItem(equippedItem, detailedOutput);
+            FullItemData item = loadItem(equippedItem, enchants, detailedOutput);
             items.add(item);
         }
         return items;
     }
 
-    public static FullItemData loadItem(EquippedItem equippedItem, boolean detailedOutput) {
+    public static FullItemData loadItem(EquippedItem equippedItem, DefaultEnchants enchants, boolean detailedOutput) {
         int id = equippedItem.itemId(), upgrade = equippedItem.upgradeStep();
         FullItemData item = loadItemBasic(id, upgrade);
 
@@ -75,12 +77,18 @@ public class ItemLoadUtil {
         if (detailedOutput) {
             if (expectedEnchant.contains(item.slot())) {
                 if (equippedItem.enchant() != null) {
-                    OutputText.println(id + ": " + item.toStringExtended() + " ENCHANT=" + equippedItem.enchant());
+                    StatBlock standardEnchant = enchants.standardEnchant(item.slot());
+                    StatBlock actualEnchant = GemData.getEnchant(equippedItem.enchant());
+                    if (standardEnchant == null || standardEnchant.equalsStats(actualEnchant)) {
+                        OutputText.println(id + ": " + item.toStringExtended() + " ENCHANTED");
+                    } else {
+                        OutputText.println(id + ": " + item.toStringExtended() + " ENCHANT WRONG ENCHANT WRONG ENCHANT WRONG "  + equippedItem.enchant());
+                    }
                 } else {
-                    OutputText.println(id + ": " + item.toStringExtended() + " MISSING EXPECTED ENCHANT");
+                    OutputText.println(id + ": " + item.toStringExtended() + " MISSING EXPECTED ENCHANT MISSING MISSING MISSING");
                 }
             } else if (equippedItem.enchant() != null) {
-                OutputText.println(id + ": " + item.toStringExtended() + " UNEXPECTED ENCHANT UNEXPECTED ENCHANT=" + equippedItem.enchant());
+                OutputText.println(id + ": " + item.toStringExtended() + " UNEXPECTED ENCHANT UNEXPECTED ENCHANT UNEXPECTED ENCHANT " + equippedItem.enchant());
             } else {
                 OutputText.println(id + ": " + item.toStringExtended());
             }

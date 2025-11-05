@@ -32,6 +32,8 @@ public class StatRatingsWeights extends StatRatings {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+        if (weight.isEmpty())
+            throw new IllegalArgumentException("empty weight file " + weightFile);
         chooseGems();
         chooseBestStats();
     }

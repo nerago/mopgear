@@ -127,7 +127,7 @@ public class GemData {
         map.put(4412, new StatBlock(0, 0, 0, 0, 0, 0, 0, 170, 0, 0)); // bracer
         map.put(4427, new StatBlock(0, 0, 0, 0, 175, 0, 0, 0, 0, 0)); // foot
         map.put(4431, new StatBlock(0, 0, 0, 0, 0, 0, 170, 0, 0, 0)); // hand
-        map.put(4805, new StatBlock(0, 0, 0, 0, 0, 0, 0, 100, 0, 0));
+        map.put(4805, new StatBlock(0, 300, 0, 0, 0, 0, 0, 100, 0, 0));
         map.put(4422, new StatBlock(0, 200, 0, 0, 0, 0, 0, 0, 0, 0)); // back stam
         map.put(4824, new StatBlock(0, 430, 0, 0, 0, 0, 0, 165, 0, 0)); // leg  tank
         map.put(4803, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0)); // dps shoulder
@@ -144,7 +144,6 @@ public class GemData {
         map.put(4414, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int bracer
         map.put(4415, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// str bracer
         map.put(4892, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));// lightweave
-//        map.put(4895, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// int leg
         map.put(4826, new StatBlock(285, 0, 0, 0, 0, 0, 0, 0, 0, 165));// int leg
         map.put(4434, new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int offhand
         map.put(4424, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));// int offhand
@@ -212,5 +211,9 @@ public class GemData {
             }
         }
         map.put(socket, best.get());
+    }
+
+    public static StatBlock getEnchant(Integer enchant) {
+        return knownEnchants.get(enchant);
     }
 }

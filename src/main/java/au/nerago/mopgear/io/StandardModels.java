@@ -58,24 +58,45 @@ public class StandardModels {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 13, statDps, 3, standardGems);
-        StatRequirements statRequirements = StatRequirementsHitExpertise.protFlexibleParry();
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 15, statDps, 4, standardGems);
+
+        StatRequirements hitRequire = StatRequirementsHitExpertise.protFlexibleParry();
+        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 8500);
+        StatRequirements combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
+
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, true);
         ReforgeRules reforge = ReforgeRules.tank();
         SetBonus setBonus = new SetBonus().activateWhiteTigerPlate();
-        return new ModelCombined(statMix, statRequirements, reforge, enchants, setBonus);
+        return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
     }
 
     private static ModelCombined pallyProtDpsModel() {
-        StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
+        StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
         StatRatings statMix = StatRatingsWeights.mix(statMitigation, 2, statDps, 24, standardGems);
-        StatRequirements statRequirements = StatRequirementsHitExpertise.protFlexibleParry();
-        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
+
+        StatRequirements hitRequire = StatRequirementsHitExpertise.protFlexibleParry();
+        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 8500);
+        StatRequirements combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
+
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
         SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegearOnly4pc();
-        return new ModelCombined(statMix, statRequirements, reforge, enchants, setBonus);
+        return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
+    }
+
+    private static ModelCombined pallyRetModel() {
+        StatRatingsWeights statRatings = new StatRatingsWeights(specToWeightFile(SpecType.PaladinRet));
+
+        StatRequirements hitRequire = StatRequirementsHitExpertise.retWideCapRange();
+        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 8500);
+        StatRequirements combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
+
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
+        ReforgeRules reforge = ReforgeRules.melee();
+        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
+        return new ModelCombined(statRatings, combinedRequire, reforge, enchants, setBonus);
     }
 
     private static ModelCombined standardTankModel(SpecType spec) {

@@ -37,7 +37,7 @@ public class StatRequirementsNull implements StatRequirements {
 
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
-        return new SkinnyItem(slot, 0, 0);
+        return new SkinnyItem(slot, 0, 0, 0);
     }
 
     @Override

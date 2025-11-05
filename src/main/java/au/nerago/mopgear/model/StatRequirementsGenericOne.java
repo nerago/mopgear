@@ -27,12 +27,12 @@ public class StatRequirementsGenericOne implements StatRequirements {
 
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
-        return new SkinnyItem(slot, item.totalCap().get(stat), 0);
+        return new SkinnyItem(slot, 0, 0, item.totalCap().get(stat));
     }
 
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
-        return skinny.one() == item.totalCap().get(stat);
+        return skinny.three() == item.totalCap().get(stat);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class StatRequirementsGenericOne implements StatRequirements {
     public Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> stream) {
         if (hasMaximum()) {
             return stream.filter(set -> {
-                int value = set.totalOne();
+                int value = set.totalThree();
                 return minimum <= value && value <= maximum;
             });
         } else {

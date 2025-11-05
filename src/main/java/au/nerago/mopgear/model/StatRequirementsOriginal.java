@@ -74,7 +74,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
     public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
         int hit = effectiveHit(item);
         int expertise = effectiveExpertise(item);
-        return new SkinnyItem(slot, hit, expertise);
+        return new SkinnyItem(slot, hit, expertise, 0);
     }
 
     @Override

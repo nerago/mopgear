@@ -16,7 +16,7 @@ public class StatRequirementsHitOnly implements StatRequirements {
     @Override
     public SkinnyItem toSkinny(SlotEquip slot, SolvableItem item) {
         int hit = item.totalCap().hit();
-        return new SkinnyItem(slot, hit, 0);
+        return new SkinnyItem(slot, hit, 0, 0);
     }
 
     @Override

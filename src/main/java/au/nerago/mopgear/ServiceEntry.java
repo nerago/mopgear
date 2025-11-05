@@ -37,7 +37,7 @@ public class ServiceEntry {
         Path gearFile = Path.of(params.gearFile);
         ModelCombined model = ModelCombined.load(params.model);
         Map<Integer, List<ReforgeRecipe>> fixedForges = new HashMap<>(params.fixedForges);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(false, gearFile, model.reforgeRules(), fixedForges);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(gearFile, model, fixedForges, false);
 
         switch (params.taskType) {
             case REFORGE -> {

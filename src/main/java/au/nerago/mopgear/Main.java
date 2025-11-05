@@ -4,7 +4,6 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.*;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.model.StatRequirementsHitExpertise;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.FindUpgrades;
@@ -54,14 +53,14 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
-        WowSimDB.discoverSetBonuses();
+//        WowSimDB.discoverSetBonuses();
 //        ItemCache.instance.get(null);
 //        new ReadLog().run();
 //        SourcesOfItemsRaid.findNormalVariants();
 
 //
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
@@ -81,7 +80,7 @@ public class Main {
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearRetFile, model.reforgeRules(), commonItems);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, model, commonItems, true);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
@@ -113,8 +112,8 @@ public class Main {
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
-//        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
-        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
+        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
+//        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
 
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
     }
@@ -126,17 +125,17 @@ public class Main {
         ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
         Path file = DataLocation.gearProtDefenceFile;
 
-        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, file, model.reforgeRules(), commonItems);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, true);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
-//        reforgeProcessPlus(items, model, startTime, null,87015, 2, false, true, null);
+//        reforgeProcessPlus(items, model, startTime, null,87050, 2, true, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
 //          reforgeProcessPlusPlus(items, model, startTime, 86680, 86682, 0, false, null);
@@ -146,7 +145,7 @@ public class Main {
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
-        findUpgrade(items, strengthPlateHeartOfFear(), model, true, null, 2);
+//        findUpgrade(items, strengthPlateHeartOfFear(), model, true, null, 2);
 //        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
 //        findUpgradeSetup(items, ArrayUtil.concat(strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic()), model, true, null);
 //        findUpgrade(items, ArrayUtil.concat(strengthPlateTerrace(), strengthPlateTerraceHeroic()), model, true, null, 2);
@@ -156,7 +155,7 @@ public class Main {
 //        findUpgrade(items, strengthPlateHeartOfFearHeroic(), model, true, null, 2);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgrade(items, strengthPlateTerrace(), model, true, null, 2);
-//        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
+        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
 //        findUpgradeMaxedItems(items, bagItemsArray(ignoredItems), model, true, null);
 //        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialTank(), null);
 //        new FindUpgrades(model, true).run(items, strengthPlateCurrentItemsProtAllUpgradable(), null, 2);
@@ -182,7 +181,7 @@ public class Main {
 
     private void reforgeBoom(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.DruidBoom);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearBoomFile, model.reforgeRules(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearBoomFile, model, null, true);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
@@ -213,7 +212,7 @@ public class Main {
 
     private void reforgeTree(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.DruidTree);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearTreeFile, model.reforgeRules(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearTreeFile, model, null, true);
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
@@ -231,7 +230,7 @@ public class Main {
 
     private void reforgeBear(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.DruidBear);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearBearFile, model.reforgeRules(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearBearFile, model, null, true);
 
         reforgeProcess(items, model, startTime);
 //        findUpgradeSetup(items, ArrayUtil.concat(SourcesOfItems.agilityLeatherCelestialArray(), SourcesOfItems.agilityLeatherValorArray()), model, true, null);
@@ -239,7 +238,7 @@ public class Main {
 
     private void reforgeWarlock(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.Warlock);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearWarlockFile, model, null, true);
 
 //        reforgeProcess(items, model, startTime);
         new FindUpgrades(model, true).run(items, intellectClothValorCelestialP1Array(), null, 0);
@@ -277,7 +276,7 @@ public class Main {
         // CHALLENGE MODE SET
 
         List<EquippedItem> itemIds = InputGearParser.readInput(DataLocation.gearRetFile);
-        List<FullItemData> inputSetItems = ItemLoadUtil.loadItems(itemIds, true);
+        List<FullItemData> inputSetItems = ItemLoadUtil.loadItems(itemIds, model.enchants(), true);
 
         OutputText.println("FINDING EXPECTED REFORGE IN RAID RET");
         EquipOptionsMap raidMap = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, commonFixedItems());
@@ -381,9 +380,9 @@ public class Main {
         ModelCombined modelProt = StandardModels.modelFor(SpecType.PaladinProtMitigation);
 
         OutputText.println("RET GEAR CURRENT");
-        List<FullItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), true);
+        List<FullItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), modelRet.enchants(), true);
         OutputText.println("PROT GEAR CURRENT");
-        List<FullItemData> protItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), true);
+        List<FullItemData> protItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), modelProt.enchants(), true);
 
         Map<SlotEquip, ReforgeRecipe> reforgeRet = new EnumMap<>(SlotEquip.class);
         reforgeRet.put(SlotEquip.Head, new ReforgeRecipe(null, null));

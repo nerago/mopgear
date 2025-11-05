@@ -55,7 +55,7 @@ public class SolverCapPhased {
 
         if (topCombosMultiply != null) {
             int actualTop = (int) (topCombosMultiply * TOP_HIT_COMBO_FILTER);
-            printRecorder.printf("SKINNY COMBOS TOO BIG JUST CONSIDERING %,d\n", actualTop);
+            printRecorder.printf("SKINNY COMBOS BEST %,d\n", actualTop);
             ToLongFunction<SkinnyItemSet> ratingFunc = is -> is.totalOne() + is.totalTwo();
 
 //            filteredSets = filteredSets.filter(new BottomNFilter<>(actualTop, ratingFunc));
@@ -65,6 +65,8 @@ public class SolverCapPhased {
                     .parallelStream();
 
             // TODO multiple sets with equal combohit may be lost
+        } else {
+            printRecorder.println("SKINNY COMBOS ALL");
         }
 
         return filteredSets.map(this::makeFromSkinny);
