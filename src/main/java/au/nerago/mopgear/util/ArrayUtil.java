@@ -1,8 +1,10 @@
 package au.nerago.mopgear.util;
 
 import au.nerago.mopgear.domain.StatType;
+import com.google.gson.JsonElement;
 
 import java.lang.reflect.Array;
+import java.net.HttpCookie;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -209,5 +211,16 @@ public class ArrayUtil {
         char[] chars = new char[count];
         Arrays.fill(chars, c);
         return new String(chars);
+    }
+
+    public static <T> T iteratorGetByIndex(Iterator<T> iterator, int index) {
+        for (int i = 0; i < index; ++i) {
+            if (iterator.hasNext()) {
+                iterator.next();
+            } else {
+                throw new IndexOutOfBoundsException();
+            }
+        }
+        return iterator.next();
     }
 }

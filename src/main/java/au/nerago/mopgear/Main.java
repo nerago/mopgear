@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.*;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.model.StatRequirementsHitExpertise;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.FindUpgrades;
@@ -53,7 +54,9 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
-        new ReadLog().run();
+        WowSimDB.discoverSetBonuses();
+//        ItemCache.instance.get(null);
+//        new ReadLog().run();
 //        SourcesOfItemsRaid.findNormalVariants();
 
 //
@@ -235,7 +238,7 @@ public class Main {
     }
 
     private void reforgeWarlock(Instant startTime) {
-        ModelCombined model = StandardModels.modelFor(SpecType.WarlockDestruction);
+        ModelCombined model = StandardModels.modelFor(SpecType.Warlock);
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(true, DataLocation.gearWarlockFile, model.reforgeRules(), null);
 
 //        reforgeProcess(items, model, startTime);

@@ -11,14 +11,14 @@ public enum SpecType {
     DruidTree,
     DruidBoom,
     Mage,
-    ShadowPriest,
-    RogueUnknown,
-    WarlockDestruction,
+    PriestShadow,
+    Rogue,
+    Warlock,
     ShamanRestoration,
     Hunter,
     MonkBrewmaster,
     ShamanElemental,
     PriestHoly,
     MonkMistweaver,
-    DeathKnightBlood
+    DeathKnightDps, ShamanEnhance, DruidFeral, MonkDps, DeathKnightBlood
 }

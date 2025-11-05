@@ -1,7 +1,6 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
 
 import java.io.*;
@@ -109,15 +108,16 @@ public class ReadLog {
                 break;
         }
 
-        printInfo(playerName, itemInfoList);
-        SpecType spec = PlayerSpecs.findSpec(itemInfoList);
+        SpecType spec = PlayerSpecs.findSpec(playerName, itemInfoList);
+
+        printInfo(playerName, spec, itemInfoList);
 
         gearMap.put(Tuple.create(playerName, spec), itemInfoList);
     }
 
-    private void printInfo(String playerName, List<LogItemInfo> itemInfoList) {
+    private void printInfo(String playerName, SpecType spec, List<LogItemInfo> itemInfoList) {
         StringBuilder build = new StringBuilder();
-        build.append(playerName).append(": ");
+        build.append(playerName).append(" [").append(spec).append("]: ");
         for (LogItemInfo item : itemInfoList) {
             FullItemData itemData = ItemCache.instance.get(item.itemId(), 0);
             if (itemData == null)

@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.io.StandardModels;
+import au.nerago.mopgear.io.WowSimDB;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.*;

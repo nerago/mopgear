@@ -26,13 +26,13 @@ public class StandardModels {
             case DruidBear, WarriorProt, MonkBrewmaster, DeathKnightBlood -> {
                 return standardTankModel(spec);
             }
-            case PaladinRet, RogueUnknown, WarriorArms, Hunter -> {
+            case PaladinRet, Rogue, WarriorArms, Hunter -> {
                 return standardMeleeModel(spec);
             }
-            case Mage, WarlockDestruction -> {
+            case Mage, Warlock -> {
                 return standardCasterModel(spec);
             }
-            case DruidBoom, ShadowPriest, ShamanElemental -> {
+            case DruidBoom, PriestShadow, ShamanElemental -> {
                 return standardHybridCasterModel(spec);
             }
             case DruidTree -> {
@@ -110,7 +110,7 @@ public class StandardModels {
         StatRatings statRatings = new StatRatingsWeights(specToWeightFile(spec));
         StatRequirements statRequirements = new StatRequirementsHitOnly(
                 StatRequirements.TARGET_RATING_CAST, StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
-        DefaultEnchants enchants = new DefaultEnchants(spec, false);
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.Warlock, false);
         ReforgeRules reforge = ReforgeRules.casterPure();
         SetBonus setBonus = SetBonus.forSpec(spec);
         return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);

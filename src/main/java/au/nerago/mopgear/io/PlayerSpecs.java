@@ -14,16 +14,16 @@ public class PlayerSpecs {
     private static Map<String, List<SpecType>> makePlayerSpecs() {
         Map<String, List<SpecType>> map = new HashMap<>();
         map.put("Ahakkua", List.of(SpecType.DeathKnightBlood));
-        map.put("Badlamp", List.of(SpecType.WarlockDestruction));
+        map.put("Badlamp", List.of(SpecType.Warlock)); // WarlockDestruction
         map.put("Ballgazer", List.of(SpecType.MonkBrewmaster));
         map.put("Bigcaluron", List.of(SpecType.ShamanRestoration));
         map.put("Calurolly", List.of(SpecType.MonkBrewmaster));
-        map.put("Hesiana", List.of(SpecType.WarlockDestruction));
+        map.put("Hesiana", List.of(SpecType.Warlock)); // WarlockDestruction
         map.put("Holydooly", List.of(SpecType.PaladinRet));
         map.put("Iniles", List.of(SpecType.PaladinHoly));
         map.put("Katsu", List.of(SpecType.ShamanElemental));
-        map.put("Knackerstars", List.of(SpecType.ShadowPriest));
-        map.put("Komui", List.of(SpecType.RogueUnknown));
+        map.put("Knackerstars", List.of(SpecType.PriestShadow));
+        map.put("Komui", List.of(SpecType.Rogue));
         map.put("Neravi", List.of(SpecType.PaladinProtDps, SpecType.PaladinProtMitigation, SpecType.PaladinRet));
         map.put("Oogabooguhh", List.of(SpecType.WarriorProt, SpecType.WarriorArms));
         map.put("Ragnoroth", List.of(SpecType.Hunter));

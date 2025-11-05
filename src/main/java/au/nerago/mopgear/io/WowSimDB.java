@@ -1,6 +1,10 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.model.SetBonus;
+import au.nerago.mopgear.results.OutputText;
+import au.nerago.mopgear.util.ArrayUtil;
+import au.nerago.mopgear.util.Tuple;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,9 +15,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WowSimDB {
@@ -22,10 +26,11 @@ public class WowSimDB {
 
     // https://raw.githubusercontent.com/wowsims/mop/57251c327bbc745d1512b9c13e952f4bcf3deedb/assets/database/db.json
 
+    private static final URL fileUrl = WowSimDB.class.getClassLoader().getResource("wowsimdb.json");
     public final static WowSimDB instance = new WowSimDB();
 
     private WowSimDB() {
-        readInput(Objects.requireNonNull(getClass().getClassLoader().getResource("wowsimdb.json")));
+        readInput(Objects.requireNonNull(fileUrl));
     }
 
     private void readInput(URL url) {
@@ -97,34 +102,43 @@ public class WowSimDB {
             int itemLevel = scaleEntry.get("ilvl").getAsInt();
 
             JsonObject stats = scaleEntry.getAsJsonObject("stats");
-            boolean hasStr = false, hasInt = false, hasAgi = false;
-            StatBlock block = StatBlock.empty;
-
-            if (stats != null) {
-                for (Map.Entry<String, JsonElement> statEntry : stats.entrySet()) {
-                    String statKey = statEntry.getKey();
-                    int value = statEntry.getValue().getAsInt();
-                    StatType statType = mapStat(statKey);
-                    if (statType != null) {
-                        block = block.withChange(statType, value);
-                    }
-                    switch (statKey) {
-                        case "0" -> hasStr = true;
-                        case "1" -> hasAgi = true;
-                        case "3" -> hasInt = true;
-                    }
-                }
-            }
-
-            PrimaryStatType primaryStatType = selectPrimaryStat(hasStr, hasInt, hasAgi);
+            StatResult result = summarizeStats(stats);
 
             ItemRef ref = ItemRef.buildAdvanced(id, itemLevel, baseItemLevel);
-            FullItemData item = FullItemData.buildFromWowSim(ref, slot, name, block, primaryStatType, armorType, sockets, socketBonusBlock);
+            FullItemData item = FullItemData.buildFromWowSim(ref, slot, name, result.block(), result.primaryStatType(), armorType, sockets, socketBonusBlock);
             itemMap.put(item.ref(), item);
         }
     }
 
-    private PrimaryStatType selectPrimaryStat(boolean hasStr, boolean hasInt, boolean hasAgi) {
+    @NotNull
+    private static StatResult summarizeStats(JsonObject stats) {
+        boolean hasStr = false, hasInt = false, hasAgi = false;
+        StatBlock block = StatBlock.empty;
+
+        if (stats != null) {
+            for (Map.Entry<String, JsonElement> statEntry : stats.entrySet()) {
+                String statKey = statEntry.getKey();
+                int value = statEntry.getValue().getAsInt();
+                StatType statType = mapStat(statKey);
+                if (statType != null) {
+                    block = block.withChange(statType, value);
+                }
+                switch (statKey) {
+                    case "0" -> hasStr = true;
+                    case "1" -> hasAgi = true;
+                    case "3" -> hasInt = true;
+                }
+            }
+        }
+
+        PrimaryStatType primaryStatType = selectPrimaryStat(hasStr, hasInt, hasAgi);
+        return new StatResult(block, primaryStatType);
+    }
+
+    private record StatResult(StatBlock block, PrimaryStatType primaryStatType) {
+    }
+
+    private static PrimaryStatType selectPrimaryStat(boolean hasStr, boolean hasInt, boolean hasAgi) {
         int primaryCount = (hasStr ? 1 : 0) + (hasInt ? 1 : 0) + (hasAgi ? 1 : 0);
         if (primaryCount > 1) {
             throw new IllegalArgumentException("primary stat conflict");
@@ -139,7 +153,7 @@ public class WowSimDB {
         }
     }
 
-    private ArmorType convertArmorType(int armorType) {
+    private static ArmorType convertArmorType(int armorType) {
         switch (armorType) {
             case -1:
                 return ArmorType.NotApplicable;
@@ -156,7 +170,7 @@ public class WowSimDB {
         }
     }
 
-    private StatBlock convertBlock(JsonArray array) {
+    private static StatBlock convertBlock(JsonArray array) {
         StatType type = null;
         int value = 0;
         for (int index = 0; index < array.size(); ++index) {
@@ -173,7 +187,7 @@ public class WowSimDB {
         return StatBlock.of(type, value);
     }
 
-    private StatType blockIndexToStat(int index) {
+    private static StatType blockIndexToStat(int index) {
         switch (index) {
             case 0, 1, 3 -> {
                 return StatType.Primary;
@@ -212,7 +226,7 @@ public class WowSimDB {
         }
     }
 
-    private SocketType mapSocket(int num) {
+    private static SocketType mapSocket(int num) {
         return switch (num) {
             case 1 -> SocketType.Meta;
             case 2 -> SocketType.Red;
@@ -305,10 +319,29 @@ public class WowSimDB {
         };
     }
 
-    private int getIntOrDefault(JsonObject object, String key, int defaultValue) {
+    private static int getIntOrDefault(JsonObject object, String key, int defaultValue) {
         JsonElement entry = object.get(key);
         if (entry != null)
             return entry.getAsInt();
+        else
+            return defaultValue;
+    }
+
+    private static int getFirstIntInArray(JsonObject object, String key, int defaultValue) {
+        JsonElement entry = object.get(key);
+        if (entry != null) {
+            JsonArray array = entry.getAsJsonArray();
+            if (!array.isEmpty()) {
+                return array.get(0).getAsInt();
+            }
+        }
+        return defaultValue;
+    }
+
+    private static String getStringOrDefault(JsonObject object, String key, String defaultValue) {
+        JsonElement entry = object.get(key);
+        if (entry != null)
+            return entry.getAsString();
         else
             return defaultValue;
     }
@@ -323,5 +356,77 @@ public class WowSimDB {
 
     public int reforgeId(ReforgeRecipe reforge) {
         return reforgeIds.get(reforge);
+    }
+
+    public static void discoverSetBonuses() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(fileUrl.openStream()))) {
+            JsonObject mainObject = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonArray itemsArray = mainObject.getAsJsonArray("items");
+
+            Map<Tuple.Tuple2<WowClass, String>, Tuple.Tuple2<TreeSet<Integer>, List<Integer>>> itemsBySet = new HashMap<>();
+            for (JsonElement element : itemsArray) {
+                JsonObject object = element.getAsJsonObject();
+                discoverSetBonuses(object, itemsBySet);
+            }
+            reportSetBonuses(itemsBySet);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private static void discoverSetBonuses(JsonObject object, Map<Tuple.Tuple2<WowClass, String>, Tuple.Tuple2<TreeSet<Integer>, List<Integer>>> itemsBySet) {
+        int itemId = object.get("id").getAsInt();
+        String name = object.get("name").getAsString();
+        int type = getIntOrDefault(object, "type", -1);
+        if (type == -1)
+            return;
+
+        JsonObject scalingOptions = object.getAsJsonObject("scalingOptions");
+        JsonObject firstScaleEntry = scalingOptions.get("0").getAsJsonObject();
+        int itemLevel = firstScaleEntry.get("ilvl").getAsInt();
+
+        int classAllowId = getFirstIntInArray(object, "classAllowlist", -1);
+        int setId = getIntOrDefault(object, "setId", -1);
+        String setName = getStringOrDefault(object, "setName", "");
+        int phase = getIntOrDefault(object, "phase", -1);
+
+        if (setId != -1 && classAllowId != -1 && !name.contains("Gladiator") && itemLevel >= 463) {
+            WowClass classType = WowClass.forId(classAllowId);
+            if (classType == null)
+                throw new RuntimeException("unknown class");
+
+            Tuple.Tuple2<WowClass, String> key = Tuple.create(classType, setName);
+            Tuple.Tuple2<TreeSet<Integer>, List<Integer>> entry = itemsBySet.computeIfAbsent(key, x -> Tuple.create(new TreeSet<>(), new ArrayList<>()));
+            entry.a().add(phase);
+            entry.a().add(itemLevel);
+            entry.b().add(itemId);
+        }
+    }
+
+    private static void reportSetBonuses(Map<Tuple.Tuple2<WowClass, String>, Tuple.Tuple2<TreeSet<Integer>, List<Integer>>> itemsBySet) {
+//        Comparator<Tuple.Tuple3<WowClass, String, Integer>> cc1 = Comparator.comparing(Tuple.Tuple3::a);
+////        Comparator<Tuple.Tuple3<WowClass, String, Integer>> cc2 = Comparator.comparing(Tuple.Tuple3::a).thenComparing( (a,b) -> 1);
+//        Comparator<Tuple.Tuple3<WowClass, String, Integer>> cc3 =
+//                Comparator.comparing((Function<Tuple.Tuple3<WowClass, String, Integer>, String>) x -> x.a().toString()).thenComparing(Tuple.Tuple3::c);
+//        Comparator<Tuple.Tuple3<WowClass, String, Integer>> cc4 =
+//                Comparator.comparing( (Tuple.Tuple3<WowClass, String, Integer> x) -> x.a()).thenComparing(Tuple.Tuple3::c);
+
+        for (Tuple.Tuple2<WowClass, String> key : itemsBySet.keySet().stream()
+                .sorted(Comparator.comparing((Tuple.Tuple2<WowClass, String> x) -> x.a()).thenComparing(Tuple.Tuple2::b))
+                .toList()) {
+            TreeSet<Integer> levels = itemsBySet.get(key).a();
+            List<Integer> itemList = itemsBySet.get(key).b();
+
+            // all meet this condition
+//            if (levels.getFirst() == 483 || levels.getFirst() == 502 || levels.getFirst() == 528)
+//                continue;
+
+//            sets.add(new SetBonus.SetInfo(SpecType.PaladinProtMitigation, DEFAULT_BONUS, DEFAULT_BONUS, whiteTigerPlate));
+            WowClass wowClass = key.a();
+            String setName = key.b();
+            OutputText.printf("sets.add(new SetInfo(SpecType.%s, \"%s\", DEFAULT_BONUS, DEFAULT_BONUS, new int[] {", wowClass, setName);
+            OutputText.print(itemList.stream().map(Object::toString).collect(Collectors.joining(",")));
+            OutputText.println("}));");
+        }
     }
 }
