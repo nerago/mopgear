@@ -411,7 +411,7 @@ public class Tasks {
 //                        84949, // mal glad girdle accuracy
 //                        89280, // voice helm
 //                        86822, // celestial overwhelm assault belt
-                        87015, // heroic clawfeet
+//                        87015, // heroic clawfeet
 //                          86979, // heroic impaling treads
 //                        86957, // heroic bladed tempest
                 },
@@ -441,7 +441,7 @@ public class Tasks {
                 preUpgrade
         );
 //                .setDuplicatedItems(Map.of(89934, 1))
-//                .setWorstCommonPenalty(99.5);
+//                .setWorstCommonPenalty(99);
 
         multi.addSpec(
                 "PROT-DEFENCE",
@@ -470,8 +470,8 @@ public class Tasks {
                 extraUpgrade,
                 preUpgrade
         )
-                .setDuplicatedItems(Map.of(89934, 2));
-//                .setWorstCommonPenalty(99.0);
+                .setDuplicatedItems(Map.of(89934, 2))
+                .setWorstCommonPenalty(99.3);
 
 //        multi.suppressSlotCheck(86957);
 //        multi.suppressSlotCheck(84829);
