@@ -337,15 +337,16 @@ public class Tasks {
     }
 
     private static void outputReforgeJson(Optional<FullItemSet> resultSet) {
-        AsWowSimJson.writeToOut(resultSet.orElseThrow().items());
+        resultSet.ifPresent(itemSet -> AsWowSimJson.writeToOut(itemSet.items()));
     }
 
     public static void outputTweaked(Optional<SolvableItemSet> bestSet, EquipOptionsMap itemOptions, ModelCombined model) {
-        bestSet.ifPresent(itemSet -> outputTweaked(itemSet, new SolvableEquipOptionsMap(itemOptions), model));
+        bestSet.ifPresent(itemSet -> outputTweaked(itemSet, new SolvableEquipOptionsMap(itemOptions), itemOptions, model));
     }
 
-    public static void outputTweaked(SolvableItemSet bestSet, SolvableEquipOptionsMap itemOptions, ModelCombined model) {
+    public static void outputTweaked(SolvableItemSet bestSet, SolvableEquipOptionsMap itemOptions, EquipOptionsMap itemOptionsFull, ModelCombined model) {
         SolvableItemSet tweakSet = Tweaker.tweak(bestSet, model, itemOptions);
+        Function<SolvableItem, FullItemData> fullItemMapper = ItemMapUtil.mapperToFullItems(itemOptionsFull);
         if (bestSet != tweakSet) {
             OutputText.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
 
@@ -356,7 +357,8 @@ public class Tasks {
                 SolvableItem change = tweakSet.items().get(slot);
                 if (orig != null && change != null) {
                     if (!orig.isIdenticalItem(change)) {
-                        OutputText.println(change + " " + model.calcRating(change));
+                        FullItemData change2 = fullItemMapper.apply(change);
+                        OutputText.println(change2 + " " + model.calcRating(change2));
                     }
                 } else if (orig != null || change != null) {
                     throw new IllegalStateException();
@@ -384,8 +386,8 @@ public class Tasks {
 //        multi.addFixedForge(86979, new ReforgeRecipe(Hit, Expertise)); // Foot Impaling Treads (Hit->Expertise)
 //        multi.addFixedForge(87100, ReforgeRecipe.empty()); // Hand White Tiger Gauntlets
 //        multi.addFixedForge(87026, ReforgeRecipe.empty()); // Back Cloak of Peacock Feathers
-        multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
-        multi.addFixedForge(86957, ReforgeRecipe.empty()); // Ring Ring of the Bladed Tempest
+//        multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
+//        multi.addFixedForge(86957, ReforgeRecipe.empty()); // Ring Ring of the Bladed Tempest
 
         int extraUpgrade = 2;
         boolean preUpgrade = false;
@@ -437,9 +439,9 @@ public class Tasks {
                 },
                 extraUpgrade,
                 preUpgrade
-        )
+        );
 //                .setDuplicatedItems(Map.of(89934, 1))
-                .setWorstCommonPenalty(99.7);
+//                .setWorstCommonPenalty(99.5);
 
         multi.addSpec(
                 "PROT-DEFENCE",
@@ -468,8 +470,8 @@ public class Tasks {
                 extraUpgrade,
                 preUpgrade
         )
-                .setDuplicatedItems(Map.of(89934, 2))
-                .setWorstCommonPenalty(99.0);
+                .setDuplicatedItems(Map.of(89934, 2));
+//                .setWorstCommonPenalty(99.0);
 
 //        multi.suppressSlotCheck(86957);
 //        multi.suppressSlotCheck(84829);
@@ -477,8 +479,8 @@ public class Tasks {
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-        multi.solve(3000);
-//        multi.solve(50000);
+//        multi.solve(3000);
+        multi.solve(50000);
 //        multi.solve(600000);
 //        multi.solve(4000000);
     }

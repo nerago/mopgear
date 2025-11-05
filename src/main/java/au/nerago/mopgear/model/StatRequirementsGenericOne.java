@@ -86,7 +86,7 @@ public class StatRequirementsGenericOne implements StatRequirements {
             });
         } else {
             return stream.filter(set -> {
-                int value = set.totalOne();
+                int value = set.totalThree();
                 return minimum <= value;
             });
         }
@@ -96,7 +96,7 @@ public class StatRequirementsGenericOne implements StatRequirements {
     public Stream<SkinnyItemSet> filterSetsMaxSkinny(Stream<SkinnyItemSet> stream) {
         if (hasMaximum()) {
             return stream.filter(set -> {
-                int value = set.totalOne();
+                int value = set.totalThree();
                 return value <= maximum;
             });
         } else {

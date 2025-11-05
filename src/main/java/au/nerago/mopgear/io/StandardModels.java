@@ -23,10 +23,13 @@ public class StandardModels {
             case PaladinProtDps -> {
                 return pallyProtDpsModel();
             }
+            case PaladinRet -> {
+                return pallyRetModel();
+            }
             case DruidBear, WarriorProt, MonkBrewmaster, DeathKnightBlood -> {
                 return standardTankModel(spec);
             }
-            case PaladinRet, Rogue, WarriorArms, Hunter -> {
+            case Rogue, WarriorArms, Hunter -> {
                 return standardMeleeModel(spec);
             }
             case Mage, Warlock -> {
@@ -61,7 +64,7 @@ public class StandardModels {
         StatRatings statMix = StatRatingsWeights.mix(statMitigation, 15, statDps, 4, standardGems);
 
         StatRequirements hitRequire = StatRequirementsHitExpertise.protFlexibleParry();
-        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 8500);
+        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7500);
         StatRequirements combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, true);
@@ -90,7 +93,7 @@ public class StandardModels {
         StatRatingsWeights statRatings = new StatRatingsWeights(specToWeightFile(SpecType.PaladinRet));
 
         StatRequirements hitRequire = StatRequirementsHitExpertise.retWideCapRange();
-        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 8500);
+        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7500);
         StatRequirements combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
