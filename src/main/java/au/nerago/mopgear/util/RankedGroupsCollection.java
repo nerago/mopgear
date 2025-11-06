@@ -11,13 +11,7 @@ public class RankedGroupsCollection<T> {
     private final TreeMap<Double, List<T>> map = new TreeMap<>();
 
     public void add(T object, double rating) {
-        map.compute(rating, (k, list) -> {
-            if (list == null) {
-                list = new ArrayList<>();
-            }
-            list.add(object);
-            return list;
-        });
+        map.computeIfAbsent(rating, k -> new ArrayList<>()).add(object);
     }
 
     public void forEach(BiConsumer<T, Double> func) {

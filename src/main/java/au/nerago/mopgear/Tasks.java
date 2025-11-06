@@ -10,6 +10,7 @@ import au.nerago.mopgear.process.*;
 import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BestHolder;
+import au.nerago.mopgear.util.RankedGroupsCollection;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
@@ -95,6 +96,18 @@ public class Tasks {
 //                            .collect(Collectors.joining(" | ")));
                 }
         );
+    }
+
+    public static void rankSingleItems(ModelCombined model, List<Integer> items) {
+        RankedGroupsCollection<FullItemData> ranked = new RankedGroupsCollection<>();
+        for (int itemId : items) {
+            FullItemData item = ItemLoadUtil.loadItemBasic(itemId, 2);
+            ranked.add(item, model.calcRating(item));
+        }
+
+        ranked.forEach((item, rate) -> {
+            OutputText.printf("%10d %s\n", Math.round(rate), item.toStringExtended());
+        });
     }
 
     public static void rankAlternativeCombos(EquipOptionsMap baseOptions, ModelCombined model, Instant startTime, List<List<Integer>> comboListList) {

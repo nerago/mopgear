@@ -54,6 +54,15 @@ public class Trinkets {
         map.put(88585, new TrinketData(Primary, 0, 6, 55, 15)); // doesn't show proc nums
         map.put(83731, new TrinketData(Mastery, 1852, 20, 115, 15)); // dunno the details
 
+        // future
+        map.put(96398, new TrinketData(Primary, 700, 10, 44, null));
+        map.put(96470, new TrinketData(Primary, 1505*5, 10, 49, null));
+        map.put(96501, new TrinketData(Primary, 1736, 10, 17, null)); // model doesn't do stacking
+        map.put(96543, new TrinketData(Crit, 3238, 20, 75, null)); // TODO do these cooldowns mean the same thing?
+
+        map.put(94507, new TrinketData(Dodge, 16000/2, 20, 120, null));
+        map.put(94508, new TrinketData(Primary, 8800, 15, 85, 15));
+
         return map;
     }
 

@@ -60,11 +60,11 @@ public class Main {
 
 //
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -119,18 +119,18 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
+//        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, true);
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
@@ -138,7 +138,14 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, null,87050, 2, true, true, null);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
-//          reforgeProcessPlusPlus(items, model, startTime, 86680, 86682, 0, false, null);
+//          reforgeProcessPlusPlus(items, model, startTime, 87071, 86681, 2, true, StatBlock.of(Hit, -100));
+        reforgeProcessPlusPlus(items, model, startTime, 87071, 86681, 2, true, null);
+//        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
+//                new CostedItem(87071,0), // yang-xi
+//                new CostedItem(86681,0), // bad head
+//                new CostedItem(87015,0) // clawfeet
+//                },
+//                2);
 //        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 //        reforgeProcessPlusMany(items, model, startTime, bagItemsArray(ignoredItems));
@@ -165,6 +172,15 @@ public class Main {
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
 
 //        compareBestReforgesWithCommon(file, model, commonFixedItems(), null);
+
+//        rankSingleItems(model, Arrays.asList(87172, 87063, 79329, 79327, 86046, 87072, 87160, 96398, 96470, 96501, 96543,
+//                94507, 94508
+
+
+//                96471, hard to model
+//                96523  difficult, very defensive
+//                96555  defensive
+//                ));
 
 //        CostedItem[] allTheGoodShit = ArrayUtil.concat(
 //                strengthPlateValorCelestialTank(itemCache),
@@ -253,21 +269,21 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 5/10/2025
-        map.put(86979, List.of(new ReforgeRecipe(Hit, Expertise))); // Foot Impaling Treads (Hit->Expertise)
-        map.put(87036, List.of(new ReforgeRecipe(null, null))); // Neck Soulgrasp Choker
-        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons (Hit->Expertise)
-        map.put(89934, List.of(new ReforgeRecipe(null, null))); // Wrist Bonded Soul Bracers
-        map.put(90862, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Seal of the Bloodseeker (Expertise->Hit)
-        map.put(87100, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets (Crit->Haste)
-        map.put(87024, List.of(new ReforgeRecipe(null, null))); // Head Nullification Greathelm
-        map.put(87026, List.of(new ReforgeRecipe(Crit, Haste))); // Back Cloak of Peacock Feathers (Crit->Haste)
-        map.put(79327, List.of(new ReforgeRecipe(null, null))); // Trinket Relic of Xuen
-        map.put(86802, List.of(new ReforgeRecipe(Haste, Expertise))); // Trinket Lei Shen's Final Orders (Haste->Expertise)
-        map.put(86906, List.of(new ReforgeRecipe(Mastery, Haste))); // Weapon1H Kilrak, Jaws of Terror (Mastery->Haste)
-        map.put(86683, List.of(new ReforgeRecipe(Haste, Hit))); // Chest White Tiger Battleplate (Haste->Hit)
-        map.put(86680, List.of(new ReforgeRecipe(Mastery, Haste))); // Leg White Tiger Legplates (Mastery->Haste)
-        map.put(86955, List.of(new ReforgeRecipe(Mastery, Expertise))); // Belt Waistplate of Overwhelming Assault (Mastery->Expertise)
+        // 6/11/2025
+        map.put(87172, List.of(new ReforgeRecipe(null, null))); // Trinket Darkmist Vortex
+        map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
+        map.put(87036, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker
+        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons
+        map.put(89934, List.of(new ReforgeRecipe(Haste, Crit))); // Wrist Bonded Soul Bracers
+        map.put(86387, List.of(new ReforgeRecipe(Hit, Expertise))); // Weapon1H Kilrak, Jaws of Terror
+        map.put(87100, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets
+        map.put(87024, List.of(new ReforgeRecipe(Crit, Hit))); // Head Nullification Greathelm
+        map.put(87026, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Cloak of Peacock Feathers
+        map.put(87050, List.of(new ReforgeRecipe(Parry, Expertise))); // Offhand Steelskin, Qiang's Impervious Shield
+        map.put(86683, List.of(new ReforgeRecipe(Crit, Expertise))); // Chest White Tiger Battleplate
+        map.put(86680, List.of(new ReforgeRecipe(Mastery, Crit))); // Leg White Tiger Legplates
+        map.put(86957, List.of(new ReforgeRecipe(Haste, Crit))); // Ring Ring of the Bladed Tempest
+        map.put(86955, List.of(new ReforgeRecipe(Mastery, Expertise))); // Belt Waistplate of Overwhelming Assault
         return map;
     }
 
