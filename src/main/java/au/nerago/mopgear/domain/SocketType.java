@@ -4,8 +4,8 @@ public enum SocketType {
     General(0, new StatType[]{}),
     Meta(1, new StatType[]{}),
     Red(2, new StatType[]{StatType.Primary, StatType.Expertise}),
-    Yellow(3, new StatType[]{StatType.Crit, StatType.Haste,StatType.Mastery}),
-    Blue(4, new StatType[]{StatType.Hit /*, StatType.Spirit*/}),
+    Yellow(3, new StatType[]{StatType.Crit, StatType.Haste, StatType.Mastery}),
+    Blue(4, new StatType[]{StatType.Hit , StatType.Spirit}),
     Sha(5, new StatType[]{}),
     Engineer(6, new StatType[]{}),;
 

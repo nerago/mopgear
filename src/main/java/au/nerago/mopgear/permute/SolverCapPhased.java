@@ -13,20 +13,23 @@ import java.util.stream.Stream;
 
 public class SolverCapPhased {
     public static final int TOP_HIT_COMBO_FILTER = 400;
-    private final ModelCombined model;
-    private final StatRequirements requirements;
-    private final StatBlock adjustment;
-    private final PrintRecorder printRecorder;
-    private SolvableEquipOptionsMap fullItems;
-    private List<SkinnyItem[]> skinnyOptions;
+    protected final ModelCombined model;
+    protected final StatRequirements requirements;
+    protected final StatBlock adjustment;
+    protected final PrintRecorder printRecorder;
+    protected SolvableEquipOptionsMap fullItems;
+    protected List<SkinnyItem[]> skinnyOptions;
+    protected long estimate;
+    protected final Long topCombosMultiply;
 
-    public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder) {
+    public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder, Long topCombosMultiply) {
         if (!supportedModel(model))
             throw new IllegalArgumentException("can't use this model without skinny support");
         this.model = model;
         this.requirements = model.statRequirements();
         this.adjustment = adjustment;
         this.printRecorder = printRecorder;
+        this.topCombosMultiply = topCombosMultiply;
     }
 
     public static boolean supportedModel(ModelCombined model) {
@@ -36,19 +39,19 @@ public class SolverCapPhased {
     public long initAndCheckSizes(SolvableEquipOptionsMap items) {
         fullItems = items;
         skinnyOptions = convertToSkinny(items);
-
-        return BigStreamUtil.estimateSets(skinnyOptions);
+        estimate = BigStreamUtil.estimateSets(skinnyOptions);
+        return estimate;
     }
 
-    public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter, Long topCombosMultiply) {
-        Stream<SolvableItemSet> partialSets = runSolverPartial(parallel, topCombosMultiply);
+    public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter) {
+        Stream<SolvableItemSet> partialSets = runSolverPartial(parallel);
         Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
         if (specialFilter != null)
             finalSets = finalSets.filter(specialFilter);
         return BigStreamUtil.findBest(model, finalSets);
     }
 
-    private Stream<SolvableItemSet> runSolverPartial(boolean parallel, Long topCombosMultiply) {
+    private Stream<SolvableItemSet> runSolverPartial(boolean parallel) {
         Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
 
         Stream<SkinnyItemSet> filteredSets = requirements.filterSetsSkinny(initialSets);
@@ -111,7 +114,7 @@ public class SolverCapPhased {
         return optionsList;
     }
 
-    private Stream<SkinnyItemSet> generateSkinnyComboStream(List<SkinnyItem[]> optionsList, boolean parallel) {
+    protected Stream<SkinnyItemSet> generateSkinnyComboStream(List<SkinnyItem[]> optionsList, boolean parallel) {
         Stream<SkinnyItemSet> stream = null;
 
 //        optionsList.sort(Comparator.comparingInt(array -> array.length));

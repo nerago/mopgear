@@ -12,12 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Reforger {
-    public static FullItemData[] reforgeItem(ReforgeRules rules, FullItemData baseItem) {
-        List<FullItemData> outputItems = reforgeItemToList(rules, baseItem);
-        return outputItems.toArray(FullItemData[]::new);
-    }
-
-    private static List<FullItemData> reforgeItemToList(ReforgeRules rules, FullItemData baseItem) {
+    public static List<FullItemData> reforgeItem(ReforgeRules rules, FullItemData baseItem) {
         List<FullItemData> outputItems = new ArrayList<>();
         outputItems.add(baseItem);
 
@@ -39,7 +34,7 @@ public class Reforger {
     }
 
     public static FullItemData[] reforgeItemBest(ModelCombined model, FullItemData baseItem) {
-        List<FullItemData> reforgedItems = reforgeItemToList(model.reforgeRules(), baseItem);
+        List<FullItemData> reforgedItems = reforgeItem(model.reforgeRules(), baseItem);
         BestHolder<FullItemData> best = new BestHolder<>();
         for (FullItemData item : reforgedItems) {
             best.add(item, model.calcRating(item));

@@ -19,6 +19,7 @@ public class JobInput {
     public boolean hackAllow;
     public boolean forceRandom;
     public boolean forceSkipIndex;
+    public boolean forcePhased;
     public long forcedRunSized;
     public boolean singleThread;
 

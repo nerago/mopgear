@@ -103,8 +103,6 @@ public class FindMultiSpec {
                         s -> reportBetter(s.resultJobs, specs)));
         outputResultFinal(best, specs);
 
-        // TODO extra phase with revised common + common tweaker
-
         // TODO keep track of good indexes and search near
     }
 
@@ -168,12 +166,15 @@ public class FindMultiSpec {
         job.setItemOptions(spec.itemOptions);
         job.runSizeMultiply = individualRunSizeMultiply * 4;
         job.hackAllow = hackAllow;
+        job.forcePhased = true;
         JobOutput output = Solver.runJob(job);
 
         FullItemSet set = output.getFinalResultSet().orElseThrow();
         spec.optimalRating = output.resultRating;
-        OutputText.printf("BASELINE %s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
-        set.outputSet(spec.model);
+        synchronized (OutputText.class) {
+            OutputText.printf("BASELINE %s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
+            set.outputSet(spec.model);
+        }
     }
 
     private static List<FullItemData> commonForges(List<FullItemData> prior, List<FullItemData> forges) {
@@ -209,7 +210,7 @@ public class FindMultiSpec {
     private ProposedResults subSolveEach(Map<ItemRef, FullItemData> commonChoices, List<SpecDetails> specList) {
         List<JobOutput> results = new ArrayList<>();
         for (SpecDetails spec : specList) {
-            JobOutput job = subSolvePart(spec.itemOptions, spec.model, commonChoices, 1);
+            JobOutput job = subSolvePart(spec.itemOptions, spec.model, commonChoices, 1, false);
             if (job.resultSet.isEmpty()) {
                 return null;
             }
@@ -218,7 +219,7 @@ public class FindMultiSpec {
         return new ProposedResults(results, commonChoices);
     }
 
-    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, Map<ItemRef, FullItemData> chosenMap, int finalMultiply) {
+    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, Map<ItemRef, FullItemData> chosenMap, int finalMultiply, boolean isFinal) {
         EquipOptionsMap submitMap = fullItemMap.shallowClone();
         buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
 
@@ -227,6 +228,7 @@ public class FindMultiSpec {
         job.setItemOptions(submitMap);
         job.runSizeMultiply = individualRunSizeMultiply * finalMultiply;
         job.hackAllow = hackAllow;
+        job.forcePhased = isFinal;
         return Solver.runJob(job);
     }
 
@@ -371,26 +373,37 @@ public class FindMultiSpec {
                 FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
                 double draftSpecRating = draftJob.resultRating;
                 OutputText.printf("DRAFT %,d\n", (long) draftSpecRating);
+                draftJob.input.printRecorder.outputNow();
+                draftSet.outputSetDetailed(spec.model);
+                AsWowSimJson.writeToOut(draftSet.items());
 
-                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, 4);
-                FullItemSet revisedSet = revisedJob.getFinalResultSet().orElseThrow();
-                double revisedSpecRating = revisedJob.resultRating;
+                ItemLoadUtil.duplicateAlternateEnchants(spec.itemOptions, spec.model);
+                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, 4, true);
 
-                if (revisedSpecRating > draftSpecRating) {
-                    OutputText.println("REVISED " + revisedSpecRating);
+                FullItemSet revisedSet = null;
+                double revisedSpecRating = 0;
+                if (revisedJob.resultSet.isPresent()) {
+                    revisedSet = revisedJob.getFinalResultSet().orElse(null);
+                    revisedSpecRating = revisedJob.resultRating;
+                }
+
+                if (revisedSet != null && revisedSpecRating > draftSpecRating) {
+                    OutputText.printf("REVISED %,d\n", (long) revisedSpecRating);
                     revisedJob.input.printRecorder.outputNow();
                     revisedSet.outputSetDetailed(spec.model);
                     AsWowSimJson.writeToOut(revisedSet.items());
+                } else if (revisedSet == null) {
+                    OutputText.println("REVISED FAIL REVISED FAIL");
                 } else {
-                    OutputText.println("Revised no better");
-                    draftJob.input.printRecorder.outputNow();
-                    draftSet.outputSetDetailed(spec.model);
-                    AsWowSimJson.writeToOut(draftSet.items());
+                    OutputText.println("REVISED no better");
                 }
 
                 double specRating = Math.max(draftSpecRating, revisedSpecRating);
                 OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
             }
+
+
+            // TODO report on changed enchant
 
         } else {
             OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
@@ -538,15 +551,15 @@ public class FindMultiSpec {
             if (overrideEnchant.containsKey(itemId)) {
                 extraItem = extraItem.changeEnchant(overrideEnchant.get(itemId));
             } else {
-                extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true);
+                extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true, false);
             }
 
-            FullItemData[] extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
+            List<FullItemData> extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
 
             SlotEquip[] slotOptions = extraItem.slot().toSlotEquipOptions();
             for (SlotEquip slot : slotOptions) {
                 FullItemData[] existing = itemOptions.get(slot);
-                itemOptions.put(slot, ArrayUtil.concat(existing, extraForged));
+                itemOptions.put(slot, ArrayUtil.concatNullSafe(existing, extraForged));
                 reportNewSlotOptions(slot);
             }
         }

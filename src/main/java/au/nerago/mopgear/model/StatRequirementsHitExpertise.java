@@ -26,9 +26,9 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
     public static StatRequirements retWideCapRange() {
         return new StatRequirementsHitExpertise(
                 StatRequirements.TARGET_RATING_MELEE,
-                StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 3,
+                StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 5,
                 StatRequirements.TARGET_RATING_MELEE,
-                StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 3);
+                StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 5);
     }
 
     public static StatRequirements protFullExpertise() {

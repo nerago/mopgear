@@ -4,10 +4,10 @@ import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 import au.nerago.mopgear.util.BestHolder;
+import au.nerago.mopgear.util.Tuple;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.ToLongFunction;
 
 public class GemData {
@@ -152,21 +152,65 @@ public class GemData {
         return map;
     }
 
-    public static StatBlock process(int[] gemIds, StatBlock socketBonus, String name) {
+    public static Tuple.Tuple2<StatBlock, List<StatBlock>> process(int[] gemIds, Integer enchant, SocketType[] socketTypes, StatBlock socketBonus, String name, boolean possibleBlacksmith) {
+        boolean socketBonusMet = true;
+
         StatBlock result = StatBlock.empty;
-        for (int id : gemIds) {
-            StatBlock stats = knownGems.get(id);
-            if (stats == null)
-                stats = knownEnchants.get(id);
-            if (stats == null)
-                throw new IllegalArgumentException("unknown gem " + id + " on " + name);
-            result = result.plus(stats);
+        if (enchant != null) {
+            result = findGemStats(name, enchant);
         }
-        if (socketBonus != null) {
+
+        List<StatBlock> gemChoice = new ArrayList<>();
+        for (int i = 0; i < socketTypes.length; ++i) {
+            int id = gemIds[i];
+            SocketType socket = socketTypes[i];
+
+            StatBlock gemStat = findGemStats(name, id);
+            gemChoice.add(gemStat);
+            if (!matchesSocket(socket, gemStat)) {
+                socketBonusMet = false;
+            }
+
+            result = result.plus(gemStat);
+        }
+
+        if (possibleBlacksmith && gemIds.length == socketTypes.length + 1) {
+            int id = gemIds[gemIds.length - 1];
+            StatBlock gemStat = findGemStats(name, id);
+            gemChoice.add(gemStat);
+            result = result.plus(gemStat);
+        } else if (gemIds.length != socketTypes.length) {
+            throw new IllegalArgumentException("gem count");
+        }
+
+        if (socketBonus != null && socketBonusMet) {
             result = result.plus(socketBonus);
         }
 
-        return result;
+        return Tuple.create(result, gemChoice);
+    }
+
+    @NotNull
+    private static StatBlock findGemStats(String name, int id) {
+        StatBlock gemStat = knownGems.get(id);
+        if (gemStat == null)
+            gemStat = knownEnchants.get(id);
+        if (gemStat == null)
+            throw new IllegalArgumentException("unknown gem " + id + " on " + name);
+        return gemStat;
+    }
+
+    public static boolean matchesSocket(SocketType socket, StatBlock gemStat) {
+        StatType[] statArray = socket.getMatchingStats();
+        if (statArray.length == 0)
+            return true;
+
+        for (StatType stat : statArray) {
+            if (gemStat.get(stat) != 0)
+                return true;
+        }
+
+        return false;
     }
 
     @Deprecated

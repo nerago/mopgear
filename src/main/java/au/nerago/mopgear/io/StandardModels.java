@@ -64,7 +64,7 @@ public class StandardModels {
         StatRatings statMix = StatRatingsWeights.mix(statMitigation, 15, statDps, 4, standardGems);
 
         StatRequirements hitRequire = StatRequirementsHitExpertise.protFlexibleParry();
-        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7500);
+        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7000);
         StatRequirements combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, true);
@@ -80,7 +80,7 @@ public class StandardModels {
         StatRatings statMix = StatRatingsWeights.mix(statMitigation, 2, statDps, 24, standardGems);
 
         StatRequirements hitRequire = StatRequirementsHitExpertise.protFlexibleParry();
-        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 8500);
+        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 8000);
         StatRequirements combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
@@ -93,13 +93,14 @@ public class StandardModels {
         StatRatingsWeights statRatings = new StatRatingsWeights(specToWeightFile(SpecType.PaladinRet));
 
         StatRequirements hitRequire = StatRequirementsHitExpertise.retWideCapRange();
-        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7500);
+        StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7000);
         StatRequirements combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.melee();
         SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
         return new ModelCombined(statRatings, combinedRequire, reforge, enchants, setBonus);
+//        return new ModelCombined(statRatings, hitRequire, reforge, enchants, setBonus);
     }
 
     private static ModelCombined standardTankModel(SpecType spec) {

@@ -2,7 +2,9 @@ package au.nerago.mopgear.domain;
 
 import au.nerago.mopgear.model.IItem;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 
 public final class FullItemData implements IItem {
@@ -18,13 +20,17 @@ public final class FullItemData implements IItem {
     public final StatBlock totalCap;
     @NotNull
     public final StatBlock totalRated;
+    @Nullable
+    public final List<StatBlock> gemChoice;
 
     private FullItemData(@NotNull ItemShared shared, @NotNull ReforgeRecipe reforge,
-                         @NotNull StatBlock statBase, @NotNull StatBlock statEnchant) {
+                         @NotNull StatBlock statBase, @NotNull StatBlock statEnchant,
+                         @Nullable List<StatBlock> gemChoice) {
         this.shared = shared;
         this.reforge = reforge;
         this.statBase = statBase;
         this.statEnchant = statEnchant;
+        this.gemChoice = gemChoice;
 
         if (statEnchant.isEmpty()) {
             totalCap = totalRated = statBase;
@@ -41,7 +47,7 @@ public final class FullItemData implements IItem {
                                                @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
                                                @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
         ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus);
-        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
+        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty, null);
     }
 
     public static FullItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name,
@@ -50,31 +56,35 @@ public final class FullItemData implements IItem {
                                                 @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
         ItemRef ref = ItemRef.buildBasic(id, itemLevel);
         ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus);
-        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty);
+        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty, null);
     }
 
     public FullItemData changeForReforge(@NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
-        return new FullItemData(shared, recipe, changedStats, statEnchant);
+        return new FullItemData(shared, recipe, changedStats, statEnchant, gemChoice);
     }
 
     public FullItemData changeStatsBase(@NotNull StatBlock changedStats) {
-        return new FullItemData(shared, reforge, changedStats, statEnchant);
+        return new FullItemData(shared, reforge, changedStats, statEnchant, gemChoice);
     }
 
     public FullItemData changeEnchant(@NotNull StatBlock changedEnchant) {
-        return new FullItemData(shared, reforge, statBase, changedEnchant);
+        return new FullItemData(shared, reforge, statBase, changedEnchant, null);
+    }
+
+    public FullItemData changeEnchant(@NotNull StatBlock changedEnchant, List<StatBlock> gemChoice) {
+        return new FullItemData(shared, reforge, statBase, changedEnchant, gemChoice);
     }
 
     public FullItemData changeDuplicate(int dupNum) {
         ItemRef changeRef = ref().changeDuplicate(dupNum);
         ItemShared changeShared = ItemSharedCache.get(changeRef, shared);
-        return new FullItemData(changeShared, reforge, statBase, statEnchant);
+        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice);
     }
 
     public FullItemData changeItemLevel(int itemLevel) {
         ItemRef changeRef = ref().changeItemLevel(itemLevel);
         ItemShared changeShared = ItemSharedCache.get(changeRef, shared);
-        return new FullItemData(changeShared, reforge, statBase, statEnchant);
+        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice);
     }
 
     @Override
@@ -88,6 +98,13 @@ public final class FullItemData implements IItem {
     public String toStringExtended() {
         final StringBuilder sb = new StringBuilder("{ ");
         append(sb);
+        if (gemChoice != null && !gemChoice.isEmpty()) {
+            sb.append("GEMS ");
+            for (StatBlock choice : gemChoice) {
+                sb.append(choice);
+            }
+            sb.append(' ');
+        }
         sb.append("REF ");
         sb.append("ilevel=").append(ref().itemLevel()).append(' ');
         sb.append("itemId=").append(itemId()).append(' ');

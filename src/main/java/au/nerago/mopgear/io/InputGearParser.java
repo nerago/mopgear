@@ -58,14 +58,7 @@ public class InputGearParser {
 
         Integer enchant = null;
         if (elementObject.has("enchant")) {
-            int enchantId = elementObject.get("enchant").getAsInt();
-            if (gems == null) {
-                gems = new int[]{enchantId};
-            } else {
-                gems = Arrays.copyOf(gems, gems.length + 1);
-                gems[gems.length - 1] = enchantId;
-            }
-            enchant = enchantId;
+            enchant = elementObject.get("enchant").getAsInt();
         }
 
         int upgradeStep = 0;

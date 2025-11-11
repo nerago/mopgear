@@ -18,8 +18,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
-import static au.nerago.mopgear.domain.StatType.Crit;
-import static au.nerago.mopgear.domain.StatType.Expertise;
+import static au.nerago.mopgear.domain.StatType.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Tasks {
@@ -42,9 +41,9 @@ public class Tasks {
         Arrays.stream(allItems).map(equip -> ItemLoadUtil.loadItemBasic(equip.itemId(), upgradeLevel))
                 .filter(item -> item.slot() != SlotItem.Weapon2H)
                 .forEach(item -> {
-                    item = ItemLoadUtil.defaultEnchants(item, model, true);
+                    item = ItemLoadUtil.defaultEnchants(item, model, true, false);
                     SlotEquip[] slotOptions = item.slot().toSlotEquipOptions();
-                    FullItemData[] reforged = Reforger.reforgeItem(model.reforgeRules(), item);
+                    List<FullItemData> reforged = Reforger.reforgeItem(model.reforgeRules(), item);
                     for (SlotEquip slot : slotOptions) {
                         optionsMap.put(slot, ArrayUtil.concatNullSafe(optionsMap.get(slot), reforged));
                     }
@@ -71,7 +70,7 @@ public class Tasks {
                 .map(equip -> ItemLoadUtil.loadItemBasic(equip.itemId(), upgradeLevel))
                 .filter(item -> item.slot() != SlotItem.Weapon2H)
                 .forEach(item -> {
-                    item = ItemLoadUtil.defaultEnchants(item, model, true);
+                    item = ItemLoadUtil.defaultEnchants(item, model, true, false);
                     SlotEquip[] slotOptions = item.slot().toSlotEquipOptions();
                     FullItemData[] reforged = Reforger.reforgeItemBest(model, item);
 //                    ItemData[] reforged = new ItemData[] { item };
@@ -113,11 +112,10 @@ public class Tasks {
     public static void rankAlternativeCombos(EquipOptionsMap baseOptions, ModelCombined model, Instant startTime, List<List<Integer>> comboListList) {
         BestHolder<List<FullItemData>> best = new BestHolder<>();
         for (List<Integer> combo : comboListList) {
-            Function<FullItemData, FullItemData> enchants = t -> ItemLoadUtil.defaultEnchants(t, model, true);
             EquipOptionsMap submitMap = baseOptions.deepClone();
             List<FullItemData> optionItems = new ArrayList<>();
             for (int extraId : combo) {
-                FullItemData item = addExtra(submitMap, model, extraId, 0, enchants, null, true, true, true);
+                FullItemData item = addExtra(submitMap, model, extraId, 0, EnchantMode.Default, null, true, true);
                 optionItems.add(item);
             }
 
@@ -148,16 +146,18 @@ public class Tasks {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, boolean defaultEnchants, StatBlock adjustment) {
+    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, EnchantMode enchantMode, StatBlock adjustment, boolean alternateEnchants) {
         FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
 
-        Function<FullItemData, FullItemData> enchanting = defaultEnchants ? x -> ItemLoadUtil.defaultEnchants(x, model, true) : Function.identity();
         if (slot == null)
             slot = extraItem.slot().toSlotEquip();
 
         EquipOptionsMap runItems = itemOptions.deepClone();
-        extraItem = addExtra(runItems, model, extraItemId, upgradeLevel, slot, enchanting, null, replace, true, true);
+        extraItem = addExtra(runItems, model, extraItemId, upgradeLevel, slot, enchantMode, null, replace, true);
         OutputText.println("EXTRA " + extraItem);
+
+        if (alternateEnchants)
+            ItemLoadUtil.duplicateAlternateEnchants(runItems, model);
 
         JobInput job = new JobInput();
         job.printRecorder.outputImmediate = true;
@@ -172,74 +172,114 @@ public class Tasks {
         }
     }
 
-    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, Function<FullItemData, FullItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, EnchantMode enchantMode, ReforgeRecipe reforge, boolean replace, boolean errorOnExists) {
         FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
-        return addExtra(reforgedItems, model, extraItem, customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
+        return addExtra(reforgedItems, model, extraItem, enchantMode, reforge, replace, errorOnExists);
     }
 
-    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, Function<FullItemData, FullItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
+    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, EnchantMode enchantMode, ReforgeRecipe reforge, boolean replace, boolean errorOnExists) {
         FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
-        return addExtra(reforgedItems, model, extraItem, slot, customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
+        return addExtra(reforgedItems, model, extraItem, slot, enchantMode, reforge, replace, errorOnExists);
     }
 
-    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, FullItemData extraItem, Function<FullItemData, FullItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
-        return addExtra(reforgedItems, model, extraItem, extraItem.slot().toSlotEquip(), customiseItem, reforge, replace, customiseOthersInSlot, errorOnExists);
+    public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, FullItemData extraItem, EnchantMode enchantMode, ReforgeRecipe reforge, boolean replace, boolean errorOnExists) {
+        return addExtra(reforgedItems, model, extraItem, extraItem.slot().toSlotEquip(), enchantMode, reforge, replace, errorOnExists);
     }
 
     @Nullable
-    private static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, FullItemData extraItem, SlotEquip slot, Function<FullItemData, FullItemData> customiseItem, ReforgeRecipe reforge, boolean replace, boolean customiseOthersInSlot, boolean errorOnExists) {
-        extraItem = customiseItem.apply(extraItem);
+    private static FullItemData addExtra(EquipOptionsMap itemOptions, ModelCombined model, FullItemData extraItem, SlotEquip slot, EnchantMode enchantMode, ReforgeRecipe recipe, boolean replace, boolean errorOnExists) {
         ItemRef ref = extraItem.ref();
-        FullItemData[] existing = reforgedItems.get(slot);
+        FullItemData[] existing = itemOptions.get(slot);
+        HashSet<FullItemData> resultingList = new HashSet<>();
 
         if (slot == SlotEquip.Weapon && existing != null && extraItem.slot() != existing[0].slot()) {
             OutputText.println("WRONG WEAPON " + extraItem);
             return null;
+        } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(ref))) {
+            if (errorOnExists)
+                throw new IllegalArgumentException("item already included " + extraItem);
+            OutputText.println("ALREADY INCLUDED " + extraItem);
+            return null;
+        } else if (existing == null) {
+            throw new IllegalArgumentException("can't add extra to empty slot");
+        } else if (replace) {
+            OutputText.println("REPLACING " + existing[0]);
         }
 
-        FullItemData[] extraForged = reforge != null ?
-                new FullItemData[]{Reforger.presetReforge(extraItem, reforge)} :
-                Reforger.reforgeItem(model.reforgeRules(), extraItem);
+        StatBlock gemStat = model.gemChoiceBestAlternate();
+        Function<FullItemData, FullItemData> enchantDefault =
+                item -> ItemLoadUtil.defaultEnchants(item, model, true, false);
+        Function<FullItemData, FullItemData> enchantAlternate =
+                item -> ItemLoadUtil.defaultEnchants(item, model, true, true);
 
-        if (replace) {
-            OutputText.println("REPLACING " + (existing != null ? existing[0] : "NOTHING"));
-            reforgedItems.put(slot, extraForged);
-        } else {
-            if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(ref))) {
-                if (errorOnExists)
-                    throw new IllegalArgumentException("item already included " + extraItem);
-                OutputText.println("ALREADY INCLUDED " + extraItem);
-                return null;
+        List<FullItemData> enchanted = new ArrayList<>();
+        switch (enchantMode) {
+            case None -> {
+                enchanted.add(extraItem);
+                if (!replace)
+                    resultingList.addAll(List.of(existing));
             }
-            reforgedItems.put(slot, ArrayUtil.concatNullSafe(existing, extraForged));
+            case Default -> {
+                enchanted.add(enchantDefault.apply(extraItem));
+                if (!replace) {
+                    resultingList.addAll(Arrays.stream(existing).map(enchantDefault).toList());
+                }
+            }
+            case AlternateGem -> {
+                enchanted.add(enchantAlternate.apply(extraItem));
+                if (!replace) {
+                    resultingList.addAll(Arrays.stream(existing).map(enchantAlternate).toList());
+                }
+            }
+            case BothDefaultAndAlternate -> {
+                enchanted.add(enchantDefault.apply(extraItem));
+                enchanted.add(enchantAlternate.apply(extraItem));
+                if (!replace) {
+                    resultingList.addAll(Arrays.stream(existing).map(enchantDefault).toList());
+                    resultingList.addAll(Arrays.stream(existing).map(enchantAlternate).toList());
+                }
+            }
         }
 
-        FullItemData[] slotArray = reforgedItems.get(slot);
-        if (customiseOthersInSlot) {
-            ArrayUtil.mapInPlace(slotArray, customiseItem);
+        List<FullItemData> forged;
+        if (recipe != null) {
+            forged = enchanted.stream().map(item -> Reforger.presetReforge(item, recipe)).toList();
+        } else {
+            forged = enchanted.stream().flatMap(item -> Reforger.reforgeItem(model.reforgeRules(), item).stream()).toList();
         }
+
+        resultingList.addAll(forged);
+        itemOptions.put(slot, resultingList.toArray(FullItemData[]::new));
+
+        listSlotContent(itemOptions, slot);
+
+        return forged.getFirst();
+    }
+
+    private static void listSlotContent(EquipOptionsMap reforgedItems, SlotEquip slot) {
+        FullItemData[] slotArray = reforgedItems.get(slot);
         HashSet<ItemRef> seen = new HashSet<>();
         ArrayUtil.forEach(slotArray, it -> {
             if (seen.add(it.ref())) {
                 OutputText.println("NEW " + slot + " " + it);
             }
         });
-
-        return extraItem;
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlusPlus(EquipOptionsMap runItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2, int upgradeLevel, boolean replace, StatBlock adjustment) {
-        Function<FullItemData, FullItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
+    public static void reforgeProcessPlusPlus(EquipOptionsMap runItems, ModelCombined model, Instant startTime, int extraItemId1, int extraItemId2, int upgradeLevel, boolean replace, StatBlock adjustment, boolean alternateEnchants) {
 //        Function<ItemData, ItemData> enchant2 = x -> x.changeFixed(new StatBlock(285,90,0,165,0,0,320,0,0,0));
 
-        FullItemData extraItem1 = addExtra(runItems, model, extraItemId1, upgradeLevel, enchant, null, replace, true, true);
+        FullItemData extraItem1 = addExtra(runItems, model, extraItemId1, upgradeLevel, EnchantMode.BothDefaultAndAlternate, null, replace, true);
         OutputText.println("EXTRA " + extraItem1);
         OutputText.println();
 
-        FullItemData extraItem2 = addExtra(runItems, model, extraItemId2, upgradeLevel, enchant, null, replace, true, true);
+        FullItemData extraItem2 = addExtra(runItems, model, extraItemId2, upgradeLevel, EnchantMode.BothDefaultAndAlternate,  null, replace, true);
         OutputText.println("EXTRA " + extraItem2);
         OutputText.println();
+
+        if (alternateEnchants)
+            ItemLoadUtil.duplicateAlternateEnchants(runItems, model);
 
         JobInput job = new JobInput();
         job.config(model, runItems, startTime, adjustment);
@@ -254,9 +294,7 @@ public class Tasks {
         }
     }
 
-    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel) {
-        Function<FullItemData, FullItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
-
+    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel, boolean alternateEnchants) {
         for (CostedItem entry : extraItems) {
             int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
@@ -268,26 +306,32 @@ public class Tasks {
                 } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(extraItem.ref()))) {
                     OutputText.println("SKIP DUP " + extraItem);
                 } else {
-                    addExtra(items, model, extraItemId, upgradeLevel, slot, enchant, null, false, true, true);
+                    addExtra(items, model, extraItemId, upgradeLevel, slot, EnchantMode.BothDefaultAndAlternate, null, false, true);
                 }
             }
         }
+
+        if (alternateEnchants)
+            ItemLoadUtil.duplicateAlternateEnchants(items, model);
+
+//        items.put(SlotEquip.Leg, Arrays.stream(items.get(SlotEquip.Leg)).filter(x -> x.itemId() == 87071).toList());
 
         JobInput job = new JobInput();
         job.model = model;
         job.setItemOptions(items);
         job.startTime = startTime;
         job.printRecorder.outputImmediate = true;
-        job.runSizeMultiply = 12;
+        job.forcePhased = true;
+//        job.runSizeMultiply = 2;
+//        job.runSizeMultiply = 12;
+        job.runSizeMultiply = 80;
         JobOutput output = Solver.runJob(job);
-        job.printRecorder.outputNow();
         Optional<FullItemSet> resultSet = output.getFinalResultSet();
         outputResultSimple(resultSet, model, true);
+        outputTweaked(output.resultSet, items, model);
     }
 
     public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, List<EquippedItem> extraItems) {
-        Function<FullItemData, FullItemData> enchant = x -> ItemLoadUtil.defaultEnchants(x, model, true);
-
         EquipOptionsMap itemsOriginal = items.deepClone();
 
         for (EquippedItem entry : extraItems) {
@@ -300,7 +344,7 @@ public class Tasks {
                 } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(extraItem.ref()))) {
                     OutputText.println("SKIP DUP " + extraItem);
                 } else {
-                    addExtra(items, model, extraItem, slot, enchant, null, false, true, true);
+                    addExtra(items, model, extraItem, slot, EnchantMode.BothDefaultAndAlternate, null, false, true);
                 }
             }
         }
@@ -386,7 +430,12 @@ public class Tasks {
 
     public static void paladinMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec();
-//        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+        multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
+        multi.addFixedForge(87026, new ReforgeRecipe(Expertise, Haste)); // Back Cloak of Peacock Feathers
+        multi.addFixedForge(86957, new ReforgeRecipe(null, null)); // Ring Ring of the Bladed Tempest
+//        multi.addFixedForge(86955, new ReforgeRecipe(Mastery, Expertise)); // Belt Waistplate of Overwhelming Assault
+        multi.addFixedForge(86387, new ReforgeRecipe(Hit, Haste)); // Weapon1H Kilrak, Jaws of Terror
 
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
 //        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
@@ -401,6 +450,11 @@ public class Tasks {
 //        multi.addFixedForge(87026, ReforgeRecipe.empty()); // Back Cloak of Peacock Feathers
 //        multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
 //        multi.addFixedForge(86957, ReforgeRecipe.empty()); // Ring Ring of the Bladed Tempest
+
+        // TRIM DOWN DEFENSE
+        multi.addFixedForge(86659, new ReforgeRecipe(Mastery, Haste)); // shoulder
+        multi.addFixedForge(90862, new ReforgeRecipe(null, null)); // ring
+//        multi.addFixedForge(85323, new ReforgeRecipe(Parry, Mastery)); // chest
 
         int extraUpgrade = 2;
         boolean preUpgrade = false;
@@ -424,9 +478,12 @@ public class Tasks {
 //                        84949, // mal glad girdle accuracy
 //                        89280, // voice helm
 //                        86822, // celestial overwhelm assault belt
-//                        87015, // heroic clawfeet
-//                          86979, // heroic impaling treads
+                        87015, // heroic clawfeet
+//                        86979, // heroic impaling treads
 //                        86957, // heroic bladed tempest
+                        85343, // normal ret chest
+                        87071, // yang-xi heroic
+                        86681, // celestial ret head
                 },
                 extraUpgrade,
                 preUpgrade
@@ -446,15 +503,18 @@ public class Tasks {
 //                        86075, // steelskin basic
 //                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
-//                        87015, // clawfeet
+                        87015, // clawfeet
 //                        87062 // elegion heroic
 //                        86957, // heroic bladed tempest
+                        85343, // normal ret chest
+                        87071, // yang-xi heroic
+                        86681, // celestial ret head
                 },
                 extraUpgrade,
                 preUpgrade
-        );
+        )
 //                .setDuplicatedItems(Map.of(89934, 1))
-//                .setWorstCommonPenalty(99);
+                .setWorstCommonPenalty(99.2);
 
         multi.addSpec(
                 "PROT-DEFENCE",
@@ -472,19 +532,22 @@ public class Tasks {
 //                        84807, // mav glad cloak alacrity
 //                        87036, // heroic soulgrasp
 //                        87026, // heroic peacock cloak
-                        86955, // heroic overwhelm assault belt
+//                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
 //                        87015, // clawfeet
 //                        87062 // elegion heroic
 //                        89075, // yi cloak
 //                        86957, // heroic bladed tempest
-//                        86325 // normal daybreak drake
+//                        86325, // normal daybreak drake
+//                        85343, // normal ret chest
+//                        87071, // yang-xi heroic
+//                        86661, // celestial prot head
                 },
                 extraUpgrade,
                 preUpgrade
         )
                 .setDuplicatedItems(Map.of(89934, 2))
-                .setWorstCommonPenalty(99.3);
+                .setWorstCommonPenalty(98.5);
 
 //        multi.suppressSlotCheck(86957);
 //        multi.suppressSlotCheck(84829);
@@ -492,9 +555,10 @@ public class Tasks {
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-//        multi.solve(3000);
-        multi.solve(50000);
-//        multi.solve(600000);
+//        multi.solve(1000);
+//        multi.solve(15000);
+//        multi.solve(50000);
+        multi.solve(660000);
 //        multi.solve(4000000);
     }
 

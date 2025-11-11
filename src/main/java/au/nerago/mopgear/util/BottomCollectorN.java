@@ -77,7 +77,12 @@ public class BottomCollectorN<T> implements Collector<T, BottomCollectorN.State<
             while (sortedSet.size() > size) {
                 sortedSet.removeLast();
             }
-            highestValue = getValue.applyAsLong(sortedSet.getLast());
+
+            try {
+                highestValue = getValue.applyAsLong(sortedSet.getLast());
+            } catch (NoSuchElementException e) {
+                // swallow
+            }
         }
 
         public Collection<T> finish() {

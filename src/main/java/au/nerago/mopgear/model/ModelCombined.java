@@ -63,6 +63,11 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return choice;
     }
 
+    public StatBlock gemChoiceBestAlternate() {
+        StatType stat = statRatings.bestNonHit();
+        return StatBlock.of(stat, 320);
+    }
+
     public StatBlock standardEnchant(SlotItem slot) {
         return enchants.standardEnchant(slot);
     }

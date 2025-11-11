@@ -1,5 +1,6 @@
 package au.nerago.mopgear.util;
 
+import au.nerago.mopgear.domain.FullItemData;
 import au.nerago.mopgear.domain.StatType;
 import com.google.gson.JsonElement;
 
@@ -61,6 +62,21 @@ public class ArrayUtil {
             return first;
         } else {
             return concat(first, second);
+        }
+    }
+
+    @SuppressWarnings({"UseBulkOperation", "ManualArrayToCollectionCopy"})
+    public static FullItemData[] concatNullSafe(FullItemData[] first, List<FullItemData> second) {
+        if (first == null) {
+            return second.toArray(FullItemData[]::new);
+        } else if (second == null) {
+            return first;
+        } else {
+            ArrayList<FullItemData> result = new ArrayList<>();
+            for (FullItemData item : first)
+                result.add(item);
+            result.addAll(second);
+            return result.toArray(FullItemData[]::new);
         }
     }
 

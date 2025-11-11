@@ -2,6 +2,7 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.*;
+import au.nerago.mopgear.model.EnchantMode;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirementsHitExpertise;
@@ -20,7 +21,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import static au.nerago.mopgear.Tasks.*;
 import static au.nerago.mopgear.domain.StatType.*;
@@ -60,11 +60,11 @@ public class Main {
 
 //
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -77,8 +77,8 @@ public class Main {
     private void reforgeRet(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.PaladinRet);
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, model, commonItems, true);
 
@@ -116,6 +116,14 @@ public class Main {
 //        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
 
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
+
+//          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
+//                new CostedItem(87071,0), // yang-xi
+//                new CostedItem(86681,0), // bad head
+//                new CostedItem(85343,0), // normal chest
+//                new CostedItem(87015,0) // clawfeet
+//                },
+//                2, true);
     }
 
     private void reforgeProt(Instant startTime) {
@@ -130,7 +138,7 @@ public class Main {
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, true);
 
-//        reforgeProcess(items, model, startTime);
+        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
@@ -139,13 +147,26 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
 //          reforgeProcessPlusPlus(items, model, startTime, 87071, 86681, 2, true, StatBlock.of(Hit, -100));
-        reforgeProcessPlusPlus(items, model, startTime, 87071, 86681, 2, true, null);
+//        reforgeProcessPlusPlus(items, model, startTime, 87071, 86681, 2, false, null);
+
+        // adding yang-xi for dps prot
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
 //                new CostedItem(87071,0), // yang-xi
 //                new CostedItem(86681,0), // bad head
+//                new CostedItem(85343,0), // normal chest
 //                new CostedItem(87015,0) // clawfeet
 //                },
-//                2);
+//                2, true);
+
+        // adding yang-xi for miti prot
+//        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
+//                        new CostedItem(87071,0), // yang-xi
+//                        new CostedItem(86661,0), // bad head
+//                        new CostedItem(87015,0) // clawfeet
+//                },
+//                2, true);
+
+
 //        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 //        reforgeProcessPlusMany(items, model, startTime, bagItemsArray(ignoredItems));
@@ -269,21 +290,20 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 6/11/2025
+        // 11/11/2025
         map.put(87172, List.of(new ReforgeRecipe(null, null))); // Trinket Darkmist Vortex
-        map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
+        map.put(86979, List.of(new ReforgeRecipe(Hit, Expertise))); // Foot Impaling Treads
         map.put(87036, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker
-        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons
-        map.put(89934, List.of(new ReforgeRecipe(Haste, Crit))); // Wrist Bonded Soul Bracers
-        map.put(86387, List.of(new ReforgeRecipe(Hit, Expertise))); // Weapon1H Kilrak, Jaws of Terror
-        map.put(87100, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets
-        map.put(87024, List.of(new ReforgeRecipe(Crit, Hit))); // Head Nullification Greathelm
+        map.put(85339, List.of(new ReforgeRecipe(Hit, Crit))); // Shoulder White Tiger Pauldrons
+        map.put(89934, List.of(new ReforgeRecipe(Expertise, Hit))); // Wrist Bonded Soul Bracers
+        map.put(86387, List.of(new ReforgeRecipe(Hit, Haste))); // Weapon1H Kilrak, Jaws of Terror
+        map.put(87100, List.of(new ReforgeRecipe(Expertise, Hit))); // Hand White Tiger Gauntlets
+        map.put(87024, List.of(new ReforgeRecipe(null, null))); // Head Nullification Greathelm
         map.put(87026, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Cloak of Peacock Feathers
-        map.put(87050, List.of(new ReforgeRecipe(Parry, Expertise))); // Offhand Steelskin, Qiang's Impervious Shield
-        map.put(86683, List.of(new ReforgeRecipe(Crit, Expertise))); // Chest White Tiger Battleplate
+        map.put(87050, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Steelskin, Qiang's Impervious Shield
         map.put(86680, List.of(new ReforgeRecipe(Mastery, Crit))); // Leg White Tiger Legplates
-        map.put(86957, List.of(new ReforgeRecipe(Haste, Crit))); // Ring Ring of the Bladed Tempest
-        map.put(86955, List.of(new ReforgeRecipe(Mastery, Expertise))); // Belt Waistplate of Overwhelming Assault
+        map.put(86957, List.of(new ReforgeRecipe(null, null))); // Ring Ring of the Bladed Tempest
+        map.put(86955, List.of(new ReforgeRecipe(Mastery, Crit))); // Belt Waistplate of Overwhelming Assault
         return map;
     }
 
@@ -315,37 +335,37 @@ public class Main {
                 89526, 82822, 82814
         };
 
-        Function<FullItemData, FullItemData> customiseItem = extraItem -> {
-//            if (extraItem.id == 82812) { // Pyretic Legguards
-//                return extraItem.changeFixed(new StatBlock(285, 0, 0, 165, 160, 160 + 60, 0, 0, 0, 0));
-//            } else if (extraItem.id == 81284) { // Anchoring Sabatons
-//                return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0, 0));
-//            } else if (extraItem.id == 81113) { // Spike-Soled Stompers
-//                return extraItem.changeFixed(new StatBlock(60, 0, 0, 0, 160, 175 + 160, 0, 0, 0, 0));
-            if (extraItem.itemId() == 87060) { // Star-Stealer Waistguard
-                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 0, 160, 320 * 2 + 160, 0, 120, 0, 0));
-//            } else if (extraItem.id == 86794) { // starcrusher gauntlets
-//                return extraItem.changeFixed(new StatBlock(170, 0, 0, 0, 160, 60 + 320 + 160, 0, 0, 0, 0));
-//            } else if (extraItem.id == 86145) { // jang-xi devastating legs
-//                return extraItem.changeFixed(new StatBlock(120, 430, 0, 0, 160, 160 * 2, 160, 0, 0, 0));
-            } else if (extraItem.itemId() == 77539) { // engineer helm
-                return extraItem.changeEnchant(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
-            } else if (extraItem.itemId() == 89503) { // Greenstone Drape
-                return extraItem.changeStatsBase(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
-                        .changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
-            } else if (extraItem.slot() == SlotItem.Back) {
-                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
-            } else {
-                OutputText.println("DEFAULT ENCHANT " + extraItem);
-                return ItemLoadUtil.defaultEnchants(extraItem, model, false);
-            }
-        };
+//        Function<FullItemData, FullItemData> customiseItem = extraItem -> {
+////            if (extraItem.id == 82812) { // Pyretic Legguards
+////                return extraItem.changeFixed(new StatBlock(285, 0, 0, 165, 160, 160 + 60, 0, 0, 0, 0));
+////            } else if (extraItem.id == 81284) { // Anchoring Sabatons
+////                return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0, 0));
+////            } else if (extraItem.id == 81113) { // Spike-Soled Stompers
+////                return extraItem.changeFixed(new StatBlock(60, 0, 0, 0, 160, 175 + 160, 0, 0, 0, 0));
+//            if (extraItem.itemId() == 87060) { // Star-Stealer Waistguard
+//                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 0, 160, 320 * 2 + 160, 0, 120, 0, 0));
+////            } else if (extraItem.id == 86794) { // starcrusher gauntlets
+////                return extraItem.changeFixed(new StatBlock(170, 0, 0, 0, 160, 60 + 320 + 160, 0, 0, 0, 0));
+////            } else if (extraItem.id == 86145) { // jang-xi devastating legs
+////                return extraItem.changeFixed(new StatBlock(120, 430, 0, 0, 160, 160 * 2, 160, 0, 0, 0));
+//            } else if (extraItem.itemId() == 77539) { // engineer helm
+//                return extraItem.changeEnchant(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
+//            } else if (extraItem.itemId() == 89503) { // Greenstone Drape
+//                return extraItem.changeStatsBase(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
+//                        .changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
+//            } else if (extraItem.slot() == SlotItem.Back) {
+//                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
+//            } else {
+//                OutputText.println("DEFAULT ENCHANT " + extraItem);
+//                return ItemLoadUtil.defaultEnchants(extraItem, model, false, null);
+//            }
+//        };
 
         for (int extraId : extraItems) {
             ReforgeRecipe reforge = null;
             if (presetReforge.containsKey(extraId))
                 reforge = presetReforge.get(extraId).getFirst();
-            FullItemData extraItem = addExtra(map, model, extraId, 0, customiseItem, reforge, false, false, false);
+            FullItemData extraItem = addExtra(map, model, extraId, 0, EnchantMode.BothDefaultAndAlternate, reforge, false, false);
             if (extraItem != null)
                 OutputText.println("EXTRA " + extraItem);
         }

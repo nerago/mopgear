@@ -7,9 +7,12 @@ import au.nerago.mopgear.io.WowHead;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
+import au.nerago.mopgear.util.Tuple;
 
 import java.nio.file.Path;
 import java.util.*;
+
+import static au.nerago.mopgear.domain.SocketType.*;
 
 @SuppressWarnings("unused")
 public class ItemLoadUtil {
@@ -70,8 +73,12 @@ public class ItemLoadUtil {
         FullItemData item = loadItemBasic(id, upgrade);
 
         if (equippedItem.gems().length > 0) {
-            StatBlock gemStat = GemData.process(equippedItem.gems(), item.shared.socketBonus(), item.shared.name());
-            item = item.changeEnchant(gemStat);
+            boolean possibleBlacksmith = item.slot() == SlotItem.Wrist || item.slot() == SlotItem.Hand;
+            if (equippedItem.gems().length != item.shared.socketSlots().length && !possibleBlacksmith)
+                throw new IllegalArgumentException("gems filled " + equippedItem.gems().length + " expected " + item.shared.socketSlots().length);
+
+            Tuple.Tuple2<StatBlock, List<StatBlock>> gemInfo = GemData.process(equippedItem.gems(), equippedItem.enchant(), item.shared.socketSlots(), item.shared.socketBonus(), item.shared.name(), possibleBlacksmith);
+            item = item.changeEnchant(gemInfo.a(), gemInfo.b());
         }
 
         if (detailedOutput) {
@@ -82,7 +89,7 @@ public class ItemLoadUtil {
                     if (standardEnchant == null || standardEnchant.equalsStats(actualEnchant)) {
                         OutputText.println(id + ": " + item.toStringExtended() + " ENCHANTED");
                     } else {
-                        OutputText.println(id + ": " + item.toStringExtended() + " ENCHANT WRONG ENCHANT WRONG ENCHANT WRONG "  + equippedItem.enchant());
+                        OutputText.println(id + ": " + item.toStringExtended() + " ENCHANT WRONG ENCHANT WRONG ENCHANT WRONG " + equippedItem.enchant());
                     }
                 } else {
                     OutputText.println(id + ": " + item.toStringExtended() + " MISSING EXPECTED ENCHANT MISSING MISSING MISSING");
@@ -129,11 +136,13 @@ public class ItemLoadUtil {
         return item;
     }
 
-    public static void defaultEnchants(EquipOptionsMap itemMap, ModelCombined model, boolean force) {
-        itemMap.forEachValue(array -> ArrayUtil.mapInPlace(array, item -> defaultEnchants(item, model, force)));
+    public static void defaultEnchants(EquipOptionsMap itemMap, ModelCombined model, boolean force, boolean alternateGem) {
+        itemMap.forEachValue(array -> ArrayUtil.mapInPlace(array, item -> defaultEnchants(item, model, force, alternateGem)));
     }
 
-    public static FullItemData defaultEnchants(FullItemData item, ModelCombined model, boolean force) {
+    public static FullItemData defaultEnchants(FullItemData item, ModelCombined model, boolean force, boolean alternateGem) {
+        int itemId = item.itemId();
+
         if (item.slot() == SlotItem.Trinket) {
             return item;
         }
@@ -149,12 +158,14 @@ public class ItemLoadUtil {
         else if (item.slot() == SlotItem.Belt)
             socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
 
+        boolean socketBonusMet = true;
         StatBlock total = StatBlock.empty;
+        List<StatBlock> gemChoice = new ArrayList<>();
         if (socketSlots != null) {
             int engineer = 0;
             for (SocketType type : socketSlots) {
+                StatBlock value;
                 if (type == SocketType.Engineer) {
-                    StatBlock value;
                     if (engineer == 0)
                         value = StatBlock.of(StatType.Haste, 600);
                     else if (engineer == 1)
@@ -163,21 +174,47 @@ public class ItemLoadUtil {
                         value = StatBlock.of(StatType.Crit, 600);
                     else
                         throw new IllegalArgumentException("don't know what engineer gem to add");
-                    total = total.plus(value);
                     engineer++;
+                } else if (alternateGem && (type == Red || type == Blue || type == Yellow)) {
+                    value = model.gemChoiceBestAlternate();
                 } else {
-                    total = total.plus(model.gemChoice(type));
+                    value = model.gemChoice(type);
                 }
+
+                gemChoice.add(value);
+                if (!GemData.matchesSocket(type, value)) {
+                    socketBonusMet = false;
+                }
+
+                total = total.plus(value);
             }
         }
-        if (item.shared.socketBonus() != null) {
+
+        if (item.shared.socketBonus() != null && socketBonusMet) {
             total = total.plus(item.shared.socketBonus());
         }
+
         StatBlock enchant = model.standardEnchant(item.slot());
         if (enchant != null) {
             total = total.plus(enchant);
         }
 
-        return item.changeEnchant(total);
+        return item.changeEnchant(total, gemChoice);
+    }
+
+    public static void duplicateAlternateEnchants(EquipOptionsMap items, ModelCombined model) {
+        HashSet<FullItemData> resultingList = new HashSet<>();
+        for (SlotEquip slot : SlotEquip.values()) {
+            FullItemData[] options = items.get(slot);
+            if (options != null) {
+                HashSet<FullItemData> updated = new HashSet<>();
+                for (FullItemData item : options) {
+                    updated.add(item);
+                    updated.add(defaultEnchants(item, model, true, false));
+                    updated.add(defaultEnchants(item, model, true, true));
+                }
+                items.put(slot, updated.toArray(FullItemData[]::new));
+            }
+        }
     }
 }

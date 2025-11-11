@@ -189,13 +189,13 @@ public class FindUpgrades {
         JobInput job = new JobInput();
 //        job.singleThread = true;
 
-        extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true);
+        extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true, false);
         job.println("OFFER " + extraItem.toStringExtended());
         job.println("REPLACING " + (items.get(slot) != null ? items.get(slot)[0].toStringExtended() : "NOTHING"));
 
-        FullItemData[] extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
+        List<FullItemData> extraOptions = Reforger.reforgeItem(model.reforgeRules(), extraItem);
         items.put(slot, extraOptions);
-        ArrayUtil.mapInPlace(items.get(slot), x -> ItemLoadUtil.defaultEnchants(x, model, true)); // redundant?
+        ArrayUtil.mapInPlace(items.get(slot), x -> ItemLoadUtil.defaultEnchants(x, model, true, false)); // redundant?
 
         if (hackAllow) {
 //            adjustment = FindStatRange.checkSetAdjust(model, items, job.printRecorder);
