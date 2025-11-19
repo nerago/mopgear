@@ -53,12 +53,8 @@ public class FindMultiSpec {
 
     public void solve(long targetComboCount) {
         OutputText.println("PREPARING SPECS");
-        for (SpecDetails spec : specs) {
-            spec.prepareA(specs);
-        }
-        for (SpecDetails spec : specs) {
-            spec.prepareB(specs);
-        }
+        specs.forEach(s -> s.prepareStartingGear(specs));
+        specs.forEach(s -> s.prepareExtraItems(specs));
 
         validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
         OutputText.println();
@@ -81,13 +77,15 @@ public class FindMultiSpec {
 
         OutputText.println("COMMON COMBOS " + commonCombos + " SKIP SIZE " + skip);
 
+        // TODO include current setup
+
         long indexedOutputSize = commonCombos / skip;
         Stream<Map<ItemRef, FullItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
-        Stream<Map<ItemRef, FullItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize);
+        Stream<Map<ItemRef, FullItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize / 2);
         Stream<Map<ItemRef, FullItemData>> commonStream = Stream.concat(commonStream1, commonStream2);
 
         Instant startTime = Instant.now();
-        commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 2, startTime, commonStream);
+        commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 3 / 2, startTime, commonStream);
 
         Stream<ProposedResults> resultStream = commonStream
                 .map(r -> subSolveEach(r, specs))
@@ -102,6 +100,8 @@ public class FindMultiSpec {
                         s -> multiRating(s.resultJobs, specs),
                         s -> reportBetter(s.resultJobs, specs)));
         outputResultFinal(best, specs);
+
+        // TODO highlight gems changed vs as loaded
 
         // TODO keep track of good indexes and search near
     }
@@ -148,7 +148,7 @@ public class FindMultiSpec {
             if (lst.isEmpty()) {
                 Optional<FullItemData> any = mapArray.stream().flatMap(x -> x.itemOptions.itemStream())
                         .filter(item -> ref.equalsTyped(item.ref())).findFirst();
-                throw new IllegalArgumentException("No common forge for " + any);
+                throw new IllegalArgumentException("No common forge for " + ref + " " + any);
             }
 
             // print common item
@@ -174,6 +174,9 @@ public class FindMultiSpec {
         synchronized (OutputText.class) {
             OutputText.printf("BASELINE %s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
             set.outputSet(spec.model);
+
+            int setItems = spec.model.setBonus().countInAnySet(output.resultSet.orElseThrow().items());
+            OutputText.println("Set Items " + setItems);
         }
     }
 
@@ -319,7 +322,6 @@ public class FindMultiSpec {
         long total = 0;
         for (int i = 0; i < resultJobs.size(); ++i) {
             JobOutput job = resultJobs.get(i);
-//            ItemSet set = job.resultSet.orElseThrow();
             SpecDetails spec = specList.get(i);
             long specRating = job.resultRating;
             total += specRating * spec.ratingMultiply;
@@ -338,6 +340,7 @@ public class FindMultiSpec {
                 OutputText.printf("-------------- %s -------------- %s\n", spec.label, "<HACK>".repeat(job.hackCount));
                 job.input.printRecorder.outputNow();
                 set.outputSetDetailed(spec.model);
+                OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", job.resultRating / spec.optimalRating * 100.0);
             }
             OutputText.println("#######################################");
         }
@@ -423,6 +426,8 @@ public class FindMultiSpec {
         double getWorstCommonPenalty();
 
         SpecDetailsInterface setWorstCommonPenalty(double penalty);
+
+        SpecDetailsInterface addRemoveItem(int id);
     }
 
     private class SpecDetails implements SpecDetailsInterface {
@@ -436,6 +441,7 @@ public class FindMultiSpec {
         boolean challengeScale;
         double worstCommonPenalty;
         Map<Integer, Integer> duplicatedItems;
+        List<Integer> removeItems;
         double optimalRating;
         EquipOptionsMap itemOptions;
 
@@ -472,6 +478,14 @@ public class FindMultiSpec {
         }
 
         @Override
+        public SpecDetailsInterface addRemoveItem(int id) {
+            if (removeItems == null)
+                removeItems = new ArrayList<>();
+            removeItems.add(id);
+            return this;
+        }
+
+        @Override
         public double getWorstCommonPenalty() {
             return worstCommonPenalty;
         }
@@ -482,16 +496,21 @@ public class FindMultiSpec {
             return this;
         }
 
-        public void prepareA(List<SpecDetails> allSpecs) {
+        public void prepareStartingGear(List<SpecDetails> allSpecs) {
             itemOptions = ItemLoadUtil.readAndLoad(gearFile, model, null, false);
             if (upgradeCurrentItems)
                 itemOptions = ItemMapUtil.upgradeAllTo2(itemOptions);
             remapDuplicates();
         }
 
-        public void prepareB(List<SpecDetails> allSpecs) {
+        public void prepareExtraItems(List<SpecDetails> allSpecs) {
             for (int itemId : extraItems) {
                 addExtra(itemId, allSpecs);
+            }
+            if (removeItems != null) {
+                for (int itemId : removeItems) {
+                    itemOptions.mapSlots(array -> Arrays.stream(array).filter(it -> it.itemId() != itemId).toArray(FullItemData[]::new));
+                }
             }
         }
 

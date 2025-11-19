@@ -90,6 +90,7 @@ public class StandardModels {
     }
 
     private static ModelCombined pallyRetModel() {
+//        StatRatings statRatings = new StatRatingsPriority(new StatType[] {Primary, Haste, Crit, Mastery});
         StatRatingsWeights statRatings = new StatRatingsWeights(specToWeightFile(SpecType.PaladinRet));
 
         StatRequirements hitRequire = StatRequirementsHitExpertise.retWideCapRange();

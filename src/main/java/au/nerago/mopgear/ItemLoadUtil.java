@@ -8,6 +8,7 @@ import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -72,12 +73,20 @@ public class ItemLoadUtil {
         int id = equippedItem.itemId(), upgrade = equippedItem.upgradeStep();
         FullItemData item = loadItemBasic(id, upgrade);
 
-        if (equippedItem.gems().length > 0) {
+        int[] equippedGems = equippedItem.gems();
+        @NotNull SocketType[] socketSlots = item.shared.socketSlots();
+        if (equippedGems.length > 0) {
             boolean possibleBlacksmith = item.slot() == SlotItem.Wrist || item.slot() == SlotItem.Hand;
-            if (equippedItem.gems().length != item.shared.socketSlots().length && !possibleBlacksmith)
-                throw new IllegalArgumentException("gems filled " + equippedItem.gems().length + " expected " + item.shared.socketSlots().length);
+            if (equippedGems.length != socketSlots.length && !possibleBlacksmith) {
+                OutputText.println(id + ": " + item.toStringExtended() + " MISSING GEM MISSING GEM MISSING GEM");
+                // TODO clean this up, was an empty socket on export
+                while (equippedGems.length < socketSlots.length) {
+                    equippedGems = ArrayUtil.append(equippedGems, 76699);
+                }
+            }
+//                throw new IllegalArgumentException("gems filled " + equippedItem.gems().length + " expected " + item.shared.socketSlots().length);
 
-            Tuple.Tuple2<StatBlock, List<StatBlock>> gemInfo = GemData.process(equippedItem.gems(), equippedItem.enchant(), item.shared.socketSlots(), item.shared.socketBonus(), item.shared.name(), possibleBlacksmith);
+            Tuple.Tuple2<StatBlock, List<StatBlock>> gemInfo = GemData.process(equippedGems, equippedItem.enchant(), socketSlots, item.shared.socketBonus(), item.shared.name(), possibleBlacksmith);
             item = item.changeEnchant(gemInfo.a(), gemInfo.b());
         }
 

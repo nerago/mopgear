@@ -104,6 +104,14 @@ public class ArrayUtil {
         return result;
     }
 
+    public static int[] append(int[] array, int item) {
+        int newLen = array.length + 1;
+        int[] result = new int[newLen];
+        System.arraycopy(array, 0, result, 0, array.length);
+        result[array.length] = item;
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
     private static <T> T[] createGeneric(T[] example, int length) {
         return (T[]) Array.newInstance(example.getClass().getComponentType(), length);

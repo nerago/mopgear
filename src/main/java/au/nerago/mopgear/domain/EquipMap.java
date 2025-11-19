@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @SuppressWarnings("unused")
-public final class EquipMap implements IEquipMap {
+public final class EquipMap /*implements IEquipMap */ {
     private FullItemData head;
     private FullItemData neck;
     private FullItemData shoulder;

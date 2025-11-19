@@ -127,14 +127,14 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
-        Path file = DataLocation.gearProtDpsFile;
+//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
+//        Path file = DataLocation.gearProtDpsFile;
 
-//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
-//        Path file = DataLocation.gearProtDefenceFile;
+        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
+        Path file = DataLocation.gearProtDefenceFile;
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, true);
 
@@ -290,20 +290,20 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 11/11/2025
+        // 13/11/2025
         map.put(87172, List.of(new ReforgeRecipe(null, null))); // Trinket Darkmist Vortex
-        map.put(86979, List.of(new ReforgeRecipe(Hit, Expertise))); // Foot Impaling Treads
+        map.put(86979, List.of(new ReforgeRecipe(Haste, Expertise))); // Foot Impaling Treads
         map.put(87036, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Soulgrasp Choker
-        map.put(85339, List.of(new ReforgeRecipe(Hit, Crit))); // Shoulder White Tiger Pauldrons
-        map.put(89934, List.of(new ReforgeRecipe(Expertise, Hit))); // Wrist Bonded Soul Bracers
+        map.put(85343, List.of(new ReforgeRecipe(null, null))); // Chest White Tiger Battleplate
+        map.put(85339, List.of(new ReforgeRecipe(Hit, Expertise))); // Shoulder White Tiger Pauldrons
+//        map.put(89934, List.of(new ReforgeRecipe(Haste, Crit))); // Wrist Bonded Soul Bracers
         map.put(86387, List.of(new ReforgeRecipe(Hit, Haste))); // Weapon1H Kilrak, Jaws of Terror
-        map.put(87100, List.of(new ReforgeRecipe(Expertise, Hit))); // Hand White Tiger Gauntlets
-        map.put(87024, List.of(new ReforgeRecipe(null, null))); // Head Nullification Greathelm
-        map.put(87026, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Cloak of Peacock Feathers
+        map.put(87100, List.of(new ReforgeRecipe(null, null))); // Hand White Tiger Gauntlets
+        map.put(87024, List.of(new ReforgeRecipe(Crit, Expertise))); // Head Nullification Greathelm
+        map.put(87026, List.of(new ReforgeRecipe(Crit, Hit))); // Back Cloak of Peacock Feathers
         map.put(87050, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Steelskin, Qiang's Impervious Shield
-        map.put(86680, List.of(new ReforgeRecipe(Mastery, Crit))); // Leg White Tiger Legplates
         map.put(86957, List.of(new ReforgeRecipe(null, null))); // Ring Ring of the Bladed Tempest
-        map.put(86955, List.of(new ReforgeRecipe(Mastery, Crit))); // Belt Waistplate of Overwhelming Assault
+        map.put(86955, List.of(new ReforgeRecipe(Haste, Hit))); // Belt Waistplate of Overwhelming Assault
         return map;
     }
 

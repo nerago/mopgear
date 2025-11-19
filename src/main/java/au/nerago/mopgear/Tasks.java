@@ -56,7 +56,7 @@ public class Tasks {
         job.forceSkipIndex = true;
         job.forcedRunSized = BILLION*4;
         job.printRecorder.outputImmediate = true;
-        job.specialFilter = set -> model.setBonus().countInSet(set.items()) >= 4;
+        job.specialFilter = set -> model.setBonus().countInAnySet(set.items()) >= 4;
         JobOutput output = Solver.runJob(job);
 
         outputResultSimple(output.getFinalResultSet(), model, true);
@@ -432,10 +432,10 @@ public class Tasks {
         FindMultiSpec multi = new FindMultiSpec();
         multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
         multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
-        multi.addFixedForge(87026, new ReforgeRecipe(Expertise, Haste)); // Back Cloak of Peacock Feathers
-        multi.addFixedForge(86957, new ReforgeRecipe(null, null)); // Ring Ring of the Bladed Tempest
+//        multi.addFixedForge(87026, new ReforgeRecipe(Expertise, Haste)); // Back Cloak of Peacock Feathers
+//        multi.addFixedForge(86957, new ReforgeRecipe(null, null)); // Ring Ring of the Bladed Tempest
 //        multi.addFixedForge(86955, new ReforgeRecipe(Mastery, Expertise)); // Belt Waistplate of Overwhelming Assault
-        multi.addFixedForge(86387, new ReforgeRecipe(Hit, Haste)); // Weapon1H Kilrak, Jaws of Terror
+//        multi.addFixedForge(86387, new ReforgeRecipe(Hit, Haste)); // Weapon1H Kilrak, Jaws of Terror
 
 //        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
 //        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
@@ -478,22 +478,23 @@ public class Tasks {
 //                        84949, // mal glad girdle accuracy
 //                        89280, // voice helm
 //                        86822, // celestial overwhelm assault belt
-                        87015, // heroic clawfeet
+//                        87015, // heroic clawfeet
 //                        86979, // heroic impaling treads
 //                        86957, // heroic bladed tempest
-                        85343, // normal ret chest
-                        87071, // yang-xi heroic
-                        86681, // celestial ret head
+//                        85343, // normal ret chest
+//                        87071, // yang-xi heroic
+//                        86681, // celestial ret head
                 },
                 extraUpgrade,
                 preUpgrade
         );
+//                .addRemoveItem(86680);
 
         multi.addSpec(
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 StandardModels.modelFor(SpecType.PaladinProtDps),
-                686,
+                686 * 3,
                 new int[]{
 //                        84870, // pvp legs
 //                        86682, // white tiger gloves
@@ -503,18 +504,20 @@ public class Tasks {
 //                        86075, // steelskin basic
 //                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
-                        87015, // clawfeet
 //                        87062 // elegion heroic
 //                        86957, // heroic bladed tempest
-                        85343, // normal ret chest
-                        87071, // yang-xi heroic
-                        86681, // celestial ret head
+//                        85343, // normal ret chest
+
+//                        87015, // clawfeet
+//                        87071, // yang-xi heroic
+//                        86681, // celestial ret head
                 },
                 extraUpgrade,
                 preUpgrade
         )
 //                .setDuplicatedItems(Map.of(89934, 1))
-                .setWorstCommonPenalty(99.2);
+                .setWorstCommonPenalty(99.5)
+        ;
 
         multi.addSpec(
                 "PROT-DEFENCE",
@@ -547,7 +550,8 @@ public class Tasks {
                 preUpgrade
         )
                 .setDuplicatedItems(Map.of(89934, 2))
-                .setWorstCommonPenalty(98.5);
+//                .setWorstCommonPenalty(99.4)
+        ;
 
 //        multi.suppressSlotCheck(86957);
 //        multi.suppressSlotCheck(84829);
@@ -558,7 +562,7 @@ public class Tasks {
 //        multi.solve(1000);
 //        multi.solve(15000);
 //        multi.solve(50000);
-        multi.solve(660000);
+        multi.solve(490000);
 //        multi.solve(4000000);
     }
 

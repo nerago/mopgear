@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -231,6 +232,26 @@ public final class EquipOptionsMap {
         if (weapon != null) func.accept(SlotEquip.Weapon, weapon);
         if (offhand != null) func.accept(SlotEquip.Offhand, offhand);
     }
+
+    public void mapSlots(Function<FullItemData[], FullItemData[]> func) {
+        if (head != null) head = func.apply(head);
+        if (neck != null) neck = func.apply(neck);
+        if (shoulder != null) shoulder = func.apply(shoulder);
+        if (back != null) back = func.apply(back);
+        if (chest != null) chest = func.apply(chest);
+        if (wrist != null) wrist = func.apply(wrist);
+        if (hand != null) hand = func.apply(hand);
+        if (belt != null) belt = func.apply(belt);
+        if (leg != null) leg = func.apply(leg);
+        if (foot != null) foot = func.apply(foot);
+        if (ring1 != null) ring1 = func.apply(ring1);
+        if (ring2 != null) ring2 = func.apply(ring2);
+        if (trinket1 != null) trinket1 = func.apply(trinket1);
+        if (trinket2 != null) trinket2 = func.apply(trinket2);
+        if (weapon != null) weapon = func.apply(weapon);
+        if (offhand != null) offhand = func.apply(offhand);
+    }
+
 
     public Stream<Tuple.Tuple2<SlotEquip, FullItemData[]>> entryStream() {
         return StreamSupport.stream(new OptionsSpliterator(), true);

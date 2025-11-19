@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @SuppressWarnings("unused")
-public final class SolvableEquipMap implements IEquipMap {
+public final class SolvableEquipMap /* implements IEquipMap */ {
     SolvableItem head;
     SolvableItem neck;
     SolvableItem shoulder;

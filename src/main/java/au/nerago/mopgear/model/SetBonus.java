@@ -12,8 +12,8 @@ public class SetBonus {
 
     public static SetBonus forSpec(SpecType spec) {
         SetBonus setBonus = new SetBonus();
-        SetInfo specified = allSets.stream().filter(s -> s.spec == spec).findAny().orElseThrow();
-        setBonus.activeSets.add(specified);
+        setBonus.activeSets.addAll(allSets.stream().filter(s -> s.spec == spec).toList());
+        setBonus.prepare();
         return setBonus;
     }
 
@@ -25,6 +25,7 @@ public class SetBonus {
     });
     public SetBonus activateWhiteTigerPlate() {
         activeSets.addAll(allSets.stream().filter(s -> s.spec == SpecType.PaladinProtMitigation).toList());
+        prepare();
         return this;
     }
 
@@ -36,6 +37,7 @@ public class SetBonus {
 
     public SetBonus activateWhiteTigerBattlegear() {
         activeSets.addAll(allSets.stream().filter(s -> s.spec == SpecType.PaladinRet).toList());
+        prepare();
         return this;
     }
     public SetBonus activateWhiteTigerBattlegearOnly4pc() {
@@ -44,6 +46,7 @@ public class SetBonus {
                 85341, 85339, 85343, 85342, 85340,
                 87101, 87103, 87099, 87100, 87102
         }));
+        prepare();
         return this;
     }
 
@@ -55,6 +58,7 @@ public class SetBonus {
     });
     public SetBonus activateRegaliaEternalBlossom() {
         activeSets.addAll(allSets.stream().filter(s -> s.spec == SpecType.DruidBoom).toList());
+        prepare();
         return this;
     }
 
@@ -66,6 +70,7 @@ public class SetBonus {
     });
     public SetBonus activateVestmentsEternalBlossom() {
         activeSets.addAll(allSets.stream().filter(s -> s.spec == SpecType.DruidTree).toList());
+        prepare();
         return this;
     }
 
@@ -151,18 +156,31 @@ public class SetBonus {
     }
 
     private final List<SetInfo> activeSets = new ArrayList<>();
+    private final Map<Integer, Integer> lookup = new HashMap<>();
     private static final List<SetInfo> allSets = buildSets();
 
+    private void prepare() {
+        lookup.clear();
+        for (int setIndex = 0; setIndex < activeSets.size(); ++setIndex) {
+            SetInfo set = activeSets.get(setIndex);
+            for (int itemId : set.items) {
+                lookup.put(itemId, setIndex);
+            }
+        }
+    }
+
+    // NOTE main entry for model calc
     public long calc(FullItemSet set) {
-        if (activeSets.isEmpty()) {
+        if (lookup.isEmpty()) {
             return DENOMIATOR;
         }
         int[] setCounts = countBySet(set.items());
         return calcMuliplier(setCounts);
     }
 
+    // NOTE main entry for model calc
     public long calc(SolvableItemSet set) {
-        if (activeSets.isEmpty()) {
+        if (lookup.isEmpty()) {
             return DENOMIATOR;
         }
         int[] setCounts = countBySet(set.items());
@@ -183,25 +201,8 @@ public class SetBonus {
         return result;
     }
 
-    private int[] countBySet(IEquipMap itemMap) {
-        // TODO consider more optimising
-        int activeSetCount = activeSets.size();
-        int[] setCounts = new int[activeSetCount];
-        for (SlotEquip slot : SlotEquip.values()) {
-            IItem item = itemMap.get(slot);
-            if (item != null) {
-                int itemId = item.itemId();
-                for (int i = 0; i < activeSetCount; ++i) {
-                    if (activeSets.get(i).items.contains(itemId)) {
-                        setCounts[i]++;
-                    }
-                }
-            }
-        }
-        return setCounts;
-    }
-
-    public int countInSet(SolvableEquipMap itemMap) {
+    // utility
+    public int countInAnySet(SolvableEquipMap itemMap) {
         int[] counts = countBySet(itemMap);
         int total = 0;
         for (int val : counts) {
@@ -210,6 +211,39 @@ public class SetBonus {
         return total;
     }
 
+    private int[] countBySet(SolvableEquipMap itemMap) {
+        int activeSetCount = activeSets.size();
+        int[] setCounts = new int[activeSetCount];
+        for (SlotEquip slot : SlotEquip.values()) {
+            SolvableItem item = itemMap.get(slot);
+            if (item != null) {
+                int itemId = item.itemId();
+                Integer matchedIndex = lookup.get(itemId);
+                if (matchedIndex != null) {
+                    setCounts[matchedIndex]++;
+                }
+            }
+        }
+        return setCounts;
+    }
+
+    private int[] countBySet(EquipMap itemMap) {
+        int activeSetCount = activeSets.size();
+        int[] setCounts = new int[activeSetCount];
+        for (SlotEquip slot : SlotEquip.values()) {
+            FullItemData item = itemMap.get(slot);
+            if (item != null) {
+                int itemId = item.itemId();
+                Integer matchedIndex = lookup.get(itemId);
+                if (matchedIndex != null) {
+                    setCounts[matchedIndex]++;
+                }
+            }
+        }
+        return setCounts;
+    }
+
+    // guild player checks
     public static SpecType forGear(List<LogItemInfo> itemInfoList) {
         for (SetInfo set : allSets) {
             for (LogItemInfo item : itemInfoList) {
