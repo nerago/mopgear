@@ -41,8 +41,8 @@ public class FindMultiSpec {
         overrideEnchant.put(id, stats);
     }
 
-    public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
-        SpecDetails spec = new SpecDetails(label, gearFile, model, ratingMultiply, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
+    public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+        SpecDetails spec = new SpecDetails(label, gearFile, model, ratingTargetPercent, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
         specs.add(spec);
         return spec;
     }
@@ -62,6 +62,8 @@ public class FindMultiSpec {
         OutputText.println("PREPARING BASELINE SPEC RUNS");
         specs.stream().parallel().forEach(this::optimalWithoutCommon);
         OutputText.println();
+
+        specs.forEach(s -> s.prepareRatingMultiplier(specs));
 
         OutputText.println("PREPARING COMMON ITEMS");
         Map<ItemRef, List<FullItemData>> commonMap = commonInMultiSet(specs);
@@ -172,11 +174,10 @@ public class FindMultiSpec {
         FullItemSet set = output.getFinalResultSet().orElseThrow();
         spec.optimalRating = output.resultRating;
         synchronized (OutputText.class) {
-            OutputText.printf("BASELINE %s base=%,d mult=%d value=%,d\n", spec.label, Math.round(spec.optimalRating), spec.ratingMultiply, Math.round(spec.optimalRating * spec.ratingMultiply));
             set.outputSet(spec.model);
 
-            int setItems = spec.model.setBonus().countInAnySet(output.resultSet.orElseThrow().items());
-            OutputText.println("Set Items " + setItems);
+//            int setItems = spec.model.setBonus().countInAnySet(output.resultSet.orElseThrow().items());
+//            OutputText.println("Set Items " + setItems);
         }
     }
 
@@ -434,7 +435,8 @@ public class FindMultiSpec {
         final String label;
         final Path gearFile;
         final ModelCombined model;
-        final int ratingMultiply;
+        final double ratingTargetPercent;
+        int ratingMultiply;
         final int[] extraItems;
         final int extraItemsUpgradeLevel;
         final boolean upgradeCurrentItems;
@@ -445,11 +447,11 @@ public class FindMultiSpec {
         double optimalRating;
         EquipOptionsMap itemOptions;
 
-        private SpecDetails(String label, Path gearFile, ModelCombined model, int ratingMultiply, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+        private SpecDetails(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
             this.label = label;
             this.gearFile = gearFile;
             this.model = model;
-            this.ratingMultiply = ratingMultiply;
+            this.ratingTargetPercent = ratingTargetPercent;
             this.extraItems = extraItems;
             this.extraItemsUpgradeLevel = extraItemsUpgradeLevel;
             this.upgradeCurrentItems = upgradeCurrentItems;
@@ -591,6 +593,21 @@ public class FindMultiSpec {
                     OutputText.println("OPTION " + slot + " " + it);
                 }
             });
+        }
+
+        public void prepareRatingMultiplier(List<SpecDetails> specs) {
+            double totalPercent = specs.stream().mapToDouble(s -> s.ratingTargetPercent).sum();
+            if (totalPercent < 0.99 || totalPercent > 1.01)
+                throw new IllegalArgumentException("doesn't add to one");
+
+            double targetCombined = 1000000000000000000.0;
+            if (optimalRating > targetCombined / 100)
+                throw new IllegalArgumentException("need bigger ratings");
+
+            double targetForThis = targetCombined * ratingTargetPercent;
+            ratingMultiply = (int) Math.round(targetForThis / optimalRating);
+
+            OutputText.printf("MULTIPLIERS %s base=%,d mult=%d value=%,d\n", label, Math.round(optimalRating), ratingMultiply, Math.round(optimalRating * ratingMultiply));
         }
     }
 

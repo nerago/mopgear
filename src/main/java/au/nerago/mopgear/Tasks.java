@@ -146,7 +146,7 @@ public class Tasks {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, EnchantMode enchantMode, StatBlock adjustment, boolean alternateEnchants) {
+    public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, EnchantMode enchantMode, StatBlock adjustment, boolean alternateEnchantsAllSlots) {
         FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
 
         if (slot == null)
@@ -156,7 +156,7 @@ public class Tasks {
         extraItem = addExtra(runItems, model, extraItemId, upgradeLevel, slot, enchantMode, null, replace, true);
         OutputText.println("EXTRA " + extraItem);
 
-        if (alternateEnchants)
+        if (alternateEnchantsAllSlots)
             ItemLoadUtil.duplicateAlternateEnchants(runItems, model);
 
         JobInput job = new JobInput();
@@ -453,7 +453,7 @@ public class Tasks {
 
         // TRIM DOWN DEFENSE
         multi.addFixedForge(86659, new ReforgeRecipe(Mastery, Haste)); // shoulder
-        multi.addFixedForge(90862, new ReforgeRecipe(null, null)); // ring
+        multi.addFixedForge(90862, new ReforgeRecipe(Haste, Mastery)); // ring
 //        multi.addFixedForge(85323, new ReforgeRecipe(Parry, Mastery)); // chest
 
         int extraUpgrade = 2;
@@ -463,17 +463,12 @@ public class Tasks {
                 "RET",
                 DataLocation.gearRetFile,
                 StandardModels.modelFor(SpecType.PaladinRet),
-                2023,
+                0.05,
                 new int[]{
-//                        88862, // tankiss
-//                        84950, // pvp belt
-//                        87024, // null greathelm
 //                        87036, // heroic soulgrasp
 //                        87026, // heroic peacock cloak
 //                        86880, // dread shadow ring
 //                        86955, // heroic overwhelm assault belt
-
-                        // possibly useful
 //                        89954, // warbelt pods
 //                        84949, // mal glad girdle accuracy
 //                        89280, // voice helm
@@ -484,6 +479,7 @@ public class Tasks {
 //                        85343, // normal ret chest
 //                        87071, // yang-xi heroic
 //                        86681, // celestial ret head
+                        87145, // defiled earth
                 },
                 extraUpgrade,
                 preUpgrade
@@ -494,12 +490,8 @@ public class Tasks {
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 StandardModels.modelFor(SpecType.PaladinProtDps),
-                686 * 3,
+                0.25,
                 new int[]{
-//                        84870, // pvp legs
-//                        86682, // white tiger gloves
-//                        86680, // white tiger legs
-//                        84949 // mal glad girdle accuracy
 //                        87026, // heroic peacock cloak
 //                        86075, // steelskin basic
 //                        86955, // heroic overwhelm assault belt
@@ -508,36 +500,31 @@ public class Tasks {
 //                        86957, // heroic bladed tempest
 //                        85343, // normal ret chest
 
-//                        87015, // clawfeet
-//                        87071, // yang-xi heroic
-//                        86681, // celestial ret head
+                        87015, // clawfeet
+                        87071, // yang-xi heroic
+                        86681, // celestial ret head
+                        87145, // defiled earth
                 },
                 extraUpgrade,
                 preUpgrade
         )
-//                .setDuplicatedItems(Map.of(89934, 1))
-                .setWorstCommonPenalty(99.5)
+//                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
+//                .setWorstCommonPenalty(99.5)
         ;
 
         multi.addSpec(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 StandardModels.modelFor(SpecType.PaladinProtMitigation),
-                253,
+                0.70,
                 new int[]{
-//                        89280, // voice amp
-////                        87024, // null greathelm
-////                        85339, // white tiger pauldrons
-////                        89345, // stonetoe spaulders
-//                        82980, // gauntlets ancient steel
-//                        85983, // bracers six oxen
 //                        90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
 //                        87036, // heroic soulgrasp
-//                        87026, // heroic peacock cloak
-//                        86955, // heroic overwhelm assault belt
+                        87026, // heroic peacock cloak
+                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
-//                        87015, // clawfeet
+                        87015, // clawfeet
 //                        87062 // elegion heroic
 //                        89075, // yi cloak
 //                        86957, // heroic bladed tempest
@@ -545,12 +532,15 @@ public class Tasks {
 //                        85343, // normal ret chest
 //                        87071, // yang-xi heroic
 //                        86661, // celestial prot head
+//                        87145, // defiled earth
+                        89934, // soul bracer
                 },
                 extraUpgrade,
                 preUpgrade
         )
-                .setDuplicatedItems(Map.of(89934, 2))
-//                .setWorstCommonPenalty(99.4)
+//                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
+//                .addRemoveItem(89934) // soul bracer
+                .setWorstCommonPenalty(99.5)
         ;
 
 //        multi.suppressSlotCheck(86957);
@@ -562,7 +552,8 @@ public class Tasks {
 //        multi.solve(1000);
 //        multi.solve(15000);
 //        multi.solve(50000);
-        multi.solve(490000);
+//        multi.solve(490000);
+        multi.solve(1490000);
 //        multi.solve(4000000);
     }
 
@@ -573,7 +564,7 @@ public class Tasks {
                 "BOOM",
                 DataLocation.gearBoomFile,
                 StandardModels.modelFor(SpecType.DruidBoom),
-                400,
+                0.5,
                 new int[]{
 //                        86909 // regail dagger
 //                        86694, // Eternal Blossom Mantle
@@ -589,7 +580,7 @@ public class Tasks {
                 "TREE",
                 DataLocation.gearTreeFile,
                 StandardModels.modelFor(SpecType.DruidTree),
-                1,
+                0.5,
                 new int[]{
 //                        86909 // regail dagger
                         88885, // Clever Ashyo's Armbands
