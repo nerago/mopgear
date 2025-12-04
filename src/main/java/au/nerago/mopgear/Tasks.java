@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.io.StandardModels;
+import au.nerago.mopgear.io.WowSimDB;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.*;
@@ -11,12 +12,18 @@ import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BestHolder;
 import au.nerago.mopgear.util.RankedGroupsCollection;
+import au.nerago.mopgear.util.Tuple;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static au.nerago.mopgear.domain.StatType.*;
@@ -715,5 +722,148 @@ public class Tasks {
         JobOutput output = Solver.runJob(job);
         FullItemSet set = output.getFinalResultSet().orElseThrow();
         return model.calcRating(set);
+    }
+
+    public static void dumpTier2Gear() {
+        try {
+            dumpTier2GearInner();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void dumpTier2GearInner() throws IOException {
+        // phase == -1, challenge downscales? set items?
+        // phase 1 = MSV, HOF, Toes
+        // phase 2 = Dominance Offensive
+        // phase 3 = thunder
+        // phase 4 = unclear
+        // phase 5 = seige
+
+        Predicate<FullItemData> isClassSet = item ->
+                           item.fullName().contains("Thousandfold Hells")
+                        || item.fullName().contains("Exorcist")
+                        || item.fullName().contains("Nine-Tailed")
+                        || item.fullName().contains("Saurok Stalker's")
+                        || item.fullName().contains("Last Mogu")
+                        || item.fullName().contains("All-Consuming Maw")
+                        || item.fullName().contains("Chromatic Hydra")
+                        || item.fullName().contains("Haunted Forest")
+                        || item.fullName().contains("Witch Doctor")
+                        || item.fullName().contains("Lightning Emperor's")
+                        || item.fullName().contains("Fire-Charm");
+
+//        WowSimDB.instance.itemStream()
+//                .filter(item -> item.shared.phase() == -1)
+//                .forEach(item -> OutputText.printf("%d %d %d %s\n", item.itemLevel(), item.shared.phase(), item.itemId(), item.fullName()));
+
+//        WowSimDB.instance.itemStream()
+//                .filter(item -> item.shared.phase() == 3)
+//                .filter(item -> item.itemId() < 94000 || item.itemId() > 96999)
+//                .filter(item -> !item.fullName().contains("Gladiator")
+//                        && !item.fullName().contains("Thousandfold Hells")
+//                        && !item.fullName().contains("Exorcist")
+//                        && !item.fullName().contains("Nine-Tailed")
+//                        && !item.fullName().contains("Saurok Stalker's")
+//                        && !item.fullName().contains("Last Mogu")
+//                        && !item.fullName().contains("All-Consuming Maw")
+//                        && !item.fullName().contains("Chromatic Hydra")
+//                        && !item.fullName().contains("Haunted Forest")
+//                        && !item.fullName().contains("Witch Doctor")
+//                        && !item.fullName().contains("Lightning Emperor's")
+//                        && !item.fullName().contains("Fire-Charm")
+//                )
+//                .forEach(item -> OutputText.printf("%d %d %s\n", item.itemLevel(), item.shared.phase(), item.fullName()));
+
+
+//        WowSimDB.instance.itemStream()
+//                .filter(item -> item.shared.phase() == 3)
+//                .filter(item -> item.shared.ref().upgradeLevel() == 0)
+//                .filter(item -> !item.fullName().contains("Gladiator"))
+//                .collect(Collectors.groupingBy(item -> item.shared.name()))
+//                .entrySet().stream()
+//                .sorted(Comparator.comparing(group -> group.getKey().toLowerCase()))
+//                .forEach(group -> {
+//                    String name = group.getKey();
+//                    int minLevel = group.getValue().stream().mapToInt(FullItemData::itemLevel).min().orElseThrow();
+//                    int maxLevel = group.getValue().stream().mapToInt(FullItemData::itemLevel).max().orElseThrow();
+//                    boolean has535 = group.getValue().stream().mapToInt(FullItemData::itemLevel).filter(lvl -> lvl == 535).findAny().isPresent();
+////                    String ids = group.getValue().stream().map(item -> item.itemId() + "u" + item.shared.ref().upgradeLevel()).collect(Collectors.joining(","));
+//                    String ids = group.getValue().stream().map(item -> String.valueOf(item.itemId()) ).collect(Collectors.joining(","));
+//                    OutputText.printf("%d %d %s %s %s\n", minLevel, maxLevel, minLevel==maxLevel ? "SINGLE" : has535 ? "" : "MISSING535", name, ids);
+//                });
+                ;
+
+        List<String> lines = Files.readAllLines(Path.of("C:\\Users\\nicholas\\Dropbox\\PC\\Documents\\tempwow.txt"));
+        Map<Integer, String> bossLookup = new HashMap<>();
+        String currBoss = null;
+        Pattern regex = Pattern.compile(".*(\\d{5}).*");
+        for (String line : lines) {
+            if (line.contains("ToT") || line.contains("--Nalak") || line.contains("--Oondasta") || line.contains("--Sunreaver Onslaught") || line.contains("--Kirin Tor Offensive") || line.contains("--Shado-Pan")) {
+                currBoss = line.split("--")[1];
+            }
+            Matcher match = regex.matcher(line);
+            if (match.matches()) {
+                String num = match.group(1);
+                bossLookup.put(Integer.valueOf(num), currBoss);
+//                System.out.println(num + " " + currBoss);
+            }
+        }
+
+
+        List<FullItemData> allItems = WowSimDB.instance.itemStream()
+                .filter(item -> item.shared.phase() == 3)
+                .filter(item -> item.shared.ref().upgradeLevel() == 0)
+                .filter(item -> !item.fullName().contains("Gladiator"))
+                .collect(Collectors.groupingBy(item -> item.shared.name()))
+                .values().stream()
+                .map(itemList -> {
+                    if (itemList.size() == 1)
+                        return itemList.getFirst();
+                    Optional<FullItemData> heroic = itemList.stream().filter(item -> item.itemLevel() == 535).findAny();
+                    if (heroic.isPresent())
+                        return heroic.get();
+                    if (itemList.size() == 2 && itemList.getFirst().itemLevel() == itemList.getLast().itemLevel()) // reputation items
+                        return itemList.getFirst();
+                    throw new IllegalStateException();
+//                    System.out.println("??? " + itemList.size() + " " + itemList.getFirst().itemLevel());
+//                    return itemList.getFirst();
+                })
+                .sorted(Comparator.comparing(item -> item.fullName().toLowerCase()))
+                .toList();
+
+//        allItems.forEach(item -> {
+//            String boss = bossLookup.getOrDefault(item.itemId(), "zUnknown");
+//            OutputText.printf("%d,%s,%s,%s\n", item.itemId(), item.shared.name(), item.slot(), boss);
+//        });
+
+        allItems.stream().map(item -> {
+            String boss = bossLookup.getOrDefault(item.itemId(), "Unknown");
+            if (boss.equals("Unknown") && isClassSet.test(item)) {
+                switch (item.slot()) {
+                    case Chest -> {
+                        boss = "Dark Animus ToT";
+                    }
+                    case Head -> {
+                        boss = "Twin Consorts ToT";
+                    }
+                    case Shoulder -> {
+                        boss = "Iron Qon ToT";
+                    }
+                    case Hand -> {
+                        boss = "Council ToT";
+                    }
+                    case Leg -> {
+                        boss = "Ji-Kun ToT";
+                    }
+                }
+            }
+            if (boss.equals("Unknown") && (item.fullName().contains("Haunted Steel") || item.fullName().contains("Dreadrunner")|| item.fullName().contains("Cloud Serpent")|| item.fullName().contains("Falling Blossom")|| item.fullName().contains("Quilen Hide")|| item.fullName().contains("Spirit Keeper")))
+                boss = "Crafted";
+            return Tuple.create(item.itemId(), item.shared.name(), item.slot(), boss);
+        })
+                .sorted(Comparator.comparing(Tuple.Tuple4::b))
+                .sorted(Comparator.comparing(Tuple.Tuple4::d))
+                .forEach(e -> OutputText.printf("%d,\"%s\",%s,%s\n", e.a(), e.b(), e.c(), e.d()));
     }
 }

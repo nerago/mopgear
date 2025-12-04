@@ -45,8 +45,8 @@ public final class FullItemData implements IItem {
     public static FullItemData buildFromWowSim(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name,
                                                @NotNull StatBlock statBase,
                                                @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
-                                               @NotNull SocketType[] socketSlots, StatBlock socketBonus) {
-        ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus);
+                                               @NotNull SocketType[] socketSlots, StatBlock socketBonus, int phase) {
+        ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus, phase);
         return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty, null);
     }
 
@@ -55,7 +55,7 @@ public final class FullItemData implements IItem {
                                                 @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
                                                 @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
         ItemRef ref = ItemRef.buildBasic(id, itemLevel);
-        ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus);
+        ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus, -1);
         return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty, null);
     }
 

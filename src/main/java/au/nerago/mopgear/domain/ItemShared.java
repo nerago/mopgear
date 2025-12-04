@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public record ItemShared(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name,
                          @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
-                         @NotNull SocketType[] socketSlots, @Nullable StatBlock socketBonus) {
+                         @NotNull SocketType[] socketSlots, @Nullable StatBlock socketBonus, int phase) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

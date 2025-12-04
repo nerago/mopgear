@@ -79,6 +79,7 @@ public class WowSimDB {
         int handType = getIntOrDefault(object, "handType", 0);
         SlotItem slot = mapSlot(type, weaponType, handType);
 
+        int phase = getIntOrDefault(object, "phase", -1);
         ArmorType armorType = convertArmorType(getIntOrDefault(object, "armorType", -1));
 
         SocketType[] sockets = new SocketType[0];
@@ -105,7 +106,7 @@ public class WowSimDB {
             StatResult result = summarizeStats(stats);
 
             ItemRef ref = ItemRef.buildAdvanced(id, itemLevel, baseItemLevel);
-            FullItemData item = FullItemData.buildFromWowSim(ref, slot, name, result.block(), result.primaryStatType(), armorType, sockets, socketBonusBlock);
+            FullItemData item = FullItemData.buildFromWowSim(ref, slot, name, result.block(), result.primaryStatType(), armorType, sockets, socketBonusBlock, phase);
             itemMap.put(item.ref(), item);
         }
     }

@@ -62,13 +62,14 @@ public class Main {
 
     private void launchpad(Instant startTime) {
 //        WowSimDB.discoverSetBonuses();
+        Tasks.dumpTier2Gear();
 //        ItemCache.instance.get(null);
 //        new ReadLog().run();
 //        SourcesOfItemsRaid.findNormalVariants();
 
 //
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);

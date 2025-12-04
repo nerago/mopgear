@@ -10,7 +10,7 @@ public class ItemSharedCache {
 
     public static ItemShared get(@NotNull ItemRef ref, @NotNull SlotItem slot, @NotNull String name,
                                  @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
-                                 @NotNull SocketType[] socketSlots, @Nullable StatBlock socketBonus) {
+                                 @NotNull SocketType[] socketSlots, @Nullable StatBlock socketBonus, int phase) {
         List<ItemShared> options = map.computeIfAbsent(ref, k -> new ArrayList<>());
 
         // TODO are multiple even valid?
@@ -20,13 +20,13 @@ public class ItemSharedCache {
             }
         }
 
-        ItemShared result = new ItemShared(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus);
+        ItemShared result = new ItemShared(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus, phase);
         options.add(result);
         return result;
     }
 
     public static ItemShared get(ItemRef ref, ItemShared old) {
-        return get(ref, old.slot(), old.name(), old.primaryStatType(), old.armorType(), old.socketSlots(), old.socketBonus());
+        return get(ref, old.slot(), old.name(), old.primaryStatType(), old.armorType(), old.socketSlots(), old.socketBonus(), old.phase());
     }
 
     private static boolean equalsShare(ItemShared share, SlotItem slot, String name, PrimaryStatType primaryStatType, ArmorType armorType, SocketType[] socketSlots, StatBlock socketBonus) {
