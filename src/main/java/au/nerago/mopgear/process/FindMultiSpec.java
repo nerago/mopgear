@@ -20,6 +20,8 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,6 +34,7 @@ public class FindMultiSpec {
     private final Map<Integer, StatBlock> overrideEnchant = new HashMap<>();
     private final List<SpecDetails> specs = new ArrayList<>();
     private final Set<Integer> suppressSlotCheck = new HashSet<>();
+    private Predicate<ProposedResults> multiSetFilter;
 
     public void addFixedForge(int id, ReforgeRecipe reforge) {
         fixedForge.put(id, reforge);
@@ -39,6 +42,10 @@ public class FindMultiSpec {
 
     public void overrideEnchant(int id, StatBlock stats) {
         overrideEnchant.put(id, stats);
+    }
+
+    public void multiSetFilter(Predicate<ProposedResults> multiSetFilter) {
+        this.multiSetFilter = multiSetFilter;
     }
 
     public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
@@ -94,6 +101,10 @@ public class FindMultiSpec {
                 .filter(Objects::nonNull)
                 .unordered()
                 .parallel();
+
+        if (multiSetFilter != null) {
+            resultStream = resultStream.filter(multiSetFilter);
+        }
 
         OutputText.println("RUNNING");
         Optional<ProposedResults> best = resultStream
@@ -611,6 +622,6 @@ public class FindMultiSpec {
         }
     }
 
-    private record ProposedResults(List<JobOutput> resultJobs, Map<ItemRef, FullItemData> chosenMap) {
+    public record ProposedResults(List<JobOutput> resultJobs, Map<ItemRef, FullItemData> chosenMap) {
     }
 }

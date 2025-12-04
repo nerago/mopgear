@@ -40,8 +40,10 @@ public class Main {
         OutputText.finish();
     }
 
-    private void run() throws ExecutionException, InterruptedException {
+    private void run() throws ExecutionException, InterruptedException, IOException {
         Instant startTime = Instant.now();
+
+        lowerPriority();
 
         try (ForkJoinPool myPool = new ForkJoinPool(12, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, false, 20, 256, 10, null, 60, TimeUnit.SECONDS)) {
             myPool.submit(() -> launchpad(startTime)).get();
@@ -50,6 +52,12 @@ public class Main {
         printElapsed(startTime);
 
         ItemCache.instance.cacheSave();
+    }
+
+    private void lowerPriority() throws IOException {
+        long processId = ProcessHandle.current().pid();
+        new ProcessBuilder().command("C:\\Windows\\System32\\wbem\\wmic.exe",
+                "process", "where", "ProcessId=" + processId, "CALL", "setpriority", "\"below normal\"").start();
     }
 
     private void launchpad(Instant startTime) {

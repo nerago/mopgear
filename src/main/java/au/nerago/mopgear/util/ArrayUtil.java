@@ -247,4 +247,12 @@ public class ArrayUtil {
         }
         return iterator.next();
     }
+
+    public static int sum(int[] array) {
+        int total = 0;
+        for (int val : array) {
+            total += val;
+        }
+        return total;
+    }
 }

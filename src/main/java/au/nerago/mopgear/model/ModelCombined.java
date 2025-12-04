@@ -92,7 +92,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
 
         StatRequirements statRequirements = StatRequirementsOriginal.load(modelParam.required());
         DefaultEnchants enchants = new DefaultEnchants(modelParam.defaultEnchants(), modelParam.blacksmith());
-        SetBonus setBonus = new SetBonus();
+        SetBonus setBonus = SetBonus.empty();
         return new ModelCombined(rating, statRequirements, ReforgeRules.casterPure(), enchants, setBonus);
     }
 }

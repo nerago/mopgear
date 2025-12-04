@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static au.nerago.mopgear.domain.StatType.*;
 
@@ -430,7 +431,7 @@ public class Tasks {
 
     public static void paladinMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec();
-        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+//        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
         multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
 //        multi.addFixedForge(87026, new ReforgeRecipe(Expertise, Haste)); // Back Cloak of Peacock Feathers
 //        multi.addFixedForge(86957, new ReforgeRecipe(null, null)); // Ring Ring of the Bladed Tempest
@@ -452,8 +453,8 @@ public class Tasks {
 //        multi.addFixedForge(86957, ReforgeRecipe.empty()); // Ring Ring of the Bladed Tempest
 
         // TRIM DOWN DEFENSE
-        multi.addFixedForge(86659, new ReforgeRecipe(Mastery, Haste)); // shoulder
-        multi.addFixedForge(90862, new ReforgeRecipe(Haste, Mastery)); // ring
+//        multi.addFixedForge(86659, new ReforgeRecipe(Mastery, Haste)); // shoulder
+//        multi.addFixedForge(90862, new ReforgeRecipe(Haste, Mastery)); // ring
 //        multi.addFixedForge(85323, new ReforgeRecipe(Parry, Mastery)); // chest
 
         int extraUpgrade = 2;
@@ -473,24 +474,27 @@ public class Tasks {
 //                        84949, // mal glad girdle accuracy
 //                        89280, // voice helm
 //                        86822, // celestial overwhelm assault belt
-//                        87015, // heroic clawfeet
+                        87015, // heroic clawfeet
 //                        86979, // heroic impaling treads
 //                        86957, // heroic bladed tempest
 //                        85343, // normal ret chest
 //                        87071, // yang-xi heroic
 //                        86681, // celestial ret head
+                        87101, // heroic ret head
                         87145, // defiled earth
+                        85340, // normal ret legs
                 },
                 extraUpgrade,
                 preUpgrade
-        );
-//                .addRemoveItem(86680);
+        )
+//                .addRemoveItem(86680)
+        ;
 
         multi.addSpec(
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 StandardModels.modelFor(SpecType.PaladinProtDps),
-                0.25,
+                0.60,
                 new int[]{
 //                        87026, // heroic peacock cloak
 //                        86075, // steelskin basic
@@ -502,12 +506,14 @@ public class Tasks {
 
                         87015, // clawfeet
                         87071, // yang-xi heroic
-                        86681, // celestial ret head
+                        87101, // heroic ret head
                         87145, // defiled earth
+                        85340, // normal ret legs
                 },
                 extraUpgrade,
                 preUpgrade
         )
+//                .addRemoveItem(86680)
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
 //                .setWorstCommonPenalty(99.5)
         ;
@@ -516,7 +522,7 @@ public class Tasks {
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 StandardModels.modelFor(SpecType.PaladinProtMitigation),
-                0.70,
+                0.35,
                 new int[]{
 //                        90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
@@ -524,14 +530,15 @@ public class Tasks {
                         87026, // heroic peacock cloak
                         86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
-                        87015, // clawfeet
+//                        87015, // clawfeet
 //                        87062 // elegion heroic
 //                        89075, // yi cloak
 //                        86957, // heroic bladed tempest
 //                        86325, // normal daybreak drake
 //                        85343, // normal ret chest
-//                        87071, // yang-xi heroic
+                        87071, // yang-xi heroic
 //                        86661, // celestial prot head
+                        87111, // heroic prot head
 //                        87145, // defiled earth
                         89934, // soul bracer
                 },
@@ -540,8 +547,17 @@ public class Tasks {
         )
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
-                .setWorstCommonPenalty(99.5)
+//                .setWorstCommonPenalty(99.5)
         ;
+
+        multi.multiSetFilter(proposedResults -> {
+            Set<Integer> uniqueItems = proposedResults.resultJobs().stream()
+                    .map(job -> job.resultSet.orElseThrow())
+                    .flatMap(itemSet -> itemSet.items().itemStream())
+                    .map(SolvableItem::itemId)
+                    .collect(Collectors.toSet());
+            return !uniqueItems.contains(87111) || !uniqueItems.contains(87101);
+        });
 
 //        multi.suppressSlotCheck(86957);
 //        multi.suppressSlotCheck(84829);
@@ -549,11 +565,12 @@ public class Tasks {
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-//        multi.solve(1000);
+        multi.solve(1000);
 //        multi.solve(15000);
 //        multi.solve(50000);
+//        multi.solve(120000);
 //        multi.solve(490000);
-        multi.solve(1490000);
+//        multi.solve(1490000);
 //        multi.solve(4000000);
     }
 
@@ -690,7 +707,7 @@ public class Tasks {
     }
 
     private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req) {
-        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, new SetBonus());
+        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, SetBonus.empty());
         JobInput job = new JobInput();
         job.model = model;
         job.setItemOptions(items);

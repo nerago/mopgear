@@ -69,7 +69,7 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = new SetBonus().activateWhiteTigerPlate();
+        SetBonus setBonus = SetBonus.activateWhiteTigerPlate();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
     }
 
@@ -85,7 +85,7 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegearOnly4pc();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
     }
 
@@ -99,7 +99,7 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.melee();
-        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegear();
         return new ModelCombined(statRatings, combinedRequire, reforge, enchants, setBonus);
 //        return new ModelCombined(statRatings, hitRequire, reforge, enchants, setBonus);
     }
@@ -109,7 +109,7 @@ public class StandardModels {
         StatRequirements statRequirements = StatRequirementsHitExpertise.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, false);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = new SetBonus();
+        SetBonus setBonus = SetBonus.forSpec(spec);
         return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);
     }
 
@@ -118,7 +118,7 @@ public class StandardModels {
         StatRequirements statRequirements = StatRequirementsHitExpertise.retWideCapRange();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.melee();
-        SetBonus setBonus = new SetBonus().activateWhiteTigerBattlegear();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegear();
         return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);
     }
 
@@ -128,7 +128,7 @@ public class StandardModels {
                 StatRequirements.TARGET_RATING_CAST, StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
         ReforgeRules reforge = ReforgeRules.casterHybrid();
-        SetBonus setBonus = new SetBonus().activateRegaliaEternalBlossom();
+        SetBonus setBonus = SetBonus.forSpec(spec);
         return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);
     }
 
@@ -153,7 +153,7 @@ public class StandardModels {
         );
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        SetBonus setBonus = new SetBonus().activateVestmentsEternalBlossom();
+        SetBonus setBonus = SetBonus.forSpec(SpecType.DruidTree);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
     }
 
@@ -163,7 +163,7 @@ public class StandardModels {
         );
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        SetBonus setBonus = new SetBonus();
+        SetBonus setBonus = SetBonus.forSpec(SpecType.PaladinHoly);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
     }
 
@@ -175,7 +175,7 @@ public class StandardModels {
         );
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        SetBonus setBonus = new SetBonus();
+        SetBonus setBonus = SetBonus.forSpec(SpecType.ShamanRestoration);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
     }
 
@@ -185,7 +185,7 @@ public class StandardModels {
         );
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        SetBonus setBonus = new SetBonus();
+        SetBonus setBonus = SetBonus.forSpec(SpecType.PriestHoly);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
     }
 
@@ -199,7 +199,7 @@ public class StandardModels {
         // https://www.icy-veins.com/mists-of-pandaria-classic/mistweaver-monk-pve-stat-priority
         StatRequirements statRequirements = new StatRequirementsGenericOne(Spirit, 5100);
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
-        SetBonus setBonus = new SetBonus();
+        SetBonus setBonus = SetBonus.forSpec(SpecType.MonkMistweaver);
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus);
     }
 
