@@ -4,22 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ea07a34a-2e86-429e-8348-7ed7a5cfaa9c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/AndroidProjectSystem.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+    <list default="true" id="ea07a34a-2e86-429e-8348-7ed7a5cfaa9c" name="Changes" comment="ide update">
       <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/FullItemSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/FullItemSet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/StandardModels.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/StandardModels.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/ModelCombined.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/ModelCombined.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/SetBonus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/SetBonus.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindMultiSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindMultiSpec.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/ArrayUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/ArrayUtil.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,6 +79,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.Main.executor": "Run",
     "Gradle.paladin_gearing [:Main.main()].executor": "Run",
     "Gradle.paladin_gearing [:au.nerago.mopgear.Main.main()].executor": "Run",
     "Gradle.paladin_gearing [build].executor": "Run",
@@ -101,7 +93,7 @@
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
   }
 }]]></component>
   <component name="RunManager" selected="Application.Main">
@@ -167,6 +159,30 @@
       <option name="presentableId" value="Default" />
       <updated>1764857561268</updated>
     </task>
+    <task id="LOCAL-00001" summary="ide update">
+      <option name="closed" value="true" />
+      <created>1764861061388</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1764861061388</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="ide update" />
+    <option name="LAST_COMMIT_MESSAGE" value="ide update" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/SetBonus.java</url>
+          <line>163</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

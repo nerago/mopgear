@@ -185,6 +185,7 @@ public class FindMultiSpec {
         FullItemSet set = output.getFinalResultSet().orElseThrow();
         spec.optimalRating = output.resultRating;
         synchronized (OutputText.class) {
+            OutputText.println("SET " + spec.label);
             set.outputSet(spec.model);
 
 //            int setItems = spec.model.setBonus().countInAnySet(output.resultSet.orElseThrow().items());

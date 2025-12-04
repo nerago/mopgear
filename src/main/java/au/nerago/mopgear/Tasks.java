@@ -480,21 +480,22 @@ public class Tasks {
 //                        85343, // normal ret chest
 //                        87071, // yang-xi heroic
 //                        86681, // celestial ret head
-                        87101, // heroic ret head
                         87145, // defiled earth
                         85340, // normal ret legs
+                        87101, // heroic ret head
                 },
                 extraUpgrade,
                 preUpgrade
         )
-//                .addRemoveItem(86680)
+                .addRemoveItem(86680) // remove celestial ret legs
+                .addRemoveItem(86681)// remove celestial ret head
         ;
 
         multi.addSpec(
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 StandardModels.modelFor(SpecType.PaladinProtDps),
-                0.60,
+                0.65,
                 new int[]{
 //                        87026, // heroic peacock cloak
 //                        86075, // steelskin basic
@@ -506,14 +507,14 @@ public class Tasks {
 
                         87015, // clawfeet
                         87071, // yang-xi heroic
-                        87101, // heroic ret head
                         87145, // defiled earth
                         85340, // normal ret legs
+                        87101, // heroic ret head
                 },
                 extraUpgrade,
                 preUpgrade
         )
-//                .addRemoveItem(86680)
+                .addRemoveItem(86680) // remove celestial ret legs
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
 //                .setWorstCommonPenalty(99.5)
         ;
@@ -522,12 +523,12 @@ public class Tasks {
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 StandardModels.modelFor(SpecType.PaladinProtMitigation),
-                0.35,
+                0.30,
                 new int[]{
 //                        90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
 //                        87036, // heroic soulgrasp
-                        87026, // heroic peacock cloak
+//                        87026, // heroic peacock cloak
                         86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
 //                        87015, // clawfeet
@@ -536,11 +537,11 @@ public class Tasks {
 //                        86957, // heroic bladed tempest
 //                        86325, // normal daybreak drake
 //                        85343, // normal ret chest
-                        87071, // yang-xi heroic
+//                        87071, // yang-xi heroic
 //                        86661, // celestial prot head
-                        87111, // heroic prot head
 //                        87145, // defiled earth
-                        89934, // soul bracer
+//                        89934, // soul bracer
+                        87101, // heroic ret head
                 },
                 extraUpgrade,
                 preUpgrade
@@ -550,14 +551,14 @@ public class Tasks {
 //                .setWorstCommonPenalty(99.5)
         ;
 
-        multi.multiSetFilter(proposedResults -> {
-            Set<Integer> uniqueItems = proposedResults.resultJobs().stream()
-                    .map(job -> job.resultSet.orElseThrow())
-                    .flatMap(itemSet -> itemSet.items().itemStream())
-                    .map(SolvableItem::itemId)
-                    .collect(Collectors.toSet());
-            return !uniqueItems.contains(87111) || !uniqueItems.contains(87101);
-        });
+//        multi.multiSetFilter(proposedResults -> {
+//            Set<Integer> uniqueItems = proposedResults.resultJobs().stream()
+//                    .map(job -> job.resultSet.orElseThrow())
+//                    .flatMap(itemSet -> itemSet.items().itemStream())
+//                    .map(SolvableItem::itemId)
+//                    .collect(Collectors.toSet());
+//            return !uniqueItems.contains(87111) || !uniqueItems.contains(87101);
+//        });
 
 //        multi.suppressSlotCheck(86957);
 //        multi.suppressSlotCheck(84829);
@@ -565,11 +566,11 @@ public class Tasks {
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-        multi.solve(1000);
+//        multi.solve(1000);
 //        multi.solve(15000);
 //        multi.solve(50000);
 //        multi.solve(120000);
-//        multi.solve(490000);
+        multi.solve(490000);
 //        multi.solve(1490000);
 //        multi.solve(4000000);
     }

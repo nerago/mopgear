@@ -1,6 +1,7 @@
 package au.nerago.mopgear.domain;
 
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.results.OutputText;
 
 import java.util.function.Function;
@@ -24,6 +25,7 @@ public record FullItemSet(StatBlock totalForRating, StatBlock totalForCaps, Equi
     public void outputSet(ModelCombined model) {
         OutputText.println(totalForRating.toStringExtended() + " " + model.calcRating(this));
         items.forEachValue(it -> OutputText.println(it + " " + model.calcRating(it)));
+        OutputText.printf("set bonus %1.2f\n", (double) model.setBonus().calc(this) / (double) SetBonus.DENOMIATOR);
     }
 
     public void outputSetDetailed(ModelCombined model) {
