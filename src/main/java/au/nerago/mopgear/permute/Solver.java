@@ -69,11 +69,11 @@ public class Solver {
             output.resultSet = SolverRandom.runSolver(model, itemOptions, adjustment, startTime, runSize, !job.singleThread, job.specialFilter);
         }
 
-        if (output.resultSet.isEmpty() && job.hackAllow) {
-            output.resultSet = FallbackCappedSetBuilder.fallbackLimits(model, itemOptions, adjustment, output);
-        }
+//        if (output.resultSet.isEmpty() && job.hackAllow) {
+//            output.resultSet = FallbackCappedSetBuilder.fallbackLimits(model, itemOptions, adjustment, output);
+//        }
 
-        output.resultSet = output.resultSet.map(set -> Tweaker.tweak(set, model, itemOptions));
+        output.resultSet = output.resultSet.map(set -> Tweaker.tweak(set, model, itemOptions, job.specialFilter));
 
         output.resultSet.ifPresent(itemSet -> output.resultRating = model.calcRating(itemSet));
         return output;

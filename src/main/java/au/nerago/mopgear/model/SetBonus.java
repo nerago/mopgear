@@ -5,6 +5,8 @@ import au.nerago.mopgear.util.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class SetBonus {
@@ -15,18 +17,16 @@ public class SetBonus {
         return new SetBonus(allSets.stream().filter(s -> s.spec == spec).toList());
     }
 
-    private static List<SetInfo> singleSet(SpecType type, String name) {
-        SetInfo set = allSets.stream().filter(s -> s.spec == type && s.setName.equals(name)).findAny().orElseThrow();
-        return Collections.singletonList(set);
+    public static SetBonus named(String... nameArray) {
+        return new SetBonus(Arrays.stream(nameArray).map(SetBonus::findSet).toList());
+    }
+
+    private static SetInfo findSet(String name) {
+        return allSets.stream().filter(s -> s.setName.equals(name)).findAny().orElseThrow();
     }
 
     public static SetBonus empty() {
         return new SetBonus(Collections.emptyList());
-    }
-
-    // <<<<<<<<<<<<< PALADIN PROT TEIR 14 >>>>>>>>>>>>>>>>
-    public static SetBonus activateWhiteTigerPlate() {
-        return new SetBonus(singleSet(SpecType.PaladinProtMitigation, "White Tiger Plate"));
     }
 
     // <<<<<<<<<<<<< PALADIN RET TEIR 14 >>>>>>>>>>>>>>>>
@@ -35,17 +35,13 @@ public class SetBonus {
     // seal,judge +10%
     private static final int WHITE_TIGER_BATTLEGEAR_4 = 1024;
 
-    public static SetBonus activateWhiteTigerBattlegear() {
-        return new SetBonus(singleSet(SpecType.PaladinRet, "White Tiger Battlegear"));
-    }
-
-    public static SetBonus activateWhiteTigerBattlegearOnly4pc() {
-        SetInfo specialBattlegear = new SetInfo(SpecType.PaladinRet, "Paladin Ret T14 for Prot", DENOMIATOR, 1050, new int[]{
-                86681, 86679, 86683, 86682, 86680,
-                85341, 85339, 85343, 85342, 85340,
-                87101, 87103, 87099, 87100, 87102
-        });
-        return new SetBonus(Collections.singletonList(specialBattlegear));
+    private static final SetInfo pallyBattlegearForTank = new SetInfo(SpecType.PaladinRet, "Paladin Ret T14 for Prot", DENOMIATOR, 1050, new int[]{
+            86681, 86679, 86683, 86682, 86680,
+            85341, 85339, 85343, 85342, 85340,
+            87101, 87103, 87099, 87100, 87102
+    });
+    public static SetBonus activateWhiteTigerBattlegearOnly4pcPlusThunderTank() {
+        return new SetBonus(Arrays.asList(pallyBattlegearForTank, findSet("Plate of the Lightning Emperor")));
     }
 
     // <<<<<<<<<<<<< DRUID BOOM TEIR 14 >>>>>>>>>>>>>>>>
@@ -142,20 +138,18 @@ public class SetBonus {
         if (selectedSets.isEmpty()) {
             lookupSingleSet = null;
             lookupManySets = null;
-            throw new RuntimeException("dont use right now (testing refactoring)");
         } else if (selectedSets.size() == 1) {
             lookupSingleSet = selectedSets.getFirst();
             lookupManySets = null;
         } else {
             lookupSingleSet = null;
             lookupManySets = new HashMap<>();
-            throw new RuntimeException("dont use right now (testing refactoring)");
-//            for (int setIndex = 0; setIndex < selectedSets.size(); ++setIndex) {
-//                SetInfo set = selectedSets.get(setIndex);
-//                for (int itemId : set.items) {
-//                    lookupManySets.put(itemId, setIndex);
-//                }
-//            }
+            for (int setIndex = 0; setIndex < selectedSets.size(); ++setIndex) {
+                SetInfo set = selectedSets.get(setIndex);
+                for (int itemId : set.items) {
+                    lookupManySets.put(itemId, setIndex);
+                }
+            }
         }
     }
 
@@ -292,6 +286,10 @@ public class SetBonus {
             }
         }
         return null;
+    }
+
+    public IntStream allSetItems() {
+        return activeSets.stream().flatMapToInt(set -> Arrays.stream(set.itemsArray));
     }
 
     private static final class SetInfo {

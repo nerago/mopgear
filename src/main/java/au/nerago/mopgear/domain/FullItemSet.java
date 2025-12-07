@@ -32,10 +32,13 @@ public record FullItemSet(StatBlock totalForRating, StatBlock totalForCaps, Equi
         OutputText.println("SET RATED " + totalForRating.toStringExtended() + " " + model.calcRating(this));
         OutputText.println("SET CONSTANT " + totalForCaps.toStringExtended());
         items.forEachValue(it -> OutputText.println(it.toStringExtended() + " " + model.calcRating(it)));
+        OutputText.printf("set bonus %1.2f\n", (double) model.setBonus().calc(this) / (double) SetBonus.DENOMIATOR);
     }
 
     public void outputSetLight() {
         items.forEachValue(it -> OutputText.printf("%s [%d]\n", it.fullName(), it.ref().itemLevel()));
+        OutputText.println();
+        items.forEachValue(it -> OutputText.printf("%s\n", it.shared.name()));
     }
 
     public boolean validate() {

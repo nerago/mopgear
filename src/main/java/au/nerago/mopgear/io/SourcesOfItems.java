@@ -1,11 +1,16 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.ItemLoadUtil;
+import au.nerago.mopgear.Tasks;
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"unused"})
@@ -413,7 +418,7 @@ public class SourcesOfItems {
         };
     }
 
-    public static CostedItem[] strengthPallyTankSetCelestial() {
+    public static CostedItem[] strengthPallyTankSetT1Celestial() {
         return new CostedItem[]{
                 new CostedItem(86661, 60), // head
                 new CostedItem(86659, 50), // shoulder
@@ -423,13 +428,33 @@ public class SourcesOfItems {
         };
     }
 
-    public static CostedItem[] strengthPallyRetSetCelestial() {
+    public static CostedItem[] strengthPallyRetSetT1Celestial() {
         return new CostedItem[]{
                 new CostedItem(86681, 60), // head
                 new CostedItem(86679, 50), // shoulder
                 new CostedItem(86683, 55),
                 new CostedItem(86682, 45),
                 new CostedItem(86680, 55),
+        };
+    }
+
+    public static CostedItem[] strengthPallyTankSetT1Heroic() {
+        return new CostedItem[]{
+                new CostedItem(87109, -1),
+                new CostedItem(87110, -1),
+                new CostedItem(87111, -1),
+                new CostedItem(87112, -1),
+                new CostedItem(87113, -1),
+        };
+    }
+
+    public static CostedItem[] strengthPallyRetSetT1Heroic() {
+        return new CostedItem[]{
+                new CostedItem(87099, -1),
+                new CostedItem(87100, -1),
+                new CostedItem(87101, -1),
+                new CostedItem(87102, -1),
+                new CostedItem(87103, -1),
         };
     }
 
@@ -562,12 +587,12 @@ public class SourcesOfItems {
 
     public static CostedItem[] strengthPlateValorCelestialTank() {
         CostedItem[] filteredCelestialArray = strengthPlateCelestialArray();
-        return ArrayUtil.concat(new CostedItem[][]{filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetCelestial(), strengthPallyRetSetCelestial()});
+        return ArrayUtil.concat(new CostedItem[][]{filteredCelestialArray, strengthPlateValorArray(), strengthPallyTankSetT1Celestial(), strengthPallyRetSetT1Celestial()});
     }
 
     public static CostedItem[] strengthPlateValorCelestialRet() {
         CostedItem[] filteredCelestialArray = strengthPlateCelestialArray();
-        return ArrayUtil.concat(new CostedItem[][]{filteredCelestialArray, strengthPlateValorArray(), strengthPallyRetSetCelestial()});
+        return ArrayUtil.concat(new CostedItem[][]{filteredCelestialArray, strengthPlateValorArray(), strengthPallyRetSetT1Celestial()});
     }
 
     public static CostedItem[] intellectLeatherValorCelestial() {
@@ -576,11 +601,114 @@ public class SourcesOfItems {
         return tempArray;
     }
 
+    public static CostedItem[] tankTrinketsThroneNormal() {
+        return new CostedItem[] {
+                new CostedItem(94526, -1),
+                new CostedItem(94515, -1),
+                new CostedItem(94527, -1),
+                new CostedItem(94519, -1),
+                new CostedItem(94518, -1),
+                new CostedItem(94529, -1),
+                new CostedItem(94528, -1),
+        };
+    }
+
+    public static CostedItem[] tankTrinketsThroneHeroic() {
+        return new CostedItem[] {
+                new CostedItem(96398, -1),
+                new CostedItem(96470, -1),
+                new CostedItem(96471, -1),
+                new CostedItem(96501, -1),
+                new CostedItem(96523, -1),
+                new CostedItem(96543, -1),
+                new CostedItem(96555, -1),
+        };
+    }
+
+    public static CostedItem[] strengthPlatePaladinTankSetHeroic() {
+        return new CostedItem[] {
+                new CostedItem(95920, -1),
+                new CostedItem(95921, -1),
+                new CostedItem(95922, -1),
+                new CostedItem(95923, -1),
+                new CostedItem(95924, -1),
+        };
+    }
+
+    public static CostedItem[] strengthPlatePaladinRetSetNormal() {
+        return new CostedItem[] {
+                new CostedItem(95280, -1),
+                new CostedItem(95281, -1),
+                new CostedItem(95282, -1),
+                new CostedItem(95283, -1),
+                new CostedItem(95284, -1),
+        };
+    }
+
+    public static CostedItem[] strengthPlatePaladinRetSetHeroic() {
+        return new CostedItem[] {
+                new CostedItem(96654, -1),
+                new CostedItem(96655, -1),
+                new CostedItem(96656, -1),
+                new CostedItem(96657, -1),
+                new CostedItem(96658, -1),
+        };
+    }
+
+    public static CostedItem[] throneGearSetHeroic(SpecType spec) {
+        return SetBonus.forSpec(spec).allSetItems()
+                .mapToObj(id -> ItemCache.instance.get(id, 0))
+                .filter(item -> item.itemLevel() == 535)
+                .map(item -> new CostedItem(item.itemId(), -1))
+                .toArray(CostedItem[]::new);
+    }
+
+    public static CostedItem[] strengthPlateThroneHeroic() {
+        return WowSimDB.instance.itemStream()
+                .filter(item -> item.shared.phase() == 3)
+                .filter(item -> item.shared.ref().upgradeLevel() == 0)
+                .filter(item -> !item.fullName().contains("Gladiator"))
+                .collect(Collectors.groupingBy(item -> item.shared.name()))
+                .values().stream()
+                .map(SourcesOfItems::selectHeroicThunderItem)
+                .filter(item ->
+                        (item.shared.armorType() == ArmorType.Plate || item.shared.armorType() == ArmorType.NotApplicable || item.slot() == SlotItem.Back)
+                        && item.shared.primaryStatType() == PrimaryStatType.Strength)
+                .filter(item -> !isT15ClassSetItem(item) || item.fullName().contains("Lightning Emperor's"))
+                .map(item -> new CostedItem(item.itemId(), -1))
+                .toArray(CostedItem[]::new);
+    }
+
     public static CostedItem[] get(String param) {
         try {
             return (CostedItem[]) SourcesOfItems.class.getMethod(param).invoke(null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean isT15ClassSetItem(FullItemData item) {
+        return item.fullName().contains("Thousandfold Hells")
+                || item.fullName().contains("Exorcist")
+                || item.fullName().contains("Nine-Tailed")
+                || item.fullName().contains("Saurok Stalker's")
+                || item.fullName().contains("Last Mogu")
+                || item.fullName().contains("All-Consuming Maw")
+                || item.fullName().contains("Chromatic Hydra")
+                || item.fullName().contains("Haunted Forest")
+                || item.fullName().contains("Witch Doctor")
+                || item.fullName().contains("Lightning Emperor's")
+                || item.fullName().contains("Fire-Charm");
+    }
+
+    public static FullItemData selectHeroicThunderItem(List<FullItemData> itemList) {
+        if (itemList.size() == 1)
+            return itemList.getFirst();
+        Optional<FullItemData> heroic = itemList.stream().filter(item -> item.itemLevel() == 535).findAny();
+        if (heroic.isPresent())
+            return heroic.get();
+        if (itemList.size() == 2 && itemList.getFirst().itemLevel() == itemList.getLast().itemLevel()) // reputation items
+            return itemList.getFirst();
+        throw new IllegalStateException();
     }
 }

@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.SkinnyItem;
 import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.SolvableItemSet;
 import au.nerago.mopgear.model.ModelCombined;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.time.Duration;
@@ -44,14 +45,26 @@ public class BigStreamUtil {
                 synchronized (System.out) {
                     System.out.print(curr);
                     System.out.print(" ");
-                    System.out.printf("%.2f", percent);
+                    System.out.printf("%.1f%%", percent);
                     Duration estimateRemain = estimateRemain(startTime, percent);
                     System.out.print(" ");
-                    System.out.print(estimateRemain.toString());
+                    printDuration(estimateRemain);
                     System.out.println();
                 }
             }
         });
+    }
+
+    private static final Duration HOUR_ONE = Duration.ofHours(1);
+    private static final Duration MINUTE_ONE = Duration.ofMinutes(1);
+    private static void printDuration(Duration duration) {
+        if (duration.compareTo(HOUR_ONE) > 0) {
+            System.out.printf("%d:%02d:%02d", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
+        } else if (duration.compareTo(MINUTE_ONE) > 0) {
+            System.out.printf("%02d:%02d", duration.toMinutes(), duration.toSecondsPart());
+        } else {
+            System.out.printf("%dS", duration.toSecondsPart());
+        }
     }
 
     private static long chooseReportFrequency(long estimate, long min, long max) {

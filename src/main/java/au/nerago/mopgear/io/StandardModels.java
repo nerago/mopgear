@@ -76,7 +76,7 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = SetBonus.activateWhiteTigerPlate();
+        SetBonus setBonus = SetBonus.named("White Tiger Plate", "Plate of the Lightning Emperor");
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
     }
 
@@ -97,7 +97,7 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusThunderTank();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
     }
 
@@ -116,7 +116,7 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.melee();
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegear();
+        SetBonus setBonus = SetBonus.named("White Tiger Battlegear", "Battlegear of the Lightning Emperor");
         return new ModelCombined(statRatings, combinedRequire, reforge, enchants, setBonus);
     }
 
@@ -134,7 +134,7 @@ public class StandardModels {
         StatRequirements statRequirements = StatRequirementsHitExpertise.retWideCapRange();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         ReforgeRules reforge = ReforgeRules.melee();
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegear();
+        SetBonus setBonus = SetBonus.forSpec(spec);
         return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus);
     }
 

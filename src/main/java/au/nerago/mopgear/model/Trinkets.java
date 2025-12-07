@@ -58,7 +58,10 @@ public class Trinkets {
         map.put(96398, new TrinketData(Primary, 700, 10, 44, null));
         map.put(96470, new TrinketData(Primary, 1505*5, 10, 49, null));
         map.put(96501, new TrinketData(Primary, 1736, 10, 17, null)); // model doesn't do stacking
+        map.put(96523, new TrinketData(Dodge, 9935, 20, 30, null)); // "when you dodge" and it stacks
         map.put(96543, new TrinketData(Crit, 3238, 20, 75, null)); // TODO do these cooldowns mean the same thing?
+        map.put(96471, new TrinketData(Primary, 0, 1, 30, null)); // self heal can't model like others
+        map.put(96555, new TrinketData(Primary, 0, 1, 30, null)); // absorb shield can't model like others
 
         map.put(94507, new TrinketData(Dodge, 16000/2, 20, 120, null));
         map.put(94508, new TrinketData(Primary, 8800, 15, 85, 15));

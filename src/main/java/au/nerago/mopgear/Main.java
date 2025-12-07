@@ -62,14 +62,14 @@ public class Main {
 
     private void launchpad(Instant startTime) {
 //        WowSimDB.discoverSetBonuses();
-        Tasks.dumpTier2Gear();
+//        Tasks.dumpTier2Gear();
 //        ItemCache.instance.get(null);
 //        new ReadLog().run();
 //        SourcesOfItemsRaid.findNormalVariants();
 
 //
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
@@ -136,11 +136,11 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
+//        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -152,7 +152,7 @@ public class Main {
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
-        reforgeProcessPlus(items, model, startTime, null, 87145, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
+//        reforgeProcessPlus(items, model, startTime, null, 87145, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null,85340, 2, true, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
@@ -213,16 +213,24 @@ public class Main {
 //                96555  defensive
 //                ));
 
-//        CostedItem[] allTheGoodShit = ArrayUtil.concat(
-//                strengthPlateValorCelestialTank(itemCache),
-//                strengthPlateMsvHeroicArray(),
-//                strengthPlateHeartOfFearHeroic(),
-//                strengthPlateTerraceHeroic(),
-//                new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
-//                new CostedItem[]{new CostedItem(79327, 0)}, // darkmoon dps
-//                new CostedItem[]{new CostedItem(84910, 0)} // pvp shield
-//        );
-//        findBIS(model, allTheGoodShit, startTime);
+        CostedItem[] allTheGoodShit = ArrayUtil.concat(
+                new CostedItem[][] {
+//                    strengthPlateValorCelestialTank(),
+//                    strengthPlateHeartOfFearHeroic(),
+//                        strengthPlateMsvHeroicArray(),
+//                    strengthPlateTerraceHeroic(),
+                    strengthPlateThroneHeroic(),
+                    tankTrinketsThroneHeroic(),
+                    strengthPlatePaladinTankSetHeroic(),
+                    strengthPlatePaladinRetSetHeroic(),
+                    strengthPallyTankSetT1Heroic(),
+                    strengthPallyRetSetT1Heroic(),
+                    new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
+//                    new CostedItem[]{new CostedItem(79327, 0)}, // darkmoon dps
+//                    new CostedItem[]{new CostedItem(84910, 0)} // pvp shield
+                }
+        );
+        findBIS(model, allTheGoodShit, startTime, 2);
 //        findBestBySlot(model, allTheGoodShit, startTime);
     }
 

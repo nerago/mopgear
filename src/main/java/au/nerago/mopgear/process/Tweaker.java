@@ -4,8 +4,10 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.util.BestHolder;
 
+import java.util.function.Predicate;
+
 public class Tweaker {
-    public static SolvableItemSet tweak(SolvableItemSet baseSet, ModelCombined model, SolvableEquipOptionsMap items) {
+    public static SolvableItemSet tweak(SolvableItemSet baseSet, ModelCombined model, SolvableEquipOptionsMap items, Predicate<SolvableItemSet> specialFilter) {
         BestHolder<SolvableItemSet> best = new BestHolder<>(baseSet, model.calcRating(baseSet));
 
         for (SlotEquip slot : SlotEquip.values()) {
@@ -24,7 +26,7 @@ public class Tweaker {
             for (SolvableItem replace : slotItems) {
                 if (replace != existing) {
                     SolvableItemSet proposed = substitutedSet(slot, replace, baseItems);
-                    if (model.filterOneSet(proposed)) {
+                    if (model.filterOneSet(proposed) && (specialFilter == null || specialFilter.test(proposed))) {
                         best.add(proposed, model.calcRating(proposed));
                     }
                 }

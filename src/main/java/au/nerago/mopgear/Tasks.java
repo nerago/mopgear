@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -62,9 +61,10 @@ public class Tasks {
         job.setItemOptions(optionsMap);
         job.startTime = startTime;
         job.forceSkipIndex = true;
-        job.forcedRunSized = BILLION*4;
+        job.forcedRunSized = BILLION/2;
+//        job.forcedRunSized = BILLION*4;
         job.printRecorder.outputImmediate = true;
-        job.specialFilter = set -> model.setBonus().countInAnySet(set.items()) >= 4;
+//        job.specialFilter = set -> model.setBonus().countInAnySet(set.items()) >= 4;
         JobOutput output = Solver.runJob(job);
 
         outputResultSimple(output.getFinalResultSet(), model, true);
@@ -373,7 +373,9 @@ public class Tasks {
         if (bestSet.isPresent()) {
             if (detailedOutput) {
                 bestSet.get().outputSetDetailed(model);
+                OutputText.println();
                 AsWowSimJson.writeToOut(bestSet.get().items());
+                OutputText.println();
                 bestSet.get().outputSetLight();
             } else {
                 bestSet.get().outputSet(model);
@@ -410,7 +412,7 @@ public class Tasks {
     }
 
     public static void outputTweaked(SolvableItemSet bestSet, SolvableEquipOptionsMap itemOptions, EquipOptionsMap itemOptionsFull, ModelCombined model) {
-        SolvableItemSet tweakSet = Tweaker.tweak(bestSet, model, itemOptions);
+        SolvableItemSet tweakSet = Tweaker.tweak(bestSet, model, itemOptions, null);
         Function<SolvableItem, FullItemData> fullItemMapper = ItemMapUtil.mapperToFullItems(itemOptionsFull);
         if (bestSet != tweakSet) {
             OutputText.println("TWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAKTWEAK");
@@ -481,15 +483,17 @@ public class Tasks {
 //                        84949, // mal glad girdle accuracy
 //                        89280, // voice helm
 //                        86822, // celestial overwhelm assault belt
-                        87015, // heroic clawfeet
-//                        86979, // heroic impaling treads
 //                        86957, // heroic bladed tempest
 //                        85343, // normal ret chest
 //                        87071, // yang-xi heroic
 //                        86681, // celestial ret head
+
+//                        87015, // heroic clawfeet
+                        86979, // heroic impaling treads
+                        87024, // null greathelm
                         87145, // defiled earth
                         85340, // normal ret legs
-                        87101, // heroic ret head
+//                        87101, // heroic ret head
                 },
                 extraUpgrade,
                 preUpgrade
@@ -515,7 +519,7 @@ public class Tasks {
                         87015, // clawfeet
                         87071, // yang-xi heroic
                         87145, // defiled earth
-                        85340, // normal ret legs
+//                        85340, // normal ret legs
                         87101, // heroic ret head
                 },
                 extraUpgrade,
@@ -548,7 +552,8 @@ public class Tasks {
 //                        86661, // celestial prot head
 //                        87145, // defiled earth
 //                        89934, // soul bracer
-                        87101, // heroic ret head
+//                        87101, // heroic ret head
+                        87024, // null greathelm
                 },
                 extraUpgrade,
                 preUpgrade
@@ -740,20 +745,7 @@ public class Tasks {
         // phase 4 = unclear
         // phase 5 = seige
 
-        Predicate<FullItemData> isClassSet = item ->
-                           item.fullName().contains("Thousandfold Hells")
-                        || item.fullName().contains("Exorcist")
-                        || item.fullName().contains("Nine-Tailed")
-                        || item.fullName().contains("Saurok Stalker's")
-                        || item.fullName().contains("Last Mogu")
-                        || item.fullName().contains("All-Consuming Maw")
-                        || item.fullName().contains("Chromatic Hydra")
-                        || item.fullName().contains("Haunted Forest")
-                        || item.fullName().contains("Witch Doctor")
-                        || item.fullName().contains("Lightning Emperor's")
-                        || item.fullName().contains("Fire-Charm");
-
-//        WowSimDB.instance.itemStream()
+        //        WowSimDB.instance.itemStream()
 //                .filter(item -> item.shared.phase() == -1)
 //                .forEach(item -> OutputText.printf("%d %d %d %s\n", item.itemLevel(), item.shared.phase(), item.itemId(), item.fullName()));
 
@@ -817,18 +809,7 @@ public class Tasks {
                 .filter(item -> !item.fullName().contains("Gladiator"))
                 .collect(Collectors.groupingBy(item -> item.shared.name()))
                 .values().stream()
-                .map(itemList -> {
-                    if (itemList.size() == 1)
-                        return itemList.getFirst();
-                    Optional<FullItemData> heroic = itemList.stream().filter(item -> item.itemLevel() == 535).findAny();
-                    if (heroic.isPresent())
-                        return heroic.get();
-                    if (itemList.size() == 2 && itemList.getFirst().itemLevel() == itemList.getLast().itemLevel()) // reputation items
-                        return itemList.getFirst();
-                    throw new IllegalStateException();
-//                    System.out.println("??? " + itemList.size() + " " + itemList.getFirst().itemLevel());
-//                    return itemList.getFirst();
-                })
+                .map(SourcesOfItems::selectHeroicThunderItem)
                 .sorted(Comparator.comparing(item -> item.fullName().toLowerCase()))
                 .toList();
 
@@ -839,23 +820,13 @@ public class Tasks {
 
         allItems.stream().map(item -> {
             String boss = bossLookup.getOrDefault(item.itemId(), "Unknown");
-            if (boss.equals("Unknown") && isClassSet.test(item)) {
+            if (boss.equals("Unknown") && SourcesOfItems.isT15ClassSetItem(item)) {
                 switch (item.slot()) {
-                    case Chest -> {
-                        boss = "Dark Animus ToT";
-                    }
-                    case Head -> {
-                        boss = "Twin Consorts ToT";
-                    }
-                    case Shoulder -> {
-                        boss = "Iron Qon ToT";
-                    }
-                    case Hand -> {
-                        boss = "Council ToT";
-                    }
-                    case Leg -> {
-                        boss = "Ji-Kun ToT";
-                    }
+                    case Chest -> boss = "Dark Animus ToT";
+                    case Head -> boss = "Twin Consorts ToT";
+                    case Shoulder -> boss = "Iron Qon ToT";
+                    case Hand -> boss = "Council ToT";
+                    case Leg -> boss = "Ji-Kun ToT";
                 }
             }
             if (boss.equals("Unknown") && (item.fullName().contains("Haunted Steel") || item.fullName().contains("Dreadrunner")|| item.fullName().contains("Cloud Serpent")|| item.fullName().contains("Falling Blossom")|| item.fullName().contains("Quilen Hide")|| item.fullName().contains("Spirit Keeper")))
@@ -866,4 +837,5 @@ public class Tasks {
                 .sorted(Comparator.comparing(Tuple.Tuple4::d))
                 .forEach(e -> OutputText.printf("%d,\"%s\",%s,%s\n", e.a(), e.b(), e.c(), e.d()));
     }
+
 }
