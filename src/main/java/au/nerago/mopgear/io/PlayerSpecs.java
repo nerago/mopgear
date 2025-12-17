@@ -27,7 +27,7 @@ public class PlayerSpecs {
         map.put("Neravi", List.of(SpecType.PaladinProtDps, SpecType.PaladinProtMitigation, SpecType.PaladinRet));
         map.put("Oogabooguhh", List.of(SpecType.WarriorProt, SpecType.WarriorArms));
         map.put("Ragnoroth", List.of(SpecType.Hunter));
-        map.put("Rycidious", List.of(SpecType.Mage));
+        map.put("Rycidious", List.of(SpecType.MageFrost));
         map.put("Talnichi", List.of(SpecType.PriestHoly));
         map.put("Talzan", List.of(SpecType.DruidBoom, SpecType.DruidTree));
         map.put("Viiolate", List.of(SpecType.Hunter));

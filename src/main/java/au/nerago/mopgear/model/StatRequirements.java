@@ -2,6 +2,7 @@ package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.*;
 
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public interface StatRequirements {
@@ -20,6 +21,8 @@ public interface StatRequirements {
     SkinnyItem toSkinny(SlotEquip slot, SolvableItem item);
 
     boolean skinnyRecommended();
+
+    ToLongFunction<SkinnyItemSet> skinnyRatingMinimiseFunc();
 
     interface StatRequirementsWithHitExpertise extends StatRequirements {
         int effectiveHit(StatBlock totals);

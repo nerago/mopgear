@@ -13,6 +13,7 @@ import java.util.EnumMap;
 
 import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.domain.StatType.Crit;
+import static au.nerago.mopgear.domain.WowClass.Mage;
 
 public class StandardModels {
     public static ModelCombined modelFor(SpecType spec) {
@@ -32,7 +33,7 @@ public class StandardModels {
             case Rogue, WarriorArms, Hunter -> {
                 return standardMeleeModel(spec);
             }
-            case Mage, Warlock -> {
+            case MageFrost, Warlock -> {
                 return standardCasterModel(spec);
             }
             case DruidBoom, PriestShadow, ShamanElemental -> {
@@ -97,7 +98,8 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusThunderTank();
+//        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusThunderTank();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
     }
 

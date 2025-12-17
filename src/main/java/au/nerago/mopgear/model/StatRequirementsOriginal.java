@@ -3,6 +3,7 @@ package au.nerago.mopgear.model;
 import au.nerago.mopgear.ServiceEntry;
 import au.nerago.mopgear.domain.*;
 
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class StatRequirementsOriginal implements StatRequirements.StatRequirementsWithHitExpertise {
@@ -80,6 +81,11 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
     @Override
     public boolean skinnyRecommended() {
         return true;
+    }
+
+    @Override
+    public ToLongFunction<SkinnyItemSet> skinnyRatingMinimiseFunc() {
+        return skinny -> skinny.totalOne() + skinny.totalTwo();
     }
 
     @Override

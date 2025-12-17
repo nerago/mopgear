@@ -65,6 +65,8 @@ public class FindUpgrades {
     public void runMain(EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment) {
         double baseRating = findBase(baseItems, adjustment);
 
+        extraItemList = checkDuplicates(extraItemList);
+
         List<UpgradeResultItem> jobList =
                 makeJobs(model, baseItems, extraItemList, adjustment, baseRating)
                 .toList().parallelStream() // helps verify
@@ -73,6 +75,25 @@ public class FindUpgrades {
                 .toList();
 
         reportResults(jobList);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    private List<CostedItemData> checkDuplicates(List<CostedItemData> extraItemList) {
+        HashMap<Integer, CostedItemData> result = new HashMap<>();
+        for (CostedItemData item : extraItemList) {
+            CostedItemData current = result.get(item.item().itemId());
+            if (result.values().stream().anyMatch(x -> x.item().shared.name().equals(item.item().shared.name()) && x.item().itemId() != item.item().itemId())) {
+                throw new RuntimeException("alternate items for " + item.item().shared.name());
+            }
+            if (current == null || current.cost() == 0 || current.cost() == -1) {
+                result.put(item.item().itemId(), item);
+            } else if (item.cost() == 0 || item.cost() == -1) {
+                // ignore
+            } else if (current.cost() != item.cost()) {
+                throw new RuntimeException("different costs for " + item.item());
+            }
+        }
+        return result.values().stream().toList();
     }
 
     private double findBase(EquipOptionsMap baseItems, StatBlock adjustment) {
@@ -187,7 +208,7 @@ public class FindUpgrades {
 
     private JobInput buildUpgradeJob(ModelCombined model, EquipOptionsMap items, FullItemData extraItem, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
         JobInput job = new JobInput();
-//        job.singleThread = true;
+        job.singleThread = true;
 
         extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true, false);
         job.println("OFFER " + extraItem.toStringExtended());

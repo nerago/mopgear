@@ -87,6 +87,11 @@ public final class FullItemData implements IItem {
         return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice);
     }
 
+    public FullItemData changeName(String replaceName) {
+        ItemShared changeShared = ItemSharedCache.get(replaceName, shared);
+        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice);
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{ ");
@@ -165,7 +170,8 @@ public final class FullItemData implements IItem {
     }
 
     public boolean isUpgradable() {
-        return !shared.name().contains("Gladiator");
+        return !shared.name().contains("Gladiator") && itemId() != 95142;
+        // TODO other non-upgradeable valour gear
     }
 
     public ItemRef ref() {

@@ -10,7 +10,7 @@ public enum SpecType {
     DruidBear,
     DruidTree,
     DruidBoom,
-    Mage,
+    MageFrost,
     PriestShadow,
     Rogue,
     Warlock,

@@ -245,6 +245,7 @@ public class FindMultiSpec {
         job.runSizeMultiply = individualRunSizeMultiply * finalMultiply;
         job.hackAllow = hackAllow;
         job.forcePhased = isFinal;
+        job.singleThread = true;
         return Solver.runJob(job);
     }
 
@@ -393,7 +394,7 @@ public class FindMultiSpec {
                 draftSet.outputSetDetailed(spec.model);
                 AsWowSimJson.writeToOut(draftSet.items());
 
-                ItemLoadUtil.duplicateAlternateEnchants(spec.itemOptions, spec.model);
+//                ItemLoadUtil.duplicateAlternateEnchants(spec.itemOptions, spec.model);
                 JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, 4, true);
 
                 FullItemSet revisedSet = null;
@@ -580,7 +581,10 @@ public class FindMultiSpec {
         }
 
         private void loadAndGenerate(int itemId) {
-            FullItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
+            FullItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, 0);
+            if (extraItem.isUpgradable() && extraItemsUpgradeLevel > 0)
+                extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
+
             if (overrideEnchant.containsKey(itemId)) {
                 extraItem = extraItem.changeEnchant(overrideEnchant.get(itemId));
             } else {

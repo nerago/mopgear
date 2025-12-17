@@ -2,13 +2,15 @@ package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.*;
 
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class StatRequirementsHitExpertise implements StatRequirements, StatRequirements.StatRequirementsWithHitExpertise {
     private final int hitMin, hitMax;
     private final int expertiseMin, expertiseMax;
+    private boolean minimiseExpertise;
 
-    public StatRequirementsHitExpertise(int hitMin, int hitMax, int expertiseMin, int expertiseMax) {
+    public StatRequirementsHitExpertise(int hitMin, int hitMax, int expertiseMin, int expertiseMax, boolean minimiseExpertise) {
         this.hitMin = hitMin;
         this.hitMax = hitMax;
         this.expertiseMin = expertiseMin;
@@ -20,7 +22,8 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
                 StatRequirements.TARGET_RATING_MELEE,
                 StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED,
                 StatRequirements.TARGET_RATING_MELEE,
-                StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
+                StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED,
+                true);
     }
 
     public static StatRequirements retWideCapRange() {
@@ -28,19 +31,22 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
                 StatRequirements.TARGET_RATING_MELEE,
                 StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 5,
                 StatRequirements.TARGET_RATING_MELEE,
-                StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 5);
+                StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 5,
+                true);
     }
 
     public static StatRequirements protFullExpertise() {
         return new StatRequirementsHitExpertise(
                 StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED,
-                StatRequirements.TARGET_RATING_TANK, StatRequirements.TARGET_RATING_TANK + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
+                StatRequirements.TARGET_RATING_TANK, StatRequirements.TARGET_RATING_TANK + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED,
+                true);
     }
 
     public static StatRequirements protFlexibleParry() {
         return new StatRequirementsHitExpertise(
                 StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 3,
-                StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_TANK);
+                StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_TANK,
+                false);
     }
 
     @Override
@@ -60,6 +66,14 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
     @Override
     public boolean skinnyRecommended() {
         return true;
+    }
+
+    @Override
+    public ToLongFunction<SkinnyItemSet> skinnyRatingMinimiseFunc() {
+        if (minimiseExpertise)
+            return skinny -> skinny.totalOne() + skinny.totalTwo();
+        else
+            return SkinnyItemSet::totalOne;
     }
 
     @Override

@@ -45,7 +45,7 @@ public class Main {
 
         lowerPriority();
 
-        try (ForkJoinPool myPool = new ForkJoinPool(12, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, false, 20, 256, 10, null, 60, TimeUnit.SECONDS)) {
+        try (ForkJoinPool myPool = new ForkJoinPool(8, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, false, 0, 32, 1, null, 60, TimeUnit.SECONDS)) {
             myPool.submit(() -> launchpad(startTime)).get();
         }
 
@@ -66,6 +66,8 @@ public class Main {
 //        ItemCache.instance.get(null);
 //        new ReadLog().run();
 //        SourcesOfItemsRaid.findNormalVariants();
+
+//        everyoneBis();
 
 //
 //        determineRatingMultipliers();
@@ -94,7 +96,7 @@ public class Main {
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Ring2,86880, 2, false, true, null);
-        reforgeProcessPlus(items, model, startTime, null, 87145, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
+//        reforgeProcessPlus(items, model, startTime, null, 87145, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null,86683, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, null,87015, 2, false, true, null);
 //        reforgeProcessPlus(items, model, startTime, true,86145, false, true, new StatBlock(285+80+120,0,0,165,160,160+160,0,0,0));
@@ -115,7 +117,7 @@ public class Main {
 //        compareBestReforgesWithCommon(DataLocation.gearRetFile, model, commonFixedItems(), null);
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
-//                findUpgradeSetup(items, strengthPlateValorArray(), model);
+                findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
 //        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialRet(), null);
 //        new FindUpgrades(model, true).runMaxedItems(items, new CostedItem[]{new CostedItem(86905, 0)}, null);
 
@@ -136,11 +138,11 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
-        Path file = DataLocation.gearProtDpsFile;
+//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
+//        Path file = DataLocation.gearProtDpsFile;
 
-//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
-//        Path file = DataLocation.gearProtDefenceFile;
+        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
+        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -152,6 +154,9 @@ public class Main {
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
+
+//          reforgeProcessPlus(items, model, startTime, null, 95142, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
+//        reforgeProcessPlus(items, model, startTime, null, 95144	, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 87145, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null,85340, 2, true, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
@@ -213,25 +218,44 @@ public class Main {
 //                96555  defensive
 //                ));
 
-        CostedItem[] allTheGoodShit = ArrayUtil.concat(
-                new CostedItem[][] {
-//                    strengthPlateValorCelestialTank(),
-//                    strengthPlateHeartOfFearHeroic(),
-//                        strengthPlateMsvHeroicArray(),
-//                    strengthPlateTerraceHeroic(),
-                    strengthPlateThroneHeroic(),
-                    tankTrinketsThroneHeroic(),
-                    strengthPlatePaladinTankSetHeroic(),
-                    strengthPlatePaladinRetSetHeroic(),
-                    strengthPallyTankSetT1Heroic(),
-                    strengthPallyRetSetT1Heroic(),
-                    new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
+//        CostedItem[] allTheGoodShit = ArrayUtil.concat(
+//                new CostedItem[][] {
+////                    strengthPlateValorCelestialTank(),
+////                    strengthPlateHeartOfFearHeroic(),
+////                        strengthPlateMsvHeroicArray(),
+////                    strengthPlateTerraceHeroic(),
+//                    strengthPlateThroneHeroic(),
+//                    tankTrinketsThroneHeroic(),
+//                    strengthDpsTrinketsThroneHeroic(),
+//                    throneClassGearSetHeroic(SpecType.PaladinProtMitigation, true),
+//                    throneClassGearSetHeroic(SpecType.PaladinRet, true),
+////                    strengthPallyTankSetT1Heroic(),
+////                    strengthPallyRetSetT1Heroic(),
+//                    new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
 //                    new CostedItem[]{new CostedItem(79327, 0)}, // darkmoon dps
-//                    new CostedItem[]{new CostedItem(84910, 0)} // pvp shield
-                }
-        );
-        findBIS(model, allTheGoodShit, startTime, 2);
+////                    new CostedItem[]{new CostedItem(84910, 0)} // pvp shield
+//                }
+//        );
+////        allTheGoodShit = minusRadenLoot(allTheGoodShit);
+//        findBIS(model, allTheGoodShit, startTime, 2, false);
+
 //        findBestBySlot(model, allTheGoodShit, startTime);
+
+//        findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
+//        findUpgrade(items, new CostedItem[]{new CostedItem(95142	,1250)}, model, true, null, 2);
+
+        Difficulty difficulty = Difficulty.Normal;
+        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+                pallyPhase3Valor(),
+                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
+                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+                strengthPlateThroneNormal(difficulty),
+                tankTrinketsThroneNormal(difficulty),
+                strengthDpsTrinketsThroneNormal(difficulty),
+        });
+        upgradeShit = minusRadenLoot(upgradeShit);
+        findUpgrade(items, upgradeShit, model, true, null, 0);
+
     }
 
     private void reforgeBoom(Instant startTime) {

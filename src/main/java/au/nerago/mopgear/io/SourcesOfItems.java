@@ -1,15 +1,14 @@
 package au.nerago.mopgear.io;
 
+import au.nerago.mopgear.Difficulty;
 import au.nerago.mopgear.ItemLoadUtil;
-import au.nerago.mopgear.Tasks;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.util.ArrayUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -541,6 +540,30 @@ public class SourcesOfItems {
         };
     }
 
+    public static CostedItem[] pallyPhase3Valor() {
+        return new CostedItem[]{
+                new CostedItem(95142, 1250),
+                new CostedItem(95144, 1250), //vanguard's battletags
+                new CostedItem(95128, 1250),
+                new CostedItem(95129, 1250),
+                new CostedItem(95140, 1250),
+                new CostedItem(95141, 1250),
+                new CostedItem(94508, 1750),
+                new CostedItem(95110, 1750),
+                new CostedItem(95111, 1750),
+                new CostedItem(95121, 2250),
+                new CostedItem(95119, 2250),
+                new CostedItem(95114, 1250),
+                new CostedItem(95115, 1250),
+                new CostedItem(95075, 2250),
+                new CostedItem(95076, 2250),
+                new CostedItem(95083, 1750),
+                new CostedItem(95084, 1750),
+                new CostedItem(95098, 0),
+                new CostedItem(95103, 0),
+        };
+    }
+
     public static List<EquippedItem> bagItemsArray(List<Integer> skip) {
         return bagItemsArray(DataLocation.bagsFile, skip);
     }
@@ -601,82 +624,126 @@ public class SourcesOfItems {
         return tempArray;
     }
 
-    public static CostedItem[] tankTrinketsThroneNormal() {
-        return new CostedItem[] {
-                new CostedItem(94526, -1),
-                new CostedItem(94515, -1),
-                new CostedItem(94527, -1),
-                new CostedItem(94519, -1),
-                new CostedItem(94518, -1),
-                new CostedItem(94529, -1),
-                new CostedItem(94528, -1),
-        };
+    public static CostedItem[] tankTrinketsThroneNormal(Difficulty difficulty) {
+        CostedItem[] array = tankTrinketsThroneHeroic();
+        return replaceWithNormal(array, difficulty);
+    }
+
+    public static CostedItem[] strengthDpsTrinketsThroneNormal(Difficulty difficulty) {
+        CostedItem[] array = strengthDpsTrinketsThroneHeroic();
+        return replaceWithNormal(array, difficulty);
     }
 
     public static CostedItem[] tankTrinketsThroneHeroic() {
-        return new CostedItem[] {
-                new CostedItem(96398, -1),
-                new CostedItem(96470, -1),
-                new CostedItem(96471, -1),
-                new CostedItem(96501, -1),
-                new CostedItem(96523, -1),
-                new CostedItem(96543, -1),
-                new CostedItem(96555, -1),
+        return new CostedItem[]{
+                new CostedItem(96523, -1), //  Delicate Vial of the Sanguinaire
+                new CostedItem(96421, -1), //  Fortitude of the Zandalari
+                new CostedItem(96471, -1), //  Ji-Kun's Rising Winds
+//                new CostedItem(103990, -1), // Resolve of Niuzao
+                new CostedItem(96555, -1), //  Soul Barrier
         };
     }
 
-    public static CostedItem[] strengthPlatePaladinTankSetHeroic() {
-        return new CostedItem[] {
-                new CostedItem(95920, -1),
-                new CostedItem(95921, -1),
-                new CostedItem(95922, -1),
-                new CostedItem(95923, -1),
-                new CostedItem(95924, -1),
+    public static CostedItem[] strengthDpsTrinketsThroneHeroic() {
+        return new CostedItem[]{
+//                new CostedItem(103989, -1), // Alacrity of Xuen
+                new CostedItem(96470, -1), //  Fabled Feather of Ji-Kun
+                new CostedItem(96543, -1), //  Gaze of the Twins
+                new CostedItem(96501, -1), //  Primordius' Talisman of Rage
+                new CostedItem(96398, -1), //  Spark of Zandalar
         };
     }
 
-    public static CostedItem[] strengthPlatePaladinRetSetNormal() {
-        return new CostedItem[] {
-                new CostedItem(95280, -1),
-                new CostedItem(95281, -1),
-                new CostedItem(95282, -1),
-                new CostedItem(95283, -1),
-                new CostedItem(95284, -1),
+    public static CostedItem[] agilityDpsTrinketsThroneHeroic() {
+        return new CostedItem[]{
+                new CostedItem(96409, -1), //  Bad Juju
+                new CostedItem(103986, -1), // Discipline of Xuen
+                new CostedItem(96369, -1), //  Renataki's Soul Charm
+                new CostedItem(96546, -1), //  Rune of Re-Origination
+                new CostedItem(96492, -1), //  Talisman of Bloodlust
         };
     }
 
-    public static CostedItem[] strengthPlatePaladinRetSetHeroic() {
-        return new CostedItem[] {
-                new CostedItem(96654, -1),
-                new CostedItem(96655, -1),
-                new CostedItem(96656, -1),
-                new CostedItem(96657, -1),
-                new CostedItem(96658, -1),
+    public static CostedItem[] intellectDpsTrinketsThroneHeroic() {
+        return new CostedItem[]{
+                new CostedItem(96455, -1), //  Breath of the Hydra
+                new CostedItem(96516, -1), //  Cha-Ye's Essence of Brilliance
+                new CostedItem(96558, -1), //  Unerring Vision of Lei Shen
+                new CostedItem(96413, -1), //  Wushoolay's Final Choice
+                new CostedItem(103987, -1), // Yu'lon's Bite
         };
     }
 
-    public static CostedItem[] throneGearSetHeroic(SpecType spec) {
-        return SetBonus.forSpec(spec).allSetItems()
+    public static CostedItem[] healTrinketsThroneHeroic() {
+        return new CostedItem[]{
+                new CostedItem(103988, -1), // Contemplation of Chi-Ji
+                new CostedItem(96385, -1), //  Horridon's Last Gasp
+                new CostedItem(96456, -1), //  Inscribed Bag of Hydra-Spawn
+                new CostedItem(96561, -1), //  Lightning-Imbued Chalice
+                new CostedItem(96507, -1), //  Stolen Relic of Zuldazar
+        };
+    }
+
+//    public static CostedItem[] tankTrinketsThroneNormal() {
+//        return new CostedItem[]{
+//                new CostedItem(94526, -1),
+//                new CostedItem(94515, -1),
+//                new CostedItem(94527, -1),
+//                new CostedItem(94519, -1),
+//                new CostedItem(94518, -1),
+//                new CostedItem(94529, -1),
+//                new CostedItem(94528, -1),
+//        };
+//    }
+
+    public static CostedItem[] throneClassGearSetHeroic(SpecType spec, Difficulty difficulty) {
+        // celestial 502
+        // normal 522
+        // heroic 535
+
+        int targetLevel = difficulty.itemLevel;
+
+        CostedItem[] array = SetBonus.forSpec(spec).allSetItems()
                 .mapToObj(id -> ItemCache.instance.get(id, 0))
-                .filter(item -> item.itemLevel() == 535)
+                .filter(item -> item.itemLevel() == targetLevel)
                 .map(item -> new CostedItem(item.itemId(), -1))
                 .toArray(CostedItem[]::new);
+        if (array.length != 5) {
+            throw new IllegalStateException("should be 5 items");
+        }
+        return array;
     }
 
     public static CostedItem[] strengthPlateThroneHeroic() {
+        return genericThroneNormalHeroic(ArmorType.Plate, PrimaryStatType.Strength, Difficulty.Heroic);
+    }
+
+    public static CostedItem[] strengthPlateThroneNormal(Difficulty difficulty) {
+        return genericThroneNormalHeroic(ArmorType.Plate, PrimaryStatType.Strength, difficulty);
+    }
+
+    public static CostedItem[] genericThroneNormalHeroic(ArmorType armorType, PrimaryStatType statType, Difficulty difficulty) {
         return WowSimDB.instance.itemStream()
                 .filter(item -> item.shared.phase() == 3)
                 .filter(item -> item.shared.ref().upgradeLevel() == 0)
                 .filter(item -> !item.fullName().contains("Gladiator"))
                 .collect(Collectors.groupingBy(item -> item.shared.name()))
                 .values().stream()
-                .map(SourcesOfItems::selectHeroicThunderItem)
+                .map(group -> selectNormalHeroicThunderItem(group, difficulty))
                 .filter(item ->
-                        (item.shared.armorType() == ArmorType.Plate || item.shared.armorType() == ArmorType.NotApplicable || item.slot() == SlotItem.Back)
-                        && item.shared.primaryStatType() == PrimaryStatType.Strength)
-                .filter(item -> !isT15ClassSetItem(item) || item.fullName().contains("Lightning Emperor's"))
+                        (item.shared.armorType() == armorType || item.shared.armorType() == ArmorType.NotApplicable || item.slot() == SlotItem.Back)
+                                && item.shared.primaryStatType() == statType)
+                .filter(item -> !isT15ClassSetItem(item))
                 .map(item -> new CostedItem(item.itemId(), -1))
                 .toArray(CostedItem[]::new);
+    }
+
+    public static CostedItem[] minusRadenLoot(CostedItem[] input) {
+        HashSet<Integer> radenItems = new HashSet<>(Arrays.asList(95025, 95013, 95001, 95038, 95035, 95033, 95028, 95002, 94995, 95003, 95015, 95010, 95000, 95029, 95030, 95027, 95031, 95023, 95011, 94999, 95036, 95037, 95020, 95018, 95022, 95019, 95021, 95014, 95032, 95040, 95006, 95012, 95034, 95026, 95039, 95004, 94998, 95024, 95005, 95009, 95007, 94996, 95016, 95008, 94997, 95017));
+        return Arrays.stream(input)
+                .filter(item -> !radenItems.contains(item.itemId()))
+                .toArray(CostedItem[]::new);
+
     }
 
     public static CostedItem[] get(String param) {
@@ -701,14 +768,40 @@ public class SourcesOfItems {
                 || item.fullName().contains("Fire-Charm");
     }
 
-    public static FullItemData selectHeroicThunderItem(List<FullItemData> itemList) {
+    public static FullItemData selectNormalHeroicThunderItem(List<FullItemData> itemList, Difficulty difficulty) {
+        int targetLevel = difficulty.itemLevel;
         if (itemList.size() == 1)
             return itemList.getFirst();
-        Optional<FullItemData> heroic = itemList.stream().filter(item -> item.itemLevel() == 535).findAny();
-        if (heroic.isPresent())
-            return heroic.get();
+
+        Optional<FullItemData> targetItem = itemList.stream().filter(item -> item.itemLevel() == targetLevel).findAny();
+        if (targetItem.isPresent())
+            return targetItem.get();
+
         if (itemList.size() == 2 && itemList.getFirst().itemLevel() == itemList.getLast().itemLevel()) // reputation items
             return itemList.getFirst();
+
+        List<FullItemData> baseItems = itemList.stream()
+                .filter(it -> it.shared.ref().upgradeLevel() == 0)
+                .sorted(Comparator.comparing(FullItemData::itemLevel))
+                .toList();
+        if (baseItems.size() == 2 && baseItems.getFirst().slot() == SlotItem.Trinket && baseItems.getFirst().itemLevel() == 496 && baseItems.getLast().itemLevel() == 535)
+            return difficulty == Difficulty.Heroic ? baseItems.getLast() : baseItems.getFirst();
+
         throw new IllegalStateException();
+    }
+
+    public static FullItemData replaceWithNormal(FullItemData example, Difficulty difficulty) {
+        List<FullItemData> withName = WowSimDB.instance.itemStream()
+                .filter(it -> it.shared.name().equals(example.shared.name()))
+                .toList();
+        return selectNormalHeroicThunderItem(withName, difficulty);
+    }
+
+    private static CostedItem @NotNull [] replaceWithNormal(CostedItem[] array, Difficulty difficulty) {
+        return Arrays.stream(array)
+                .map(x -> ItemCache.instance.get(x.itemId(), 0))
+                .map(example -> replaceWithNormal(example, difficulty))
+                .map(x -> new CostedItem(x.itemId(), -1))
+                .toArray(CostedItem[]::new);
     }
 }

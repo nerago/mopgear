@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static au.nerago.mopgear.domain.StatType.*;
+import static au.nerago.mopgear.io.SourcesOfItems.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Tasks {
@@ -43,9 +44,9 @@ public class Tasks {
         new FindUpgrades(model, allowHacks).runMaxedItems(baseItems, extraItems, adjustment);
     }
 
-    public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel) {
+    public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel, boolean requireFullSetBonus) {
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
-        Arrays.stream(allItems).map(equip -> ItemLoadUtil.loadItemBasic(equip.itemId(), upgradeLevel))
+        Arrays.stream(allItems).flatMap(equip -> ItemLoadUtil.loadItemBasicWithRandomVariants(equip.itemId(), upgradeLevel).stream())
                 .filter(item -> item.slot() != SlotItem.Weapon2H)
                 .forEach(item -> {
                     item = ItemLoadUtil.defaultEnchants(item, model, true, false);
@@ -60,11 +61,19 @@ public class Tasks {
         job.model = model;
         job.setItemOptions(optionsMap);
         job.startTime = startTime;
+
         job.forceSkipIndex = true;
-        job.forcedRunSized = BILLION/2;
+        job.forcedRunSized = BILLION/6;
+
+//        job.forcePhased = true;
+//        job.runSizeMultiply = 10;
+
+//        job.forcedRunSized = BILLION;
 //        job.forcedRunSized = BILLION*4;
         job.printRecorder.outputImmediate = true;
-//        job.specialFilter = set -> model.setBonus().countInAnySet(set.items()) >= 4;
+        if (requireFullSetBonus) {
+            job.specialFilter = set -> model.setBonus().countInAnySet(set.items()) >= 4;
+        }
         JobOutput output = Solver.runJob(job);
 
         outputResultSimple(output.getFinalResultSet(), model, true);
@@ -441,6 +450,7 @@ public class Tasks {
     public static void paladinMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec();
 //        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
+//        multi.addFixedForge(94526, ReforgeRecipe.empty()); // zandalar trinket
         multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
 //        multi.addFixedForge(87026, new ReforgeRecipe(Expertise, Haste)); // Back Cloak of Peacock Feathers
 //        multi.addFixedForge(86957, new ReforgeRecipe(null, null)); // Ring Ring of the Bladed Tempest
@@ -466,7 +476,7 @@ public class Tasks {
 //        multi.addFixedForge(90862, new ReforgeRecipe(Haste, Mastery)); // ring
 //        multi.addFixedForge(85323, new ReforgeRecipe(Parry, Mastery)); // chest
 
-        int extraUpgrade = 2;
+        int extraUpgrade = 0;
         boolean preUpgrade = false;
 
         multi.addSpec(
@@ -482,7 +492,6 @@ public class Tasks {
 //                        89954, // warbelt pods
 //                        84949, // mal glad girdle accuracy
 //                        89280, // voice helm
-//                        86822, // celestial overwhelm assault belt
 //                        86957, // heroic bladed tempest
 //                        85343, // normal ret chest
 //                        87071, // yang-xi heroic
@@ -491,9 +500,14 @@ public class Tasks {
 //                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
                         87024, // null greathelm
-                        87145, // defiled earth
+//                        87145, // defiled earth
                         85340, // normal ret legs
 //                        87101, // heroic ret head
+//                        95142, // striker's battletags
+                        87036, // soulgrasp chocker
+                        94726, // cloudbreaker belt
+                        95914, // ret tier shoulder
+                        95924, // prot tier shoulder
                 },
                 extraUpgrade,
                 preUpgrade
@@ -506,21 +520,36 @@ public class Tasks {
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 StandardModels.modelFor(SpecType.PaladinProtDps),
-                0.65,
+                0.40,
                 new int[]{
-//                        87026, // heroic peacock cloak
-//                        86075, // steelskin basic
-//                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
 //                        87062 // elegion heroic
 //                        86957, // heroic bladed tempest
 //                        85343, // normal ret chest
 
-                        87015, // clawfeet
-                        87071, // yang-xi heroic
+                        87015, // heroic clawfeet
+//                        86979, // heroic impaling treads
+//                        87071, // yang-xi heroic
                         87145, // defiled earth
-//                        85340, // normal ret legs
+                        85340, // normal ret legs
                         87101, // heroic ret head
+//                        86946, // ruby signet heroic
+                        95142, // striker's battletags
+//                        94726, // cloudbreaker belt
+
+//                        87026, // heroic peacock cloak
+                        86955, // heroic overwhelm assault belt
+                        86325, // daybreak
+
+                        87050, // steelskin heroic
+//                        95768, // greatshield gloaming celestial
+                        95652, // celestial head
+                        95808, // celestial leg
+                        95874, // celestial shoulder
+                        95687, // celestial beakbreaker cloak
+                        95914, // ret tier shoulder celestial
+                        95924, // prot tier shoulder celestial
+
                 },
                 extraUpgrade,
                 preUpgrade
@@ -534,13 +563,12 @@ public class Tasks {
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 StandardModels.modelFor(SpecType.PaladinProtMitigation),
-                0.30,
+                0.55,
                 new int[]{
 //                        90594, // golden lotus durable necklace
 //                        84807, // mav glad cloak alacrity
 //                        87036, // heroic soulgrasp
 //                        87026, // heroic peacock cloak
-                        86955, // heroic overwhelm assault belt
 //                        86979, // heroic impaling treads
 //                        87015, // clawfeet
 //                        87062 // elegion heroic
@@ -554,6 +582,23 @@ public class Tasks {
 //                        89934, // soul bracer
 //                        87101, // heroic ret head
                         87024, // null greathelm
+//                        86946, // ruby signet heroic
+//                        95142, // striker's battletags
+//                        94726, // cloudbreaker belt
+                        86955, // heroic overwhelm assault belt
+                        87060, // star-breaker belt
+
+                        87026, // heroic peacock cloak
+                        86325, // daybreak
+
+//                        87050, // steelskin heroic
+                        95768, // greatshield gloaming celestial
+                        95652, // celestial head
+                        95808, // celestial leg
+                        95874, // celestial shoulder
+//                        95687, // celestial beakbreaker cloak
+                        95914, // ret tier shoulder celestial
+                        95924, // prot tier shoulder celestial
                 },
                 extraUpgrade,
                 preUpgrade
@@ -574,7 +619,7 @@ public class Tasks {
 
 //        multi.suppressSlotCheck(86957);
 //        multi.suppressSlotCheck(84829);
-//        multi.suppressSlotCheck(86880);
+//        multi.suppressSlotCheck(86946);
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
@@ -582,7 +627,8 @@ public class Tasks {
 //        multi.solve(15000);
 //        multi.solve(50000);
 //        multi.solve(120000);
-        multi.solve(490000);
+        multi.solve(220000);
+//        multi.solve(490000);
 //        multi.solve(1490000);
 //        multi.solve(4000000);
     }
@@ -809,7 +855,7 @@ public class Tasks {
                 .filter(item -> !item.fullName().contains("Gladiator"))
                 .collect(Collectors.groupingBy(item -> item.shared.name()))
                 .values().stream()
-                .map(SourcesOfItems::selectHeroicThunderItem)
+                .map(x -> SourcesOfItems.selectNormalHeroicThunderItem(x, Difficulty.Heroic))
                 .sorted(Comparator.comparing(item -> item.fullName().toLowerCase()))
                 .toList();
 
@@ -838,4 +884,39 @@ public class Tasks {
                 .forEach(e -> OutputText.printf("%d,\"%s\",%s,%s\n", e.a(), e.b(), e.c(), e.d()));
     }
 
+    public static void everyoneBis() {
+//        SpecType spec = SpecType.WarriorProt;
+//        ModelCombined model = StandardModels.modelFor(spec);
+//        CostedItem[] allItems = ArrayUtil.concat(
+//                new CostedItem[][] {
+//                        strengthPlateThroneHeroic(),
+//                        throneClassGearSetHeroic(spec, true),
+//                        tankTrinketsThroneHeroic(),
+//                        strengthDpsTrinketsThroneHeroic(),
+//                }
+//        );
+
+//        SpecType spec = SpecType.MageFrost;
+//        ModelCombined model = StandardModels.modelFor(spec);
+//        CostedItem[] allItems = ArrayUtil.concat(
+//                new CostedItem[][] {
+//                        genericThroneHeroic(ArmorType.Cloth, PrimaryStatType.Intellect),
+//                        throneClassGearSetHeroic(spec, true),
+//                        intellectDpsTrinketsThroneHeroic()
+//                }
+//        );
+
+        SpecType spec = SpecType.ShamanRestoration;
+        ModelCombined model = StandardModels.modelFor(spec);
+        CostedItem[] allItems = ArrayUtil.concat(
+                new CostedItem[][] {
+                        genericThroneNormalHeroic(ArmorType.Mail, PrimaryStatType.Intellect, Difficulty.Heroic),
+                        throneClassGearSetHeroic(spec, Difficulty.Heroic),
+                        intellectDpsTrinketsThroneHeroic(),
+                        healTrinketsThroneHeroic()
+                }
+        );
+
+        findBIS(model, allItems, Instant.now(), 2, false);
+    }
 }

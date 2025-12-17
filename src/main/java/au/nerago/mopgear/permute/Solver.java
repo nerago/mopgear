@@ -18,9 +18,9 @@ import java.util.Optional;
 public class Solver {
     private static final long MILLION = 1_000_000;
     private static final long DEFAULT_RANDOM_RUN_SIZE = 10 * MILLION;
-    public static final long MAX_SKINNY_PHASED_ANY = 1000 * MILLION;
+    public static final long MAX_SKINNY_PHASED_ANY = 100 * MILLION;
     public static final long MAX_SKINNY_FULL_SEARCH = 10000;
-    public static final long MAX_BASIC_FULL_SEARCH = MILLION / 10;
+    public static final long MAX_BASIC_FULL_SEARCH = MILLION / 50;
 
     public static JobOutput runJob(JobInput job) {
         ModelCombined model = job.model;

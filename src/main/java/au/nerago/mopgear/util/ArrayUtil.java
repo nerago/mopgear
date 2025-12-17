@@ -1,11 +1,10 @@
 package au.nerago.mopgear.util;
 
+import au.nerago.mopgear.domain.CostedItem;
 import au.nerago.mopgear.domain.FullItemData;
 import au.nerago.mopgear.domain.StatType;
-import com.google.gson.JsonElement;
 
 import java.lang.reflect.Array;
-import java.net.HttpCookie;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -254,5 +253,11 @@ public class ArrayUtil {
             total += val;
         }
         return total;
+    }
+
+    public static boolean sameContentUnordered(CostedItem[] a, CostedItem[] b) {
+        HashSet<CostedItem> aa = new HashSet<>(Arrays.asList(a));
+        HashSet<CostedItem> bb = new HashSet<>(Arrays.asList(b));
+        return aa.equals(bb);
     }
 }

@@ -29,6 +29,10 @@ public class ItemSharedCache {
         return get(ref, old.slot(), old.name(), old.primaryStatType(), old.armorType(), old.socketSlots(), old.socketBonus(), old.phase());
     }
 
+    public static ItemShared get(String replaceName, ItemShared old) {
+        return get(old.ref(), old.slot(), replaceName, old.primaryStatType(), old.armorType(), old.socketSlots(), old.socketBonus(), old.phase());
+    }
+
     private static boolean equalsShare(ItemShared share, SlotItem slot, String name, PrimaryStatType primaryStatType, ArmorType armorType, SocketType[] socketSlots, StatBlock socketBonus) {
         return share.slot() == slot &&
                 share.name().equals(name) &&

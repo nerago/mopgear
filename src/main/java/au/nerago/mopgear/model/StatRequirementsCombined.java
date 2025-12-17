@@ -2,6 +2,7 @@ package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.*;
 
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class StatRequirementsCombined implements StatRequirements {
@@ -41,6 +42,11 @@ public class StatRequirementsCombined implements StatRequirements {
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
         return a.skinnyMatch(skinny, item) && b.skinnyMatch(skinny, item);
+    }
+
+    @Override
+    public ToLongFunction<SkinnyItemSet> skinnyRatingMinimiseFunc() {
+        return a.skinnyRatingMinimiseFunc();
     }
 
     @Override

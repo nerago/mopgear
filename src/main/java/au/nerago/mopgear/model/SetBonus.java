@@ -34,14 +34,20 @@ public class SetBonus {
     private static final int WHITE_TIGER_BATTLEGEAR_2 = 1032;
     // seal,judge +10%
     private static final int WHITE_TIGER_BATTLEGEAR_4 = 1024;
+    private static final int WHITE_TIGER_BATTLEGEAR_4_TANK = 1040;
+    private static final int PLATE_LIGHTNING_BONUS = 1010;
 
-    private static final SetInfo pallyBattlegearForTank = new SetInfo(SpecType.PaladinRet, "Paladin Ret T14 for Prot", DENOMIATOR, 1050, new int[]{
+    private static final SetInfo pallyBattlegearForTank = new SetInfo(SpecType.PaladinRet, "Paladin Ret T14 for Prot", DENOMIATOR, WHITE_TIGER_BATTLEGEAR_4_TANK, new int[]{
             86681, 86679, 86683, 86682, 86680,
             85341, 85339, 85343, 85342, 85340,
             87101, 87103, 87099, 87100, 87102
     });
     public static SetBonus activateWhiteTigerBattlegearOnly4pcPlusThunderTank() {
         return new SetBonus(Arrays.asList(pallyBattlegearForTank, findSet("Plate of the Lightning Emperor")));
+    }
+
+    public static SetBonus activateWhiteTigerBattlegearOnly4pcPlusAll() {
+        return new SetBonus(Arrays.asList(pallyBattlegearForTank, findSet("White Tiger Plate"), findSet("Plate of the Lightning Emperor")));
     }
 
     // <<<<<<<<<<<<< DRUID BOOM TEIR 14 >>>>>>>>>>>>>>>>
@@ -65,7 +71,7 @@ public class SetBonus {
         sets.add(new SetInfo(SpecType.PaladinRet, "Battlegear of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{98985, 98986, 98987, 99002, 99052, 99132, 99136, 99137, 99138, 99139, 99372, 99373, 99379, 99380, 99387, 99566, 99625, 99651, 99661, 99662}));
         sets.add(new SetInfo(SpecType.PaladinRet, "Battlegear of the Lightning Emperor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95280, 95281, 95282, 95283, 95284, 95910, 95911, 95912, 95913, 95914, 96654, 96655, 96656, 96657, 96658}));
         sets.add(new SetInfo(SpecType.PaladinProtMitigation, "Plate of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99026, 99027, 99028, 99029, 99031, 99126, 99127, 99128, 99129, 99130, 99364, 99368, 99369, 99370, 99371, 99593, 99594, 99595, 99596, 99598}));
-        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "Plate of the Lightning Emperor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95290, 95291, 95292, 95293, 95294, 95920, 95921, 95922, 95923, 95924, 96664, 96665, 96666, 96667, 96668}));
+        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "Plate of the Lightning Emperor", PLATE_LIGHTNING_BONUS, PLATE_LIGHTNING_BONUS, new int[]{95290, 95291, 95292, 95293, 95294, 95920, 95921, 95922, 95923, 95924, 96664, 96665, 96666, 96667, 96668}));
         sets.add(new SetInfo(SpecType.PaladinHoly, "Vestments of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{98979, 98980, 98982, 99003, 99076, 99124, 99125, 99133, 99134, 99135, 99374, 99375, 99376, 99377, 99378, 99626, 99648, 99656, 99665, 99666}));
         sets.add(new SetInfo(SpecType.PaladinHoly, "Vestments of the Lightning Emperor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95285, 95286, 95287, 95288, 95289, 95915, 95916, 95917, 95918, 95919, 96659, 96660, 96661, 96662, 96663}));
         sets.add(new SetInfo(SpecType.PaladinRet, "White Tiger Battlegear", WHITE_TIGER_BATTLEGEAR_2, WHITE_TIGER_BATTLEGEAR_4, new int[]{85339, 85340, 85341, 85342, 85343, 86679, 86680, 86681, 86682, 86683, 87099, 87100, 87101, 87102, 87103}));
@@ -98,9 +104,9 @@ public class SetBonus {
         sets.add(new SetInfo(SpecType.ShamanElemental, "Regalia of the Witch Doctor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95320, 95321, 95322, 95323, 95324, 95950, 95951, 95952, 95953, 95954, 96694, 96695, 96696, 96697, 96698}));
         sets.add(new SetInfo(SpecType.ShamanRestoration, "Vestments of the Firebird", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85349, 85350, 85351, 85352, 85353, 86689, 86690, 86691, 86692, 86693, 87129, 87130, 87131, 87132, 87133}));
         sets.add(new SetInfo(SpecType.ShamanRestoration, "Vestments of the Witch Doctor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95310, 95311, 95312, 95313, 95314, 95940, 95941, 95942, 95943, 95944, 96684, 96685, 96686, 96687, 96688}));
-        sets.add(new SetInfo(SpecType.Mage, "Chronomancer Regalia", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99077, 99078, 99079, 99083, 99084, 99152, 99153, 99160, 99161, 99162, 99397, 99398, 99399, 99400, 99401, 99575, 99576, 99657, 99658, 99659}));
-        sets.add(new SetInfo(SpecType.Mage, "Regalia of the Burning Scroll", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85374, 85375, 85376, 85377, 85378, 86714, 86715, 86716, 86717, 86718, 87007, 87008, 87009, 87010, 87011}));
-        sets.add(new SetInfo(SpecType.Mage, "Regalia of the Chromatic Hydra", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95260, 95261, 95262, 95263, 95264, 95890, 95891, 95892, 95893, 95894, 96634, 96635, 96636, 96637, 96638}));
+        sets.add(new SetInfo(SpecType.MageFrost, "Chronomancer Regalia", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99077, 99078, 99079, 99083, 99084, 99152, 99153, 99160, 99161, 99162, 99397, 99398, 99399, 99400, 99401, 99575, 99576, 99657, 99658, 99659}));
+        sets.add(new SetInfo(SpecType.MageFrost, "Regalia of the Burning Scroll", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85374, 85375, 85376, 85377, 85378, 86714, 86715, 86716, 86717, 86718, 87007, 87008, 87009, 87010, 87011}));
+        sets.add(new SetInfo(SpecType.MageFrost, "Regalia of the Chromatic Hydra", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95260, 95261, 95262, 95263, 95264, 95890, 95891, 95892, 95893, 95894, 96634, 96635, 96636, 96637, 96638}));
         sets.add(new SetInfo(SpecType.Warlock, "Regalia of the Horned Nightmare", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99045, 99053, 99054, 99055, 99056, 99096, 99097, 99098, 99204, 99205, 99416, 99417, 99424, 99425, 99426, 99567, 99568, 99569, 99570, 99601}));
         sets.add(new SetInfo(SpecType.Warlock, "Regalia of the Thousandfold Hells", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95325, 95326, 95327, 95328, 95329, 95981, 95982, 95983, 95984, 95985, 96725, 96726, 96727, 96728, 96729}));
         sets.add(new SetInfo(SpecType.Warlock, "Sha-Skin Regalia", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85369, 85370, 85371, 85372, 85373, 86709, 86710, 86711, 86712, 86713, 87187, 87188, 87189, 87190, 87191}));

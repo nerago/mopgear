@@ -2,6 +2,7 @@ package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.*;
 
+import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class StatRequirementsGenericTwo implements StatRequirements {
@@ -49,6 +50,11 @@ public class StatRequirementsGenericTwo implements StatRequirements {
     @Override
     public boolean skinnyRecommended() {
         return true;
+    }
+
+    @Override
+    public ToLongFunction<SkinnyItemSet> skinnyRatingMinimiseFunc() {
+        return skinny -> skinny.totalOne() + skinny.totalTwo();
     }
 
     @Override

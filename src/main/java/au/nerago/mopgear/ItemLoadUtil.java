@@ -115,6 +115,33 @@ public class ItemLoadUtil {
         return item;
     }
 
+    public static List<FullItemData> loadItemBasicWithRandomVariants(int itemId, int upgradeLevel) {
+        FullItemData item = loadItemBasic(itemId, upgradeLevel);
+        return switch (itemId) {
+            // Caustic Spike Bracers
+            case 95732 -> itemWithRandomVariants(item, 712);
+            case 94820 -> itemWithRandomVariants(item, 858);
+            case 96104 -> itemWithRandomVariants(item, 907);
+            case 96476 -> itemWithRandomVariants(item, 968);
+            case 96848 -> itemWithRandomVariants(item, 1020); // no value source (others random wowhead comment at least)
+            default -> Collections.singletonList(item);
+        };
+    }
+
+    private static List<FullItemData> itemWithRandomVariants(FullItemData item, int statValue) {
+        List<FullItemData> result = new ArrayList<>();
+        result.add(itemWithRandomVariants(item, StatType.Crit, statValue));
+        result.add(itemWithRandomVariants(item, StatType.Haste, statValue));
+        result.add(itemWithRandomVariants(item, StatType.Mastery, statValue));
+        result.add(itemWithRandomVariants(item, StatType.Expertise, statValue));
+        result.add(itemWithRandomVariants(item, StatType.Hit, statValue));
+        return result;
+    }
+
+    private static FullItemData itemWithRandomVariants(FullItemData item, StatType statType, int statValue) {
+        return item.changeStatsBase(item.statBase.withChange(statType, statValue)).changeName(item.shared.name() + " of " + statType);
+    }
+
     public static FullItemData loadItemBasic(int itemId, int upgradeLevel) {
         ItemCache itemCache = ItemCache.instance;
         FullItemData item = itemCache.get(itemId, upgradeLevel);

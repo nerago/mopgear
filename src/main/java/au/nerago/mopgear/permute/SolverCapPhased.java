@@ -59,13 +59,15 @@ public class SolverCapPhased {
         if (topCombosMultiply != null) {
             int actualTop = (int) (topCombosMultiply * TOP_HIT_COMBO_FILTER);
             printRecorder.printf("SKINNY COMBOS BEST %,d\n", actualTop);
-            ToLongFunction<SkinnyItemSet> ratingFunc = is -> is.totalOne() + is.totalTwo();
+            ToLongFunction<SkinnyItemSet> ratingFunc = requirements.skinnyRatingMinimiseFunc();
 
 //            filteredSets = filteredSets.filter(new BottomNFilter<>(actualTop, ratingFunc));
 
             // try a Top Collector (with good merging), re-stream combo
             filteredSets = filteredSets.collect(new BottomCollectorN<>(actualTop, ratingFunc))
                     .parallelStream();
+
+            // TODO minimise hit only?
 
             // TODO multiple sets with equal combohit may be lost
         } else {
