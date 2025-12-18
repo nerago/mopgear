@@ -88,8 +88,8 @@ public class Main {
     private void reforgeRet(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.PaladinRet);
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, model, commonItems, true);
 
@@ -117,13 +117,13 @@ public class Main {
 //        compareBestReforgesWithCommon(DataLocation.gearRetFile, model, commonFixedItems(), null);
 
 //                        findUpgradeSetup(items, strengthPlateMsvArray(), model, true, StatBlock.of(Hit, 200, Expertise, 200));
-                findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
+//                findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
 //        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialRet(), null);
 //        new FindUpgrades(model, true).runMaxedItems(items, new CostedItem[]{new CostedItem(86905, 0)}, null);
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
-//        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
+        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
 //        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
 
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
@@ -144,8 +144,8 @@ public class Main {
         ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
         Path file = DataLocation.gearProtDefenceFile;
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, true);
 
@@ -155,13 +155,13 @@ public class Main {
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
 
-//          reforgeProcessPlus(items, model, startTime, null, 95142, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
+//          reforgeProcessPlus(items, model, startTime, null, 95807, 0, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 95144	, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 87145, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null,85340, 2, true, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
-//          reforgeProcessPlusPlus(items, model, startTime, 87071, 86681, 2, true, StatBlock.of(Hit, -100));
+//          reforgeProcessPlusPlus(items, model, startTime, 95807, 95798, 0, false, null, true);
 //        reforgeProcessPlusPlus(items, model, startTime, 87071, 86681, 2, false, null);
 
         // adding yang-xi for dps prot
@@ -198,7 +198,7 @@ public class Main {
 //        findUpgrade(items, strengthPlateHeartOfFearHeroic(), model, true, null, 2);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgrade(items, strengthPlateTerrace(), model, true, null, 2);
-//        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
+        findUpgrade(items, bagItemsArray(ignoredItems), model, false, null);
 //        findUpgradeMaxedItems(items, bagItemsArray(ignoredItems), model, true, null);
 //        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialTank(), null);
 //        new FindUpgrades(model, true).run(items, strengthPlateCurrentItemsProtAllUpgradable(), null, 2);
@@ -244,17 +244,17 @@ public class Main {
 //        findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
 //        findUpgrade(items, new CostedItem[]{new CostedItem(95142	,1250)}, model, true, null, 2);
 
-        Difficulty difficulty = Difficulty.Normal;
-        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-                pallyPhase3Valor(),
-                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
-                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
-                strengthPlateThroneNormal(difficulty),
-                tankTrinketsThroneNormal(difficulty),
-                strengthDpsTrinketsThroneNormal(difficulty),
-        });
-        upgradeShit = minusRadenLoot(upgradeShit);
-        findUpgrade(items, upgradeShit, model, true, null, 0);
+//        Difficulty difficulty = Difficulty.Celestial;
+//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+////                pallyPhase3Valor(),
+//                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
+//                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+//                strengthPlateThroneNormal(difficulty),
+//                tankTrinketsThroneNormal(difficulty),
+//                strengthDpsTrinketsThroneNormal(difficulty),
+//        });
+//        upgradeShit = minusRadenLoot(upgradeShit);
+//        findUpgrade(items, upgradeShit, model, true, null, 0);
 
     }
 

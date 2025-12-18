@@ -451,7 +451,7 @@ public class Tasks {
         FindMultiSpec multi = new FindMultiSpec();
 //        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 //        multi.addFixedForge(94526, ReforgeRecipe.empty()); // zandalar trinket
-        multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
+//        multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
 //        multi.addFixedForge(87026, new ReforgeRecipe(Expertise, Haste)); // Back Cloak of Peacock Feathers
 //        multi.addFixedForge(86957, new ReforgeRecipe(null, null)); // Ring Ring of the Bladed Tempest
 //        multi.addFixedForge(86955, new ReforgeRecipe(Mastery, Expertise)); // Belt Waistplate of Overwhelming Assault
@@ -482,7 +482,7 @@ public class Tasks {
         multi.addSpec(
                 "RET",
                 DataLocation.gearRetFile,
-                StandardModels.modelFor(SpecType.PaladinRet),
+                StandardModels.pallyRetModel(),
                 0.05,
                 new int[]{
 //                        87036, // heroic soulgrasp
@@ -499,15 +499,19 @@ public class Tasks {
 
 //                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
-                        87024, // null greathelm
+//                        87024, // null greathelm
 //                        87145, // defiled earth
-                        85340, // normal ret legs
+//                        85340, // normal ret legs
 //                        87101, // heroic ret head
-//                        95142, // striker's battletags
-                        87036, // soulgrasp chocker
                         94726, // cloudbreaker belt
-                        95914, // ret tier shoulder
-                        95924, // prot tier shoulder
+//                        95914, // ret tier15 shoulder
+//                        95924, // prot tier15 shoulder
+//                        95652, // Puncture-Proof Greathelm head
+                        95807, // celestial lightning legs
+
+                        95142, // striker's battletags
+                        95205, // terra-cotta neck
+//                        87036, // soulgrasp heroic
                 },
                 extraUpgrade,
                 preUpgrade
@@ -519,7 +523,7 @@ public class Tasks {
         multi.addSpec(
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
-                StandardModels.modelFor(SpecType.PaladinProtDps),
+                StandardModels.pallyProtDpsModel(),
                 0.40,
                 new int[]{
 //                        86979, // heroic impaling treads
@@ -527,61 +531,53 @@ public class Tasks {
 //                        86957, // heroic bladed tempest
 //                        85343, // normal ret chest
 
-                        87015, // heroic clawfeet
+//                        87015, // heroic clawfeet
 //                        86979, // heroic impaling treads
 //                        87071, // yang-xi heroic
-                        87145, // defiled earth
-                        85340, // normal ret legs
-                        87101, // heroic ret head
+//                        87145, // defiled earth
+//                        85340, // normal ret legs
+//                        87101, // heroic ret head
 //                        86946, // ruby signet heroic
-                        95142, // striker's battletags
-//                        94726, // cloudbreaker belt
+                        94726, // cloudbreaker belt
 
 //                        87026, // heroic peacock cloak
                         86955, // heroic overwhelm assault belt
-                        86325, // daybreak
+                        95807, // celestial lightning legs
 
-                        87050, // steelskin heroic
+//                        87050, // steelskin heroic
 //                        95768, // greatshield gloaming celestial
-                        95652, // celestial head
-                        95808, // celestial leg
-                        95874, // celestial shoulder
+//                        95652, // Puncture-Proof Greathelm head
                         95687, // celestial beakbreaker cloak
-                        95914, // ret tier shoulder celestial
-                        95924, // prot tier shoulder celestial
+//                        95914, // ret tier shoulder celestial
+//                        95924, // prot tier shoulder celestial
 
+                        95142, // striker's battletags
+                        95205, // terra-cotta neck
+                        87036, // soulgrasp heroic
                 },
                 extraUpgrade,
                 preUpgrade
         )
                 .addRemoveItem(86680) // remove celestial ret legs
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
-//                .setWorstCommonPenalty(99.5)
+                .setWorstCommonPenalty(99.0)
         ;
 
         multi.addSpec(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
-                StandardModels.modelFor(SpecType.PaladinProtMitigation),
+                StandardModels.pallyProtMitigationModel(),
                 0.55,
                 new int[]{
-//                        90594, // golden lotus durable necklace
-//                        84807, // mav glad cloak alacrity
-//                        87036, // heroic soulgrasp
-//                        87026, // heroic peacock cloak
 //                        86979, // heroic impaling treads
 //                        87015, // clawfeet
 //                        87062 // elegion heroic
-//                        89075, // yi cloak
 //                        86957, // heroic bladed tempest
-//                        86325, // normal daybreak drake
-//                        85343, // normal ret chest
 //                        87071, // yang-xi heroic
-//                        86661, // celestial prot head
 //                        87145, // defiled earth
 //                        89934, // soul bracer
 //                        87101, // heroic ret head
-                        87024, // null greathelm
+//                        87024, // null greathelm
 //                        86946, // ruby signet heroic
 //                        95142, // striker's battletags
 //                        94726, // cloudbreaker belt
@@ -590,22 +586,27 @@ public class Tasks {
 
                         87026, // heroic peacock cloak
                         86325, // daybreak
+                        95807, // celestial lightning legs
 
 //                        87050, // steelskin heroic
-                        95768, // greatshield gloaming celestial
-                        95652, // celestial head
-                        95808, // celestial leg
-                        95874, // celestial shoulder
-//                        95687, // celestial beakbreaker cloak
-                        95914, // ret tier shoulder celestial
-                        95924, // prot tier shoulder celestial
+//                        95768, // greatshield gloaming celestial
+//                        95652, // Puncture-Proof Greathelm head
+                        95687, // celestial beakbreaker cloak
+//                        95808, // celestial whipping legs
+//                        95874, // celestial bloody shoulders
+//                        95914, // ret tier shoulder celestial
+//                        95924, // prot tier shoulder celestial
+
+                        95142, // striker's battletags
+                        95205, // terra-cotta neck
+                        87036, // soulgrasp heroic
                 },
                 extraUpgrade,
                 preUpgrade
         )
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
-//                .setWorstCommonPenalty(99.5)
+                .setWorstCommonPenalty(99.0)
         ;
 
 //        multi.multiSetFilter(proposedResults -> {

@@ -60,7 +60,7 @@ public class StandardModels {
 
     private static boolean useHasteMinimums = false;
 
-    private static ModelCombined pallyProtMitigationModel() {
+    public static ModelCombined pallyProtMitigationModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
@@ -81,7 +81,7 @@ public class StandardModels {
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
     }
 
-    private static ModelCombined pallyProtDpsModel() {
+    public static ModelCombined pallyProtDpsModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
@@ -103,7 +103,7 @@ public class StandardModels {
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus);
     }
 
-    private static ModelCombined pallyRetModel() {
+    public static ModelCombined pallyRetModel() {
 //        StatRatings statRatings = new StatRatingsPriority(new StatType[] {Primary, Haste, Crit, Mastery});
         StatRatingsWeights statRatings = new StatRatingsWeights(specToWeightFile(SpecType.PaladinRet));
 

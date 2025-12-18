@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -395,7 +394,7 @@ public class FindMultiSpec {
                 AsWowSimJson.writeToOut(draftSet.items());
 
 //                ItemLoadUtil.duplicateAlternateEnchants(spec.itemOptions, spec.model);
-                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, 4, true);
+                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, 8, true);
 
                 FullItemSet revisedSet = null;
                 double revisedSpecRating = 0;
@@ -530,9 +529,10 @@ public class FindMultiSpec {
         }
 
         private void addExtra(int itemId, List<SpecDetails> allSpecs) {
-            verifyNotAlreadyIncluded(itemId);
-            if (!copyFromOtherSpec(itemId, allSpecs)) {
-                loadAndGenerate(itemId);
+            if (!checkAlreadyIncluded(itemId)) {
+                if (!copyFromOtherSpec(itemId, allSpecs)) {
+                    loadAndGenerate(itemId);
+                }
             }
         }
 
@@ -551,14 +551,17 @@ public class FindMultiSpec {
             }
         }
 
-        private void verifyNotAlreadyIncluded(int itemId) {
+        private boolean checkAlreadyIncluded(int itemId) {
             FullItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
             SlotEquip[] slots = extraItem.slot().toSlotEquipOptions();
             for (SlotEquip slot : slots) {
                 FullItemData[] existing = itemOptions.get(slot);
-                if (ArrayUtil.anyMatch(existing, item -> item.itemId() == itemId))
-                    throw new IllegalArgumentException("{SET " + label + "} item already included " + itemId + " " + extraItem);
+                if (ArrayUtil.anyMatch(existing, item -> item.itemId() == itemId)) {
+                    //                    throw new IllegalArgumentException("{SET " + label + "} item already included " + itemId + " " + extraItem);
+                    return true;
+                }
             }
+            return false;
         }
 
         private boolean copyFromOtherSpec(int itemId, List<SpecDetails> allSpecs) {
