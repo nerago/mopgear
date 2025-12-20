@@ -5,6 +5,10 @@ import au.nerago.mopgear.util.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -280,6 +284,11 @@ public class SetBonus {
         } else {
             return 0;
         }
+    }
+
+    public static ToIntFunction<SolvableEquipMap> countInSpecifiedSet(String setName) {
+        SetBonus inst = named(setName);
+        return inst::countInAnySet;
     }
 
     // guild player checks

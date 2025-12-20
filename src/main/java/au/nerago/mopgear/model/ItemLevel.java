@@ -43,7 +43,7 @@ public class ItemLevel {
         } else {
             StatBlock statsFixed = scaleStatBlock(item.statEnchant, factor);
             OutputText.println("SCALED TRINKET " + item.fullName() + " " + stats + " " + statsFixed);
-            return item.changeStatsBase(stats).changeEnchant(statsFixed);
+            return item.changeStatsBase(stats).changeEnchant(statsFixed, null, null);
         }
     }
 

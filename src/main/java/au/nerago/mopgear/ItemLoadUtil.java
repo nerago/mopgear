@@ -4,7 +4,9 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.io.ItemCache;
 import au.nerago.mopgear.io.WowHead;
+import au.nerago.mopgear.io.WowSimDB;
 import au.nerago.mopgear.model.*;
+import au.nerago.mopgear.process.Reforger;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
@@ -35,7 +37,6 @@ public class ItemLoadUtil {
         return set;
     }
 
-
     public static EquipOptionsMap readAndLoad(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> presetForge, boolean detailedOutput) {
         return readAndLoad(file, model.reforgeRules(), model.enchants(), presetForge, detailedOutput);
     }
@@ -48,6 +49,34 @@ public class ItemLoadUtil {
                 : ItemMapUtil.standardItemsReforgedToMap(reforge, items);
         ItemCache.instance.cacheSave();
         return result;
+    }
+
+    public static EquipMap readAndLoadExistingForge(Path file, DefaultEnchants enchants) {
+        EquipMap map = EquipMap.empty();
+
+        List<EquippedItem> itemIds = InputGearParser.readInput(file);
+        for (EquippedItem equippedItem : itemIds) {
+            FullItemData item = loadItem(equippedItem, enchants, false);
+
+            ReforgeRecipe forge = null;
+            if (equippedItem.reforging() != 0) {
+                forge = WowSimDB.instance.reforgeId(equippedItem.reforging());
+            }
+            item = Reforger.presetReforge(item, forge);
+
+            SlotEquip slot = item.slot().toSlotEquip();
+            if (slot == SlotEquip.Ring1 && map.has(slot)) {
+                slot = SlotEquip.Ring2;
+            } else if (slot == SlotEquip.Trinket1 && map.has(slot)) {
+                slot = SlotEquip.Trinket2;
+            } else if (map.has(slot)) {
+                throw new IllegalArgumentException("duplicate item");
+            }
+
+            map.put(slot, item);
+        }
+
+        return map;
     }
 
     public static void forceReload(ItemCache itemCache, Path file) {
@@ -76,7 +105,7 @@ public class ItemLoadUtil {
         int[] equippedGems = equippedItem.gems();
         @NotNull SocketType[] socketSlots = item.shared.socketSlots();
         if (equippedGems.length > 0) {
-            boolean possibleBlacksmith = item.slot() == SlotItem.Wrist || item.slot() == SlotItem.Hand;
+            boolean possibleBlacksmith = item.slot().possibleBlacksmith();
             if (equippedGems.length != socketSlots.length && !possibleBlacksmith) {
                 OutputText.println(id + ": " + item.toStringExtended() + " MISSING GEM MISSING GEM MISSING GEM");
                 // TODO clean this up, was an empty socket on export
@@ -87,7 +116,7 @@ public class ItemLoadUtil {
 //                throw new IllegalArgumentException("gems filled " + equippedItem.gems().length + " expected " + item.shared.socketSlots().length);
 
             Tuple.Tuple2<StatBlock, List<StatBlock>> gemInfo = GemData.process(equippedGems, equippedItem.enchant(), socketSlots, item.shared.socketBonus(), item.shared.name(), possibleBlacksmith);
-            item = item.changeEnchant(gemInfo.a(), gemInfo.b());
+            item = item.changeEnchant(gemInfo.a(), gemInfo.b(), equippedItem.enchant());
         }
 
         if (detailedOutput) {
@@ -231,11 +260,13 @@ public class ItemLoadUtil {
         }
 
         StatBlock enchant = model.standardEnchant(item.slot());
+        Integer enchantId = null;
         if (enchant != null) {
             total = total.plus(enchant);
+            enchantId = GemData.reverseLookup(enchant, item.shared.primaryStatType());
         }
 
-        return item.changeEnchant(total, gemChoice);
+        return item.changeEnchant(total, gemChoice, enchantId);
     }
 
     public static void duplicateAlternateEnchants(EquipOptionsMap items, ModelCombined model) {

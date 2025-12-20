@@ -61,4 +61,8 @@ public enum SlotItem {
             }
         }
     }
+
+    public boolean possibleBlacksmith() {
+        return this == SlotItem.Wrist || this == SlotItem.Hand || this == SlotItem.Belt;
+    }
 }

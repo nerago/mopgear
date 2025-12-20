@@ -359,6 +359,14 @@ public class WowSimDB {
         return reforgeIds.get(reforge);
     }
 
+    public ReforgeRecipe reforgeId(int reforgeId) {
+        for (Map.Entry<ReforgeRecipe, Integer> entry : reforgeIds.entrySet()) {
+            if (entry.getValue() == reforgeId)
+                return entry.getKey();
+        }
+        throw new RuntimeException("reforge id not found " + reforgeId);
+    }
+
     public static void discoverSetBonuses() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(fileUrl.openStream()))) {
             JsonObject mainObject = JsonParser.parseReader(reader).getAsJsonObject();

@@ -2,10 +2,7 @@ package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.*;
-import au.nerago.mopgear.model.EnchantMode;
-import au.nerago.mopgear.model.ItemLevel;
-import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.model.StatRequirementsHitExpertise;
+import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.FindUpgrades;
 import au.nerago.mopgear.results.JobInput;
@@ -21,6 +18,9 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.function.DoublePredicate;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 import static au.nerago.mopgear.Tasks.*;
 import static au.nerago.mopgear.domain.StatType.*;
@@ -71,10 +71,10 @@ public class Main {
 
 //
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
-//        reforgeRet(startTime);
+        reforgeRet(startTime);
 //            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
@@ -86,10 +86,10 @@ public class Main {
     }
 
     private void reforgeRet(Instant startTime) {
-        ModelCombined model = StandardModels.modelFor(SpecType.PaladinRet);
+        ModelCombined model = StandardModels.pallyRetModel();
 
-        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, model, commonItems, true);
 
@@ -104,6 +104,19 @@ public class Main {
 //        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new int[]{77530,89075,81262,87607,89823}));
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new ArrayList<>()));
+
+        Predicate<SolvableItemSet> specialFilter;
+//        job.specialFilter = set -> model.setBonus().countInAnySet(set.items()) >= 4;
+//        ToIntFunction<SolvableEquipMap> countFunc = SetBonus.countInSpecifiedSet("Battlegear of the Lightning Emperor");
+//        ToIntFunction<SolvableEquipMap> countFunc = SetBonus.countInSpecifiedSet("White Tiger Battlegear");
+//        specialFilter = set -> countFunc.applyAsInt(set.items()) >= 4;
+        specialFilter = null;
+        reforgeProcessPlusMany(items, model, startTime,
+                ArrayUtil.concat(
+                    SourcesOfItems.throneClassGearSetHeroic(SpecType.PaladinRet, Difficulty.Celestial),
+                    strengthPlateThroneNormal(Difficulty.Celestial)),
+                0, false, specialFilter);
+
 //          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
 //                  new CostedItem(84950,0),
 //                  new CostedItem(89954,0),
@@ -123,7 +136,7 @@ public class Main {
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
-        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
+//        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
 //        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
 
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
@@ -446,7 +459,7 @@ public class Main {
             }
         }
 
-        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsHitExpertise.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus());
+        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsHitExpertise.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus(), SpecType.PaladinRet);
         Optional<FullItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null);
 
         OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");

@@ -31,7 +31,7 @@ public class Solver {
         BigInteger estimateFullCombos = BigStreamUtil.estimateSets(itemOptions);
 
         SolverCapPhased phased = null;
-        long estimatePhase1Combos = 0;
+        BigInteger estimatePhase1Combos = BigInteger.ZERO;
         if (SolverCapPhased.supportedModel(model)) {
             phased = new SolverCapPhased(model, adjustment, job.printRecorder, runSizeMultiply);
             estimatePhase1Combos = phased.initAndCheckSizes(itemOptions);
@@ -57,10 +57,10 @@ public class Solver {
         } else if (estimateFullCombos.compareTo(BigInteger.valueOf(MAX_BASIC_FULL_SEARCH * runSizeMultiply)) < 0) {
             job.println("SOLVE full search");
             output.resultSet = SolverIndexed.runSolver(model, itemOptions, adjustment, estimateFullCombos.longValueExact(), job.specialFilter);
-        } else if (phased != null && estimatePhase1Combos < MAX_SKINNY_FULL_SEARCH * runSizeMultiply) {
+        } else if (phased != null && estimatePhase1Combos.compareTo(BigInteger.valueOf(MAX_SKINNY_FULL_SEARCH * runSizeMultiply)) < 0) {
             job.println("SOLVE phased full");
             output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter);
-        } else if (phased != null && estimatePhase1Combos < MAX_SKINNY_PHASED_ANY * runSizeMultiply) {
+        } else if (phased != null && estimatePhase1Combos.compareTo(BigInteger.valueOf(MAX_SKINNY_PHASED_ANY * runSizeMultiply)) < 0) {
             job.println("SOLVE phased top only");
             output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter);
         } else {

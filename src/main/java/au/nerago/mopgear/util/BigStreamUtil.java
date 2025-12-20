@@ -4,7 +4,6 @@ import au.nerago.mopgear.domain.SkinnyItem;
 import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.SolvableItemSet;
 import au.nerago.mopgear.model.ModelCombined;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.time.Duration;
@@ -125,8 +124,13 @@ public class BigStreamUtil {
         }
     }
 
-    public static long estimateSets(List<SkinnyItem[]> skinnyOptions) {
-        return skinnyOptions.stream().mapToLong(x -> (long) x.length).reduce((a, b) -> a * b).orElse(0);
+    public static BigInteger estimateSets(List<SkinnyItem[]> skinnyOptions) {
+        Optional<BigInteger> number =  skinnyOptions.stream().map(x -> BigInteger.valueOf(x.length)).reduce(BigInteger::multiply);
+        if (number.isPresent()) {
+            return number.get();
+        } else {
+            throw new RuntimeException("unable to determine item combination estimate");
+        }
     }
 
     public static <X, T> long estimateSets(Map<X, List<T>> commonMap) {

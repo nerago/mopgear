@@ -21,11 +21,11 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.io.SourcesOfItems.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
@@ -158,7 +158,7 @@ public class Tasks {
         Optional<FullItemSet> resultSet = output.getFinalResultSet();
 
         outputResultSimple(resultSet, model, true);
-        outputReforgeJson(resultSet);
+//        outputReforgeJson(resultSet);
         outputTweaked(output.resultSet, itemOptions, model);
     }
 
@@ -311,7 +311,7 @@ public class Tasks {
         }
     }
 
-    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel, boolean alternateEnchants) {
+    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel, boolean alternateEnchants, Predicate<SolvableItemSet> specialFilter) {
         for (CostedItem entry : extraItems) {
             int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
@@ -338,10 +338,13 @@ public class Tasks {
         job.setItemOptions(items);
         job.startTime = startTime;
         job.printRecorder.outputImmediate = true;
-        job.forcePhased = true;
+//        job.forcePhased = true;
 //        job.runSizeMultiply = 2;
-//        job.runSizeMultiply = 12;
-        job.runSizeMultiply = 80;
+        job.runSizeMultiply = 12;
+//        job.runSizeMultiply = 512;
+        job.specialFilter = specialFilter;
+
+
         JobOutput output = Solver.runJob(job);
         Optional<FullItemSet> resultSet = output.getFinalResultSet();
         outputResultSimple(resultSet, model, true);
@@ -383,7 +386,7 @@ public class Tasks {
             if (detailedOutput) {
                 bestSet.get().outputSetDetailed(model);
                 OutputText.println();
-                AsWowSimJson.writeToOut(bestSet.get().items());
+                AsWowSimJson.writeFullToOut(bestSet.get().items(), model);
                 OutputText.println();
                 bestSet.get().outputSetLight();
             } else {
@@ -560,7 +563,7 @@ public class Tasks {
         )
                 .addRemoveItem(86680) // remove celestial ret legs
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
-                .setWorstCommonPenalty(99.0)
+//                .setWorstCommonPenalty(99.0)
         ;
 
         multi.addSpec(
@@ -606,7 +609,7 @@ public class Tasks {
         )
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
-                .setWorstCommonPenalty(99.0)
+                .setWorstCommonPenalty(98.7)
         ;
 
 //        multi.multiSetFilter(proposedResults -> {
@@ -668,8 +671,8 @@ public class Tasks {
                 false
         );
 
-        multi.overrideEnchant(86865, StatBlock.empty); // no sha gem
-        multi.overrideEnchant(86893, StatBlock.empty); // no sha gem
+//        multi.overrideEnchant(86865, StatBlock.empty); // no sha gem
+//        multi.overrideEnchant(86893, StatBlock.empty); // no sha gem
 
         multi.solve(3000);
     }
@@ -715,9 +718,9 @@ public class Tasks {
         EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, ReforgeRules.melee(), new DefaultEnchants(SpecType.PaladinRet, true), null, true);
         EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, true);
 
-        double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry());
-        double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry());
-        double rateRet = determineRatingMultipliersOne(retRet, itemsRet, StatRequirementsHitExpertise.ret());
+        double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtMitigation);
+        double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtDps);
+        double rateRet = determineRatingMultipliersOne(retRet, itemsRet, StatRequirementsHitExpertise.ret(), SpecType.PaladinRet);
 
         double targetCombined = 1000000000;
 
@@ -766,8 +769,8 @@ public class Tasks {
                 multiC * defTotal / multiTotal);
     }
 
-    private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req) {
-        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, SetBonus.empty());
+    private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req, SpecType spec) {
+        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, SetBonus.empty(), spec);
         JobInput job = new JobInput();
         job.model = model;
         job.setItemOptions(items);

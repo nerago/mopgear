@@ -14,7 +14,6 @@ import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class InputGearParser {
@@ -46,6 +45,15 @@ public class InputGearParser {
         return result;
     }
 
+
+    public static JsonObject asParsed(Path file) {
+        try (BufferedReader reader = Files.newBufferedReader(file)) {
+            return JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     @NotNull
     public static EquippedItem parseEquipped(JsonObject elementObject) {
         int id = elementObject.get("id").getAsInt();
@@ -66,6 +74,11 @@ public class InputGearParser {
             upgradeStep = elementObject.get("upgrade_step").getAsInt();
         }
 
-        return new EquippedItem(id, gems, enchant, upgradeStep);
+        int reforging = 0;
+        if (elementObject.has("reforging")) {
+            reforging = elementObject.get("reforging").getAsInt();
+        }
+
+        return new EquippedItem(id, gems, enchant, upgradeStep, reforging);
     }
 }

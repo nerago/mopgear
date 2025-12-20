@@ -11,10 +11,8 @@ import au.nerago.mopgear.results.AsWowSimJson;
 import au.nerago.mopgear.results.JobInput;
 import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.OutputText;
-import au.nerago.mopgear.util.ArrayUtil;
-import au.nerago.mopgear.util.BigStreamUtil;
-import au.nerago.mopgear.util.Primes;
-import au.nerago.mopgear.util.TopCollectorReporting;
+import au.nerago.mopgear.util.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -30,7 +28,7 @@ public class FindMultiSpec {
     private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
-    private final Map<Integer, StatBlock> overrideEnchant = new HashMap<>();
+    private final Map<Integer, Tuple.Tuple3<StatBlock, List<StatBlock>, Integer>> overrideEnchant = new HashMap<>();
     private final List<SpecDetails> specs = new ArrayList<>();
     private final Set<Integer> suppressSlotCheck = new HashSet<>();
     private Predicate<ProposedResults> multiSetFilter;
@@ -39,8 +37,8 @@ public class FindMultiSpec {
         fixedForge.put(id, reforge);
     }
 
-    public void overrideEnchant(int id, StatBlock stats) {
-        overrideEnchant.put(id, stats);
+    public void overrideEnchant(int id, StatBlock stats, List<StatBlock> gemChoice, Integer enchantId) {
+        overrideEnchant.put(id, Tuple.create(stats, gemChoice, enchantId));
     }
 
     public void multiSetFilter(Predicate<ProposedResults> multiSetFilter) {
@@ -90,7 +88,9 @@ public class FindMultiSpec {
         long indexedOutputSize = commonCombos / skip;
         Stream<Map<ItemRef, FullItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
         Stream<Map<ItemRef, FullItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize / 2);
-        Stream<Map<ItemRef, FullItemData>> commonStream = Stream.concat(commonStream1, commonStream2);
+        Stream<Map<ItemRef, FullItemData>> baselineStream = baselineAsCommonOptionsStream(commonMap);
+        Stream<Map<ItemRef, FullItemData>> equippedStream = equippedAsCommonOptionsStream(commonMap);
+        Stream<Map<ItemRef, FullItemData>> commonStream = Stream.concat(Stream.concat(commonStream1, commonStream2), Stream.concat(baselineStream, equippedStream));
 
         Instant startTime = Instant.now();
         commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 3 / 2, startTime, commonStream);
@@ -116,6 +116,45 @@ public class FindMultiSpec {
         // TODO highlight gems changed vs as loaded
 
         // TODO keep track of good indexes and search near
+    }
+
+    private Stream<Map<ItemRef, FullItemData>> equippedAsCommonOptionsStream(Map<ItemRef, List<FullItemData>> commonMap) {
+        Random rand = new Random();
+        Set<Map<ItemRef, FullItemData>> result = new HashSet<>();
+        for (SpecDetails spec : specs) {
+            for (int attempt = 0; attempt < 50; ++attempt) {
+                HashMap<ItemRef, FullItemData> possible = new HashMap<>();
+                spec.equippedGear.forEachValue(item -> possible.put(item.ref(), item));
+                commonMap.forEach((ref, itemList) -> {
+                    if (!possible.containsKey(ref)) {
+                        FullItemData choice = ArrayUtil.rand(itemList, rand);
+                        possible.put(ref, choice);
+                    }
+                });
+                result.add(possible);
+            }
+        }
+        return result.stream();
+    }
+
+    private Stream<Map<ItemRef, FullItemData>> baselineAsCommonOptionsStream(Map<ItemRef, List<FullItemData>> commonMap) {
+        Random rand = new Random();
+        Set<Map<ItemRef, FullItemData>> result = new HashSet<>();
+        for (SpecDetails spec : specs) {
+            EquipMap baseSet = spec.optimalBaselineSet.items();
+            for (int attempt = 0; attempt < 50; ++attempt) {
+                HashMap<ItemRef, FullItemData> possible = new HashMap<>();
+                baseSet.forEachValue(item -> possible.put(item.ref(), item));
+                commonMap.forEach((ref, itemList) -> {
+                    if (!possible.containsKey(ref)) {
+                        FullItemData choice = ArrayUtil.rand(itemList, rand);
+                        possible.put(ref, choice);
+                    }
+                });
+                result.add(possible);
+            }
+        }
+        return result.stream();
     }
 
     private Map<ItemRef, List<FullItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
@@ -183,6 +222,7 @@ public class FindMultiSpec {
 
         FullItemSet set = output.getFinalResultSet().orElseThrow();
         spec.optimalRating = output.resultRating;
+        spec.optimalBaselineSet = set;
         synchronized (OutputText.class) {
             OutputText.println("SET " + spec.label);
             set.outputSet(spec.model);
@@ -457,6 +497,8 @@ public class FindMultiSpec {
         Map<Integer, Integer> duplicatedItems;
         List<Integer> removeItems;
         double optimalRating;
+        FullItemSet optimalBaselineSet;
+        EquipMap equippedGear;
         EquipOptionsMap itemOptions;
 
         private SpecDetails(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
@@ -512,8 +554,11 @@ public class FindMultiSpec {
 
         public void prepareStartingGear(List<SpecDetails> allSpecs) {
             itemOptions = ItemLoadUtil.readAndLoad(gearFile, model, null, false);
+            equippedGear = ItemLoadUtil.readAndLoadExistingForge(gearFile, model.enchants());
+
             if (upgradeCurrentItems)
                 itemOptions = ItemMapUtil.upgradeAllTo2(itemOptions);
+
             remapDuplicates();
         }
 
@@ -589,7 +634,8 @@ public class FindMultiSpec {
                 extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
 
             if (overrideEnchant.containsKey(itemId)) {
-                extraItem = extraItem.changeEnchant(overrideEnchant.get(itemId));
+                Tuple.Tuple3<StatBlock, List<StatBlock>, Integer> info = overrideEnchant.get(itemId);
+                extraItem = extraItem.changeEnchant(info.a(), info.b(), info.c());
             } else {
                 extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true, false);
             }

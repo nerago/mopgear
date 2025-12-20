@@ -711,6 +711,9 @@ public class SourcesOfItems {
         if (array.length != 5) {
             throw new IllegalStateException("should be 5 items");
         }
+        if (difficulty != Difficulty.Heroic) {
+            array = minusRadenLoot(array);
+        }
         return array;
     }
 
@@ -723,7 +726,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] genericThroneNormalHeroic(ArmorType armorType, PrimaryStatType statType, Difficulty difficulty) {
-        return WowSimDB.instance.itemStream()
+        CostedItem[] array = WowSimDB.instance.itemStream()
                 .filter(item -> item.shared.phase() == 3)
                 .filter(item -> item.shared.ref().upgradeLevel() == 0)
                 .filter(item -> !item.fullName().contains("Gladiator"))
@@ -736,6 +739,10 @@ public class SourcesOfItems {
                 .filter(item -> !isT15ClassSetItem(item))
                 .map(item -> new CostedItem(item.itemId(), -1))
                 .toArray(CostedItem[]::new);
+        if (difficulty != Difficulty.Heroic) {
+            array = minusRadenLoot(array);
+        }
+        return array;
     }
 
     public static CostedItem[] minusRadenLoot(CostedItem[] input) {

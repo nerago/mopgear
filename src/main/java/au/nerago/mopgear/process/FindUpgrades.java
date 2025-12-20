@@ -48,7 +48,7 @@ public class FindUpgrades {
     public void runMaxedItems(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {
         baseItems = ItemMapUtil.upgradeAllTo2(baseItems);
         List<CostedItemData> extraItemList = extraItems.stream()
-                .map(ei -> new EquippedItem(ei.itemId(), ei.gems(), ei.enchant(), ItemLevel.MAX_UPGRADE_LEVEL))
+                .map(ei -> new EquippedItem(ei.itemId(), ei.gems(), ei.enchant(), ItemLevel.MAX_UPGRADE_LEVEL, ei.reforging()))
                 .map(ei -> new CostedItemData(ItemLoadUtil.loadItem(ei, model.enchants(), false), 0))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);

@@ -1,1 +1,1 @@
-( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,CritRating=0.435,HasteRating=0.403,MasteryRating=0.447,Ap=0.436,MeleeDps=1.632 )
+( Pawn: v1: "Retribution WoWSims Weights": Class=Paladin,Strength=1.000,HitRating=0.680,CritRating=0.560,HasteRating=0.670,ExpertiseRating=0.680,MasteryRating=0.620,Ap=0.440,MeleeDps=1.860 )

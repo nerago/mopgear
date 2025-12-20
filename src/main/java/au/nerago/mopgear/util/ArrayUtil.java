@@ -2,6 +2,7 @@ package au.nerago.mopgear.util;
 
 import au.nerago.mopgear.domain.CostedItem;
 import au.nerago.mopgear.domain.FullItemData;
+import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 
 import java.lang.reflect.Array;
@@ -259,5 +260,12 @@ public class ArrayUtil {
         HashSet<CostedItem> aa = new HashSet<>(Arrays.asList(a));
         HashSet<CostedItem> bb = new HashSet<>(Arrays.asList(b));
         return aa.equals(bb);
+    }
+
+    public static <K, V> Map<K, V> combineMaps(Map<K, V> mapOne, Map<K, V> mapTwo) {
+        Map<K, V> result = new HashMap<>();
+        result.putAll(mapOne);
+        result.putAll(mapTwo);
+        return result;
     }
 }

@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
-                            DefaultEnchants enchants, SetBonus setBonus) {
+                            DefaultEnchants enchants, SetBonus setBonus, SpecType spec) {
 
     public long calcRating(FullItemSet set) {
         long value = statRatings.calcRating(set.totalForRating());
@@ -46,7 +46,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public ModelCombined withNoRequirements() {
-        return new ModelCombined(statRatings, new StatRequirementsNull(), reforgeRules, enchants, setBonus);
+        return new ModelCombined(statRatings, new StatRequirementsNull(), reforgeRules, enchants, setBonus, spec);
     }
 
     public StatBlock gemChoice(SocketType socket) {
@@ -90,9 +90,10 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
             throw new IllegalArgumentException("expected one or two weights only");
         }
 
+        SpecType spec = modelParam.spec();
         StatRequirements statRequirements = StatRequirementsOriginal.load(modelParam.required());
         DefaultEnchants enchants = new DefaultEnchants(modelParam.defaultEnchants(), modelParam.blacksmith());
-        SetBonus setBonus = SetBonus.empty();
-        return new ModelCombined(rating, statRequirements, ReforgeRules.casterPure(), enchants, setBonus);
+        SetBonus setBonus = SetBonus.forSpec(spec);
+        return new ModelCombined(rating, statRequirements, ReforgeRules.casterPure(), enchants, setBonus, spec);
     }
 }

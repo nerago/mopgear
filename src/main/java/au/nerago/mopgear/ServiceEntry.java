@@ -44,7 +44,7 @@ public class ServiceEntry {
                 Tasks.reforgeProcess(items, model, null);
             }
             case EXTRA_ITEMS -> {
-                Tasks.reforgeProcessPlusMany(items, model, null, params.extraItems, params.upgradeLevel, false);
+                Tasks.reforgeProcessPlusMany(items, model, null, params.extraItems, params.upgradeLevel, false, null);
             }
             case EXTRA_BAGS -> {
                 Path bagsFile = Path.of(params.bagFile);
@@ -74,12 +74,12 @@ public class ServiceEntry {
                                ) {
     }
 
-    public record ServiceModel(List<ServiceWeightStats> weight,
+    public record ServiceModel(SpecType spec,
+                               List<ServiceWeightStats> weight,
                                 ServiceRequiredStats required,
                                 List<StatType> reforgeTargets,
                                 Map<SlotItem, StatBlock> defaultEnchants,
-                                boolean blacksmith,
-                                boolean useSetBonus) {
+                                boolean blacksmith) {
     }
 
     public enum ServiceTaskType {

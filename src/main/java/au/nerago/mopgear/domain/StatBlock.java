@@ -406,6 +406,31 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
                 expertise == 0 && dodge == 0 && parry == 0 && spirit == 0;
     }
 
+    public boolean hasSingleStat() {
+        int count = 0;
+        if (primary != 0)
+            count++;
+        if (stam != 0)
+            count++;
+        if (mastery != 0)
+            count++;
+        if (crit != 0)
+            count++;
+        if (hit != 0)
+            count++;
+        if (haste != 0)
+            count++;
+        if (expertise != 0)
+            count++;
+        if (dodge != 0)
+            count++;
+        if (parry != 0)
+            count++;
+        if (spirit != 0)
+            count++;
+        return count == 1;
+    }
+
     public boolean equalsStats(StatBlock stats) {
         return primary == stats.primary && stam == stats.stam && mastery == stats.mastery && crit == stats.crit && hit == stats.hit &&
                 haste == stats.haste && expertise == stats.expertise && dodge == stats.dodge && parry == stats.parry && spirit == stats.spirit;

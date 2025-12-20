@@ -84,7 +84,7 @@ public class ItemMapUtil {
 
         FullItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
         loaded = Reforger.presetReforge(loaded, oldItem.reforge);
-        return loaded.changeEnchant(oldItem.statEnchant);
+        return loaded.changeEnchant(oldItem.statEnchant, oldItem.gemChoice, oldItem.enchantChoice);
     }
 
     public static Function<SolvableItem, FullItemData> mapperToFullItems(EquipOptionsMap map) {

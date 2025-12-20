@@ -6,6 +6,7 @@ import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.*;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
@@ -19,7 +20,7 @@ public class SolverCapPhased {
     protected final PrintRecorder printRecorder;
     protected SolvableEquipOptionsMap fullItems;
     protected List<SkinnyItem[]> skinnyOptions;
-    protected long estimate;
+    protected BigInteger estimate;
     protected final Long topCombosMultiply;
 
     public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder, Long topCombosMultiply) {
@@ -36,7 +37,7 @@ public class SolverCapPhased {
         return model.statRequirements().skinnyRecommended();
     }
 
-    public long initAndCheckSizes(SolvableEquipOptionsMap items) {
+    public BigInteger initAndCheckSizes(SolvableEquipOptionsMap items) {
         fullItems = items;
         skinnyOptions = convertToSkinny(items);
         estimate = BigStreamUtil.estimateSets(skinnyOptions);
