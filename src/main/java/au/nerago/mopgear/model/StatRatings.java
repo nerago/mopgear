@@ -30,11 +30,12 @@ public abstract class StatRatings {
     protected void chooseBestStats() {
         LowHighHolder<StatType> bestStat = new LowHighHolder<>();
         for (StatType stat : StatType.values()) {
-            if (stat != Primary && stat != Hit && stat != Expertise) {
+            if (stat != Primary && stat != Hit && stat != Expertise && stat != Stam) { // TODO should we exclude stam this way or still consider for gems another way
                 bestStat.add(stat, calcRating(stat, 1));
             }
         }
         bestNonHit = bestStat.getHigh();
+        // TODO only include non-zero for worst?
         worstNonHit = bestStat.getLow();
     }
 

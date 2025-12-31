@@ -74,8 +74,8 @@ public class Main {
 //        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
-        reforgeRet(startTime);
-//            reforgeProt(startTime);
+//        reforgeRet(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -151,24 +151,24 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtDps);
+//        ModelCombined model = StandardModels.pallyProtDpsModel();
 //        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = StandardModels.modelFor(SpecType.PaladinProtMitigation);
+        ModelCombined model = StandardModels.pallyProtMitigationModel();
         Path file = DataLocation.gearProtDefenceFile;
 
-        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, true);
 
-//        reforgeProcess(items, model, startTime);
+        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
 //        reforgeProcessProtFixed2(model, startTime, true);
 
-//          reforgeProcessPlus(items, model, startTime, null, 95807, 0, false, EnchantMode.BothDefaultAndAlternate, null, false);
+//          reforgeProcessPlus(items, model, startTime, null, 96182, 0, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 95144	, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 87145, 2, false, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null,85340, 2, true, EnchantMode.BothDefaultAndAlternate, null, false);
@@ -200,6 +200,42 @@ public class Main {
 //        reforgeProcessPlusMany(items, model, startTime, bagItemsArray(ignoredItems));
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
+        /*
+                reforgeProcessPlusMany(items, model, startTime, new int[]{
+                                86979, // heroic impaling treads
+                                87062, // elegion heroic
+                                86957, // heroic bladed tempest
+                                85343, // normal ret chest
+
+                                87015, // heroic clawfeet
+                                86979, // heroic impaling treads
+                                87071, // yang-xi heroic
+                                87145, // defiled earth
+                                85340, // normal ret legs
+                                87101, // heroic ret head
+                                86946, // ruby signet heroic
+                                94726, // cloudbreaker belt
+
+                                87026, // heroic peacock cloak
+                                86955, // heroic overwhelm assault belt
+                                95535, // normal lightning legs
+
+                                87050, // steelskin heroic
+                                95768, // greatshield gloaming celestial
+                                95652, // Puncture-Proof Greathelm head
+                                95687, // celestial beakbreaker cloak
+//                                95914, // ret tier shoulder celestial
+//                                95924, // prot tier shoulder celestial
+                        95910, 95911, 95912, 95913, 95914,
+                        95920, 95921, 95922, 95923, 95924,
+
+                                95142, // striker's battletags
+                                95205, // terra-cotta neck
+                                87036, // soulgrasp heroic
+                        }, 2, false, null);
+
+         */
+
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
 //        findUpgrade(items, strengthPlateHeartOfFear(), model, true, null, 2);
 //        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
@@ -211,7 +247,7 @@ public class Main {
 //        findUpgrade(items, strengthPlateHeartOfFearHeroic(), model, true, null, 2);
 //        findUpgradeSetup(items, strengthPlateHeartOfFear(), model, false, StatBlock.of(Hit, 200, Expertise, 400));
 //        findUpgrade(items, strengthPlateTerrace(), model, true, null, 2);
-        findUpgrade(items, bagItemsArray(ignoredItems), model, false, null);
+//        findUpgrade(items, bagItemsArray(ignoredItems), model, false, null);
 //        findUpgradeMaxedItems(items, bagItemsArray(ignoredItems), model, true, null);
 //        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialTank(), null);
 //        new FindUpgrades(model, true).run(items, strengthPlateCurrentItemsProtAllUpgradable(), null, 2);
@@ -459,7 +495,7 @@ public class Main {
             }
         }
 
-        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsHitExpertise.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus(), SpecType.PaladinRet);
+        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsHitExpertise.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus(), SpecType.PaladinRet, model.defaultGemAlternateChoice());
         Optional<FullItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null);
 
         OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");

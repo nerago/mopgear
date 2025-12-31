@@ -38,7 +38,7 @@ public class SetBonus {
     private static final int WHITE_TIGER_BATTLEGEAR_2 = 1032;
     // seal,judge +10%
     private static final int WHITE_TIGER_BATTLEGEAR_4 = 1024;
-    private static final int WHITE_TIGER_BATTLEGEAR_4_TANK = 1040;
+    private static final int WHITE_TIGER_BATTLEGEAR_4_TANK = 1035; // gives 2% to dps, a bit more overall
     private static final int PLATE_LIGHTNING_BONUS = 1010;
 
     private static final SetInfo pallyBattlegearForTank = new SetInfo(SpecType.PaladinRet, "Paladin Ret T14 for Prot", DENOMIATOR, WHITE_TIGER_BATTLEGEAR_4_TANK, new int[]{

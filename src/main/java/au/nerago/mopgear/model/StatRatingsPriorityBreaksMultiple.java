@@ -13,7 +13,6 @@ public class StatRatingsPriorityBreaksMultiple extends StatRatings {
     private final StatType breakpointStat;
     private final int[] breakpointsArray;
     private final StatType[] remainPriority;
-    private final static int OUTPUT_MULTIPLY = 1; // scale to similar rates as weighting
 
     public StatRatingsPriorityBreaksMultiple(StatType breakpointStat, int[] breakpointsArray, StatType[] remainPriority) {
         this.breakpointStat = breakpointStat;
@@ -53,18 +52,18 @@ public class StatRatingsPriorityBreaksMultiple extends StatRatings {
         result += excessHaste; // multiply 1
 
         for (StatType stat : remainPriority) {
-            int value = totals.get(stat);
+            long value = totals.get(stat);
             multiply /= STEP;
             result += value * multiply;
         }
 
-        return result * OUTPUT_MULTIPLY;
+        return result;
     }
 
     @Override
     public long calcRating(StatType queryStat, int queryValue) {
         if (queryStat == breakpointStat) {
-            int effectiveHaste = 0;
+            long effectiveHaste = 0;
             for (int i = breakpointsArray.length - 1; i >= 0; i--) {
                 int num = breakpointsArray[i];
                 if (queryValue >= num) {
@@ -73,15 +72,14 @@ public class StatRatingsPriorityBreaksMultiple extends StatRatings {
                 }
             }
 
-            int excessHaste = queryValue - effectiveHaste;
-            long result = (effectiveHaste * INITIAL) + excessHaste;
-            return result * OUTPUT_MULTIPLY;
+            long excessHaste = queryValue - effectiveHaste;
+            return (effectiveHaste * INITIAL) + excessHaste;
         } else {
             long multiply = INITIAL;
             for (StatType stat : remainPriority) {
                 multiply /= STEP;
                 if (stat == queryStat) {
-                    return queryValue * multiply * OUTPUT_MULTIPLY;
+                    return queryValue * multiply;
                 }
             }
             return 0;

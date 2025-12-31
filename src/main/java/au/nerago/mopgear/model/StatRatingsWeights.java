@@ -83,6 +83,8 @@ public class StatRatingsWeights extends StatRatings {
                 default -> stat;
             };
         }
+        if (stat.stam() <= 0)
+            stat = stat.withChange(Stam, 1);
         return stat;
     }
 
@@ -98,23 +100,23 @@ public class StatRatingsWeights extends StatRatings {
 
     @Override
     public long calcRating(StatBlock value) {
-        int total = 0;
-        total += value.primary() * weight.primary();
-        total += value.stam() * weight.stam();
-        total += value.mastery() * weight.mastery();
-        total += value.crit() * weight.crit();
-        total += value.parry() * weight.parry();
-        total += value.haste() * weight.haste();
-        total += value.dodge() * weight.dodge();
-        total += value.hit() * weight.hit();
-        total += value.expertise() * weight.expertise();
-        total += value.spirit() * weight.spirit();
+        long total = 0;
+        total += (long) value.primary() * (long) weight.primary();
+        total += (long) value.stam() * (long) weight.stam();
+        total += (long) value.mastery() * (long) weight.mastery();
+        total += (long) value.crit() * (long) weight.crit();
+        total += (long) value.parry() * (long) weight.parry();
+        total += (long) value.haste() * (long) weight.haste();
+        total += (long) value.dodge() * (long) weight.dodge();
+        total += (long) value.hit() * (long) weight.hit();
+        total += (long) value.expertise() * (long) weight.expertise();
+        total += (long) value.spirit() * (long) weight.spirit();
         return total;
     }
 
     @Override
     public long calcRating(StatType stat, int value) {
-        return (long) value * weight.get(stat);
+        return (long) value * (long) weight.get(stat);
     }
 
 }

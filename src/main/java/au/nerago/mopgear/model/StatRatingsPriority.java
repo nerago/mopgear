@@ -7,7 +7,6 @@ import java.util.Arrays;
 
 public class StatRatingsPriority extends StatRatings {
     private final StatType[] priority;
-    private final static int DEFAULT_MULTIPLY = 4; // scale to similar rates as weighting
 
     public StatRatingsPriority(StatType[] priority) {
         this.priority = priority;
@@ -34,10 +33,10 @@ public class StatRatingsPriority extends StatRatings {
         long result = 0;
         long multiply = 1000;
         for (StatType stat : priority) {
-            result += totals.get(stat) * multiply;
+            result += (long) totals.get(stat) * multiply;
             multiply /= 10;
         }
-        return result * DEFAULT_MULTIPLY;
+        return result;
     }
 
     @Override
@@ -45,7 +44,7 @@ public class StatRatingsPriority extends StatRatings {
         long multiply = 1000;
         for (StatType stat : priority) {
             if (stat == queryStat) {
-                return value * multiply * DEFAULT_MULTIPLY;
+                return value * multiply;
             }
             multiply /= 10;
         }

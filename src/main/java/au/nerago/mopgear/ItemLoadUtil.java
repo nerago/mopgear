@@ -107,13 +107,13 @@ public class ItemLoadUtil {
         if (equippedGems.length > 0) {
             boolean possibleBlacksmith = item.slot().possibleBlacksmith();
             if (equippedGems.length != socketSlots.length && !possibleBlacksmith) {
-                OutputText.println(id + ": " + item.toStringExtended() + " MISSING GEM MISSING GEM MISSING GEM");
-                // TODO clean this up, was an empty socket on export
-                while (equippedGems.length < socketSlots.length) {
-                    equippedGems = ArrayUtil.append(equippedGems, 76699);
-                }
+                throw new IllegalArgumentException(id + ": " + item.toStringExtended() + " MISSING GEM MISSING GEM MISSING GEM");
+//                OutputText.println(id + ": " + item.toStringExtended() + " MISSING GEM MISSING GEM MISSING GEM");
+//                // TODO clean this up, was an empty socket on export
+//                while (equippedGems.length < socketSlots.length) {
+//                    equippedGems = ArrayUtil.append(equippedGems, 76699);
+//                }
             }
-//                throw new IllegalArgumentException("gems filled " + equippedItem.gems().length + " expected " + item.shared.socketSlots().length);
 
             Tuple.Tuple2<StatBlock, List<StatBlock>> gemInfo = GemData.process(equippedGems, equippedItem.enchant(), socketSlots, item.shared.socketBonus(), item.shared.name(), possibleBlacksmith);
             item = item.changeEnchant(gemInfo.a(), gemInfo.b(), equippedItem.enchant());

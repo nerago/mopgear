@@ -77,6 +77,13 @@ public class ItemMapUtil {
         return result;
     }
 
+    public static EquipOptionsMap mapReplaceAll(EquipOptionsMap baseItems, Function<FullItemData, FullItemData> mapper) {
+        EquipOptionsMap result = EquipOptionsMap.empty();
+        baseItems.forEachPair((slot, itemArray) ->
+                result.put(slot, ArrayUtil.mapAsNew(itemArray, mapper, FullItemData[]::new)));
+        return result;
+    }
+
     private static FullItemData upgradeItemTo2(FullItemData oldItem) {
         if (!oldItem.isUpgradable() || oldItem.ref().upgradeLevel() == ItemLevel.MAX_UPGRADE_LEVEL) {
             return oldItem;

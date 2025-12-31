@@ -26,6 +26,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static au.nerago.mopgear.domain.StatType.Crit;
+import static au.nerago.mopgear.domain.StatType.Haste;
 import static au.nerago.mopgear.io.SourcesOfItems.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
@@ -311,6 +313,11 @@ public class Tasks {
         }
     }
 
+    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, int[] extraItems, int upgradeLevel, boolean alternateEnchants, Predicate<SolvableItemSet> specialFilter) {
+        CostedItem[] extraItemsCost = Arrays.stream(extraItems).mapToObj(id -> new CostedItem(id, -1)).toArray(CostedItem[]::new);
+        reforgeProcessPlusMany(items, model, startTime, extraItemsCost, upgradeLevel, alternateEnchants, specialFilter);
+    }
+
     public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel, boolean alternateEnchants, Predicate<SolvableItemSet> specialFilter) {
         for (CostedItem entry : extraItems) {
             int extraItemId = entry.itemId();
@@ -338,12 +345,13 @@ public class Tasks {
         job.setItemOptions(items);
         job.startTime = startTime;
         job.printRecorder.outputImmediate = true;
-//        job.forcePhased = true;
 //        job.runSizeMultiply = 2;
-        job.runSizeMultiply = 12;
-//        job.runSizeMultiply = 512;
-        job.specialFilter = specialFilter;
+//        job.runSizeMultiply = 12;
+//        job.runSizeMultiply = 42;
 
+        job.forcePhased = true;
+        job.runSizeMultiply = 512;
+        job.specialFilter = specialFilter;
 
         JobOutput output = Solver.runJob(job);
         Optional<FullItemSet> resultSet = output.getFinalResultSet();
@@ -386,6 +394,7 @@ public class Tasks {
             if (detailedOutput) {
                 bestSet.get().outputSetDetailed(model);
                 OutputText.println();
+                AsWowSimJson.writeToOutBasic(bestSet.get().items());
                 AsWowSimJson.writeFullToOut(bestSet.get().items(), model);
                 OutputText.println();
                 bestSet.get().outputSetLight();
@@ -415,8 +424,8 @@ public class Tasks {
         }
     }
 
-    private static void outputReforgeJson(Optional<FullItemSet> resultSet) {
-        resultSet.ifPresent(itemSet -> AsWowSimJson.writeToOut(itemSet.items()));
+    private static void outputReforgeJson(Optional<FullItemSet> resultSet, ModelCombined model) {
+        resultSet.ifPresent(itemSet -> AsWowSimJson.writeFullToOut(itemSet.items(), model));
     }
 
     public static void outputTweaked(Optional<SolvableItemSet> bestSet, EquipOptionsMap itemOptions, ModelCombined model) {
@@ -452,6 +461,7 @@ public class Tasks {
 
     public static void paladinMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec();
+//        multi.addFixedForge(95757, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
 //        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 //        multi.addFixedForge(94526, ReforgeRecipe.empty()); // zandalar trinket
 //        multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
@@ -460,26 +470,8 @@ public class Tasks {
 //        multi.addFixedForge(86955, new ReforgeRecipe(Mastery, Expertise)); // Belt Waistplate of Overwhelming Assault
 //        multi.addFixedForge(86387, new ReforgeRecipe(Hit, Haste)); // Weapon1H Kilrak, Jaws of Terror
 
-//        multi.addFixedForge(86219, new ReforgeRecipe(StatType.Hit, StatType.Haste)); // 1h sword
-//        multi.addFixedForge(89280, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // voice greathelm
-//        multi.addFixedForge(85991, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Soulgrasp Choker
-//        multi.addFixedForge(86794, new ReforgeRecipe(StatType.Hit, StatType.Expertise)); // Starcrusher Gauntlets
-//        multi.addFixedForge(89069, new ReforgeRecipe(StatType.Crit, StatType.Haste)); // ring golden stair
-//        multi.addFixedForge(89954, new ReforgeRecipe(StatType.Expertise, StatType.Haste));// warbelt
-//        multi.addFixedForge(89346, new ReforgeRecipe(StatType.Dodge, StatType.Haste)); // autumn shoulder
 
-//        multi.addFixedForge(86979, new ReforgeRecipe(Hit, Expertise)); // Foot Impaling Treads (Hit->Expertise)
-//        multi.addFixedForge(87100, ReforgeRecipe.empty()); // Hand White Tiger Gauntlets
-//        multi.addFixedForge(87026, ReforgeRecipe.empty()); // Back Cloak of Peacock Feathers
-//        multi.addFixedForge(86683, new ReforgeRecipe(Crit, Expertise)); // Chest White Tiger Battleplate (Crit->Expertise)
-//        multi.addFixedForge(86957, ReforgeRecipe.empty()); // Ring Ring of the Bladed Tempest
-
-        // TRIM DOWN DEFENSE
-//        multi.addFixedForge(86659, new ReforgeRecipe(Mastery, Haste)); // shoulder
-//        multi.addFixedForge(90862, new ReforgeRecipe(Haste, Mastery)); // ring
-//        multi.addFixedForge(85323, new ReforgeRecipe(Parry, Mastery)); // chest
-
-        int extraUpgrade = 0;
+        int extraUpgrade = 2;
         boolean preUpgrade = false;
 
         multi.addSpec(
@@ -510,11 +502,16 @@ public class Tasks {
 //                        95914, // ret tier15 shoulder
 //                        95924, // prot tier15 shoulder
 //                        95652, // Puncture-Proof Greathelm head
-                        95807, // celestial lightning legs
+                        95535, // normal lightning legs
+
+                        95914, // ret tier shoulder celestial
+                        95910, // ret tier chest celestial
+                        95910, // ret tier gloves celestial
 
                         95142, // striker's battletags
                         95205, // terra-cotta neck
 //                        87036, // soulgrasp heroic
+
                 },
                 extraUpgrade,
                 preUpgrade
@@ -527,7 +524,7 @@ public class Tasks {
                 "PROT-DAMAGE",
                 DataLocation.gearProtDpsFile,
                 StandardModels.pallyProtDpsModel(),
-                0.40,
+                0.60,
                 new int[]{
 //                        86979, // heroic impaling treads
 //                        87062 // elegion heroic
@@ -545,36 +542,41 @@ public class Tasks {
 
 //                        87026, // heroic peacock cloak
                         86955, // heroic overwhelm assault belt
-                        95807, // celestial lightning legs
+                        95535, // normal lightning legs
 
 //                        87050, // steelskin heroic
 //                        95768, // greatshield gloaming celestial
 //                        95652, // Puncture-Proof Greathelm head
                         95687, // celestial beakbreaker cloak
-//                        95914, // ret tier shoulder celestial
+                        95914, // ret tier shoulder celestial
+                        95910, // ret tier chest celestial
+                        95910, // ret tier gloves celestial
 //                        95924, // prot tier shoulder celestial
 
                         95142, // striker's battletags
                         95205, // terra-cotta neck
                         87036, // soulgrasp heroic
+
+                        96182, // ultimate prot of the emperor thunder
                 },
                 extraUpgrade,
                 preUpgrade
         )
                 .addRemoveItem(86680) // remove celestial ret legs
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
-//                .setWorstCommonPenalty(99.0)
+//                .setWorstCommonPenalty(98.5)
+                .setWorstCommonPenalty(99)
         ;
 
         multi.addSpec(
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 StandardModels.pallyProtMitigationModel(),
-                0.55,
+                0.35,
                 new int[]{
 //                        86979, // heroic impaling treads
 //                        87015, // clawfeet
-//                        87062 // elegion heroic
+//                        87062, // elegion heroic
 //                        86957, // heroic bladed tempest
 //                        87071, // yang-xi heroic
 //                        87145, // defiled earth
@@ -585,31 +587,35 @@ public class Tasks {
 //                        95142, // striker's battletags
 //                        94726, // cloudbreaker belt
                         86955, // heroic overwhelm assault belt
-                        87060, // star-breaker belt
+//                        87060, // Star-Stealer Waistguard
 
                         87026, // heroic peacock cloak
                         86325, // daybreak
-                        95807, // celestial lightning legs
+                        95687, // celestial beakbreaker cloak
+
+                        95535, // normal lightning legs
 
 //                        87050, // steelskin heroic
 //                        95768, // greatshield gloaming celestial
 //                        95652, // Puncture-Proof Greathelm head
-                        95687, // celestial beakbreaker cloak
 //                        95808, // celestial whipping legs
 //                        95874, // celestial bloody shoulders
 //                        95914, // ret tier shoulder celestial
 //                        95924, // prot tier shoulder celestial
 
-                        95142, // striker's battletags
+//                        95142, // striker's battletags
                         95205, // terra-cotta neck
-                        87036, // soulgrasp heroic
+//                        87036, // soulgrasp heroic
+
+                        96182, // ultimate prot of the emperor thunder
                 },
                 extraUpgrade,
                 preUpgrade
         )
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
-                .setWorstCommonPenalty(98.7)
+//                .setWorstCommonPenalty(98.5)
+                .setWorstCommonPenalty(99)
         ;
 
 //        multi.multiSetFilter(proposedResults -> {
@@ -631,9 +637,9 @@ public class Tasks {
 //        multi.solve(15000);
 //        multi.solve(50000);
 //        multi.solve(120000);
-        multi.solve(220000);
+//        multi.solve(220000);
 //        multi.solve(490000);
-//        multi.solve(1490000);
+        multi.solve(1490000);
 //        multi.solve(4000000);
     }
 
@@ -729,10 +735,10 @@ public class Tasks {
         OutputText.printf("RET        %,d\n", (long)rateRet);
         OutputText.println();
 
-        int dmgPercentMit = 10, dmgPercentDps = 100 - dmgPercentMit;
+        int dmgPercentMit = 20, dmgPercentDps = 100 - dmgPercentMit;
         OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
-        long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation);
-        long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps);
+        long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation * 10);
+        long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps * 10);
         OutputText.printf("USE mitigation %d dps %d\n", dmgMultiplyA, dmgMultiplyB);
         double dmgTotal = dmgMultiplyA * rateMitigation + dmgMultiplyB * rateTankDps;
         OutputText.printf("EFFECTIVE %.2f %.2f\n",
@@ -742,10 +748,10 @@ public class Tasks {
         StatType dmgBestStat = dmgMix.bestNonHit();
         OutputText.printf("BEST STAT %s\n\n", dmgBestStat);
 
-        int defPercentMit = 85, defPercentDps = 100 - defPercentMit;
-        OutputText.printf("defenceProtModel 85%% mitigation, 15%% dps\n");
-        long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation);
-        long defMultiplyB = Math.round(targetCombined * (defPercentDps / 100.0) / rateTankDps);
+        int defPercentMit = 80, defPercentDps = 100 - defPercentMit;
+        OutputText.printf("defenceProtModel %d%% mitigation, %d%% dps\n", defPercentMit , defPercentDps);
+        long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation * 10);
+        long defMultiplyB = Math.round(targetCombined * (defPercentDps / 100.0) / rateTankDps * 10);
         OutputText.printf("USE mitigation %d dps %d\n", defMultiplyA, defMultiplyB);
         double defTotal = defMultiplyA * rateMitigation + defMultiplyB * rateTankDps;
         OutputText.printf("EFFECTIVE %.2f %.2f\n",
@@ -755,22 +761,22 @@ public class Tasks {
         StatType defBestStat = defMix.bestNonHit();
         OutputText.printf("BEST STAT %s\n\n", defBestStat);
 
-        double multiTargetCombined = 1000000000000L;
-        int multiRet = 5, multiDmg = 70, multiDef = 25;
-        OutputText.printf("multiSpec %d%% ret %d%% dmg_tank %d%% mitigation\n", multiRet, multiDmg, multiDef);
-        long multiA = Math.round(multiTargetCombined * (multiRet / 100.0) / rateRet);
-        long multiB = Math.round(multiTargetCombined * (multiDmg / 100.0) / dmgTotal);
-        long multiC = Math.round(multiTargetCombined * (multiDef / 100.0) / defTotal);
-        OutputText.printf("USE ret %d dmg_tank %d mitigation %d \n", multiA, multiB, multiC);
-        double multiTotal = multiA * rateRet + multiB * dmgTotal + multiC * defTotal;
-        OutputText.printf("EFFECTIVE %.2f %.2f %.2f\n\n",
-                multiA * rateRet / multiTotal,
-                multiB * dmgTotal / multiTotal,
-                multiC * defTotal / multiTotal);
+//        double multiTargetCombined = 1000000000000L;
+//        int multiRet = 5, multiDmg = 70, multiDef = 25;
+//        OutputText.printf("multiSpec %d%% ret %d%% dmg_tank %d%% mitigation\n", multiRet, multiDmg, multiDef);
+//        long multiA = Math.round(multiTargetCombined * (multiRet / 100.0) / rateRet);
+//        long multiB = Math.round(multiTargetCombined * (multiDmg / 100.0) / dmgTotal);
+//        long multiC = Math.round(multiTargetCombined * (multiDef / 100.0) / defTotal);
+//        OutputText.printf("USE ret %d dmg_tank %d mitigation %d \n", multiA, multiB, multiC);
+//        double multiTotal = multiA * rateRet + multiB * dmgTotal + multiC * defTotal;
+//        OutputText.printf("EFFECTIVE %.2f %.2f %.2f\n\n",
+//                multiA * rateRet / multiTotal,
+//                multiB * dmgTotal / multiTotal,
+//                multiC * defTotal / multiTotal);
     }
 
     private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req, SpecType spec) {
-        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, SetBonus.empty(), spec);
+        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, SetBonus.empty(), spec, null);
         JobInput job = new JobInput();
         job.model = model;
         job.setItemOptions(items);

@@ -13,6 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.ToLongFunction;
 
+import static au.nerago.mopgear.domain.StatType.Haste;
+import static au.nerago.mopgear.domain.StatType.Stam;
+
 public class GemData {
     private static final Map<Integer, StatBlock> standardGems = buildGemsStandard();
     private static final Map<Integer, StatBlock> knownGems = buildGems();
@@ -98,6 +101,8 @@ public class GemData {
         map.put(76668, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
         map.put(76537, new StatBlock(60, 0, 0, 0, 0, 120, 0, 0, 0, 0));
         map.put(76686, new StatBlock(80, 0, 0, 0, 0, 0, 0, 0, 0, 160));
+        map.put(76588, StatBlock.of(Haste, 160, Stam, 120));
+        map.put(76654, StatBlock.of(Haste, 160, Stam, 120));
     }
 
     private static void gemsEngineering(Map<Integer, StatBlock> map) {
@@ -139,7 +144,7 @@ public class GemData {
         map.put(4806, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0)); // caster shoulder
         map.put(4443, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)); // weapon
         map.put(4420, new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0, 0)); // chest stam
-        map.put(4421, new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0));// cloak one
+        map.put(4421, new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0));// cloak hit
         map.put(4993, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 170, 0));// shield
         map.put(4823, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// leg dps
         map.put(4429, new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0));// panda feet
@@ -151,7 +156,7 @@ public class GemData {
         map.put(4892, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));// lightweave
         map.put(4826, new StatBlock(285, 0, 0, 0, 0, 0, 0, 0, 0, 165));// int leg
         map.put(4434, new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int offhand
-        map.put(4424, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));// int offhand
+        map.put(4424, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));// cloak crit
         map.put(4433, StatBlock.of(StatType.Mastery, 170));
         map.put(4444, StatBlock.empty); // dancing steel
         return map;
@@ -282,6 +287,6 @@ public class GemData {
             if (stat.equalsStats(entry.getValue()))
                 return entry.getKey();
         }
-        throw new RuntimeException("stat/enchant not found");
+        throw new RuntimeException("stat/enchant not found " + stat.toStringExtended());
     }
 }

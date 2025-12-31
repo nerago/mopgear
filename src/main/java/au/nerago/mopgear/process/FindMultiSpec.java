@@ -3,6 +3,7 @@ package au.nerago.mopgear.process;
 import au.nerago.mopgear.ItemLoadUtil;
 import au.nerago.mopgear.ItemMapUtil;
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.model.GemData;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.permute.PossibleIndexed;
 import au.nerago.mopgear.permute.PossibleRandom;
@@ -21,6 +22,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static au.nerago.mopgear.domain.StatType.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
@@ -83,8 +86,6 @@ public class FindMultiSpec {
 
         OutputText.println("COMMON COMBOS " + commonCombos + " SKIP SIZE " + skip);
 
-        // TODO include current setup
-
         long indexedOutputSize = commonCombos / skip;
         Stream<Map<ItemRef, FullItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
         Stream<Map<ItemRef, FullItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize / 2);
@@ -92,8 +93,7 @@ public class FindMultiSpec {
         Stream<Map<ItemRef, FullItemData>> equippedStream = equippedAsCommonOptionsStream(commonMap);
         Stream<Map<ItemRef, FullItemData>> commonStream = Stream.concat(Stream.concat(commonStream1, commonStream2), Stream.concat(baselineStream, equippedStream));
 
-        Instant startTime = Instant.now();
-        commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 3 / 2, startTime, commonStream);
+        commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 3 / 2, Instant.now(), commonStream);
 
         Stream<ProposedResults> resultStream = commonStream
                 .map(r -> subSolveEach(r, specs))
@@ -215,7 +215,7 @@ public class FindMultiSpec {
         JobInput job = new JobInput();
         job.model = spec.model;
         job.setItemOptions(spec.itemOptions);
-        job.runSizeMultiply = individualRunSizeMultiply * 4;
+        job.runSizeMultiply = individualRunSizeMultiply * 64;
         job.hackAllow = hackAllow;
         job.forcePhased = true;
         JobOutput output = Solver.runJob(job);
@@ -431,7 +431,7 @@ public class FindMultiSpec {
                 OutputText.printf("DRAFT %,d\n", (long) draftSpecRating);
                 draftJob.input.printRecorder.outputNow();
                 draftSet.outputSetDetailed(spec.model);
-                AsWowSimJson.writeToOut(draftSet.items());
+                AsWowSimJson.writeFullToOut(draftSet.items(), spec.model);
 
 //                ItemLoadUtil.duplicateAlternateEnchants(spec.itemOptions, spec.model);
                 JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, 8, true);
@@ -447,7 +447,7 @@ public class FindMultiSpec {
                     OutputText.printf("REVISED %,d\n", (long) revisedSpecRating);
                     revisedJob.input.printRecorder.outputNow();
                     revisedSet.outputSetDetailed(spec.model);
-                    AsWowSimJson.writeToOut(revisedSet.items());
+                    AsWowSimJson.writeFullToOut(revisedSet.items(), spec.model);
                 } else if (revisedSet == null) {
                     OutputText.println("REVISED FAIL REVISED FAIL");
                 } else {
@@ -560,6 +560,42 @@ public class FindMultiSpec {
                 itemOptions = ItemMapUtil.upgradeAllTo2(itemOptions);
 
             remapDuplicates();
+            replaceGems();
+        }
+
+        private void replaceGems() {
+            if (this.model.spec() == SpecType.PaladinRet) {
+                EquipOptionsMap result = EquipOptionsMap.empty();
+                itemOptions.forEachPair((slot, itemArray) ->
+                        result.put(slot, ArrayUtil.concat(itemArray, ArrayUtil.mapAsNew(itemArray, this::replaceGems, FullItemData[]::new))));
+                itemOptions = result;
+            } else {
+                itemOptions = ItemMapUtil.mapReplaceAll(itemOptions, this::replaceGems);
+            }
+        }
+
+        private FullItemData replaceGems(FullItemData item) {
+            if (item.slot() == SlotItem.Trinket)
+                return item;
+
+            Integer changedEnchantChoice = item.enchantChoice;
+//            if (changedEnchantChoice == 4421)
+            if (item.slot() == SlotItem.Back)
+                changedEnchantChoice = 4424;
+
+            StatBlock checkGem = StatBlock.of(Haste, 160, Hit, 160);
+            StatBlock replaceGem = StatBlock.of(Haste, 160, Stam, 120);
+            List<StatBlock> changedGems = item.gemChoice != null
+                    ? item.gemChoice.stream().map(gem -> gem.equalsStats(checkGem) ? replaceGem : gem).toList()
+                    : null;
+
+            StatBlock changedEnchantValue = GemData.process(changedGems, item.enchantChoice, item.shared.socketSlots(), item.shared.socketBonus(), item.shared.name(), item.slot().possibleBlacksmith());
+            if (!changedEnchantValue.equalsStats(item.statEnchant)) {
+                item = item.changeEnchant(changedEnchantValue, changedGems, changedEnchantChoice);
+                OutputText.println("CHANGED ENCHANTS " + item);
+            }
+
+            return item;
         }
 
         public void prepareExtraItems(List<SpecDetails> allSpecs) {

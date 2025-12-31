@@ -25,6 +25,10 @@ public record ItemRef(int itemId, int itemLevel, int itemLevelBase, int duplicat
         return (itemLevel - itemLevelBase) / ItemLevel.ITEM_LEVELS_PER_UPGRADE_LEVEL;
     }
 
+    public boolean thunderforged() {
+        return itemLevelBase == 528 || itemLevelBase == 541;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

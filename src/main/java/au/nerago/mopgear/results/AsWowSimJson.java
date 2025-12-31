@@ -12,18 +12,21 @@ import au.nerago.mopgear.util.Tuple;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Path;
 import java.util.List;
 
 public class AsWowSimJson {
-    public static void writeToOut(EquipMap map) {
+    // only good for reforgelite, not wowsim
+    @Deprecated
+    public static void writeToOutBasic(EquipMap map) {
         OutputText.print("{\"player\":{\"equipment\":{\"items\":[");
-        map.forEachValue(AsWowSimJson::writeItem);
+        map.forEachValue(AsWowSimJson::writeItemBasic);
         OutputText.println("]}}}");
     }
 
-    private static void writeItem(FullItemData item) {
+    private static void writeItemBasic(FullItemData item) {
         if (!item.reforge.isEmpty()) {
             int reforgeId = WowSimDB.instance.reforgeId(item.reforge);
             OutputText.printf("{\"id\":%d,\"reforging\":%d,\"upgrade_step\":%d},", item.itemId(), reforgeId, item.shared.ref().upgradeLevel());
@@ -75,7 +78,7 @@ public class AsWowSimJson {
         } else if (model.spec() == SpecType.PaladinProtMitigation) {
             gearFile = DataLocation.gearProtDefenceFile;
         } else {
-            writeToOut(map);
+            writeToOutBasic(map);
             return;
         }
 

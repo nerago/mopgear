@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
-                            DefaultEnchants enchants, SetBonus setBonus, SpecType spec) {
+                            DefaultEnchants enchants, SetBonus setBonus, SpecType spec, StatBlock defaultGemAlternateChoice) {
 
     public long calcRating(FullItemSet set) {
         long value = statRatings.calcRating(set.totalForRating());
@@ -46,7 +46,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public ModelCombined withNoRequirements() {
-        return new ModelCombined(statRatings, new StatRequirementsNull(), reforgeRules, enchants, setBonus, spec);
+        return new ModelCombined(statRatings, new StatRequirementsNull(), reforgeRules, enchants, setBonus, spec, defaultGemAlternateChoice);
     }
 
     public StatBlock gemChoice(SocketType socket) {
@@ -64,6 +64,10 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public StatBlock gemChoiceBestAlternate() {
+        if (defaultGemAlternateChoice != null) {
+            return defaultGemAlternateChoice;
+        }
+
         StatType stat = statRatings.bestNonHit();
         return StatBlock.of(stat, 320);
     }
@@ -94,6 +98,6 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         StatRequirements statRequirements = StatRequirementsOriginal.load(modelParam.required());
         DefaultEnchants enchants = new DefaultEnchants(modelParam.defaultEnchants(), modelParam.blacksmith());
         SetBonus setBonus = SetBonus.forSpec(spec);
-        return new ModelCombined(rating, statRequirements, ReforgeRules.casterPure(), enchants, setBonus, spec);
+        return new ModelCombined(rating, statRequirements, ReforgeRules.casterPure(), enchants, setBonus, spec, null);
     }
 }

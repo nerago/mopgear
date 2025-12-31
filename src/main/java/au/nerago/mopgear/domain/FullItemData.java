@@ -173,7 +173,7 @@ public final class FullItemData implements IItem {
     }
 
     public boolean isUpgradable() {
-        return !shared.name().contains("Gladiator") && itemId() != 95142;
+        return !shared.name().contains("Gladiator") && itemId() != 95142 && !shared.ref().thunderforged();
         // TODO other non-upgradeable valour gear
     }
 

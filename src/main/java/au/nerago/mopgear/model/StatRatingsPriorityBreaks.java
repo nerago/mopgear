@@ -13,7 +13,6 @@ public class StatRatingsPriorityBreaks extends StatRatings {
     private final StatType firstAndLastStat;
     private final int breakpointTarget;
     private final StatType[][] remainPriority;
-    private final static int OUTPUT_MULTIPLY = 1; // scale to similar rates as weighting
 
     public StatRatingsPriorityBreaks(StatType firstAndLastStat, int breakpointTarget, StatType[][] remainPriority) {
         this.firstAndLastStat = firstAndLastStat;
@@ -53,7 +52,7 @@ public class StatRatingsPriorityBreaks extends StatRatings {
             multiply /= STEP;
 
             for (StatType[] rank : remainPriority) {
-                int value = 0;
+                long value = 0;
                 for (StatType stat : rank) {
                     value += totals.get(stat);
                 }
@@ -65,7 +64,7 @@ public class StatRatingsPriorityBreaks extends StatRatings {
             multiply /= STEP;
 
             for (StatType[] rank : remainPriority) {
-                int value = 0;
+                long value = 0;
                 for (StatType stat : rank) {
                     value += totals.get(stat);
                 }
@@ -73,23 +72,23 @@ public class StatRatingsPriorityBreaks extends StatRatings {
                 multiply /= STEP;
             }
         }
-        return result * OUTPUT_MULTIPLY;
+        return result;
     }
 
     @Override
     public long calcRating(StatType queryStat, int value) {
         if (queryStat == firstAndLastStat) {
             if (value > breakpointTarget) {
-                return ((breakpointTarget * INITIAL) + (value - breakpointTarget)) * OUTPUT_MULTIPLY;
+                return ((breakpointTarget * INITIAL) + (value - breakpointTarget));
             } else {
-                return value * INITIAL * OUTPUT_MULTIPLY;
+                return (long) value * INITIAL;
             }
         } else {
             long multiply = INITIAL / STEP;
             for (StatType[] rank : remainPriority) {
                 for (StatType stat : rank) {
                     if (stat == queryStat) {
-                        return value * multiply * OUTPUT_MULTIPLY;
+                        return value * multiply;
                     }
                 }
                 multiply /= STEP;
