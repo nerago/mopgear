@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -21,10 +22,14 @@ public class BossLookup {
     private static Map<String, Integer> bossIdMap = readInputBosses();
     private static Map<Integer, String > bossIdMapInverse = MapUtil.inverse(bossIdMap);
 
+    private static @NotNull BufferedReader openFile() throws IOException, URISyntaxException {
+        return Files.newBufferedReader(Path.of(fileUrl.toURI()), StandardCharsets.UTF_8);
+    }
+
     private static Map<String, Integer> readInputBosses() {
         int bossIdSequence = 1;
         HashSet<String> seen = new HashSet<>();
-        try (BufferedReader reader = Files.newBufferedReader(Path.of(fileUrl.toURI()))) {
+        try (BufferedReader reader = openFile()) {
             Map<String, Integer> map = new HashMap<>();
             while (true) {
                 String line = reader.readLine();
@@ -45,7 +50,7 @@ public class BossLookup {
     }
 
     private static Map<String, String> readInputName() {
-        try (BufferedReader reader = Files.newBufferedReader(Path.of(fileUrl.toURI()))) {
+        try (BufferedReader reader = openFile()) {
             Map<String, String> map = new HashMap<>();
             while (true) {
                 String line = reader.readLine();
@@ -66,12 +71,14 @@ public class BossLookup {
     }
 
     static Map<Integer, String> readInput() {
-        try (BufferedReader reader = Files.newBufferedReader(Path.of(fileUrl.toURI()))) {
+        try (BufferedReader reader = openFile()) {
             Map<Integer, String> map = new HashMap<>();
             while (true) {
                 String line = reader.readLine();
                 if (line == null)
                     break;
+                if (line.charAt(0) == '\uFEFF') // bloody bom
+                    continue;
                 String[] parts = line.split("\t");
                 if (parts.length != 4)
                     break;

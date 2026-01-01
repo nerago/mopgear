@@ -71,11 +71,11 @@ public class Main {
 
 //
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -254,7 +254,7 @@ public class Main {
 //        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialTank(), null);
 //        new FindUpgrades(model, true).run(items, strengthPlateCurrentItemsProtAllUpgradable(), null, 2);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
-        findUpgrade(items, ArrayUtil.concat(bagItemsArray(ignoredItems), SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile)), model, true, null);
+//        findUpgrade(items, ArrayUtil.concat(bagItemsArray(ignoredItems), SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile)), model, true, null);
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
@@ -271,20 +271,20 @@ public class Main {
 //                ));
 
 //        CostedItem[] allTheGoodShit = ArrayUtil.concat(
-//                new CostedItem[][] {
+//                new CostedItem[][]{
 ////                    strengthPlateValorCelestialTank(),
 ////                    strengthPlateHeartOfFearHeroic(),
 ////                        strengthPlateMsvHeroicArray(),
 ////                    strengthPlateTerraceHeroic(),
-//                    strengthPlateThroneHeroic(),
-//                    tankTrinketsThroneHeroic(),
-//                    strengthDpsTrinketsThroneHeroic(),
-//                    throneClassGearSetHeroic(SpecType.PaladinProtMitigation, true),
-//                    throneClassGearSetHeroic(SpecType.PaladinRet, true),
+//                        strengthPlateThroneHeroic(),
+//                        tankTrinketsThroneHeroic(),
+//                        strengthDpsTrinketsThroneHeroic(),
+//                        throneClassGearSetHeroic(SpecType.PaladinProtMitigation, Difficulty.Normal),
+//                        throneClassGearSetHeroic(SpecType.PaladinRet, true),
 ////                    strengthPallyTankSetT1Heroic(),
 ////                    strengthPallyRetSetT1Heroic(),
-//                    new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
-//                    new CostedItem[]{new CostedItem(79327, 0)}, // darkmoon dps
+//                        new CostedItem[]{new CostedItem(90862, 0)}, // quest ring
+//                        new CostedItem[]{new CostedItem(79327, 0)}, // darkmoon dps
 ////                    new CostedItem[]{new CostedItem(84910, 0)} // pvp shield
 //                }
 //        );
@@ -296,17 +296,17 @@ public class Main {
 //        findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
 //        findUpgrade(items, new CostedItem[]{new CostedItem(95142	,1250)}, model, true, null, 2);
 
-//        Difficulty difficulty = Difficulty.Celestial;
-//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-////                pallyPhase3Valor(),
-//                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
-//                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
-//                strengthPlateThroneNormal(difficulty),
-//                tankTrinketsThroneNormal(difficulty),
-//                strengthDpsTrinketsThroneNormal(difficulty),
-//        });
-//        upgradeShit = minusRadenLoot(upgradeShit);
-//        findUpgrade(items, upgradeShit, model, true, null, 0);
+        Difficulty difficulty = Difficulty.Normal;
+        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+//                pallyPhase3Valor(),
+                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
+                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+                strengthPlateThroneNormal(difficulty),
+                tankTrinketsThroneNormal(difficulty),
+                strengthDpsTrinketsThroneNormal(difficulty),
+        });
+        upgradeShit = minusRadenLoot(upgradeShit);
+        findUpgrade(items, upgradeShit, model, true, null, 2);
 
     }
 

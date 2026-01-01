@@ -225,9 +225,9 @@ public class FindUpgrades {
         } else {
             String boss = BossLookup.bossNameForBossId(cost);
             if (plusPercent > 0.0) {
-                OutputText.printf("%10s \t%d \t%35s \t$%s \t+%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), boss, plusPercent, stars);
+                OutputText.printf("%10s \t%d \t%35s \t+%2.2f%% %s\t %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), plusPercent, stars, boss);
             } else {
-                OutputText.printf("%10s \t%d \t%35s \t$%s \t%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), boss, plusPercent, stars);
+                OutputText.printf("%10s \t%d \t%35s \t%2.2f%% %s\t %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), plusPercent, stars, boss);
             }
         }
     }
