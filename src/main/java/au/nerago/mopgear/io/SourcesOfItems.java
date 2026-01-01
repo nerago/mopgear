@@ -576,6 +576,10 @@ public class SourcesOfItems {
             return filterExclude(bagArray, skip);
     }
 
+    public static List<EquippedItem> currentItemsAll(Path... gearFiles) {
+        return Arrays.stream(gearFiles).flatMap(file -> InputGearParser.readInput(file).stream()).distinct().toList();
+    }
+
     public static CostedItem[] strengthPlateCurrentItemsRet() {
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, StandardModels.modelFor(SpecType.PaladinRet), null, true);
         Stream<CostedItem> itemStream = items.entryStream()

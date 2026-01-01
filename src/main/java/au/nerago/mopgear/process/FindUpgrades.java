@@ -3,6 +3,7 @@ package au.nerago.mopgear.process;
 import au.nerago.mopgear.ItemLoadUtil;
 import au.nerago.mopgear.ItemMapUtil;
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.io.BossLookup;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
@@ -25,6 +26,7 @@ public class FindUpgrades {
 
     private static final long runSizeMultiply = 2;
 //    private static final long runSizeMultiply = 1;
+    private static final boolean costsTraditional = false;
 
     public FindUpgrades(ModelCombined model, boolean hackAllow) {
         this.model = model;
@@ -66,6 +68,8 @@ public class FindUpgrades {
         double baseRating = findBase(baseItems, adjustment);
 
         extraItemList = checkDuplicates(extraItemList);
+        if (!costsTraditional)
+            extraItemList = costsToBossIds(extraItemList);
 
         List<UpgradeResultItem> jobList =
                 makeJobs(model, baseItems, extraItemList, adjustment, baseRating)
@@ -77,14 +81,25 @@ public class FindUpgrades {
         reportResults(jobList);
     }
 
+    private List<CostedItemData> costsToBossIds(List<CostedItemData> extraItemList) {
+        return extraItemList.stream()
+                .map(cid ->
+                        new CostedItemData(
+                                cid.item(),
+                                BossLookup.bossIdForItemName(cid.item().shared.name())
+                        )
+                ).toList();
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     private List<CostedItemData> checkDuplicates(List<CostedItemData> extraItemList) {
         HashMap<Integer, CostedItemData> result = new HashMap<>();
         for (CostedItemData item : extraItemList) {
             CostedItemData current = result.get(item.item().itemId());
-            if (result.values().stream().anyMatch(x -> x.item().shared.name().equals(item.item().shared.name()) && x.item().itemId() != item.item().itemId())) {
-                throw new RuntimeException("alternate items for " + item.item().shared.name());
-            }
+            // TODO consider reenabling check, should delete the old celestial version etc
+//            if (result.values().stream().anyMatch(x -> x.item().shared.name().equals(item.item().shared.name()) && x.item().itemId() != item.item().itemId())) {
+//                throw new RuntimeException("alternate items for " + item.item().shared.name());
+//            }
             if (current == null || current.cost() == 0 || current.cost() == -1) {
                 result.put(item.item().itemId(), item);
             } else if (item.cost() == 0 || item.cost() == -1) {
@@ -120,7 +135,8 @@ public class FindUpgrades {
     private void reportResults(List<UpgradeResultItem> jobList) {
         reportByCost(jobList);
         reportBySlot(jobList);
-        reportCostUpgradeRank(jobList);
+        if (costsTraditional)
+            reportCostUpgradeRank(jobList);
         reportOverallRank(jobList);
     }
 
@@ -155,6 +171,7 @@ public class FindUpgrades {
                         RankedGroupsCollection.collector(UpgradeResultItem::factor)));
         for (Integer cost : grouped.keySet().stream().sorted(Comparator.naturalOrder()).toList()) {
             RankedGroupsCollection<UpgradeResultItem> best = grouped.get(cost);
+            OutputText.printf("COST %d %s\n", cost, BossLookup.bossNameForBossId(cost));
             best.forEach((item, factor) -> reportItem(item));
             OutputText.println();
         }
@@ -194,15 +211,24 @@ public class FindUpgrades {
         int cost = resultItem.cost();
         String stars = ArrayUtil.repeat('*', resultItem.hackCount());
         double plusPercent = (factor - 1.0) * 100;
-        if (plusPercent > 0.0) {
-            if (cost >= 10) {
-                double plusPerCost = plusPercent / cost;
-                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\t %1.4f\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars, plusPerCost);
+        if (costsTraditional) {
+            if (plusPercent > 0.0) {
+                if (cost >= 10) {
+                    double plusPerCost = plusPercent / cost;
+                    OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\t %1.4f\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars, plusPerCost);
+                } else {
+                    OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars);
+                }
             } else {
-                OutputText.printf("%10s \t%d \t%35s \t$%d \t+%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars);
+                OutputText.printf("%10s \t%d \t%35s \t$%d \t%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars);
             }
         } else {
-            OutputText.printf("%10s \t%d \t%35s \t$%d \t%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), cost, plusPercent, stars);
+            String boss = BossLookup.bossNameForBossId(cost);
+            if (plusPercent > 0.0) {
+                OutputText.printf("%10s \t%d \t%35s \t$%s \t+%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), boss, plusPercent, stars);
+            } else {
+                OutputText.printf("%10s \t%d \t%35s \t$%s \t%2.2f%% %s\n", item.slot(), item.shared.ref().itemLevel(), item.shared.name(), boss, plusPercent, stars);
+            }
         }
     }
 

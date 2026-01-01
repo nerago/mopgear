@@ -226,7 +226,7 @@ public class StandardModels {
     private static EnumMap<SocketType, StatBlock> protGems() {
         EnumMap<SocketType, StatBlock> gems = new EnumMap<>(SocketType.class);
         gems.put(SocketType.Red, StatBlock.of(Haste, 160, Expertise, 160));
-        gems.put(SocketType.Blue, StatBlock.of(Haste, 160, Stam, 160));
+        gems.put(SocketType.Blue, StatBlock.of(Haste, 160, Stam, 120));
         gems.put(SocketType.Yellow, StatBlock.of(Haste, 320));
         gems.put(SocketType.General, StatBlock.of(Haste, 320));
         gems.put(SocketType.Meta, StatBlock.of(Primary, 216));

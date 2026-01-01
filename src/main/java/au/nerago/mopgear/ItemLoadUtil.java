@@ -175,7 +175,17 @@ public class ItemLoadUtil {
         ItemCache itemCache = ItemCache.instance;
         FullItemData item = itemCache.get(itemId, upgradeLevel);
         if (item == null) {
-            throw new RuntimeException("dont use this please, prefer wowsim data");
+            if (upgradeLevel > 0) {
+                item = itemCache.get(itemId, 0);
+                if (item != null) {
+                    OutputText.println("DOWNGRADE SUBSTITUTED BASE ITEM " + item.toStringExtended());
+                } else {
+                    throw new RuntimeException("item " + itemId + " not found in wowsim data, even downgraded");
+                }
+            } else {
+                throw new RuntimeException("item " + itemId + " not found in wowsim data");
+            }
+//            throw new RuntimeException("dont use this please, prefer wowsim data");
 //            item = WowHead.fetchItem(itemId);
 //            if (item != null) {
 //                itemCache.put(item);

@@ -394,7 +394,6 @@ public class Tasks {
             if (detailedOutput) {
                 bestSet.get().outputSetDetailed(model);
                 OutputText.println();
-                AsWowSimJson.writeToOutBasic(bestSet.get().items());
                 AsWowSimJson.writeFullToOut(bestSet.get().items(), model);
                 OutputText.println();
                 bestSet.get().outputSetLight();
@@ -461,7 +460,7 @@ public class Tasks {
 
     public static void paladinMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec();
-//        multi.addFixedForge(95757, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
+        multi.addFixedForge(95757, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
 //        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 //        multi.addFixedForge(94526, ReforgeRecipe.empty()); // zandalar trinket
 //        multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
@@ -469,7 +468,6 @@ public class Tasks {
 //        multi.addFixedForge(86957, new ReforgeRecipe(null, null)); // Ring Ring of the Bladed Tempest
 //        multi.addFixedForge(86955, new ReforgeRecipe(Mastery, Expertise)); // Belt Waistplate of Overwhelming Assault
 //        multi.addFixedForge(86387, new ReforgeRecipe(Hit, Haste)); // Weapon1H Kilrak, Jaws of Terror
-
 
         int extraUpgrade = 2;
         boolean preUpgrade = false;
@@ -480,44 +478,39 @@ public class Tasks {
                 StandardModels.pallyRetModel(),
                 0.05,
                 new int[]{
-//                        87036, // heroic soulgrasp
-//                        87026, // heroic peacock cloak
+                        87026, // heroic peacock cloak
 //                        86880, // dread shadow ring
 //                        86955, // heroic overwhelm assault belt
-//                        89954, // warbelt pods
-//                        84949, // mal glad girdle accuracy
-//                        89280, // voice helm
 //                        86957, // heroic bladed tempest
-//                        85343, // normal ret chest
 //                        87071, // yang-xi heroic
-//                        86681, // celestial ret head
 
 //                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
+                        89934, // soul bracer
 //                        87024, // null greathelm
 //                        87145, // defiled earth
-//                        85340, // normal ret legs
-//                        87101, // heroic ret head
                         94726, // cloudbreaker belt
-//                        95914, // ret tier15 shoulder
-//                        95924, // prot tier15 shoulder
 //                        95652, // Puncture-Proof Greathelm head
                         95535, // normal lightning legs
 
-                        95914, // ret tier shoulder celestial
-                        95910, // ret tier chest celestial
-                        95910, // ret tier gloves celestial
+                        85340, // ret tier14 legs
+                        87101, // ret tier14 head
+                        85339, // ret tier14 shoulder
+                        85343, // ret tier14 chest
+                        87100, // ret tier14 hands
+                        95914, // ret tier15 shoulder celestial
+                        95910, // ret tier15 chest celestial
+                        95910, // ret tier15 gloves celestial
 
                         95142, // striker's battletags
                         95205, // terra-cotta neck
 //                        87036, // soulgrasp heroic
-
                 },
                 extraUpgrade,
                 preUpgrade
         )
-                .addRemoveItem(86680) // remove celestial ret legs
-                .addRemoveItem(86681)// remove celestial ret head
+//                .addRemoveItem(86680) // remove celestial ret legs
+//                .addRemoveItem(86681)// remove celestial ret head
         ;
 
         multi.addSpec(
@@ -545,27 +538,37 @@ public class Tasks {
                         95535, // normal lightning legs
 
 //                        87050, // steelskin heroic
-//                        95768, // greatshield gloaming celestial
 //                        95652, // Puncture-Proof Greathelm head
                         95687, // celestial beakbreaker cloak
-                        95914, // ret tier shoulder celestial
-                        95910, // ret tier chest celestial
-                        95910, // ret tier gloves celestial
-//                        95924, // prot tier shoulder celestial
+
+//                        95924, // prot tier15 shoulder celestial
+                        // TODO add all prot tier15 celestial (not farming today)
+
+                        85340, // ret tier14 legs
+                        87101, // ret tier14 head
+                        85339, // ret tier14 shoulder
+                        85343, // ret tier14 chest
+                        87100, // ret tier14 hands
+                        95914, // ret tier15 shoulder celestial
+                        95910, // ret tier15 chest celestial
+                        95910, // ret tier15 gloves celestial
 
                         95142, // striker's battletags
                         95205, // terra-cotta neck
                         87036, // soulgrasp heroic
 
                         96182, // ultimate prot of the emperor thunder
+
+                        // bags upgrades none
+
                 },
                 extraUpgrade,
                 preUpgrade
         )
-                .addRemoveItem(86680) // remove celestial ret legs
+//                .addRemoveItem(86680) // remove celestial ret legs
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
 //                .setWorstCommonPenalty(98.5)
-                .setWorstCommonPenalty(99)
+//                .setWorstCommonPenalty(99)
         ;
 
         multi.addSpec(
@@ -575,16 +578,12 @@ public class Tasks {
                 0.35,
                 new int[]{
 //                        86979, // heroic impaling treads
-//                        87015, // clawfeet
-//                        87062, // elegion heroic
 //                        86957, // heroic bladed tempest
-//                        87071, // yang-xi heroic
+                        87071, // yang-xi heroic
 //                        87145, // defiled earth
 //                        89934, // soul bracer
-//                        87101, // heroic ret head
-//                        87024, // null greathelm
+                        87024, // null greathelm
 //                        86946, // ruby signet heroic
-//                        95142, // striker's battletags
 //                        94726, // cloudbreaker belt
                         86955, // heroic overwhelm assault belt
 //                        87060, // Star-Stealer Waistguard
@@ -595,19 +594,36 @@ public class Tasks {
 
                         95535, // normal lightning legs
 
-//                        87050, // steelskin heroic
-//                        95768, // greatshield gloaming celestial
 //                        95652, // Puncture-Proof Greathelm head
 //                        95808, // celestial whipping legs
-//                        95874, // celestial bloody shoulders
-//                        95914, // ret tier shoulder celestial
 //                        95924, // prot tier shoulder celestial
+
+                        86659, // prot tier14 shoulder
+                        85323, // prot tier14 chest
+                        86662, // prot tier14 hand
+                        85320, // prot tier14 legs
+
+                        85340, // ret tier14 legs
+                        87101, // ret tier14 head
+                        85339, // ret tier14 shoulder
+                        85343, // ret tier14 chest
+                        87100, // ret tier14 hands
+
+                        95914, // ret tier15 shoulder celestial
+                        95910, // ret tier15 chest celestial
+                        95910, // ret tier15 gloves celestial
 
 //                        95142, // striker's battletags
                         95205, // terra-cotta neck
-//                        87036, // soulgrasp heroic
+                        87036, // soulgrasp heroic
 
                         96182, // ultimate prot of the emperor thunder
+
+                        // bags upgrades
+                        95735, // artery ripper
+                        89934, // bonded soul bracer
+                        95874, // Bloody Shoulderplates
+                        95683, // Shoulderguards of Centripetal Destruction
                 },
                 extraUpgrade,
                 preUpgrade
@@ -615,7 +631,7 @@ public class Tasks {
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
 //                .setWorstCommonPenalty(98.5)
-                .setWorstCommonPenalty(99)
+//                .setWorstCommonPenalty(99)
         ;
 
 //        multi.multiSetFilter(proposedResults -> {
@@ -633,13 +649,13 @@ public class Tasks {
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-//        multi.solve(1000);
+        multi.solve(1000);
 //        multi.solve(15000);
 //        multi.solve(50000);
 //        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);
-        multi.solve(1490000);
+//        multi.solve(1490000);
 //        multi.solve(4000000);
     }
 
@@ -836,7 +852,7 @@ public class Tasks {
 //                    int minLevel = group.getValue().stream().mapToInt(FullItemData::itemLevel).min().orElseThrow();
 //                    int maxLevel = group.getValue().stream().mapToInt(FullItemData::itemLevel).max().orElseThrow();
 //                    boolean has535 = group.getValue().stream().mapToInt(FullItemData::itemLevel).filter(lvl -> lvl == 535).findAny().isPresent();
-////                    String ids = group.getValue().stream().map(item -> item.itemId() + "u" + item.shared.ref().upgradeLevel()).collect(Collectors.joining(","));
+//                    String ids = group.getValue().stream().map(item -> item.itemId() + "u" + item.shared.ref().upgradeLevel()).collect(Collectors.joining(","));
 //                    String ids = group.getValue().stream().map(item -> String.valueOf(item.itemId()) ).collect(Collectors.joining(","));
 //                    OutputText.printf("%d %d %s %s %s\n", minLevel, maxLevel, minLevel==maxLevel ? "SINGLE" : has535 ? "" : "MISSING535", name, ids);
 //                });

@@ -5,30 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea07a34a-2e86-429e-8348-7ed7a5cfaa9c" name="Changes" comment="stuff">
+      <change afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/BossLookup.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/MapUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gear-prot-defence.json" beforeDir="false" afterPath="$PROJECT_DIR$/gear-prot-defence.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gear-prot-dps.json" beforeDir="false" afterPath="$PROJECT_DIR$/gear-prot-dps.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gear-ret.json" beforeDir="false" afterPath="$PROJECT_DIR$/gear-ret.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bags-gear-bags.json" beforeDir="false" afterPath="$PROJECT_DIR$/bags-gear-bags.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/ItemLoadUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/ItemLoadUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/ItemMapUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/ItemMapUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/FullItemData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/FullItemData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/EquippedItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/EquippedItem.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/ItemRef.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/ItemRef.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/SourcesOfItems.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/SourcesOfItems.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/StandardModels.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/StandardModels.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/ModelCombined.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/ModelCombined.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/SetBonus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/SetBonus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatings.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatingsPriority.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatingsPriority.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatingsPriorityBreaks.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatingsPriorityBreaks.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatingsPriorityBreaksMultiple.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatingsPriorityBreaksMultiple.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatingsWeights.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRatingsWeights.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRequirementsHitExpertise.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRequirementsHitExpertise.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/ItemLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/ItemLevel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindMultiSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindMultiSpec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindUpgrades.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindUpgrades.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/results/AsWowSimJson.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/results/AsWowSimJson.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/weight/PaladinProtDps.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/weight/PaladinProtDps.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/weight/PaladinProtMitigation.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/weight/PaladinProtMitigation.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/ArrayUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/ArrayUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/wowsimdb.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/wowsimdb.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,6 +62,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Enum" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -96,29 +90,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.paladin_gearing [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.paladin_gearing [:au.nerago.mopgear.Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.paladin_gearing [build].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Nicholas/Dropbox/prog/paladin_gearing&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.41724136&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.paladin_gearing [:Main.main()].executor": "Run",
+    "Gradle.paladin_gearing [:au.nerago.mopgear.Main.main()].executor": "Run",
+    "Gradle.paladin_gearing [build].executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Nicholas/Dropbox/prog/paladin_gearing",
+    "project.structure.last.edited": "SDKs",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.41724136",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="au.nerago.mopgear.util" />
       <recent name="au.nerago.mopgear" />
     </key>
   </component>
@@ -230,7 +225,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766214619717</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="stuff">
+      <option name="closed" value="true" />
+      <created>1767222839058</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1767222839058</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -243,12 +246,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/ArrayUtil.java</url>
-          <line>259</line>
+          <line>270</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/SourcesOfItems.java</url>
-          <line>796</line>
+          <line>800</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -257,24 +260,9 @@
           <option name="timeStamp" value="5" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindUpgrades.java</url>
-          <line>92</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemData.java</url>
           <line>289</line>
           <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/results/AsWowSimJson.java</url>
-          <line>62</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/results/AsWowSimJson.java</url>
-          <line>73</line>
-          <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java</url>
@@ -283,7 +271,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java</url>
-          <line>747</line>
+          <line>763</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">

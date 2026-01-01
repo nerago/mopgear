@@ -71,11 +71,11 @@ public class Main {
 
 //
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -103,19 +103,19 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, null, 86145, false, true, null);
 //        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new int[]{77530,89075,81262,87607,89823}));
-//        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.bagItemsArray(model, new ArrayList<>()));
+//        reforgeProcessPlusMany(items, model, startTime, SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile));
 
-        Predicate<SolvableItemSet> specialFilter;
+//        Predicate<SolvableItemSet> specialFilter;
 //        job.specialFilter = set -> model.setBonus().countInAnySet(set.items()) >= 4;
 //        ToIntFunction<SolvableEquipMap> countFunc = SetBonus.countInSpecifiedSet("Battlegear of the Lightning Emperor");
 //        ToIntFunction<SolvableEquipMap> countFunc = SetBonus.countInSpecifiedSet("White Tiger Battlegear");
 //        specialFilter = set -> countFunc.applyAsInt(set.items()) >= 4;
-        specialFilter = null;
-        reforgeProcessPlusMany(items, model, startTime,
-                ArrayUtil.concat(
-                    SourcesOfItems.throneClassGearSetHeroic(SpecType.PaladinRet, Difficulty.Celestial),
-                    strengthPlateThroneNormal(Difficulty.Celestial)),
-                0, false, specialFilter);
+//        specialFilter = null;
+//        reforgeProcessPlusMany(items, model, startTime,
+//                ArrayUtil.concat(
+//                    SourcesOfItems.throneClassGearSetHeroic(SpecType.PaladinRet, Difficulty.Celestial),
+//                    strengthPlateThroneNormal(Difficulty.Celestial)),
+//                0, false, specialFilter);
 
 //          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
 //                  new CostedItem(84950,0),
@@ -137,6 +137,8 @@ public class Main {
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
 //        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
+        findUpgrade(items, ArrayUtil.concat(bagItemsArray(ignoredItems), SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile)), model, true, null);
+
 //        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
 
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
@@ -151,18 +153,18 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = StandardModels.pallyProtDpsModel();
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = StandardModels.pallyProtDpsModel();
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = StandardModels.pallyProtMitigationModel();
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = StandardModels.pallyProtMitigationModel();
+//        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, true);
 
-        reforgeProcess(items, model, startTime);
+//        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
 //        reforgeProcessProtFixedPlus(model, startTime, 86753, false, true);
 //        reforgeProcessProtFixed(model, startTime, true);
@@ -252,6 +254,7 @@ public class Main {
 //        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialTank(), null);
 //        new FindUpgrades(model, true).run(items, strengthPlateCurrentItemsProtAllUpgradable(), null, 2);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
+        findUpgrade(items, ArrayUtil.concat(bagItemsArray(ignoredItems), SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile)), model, true, null);
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);

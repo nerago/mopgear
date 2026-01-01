@@ -113,8 +113,8 @@ public class FindMultiSpec {
                         s -> reportBetter(s.resultJobs, specs)));
         outputResultFinal(best, specs);
 
+        // TODO report on extras that are always unused in all candidate sets
         // TODO highlight gems changed vs as loaded
-
         // TODO keep track of good indexes and search near
     }
 

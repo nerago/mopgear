@@ -7,7 +7,9 @@ import au.nerago.mopgear.util.ArrayUtil;
 public class ItemLevel {
     private static final int CHALLENGE_TARGET_LEVEL = 463;
     private static final double FORMULA_POWER = 5.48;
-    public static final int ITEM_LEVELS_PER_UPGRADE_LEVEL = 4;
+    public static final int LOW_HIGH_MOP_ITEM_LEVELS_THRESHOLD = 522;
+    public static final int LOW_MOP_ITEM_LEVELS_PER_UPGRADE_LEVEL = 4;
+    public static final int HIGH_MOP_ITEM_LEVELS_PER_UPGRADE_LEVEL = 3;
     public static final int MAX_UPGRADE_LEVEL = 2;
 
     private static double calcMultiplier(int levelFrom, int levelTo) {
@@ -54,7 +56,9 @@ public class ItemLevel {
         ItemRef ref = item.shared.ref();
         int currentLevel = ref.itemLevel();
         int baseItemLevel = ref.itemLevelBase();
-        int targetLevel = baseItemLevel + upgradeLevel * ITEM_LEVELS_PER_UPGRADE_LEVEL;
+        int targetLevel = baseItemLevel < LOW_HIGH_MOP_ITEM_LEVELS_THRESHOLD
+                ? baseItemLevel + upgradeLevel * LOW_MOP_ITEM_LEVELS_PER_UPGRADE_LEVEL
+                : baseItemLevel + upgradeLevel * HIGH_MOP_ITEM_LEVELS_PER_UPGRADE_LEVEL;
 
         if (currentLevel != targetLevel) {
             double factor = calcMultiplier(currentLevel, targetLevel);

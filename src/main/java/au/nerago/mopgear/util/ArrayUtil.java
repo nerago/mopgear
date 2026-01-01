@@ -47,6 +47,17 @@ public class ArrayUtil {
         return result;
     }
 
+    @SafeVarargs
+    public static <T> List<T> concat(List<T>... parts) {
+        ArrayList<T> result = new ArrayList<>();
+        for (List<T> list : parts) {
+            if (list != null) {
+                result.addAll(list);
+            }
+        }
+        return result;
+    }
+
     public static <T> T[] concat(T[] first, T[] second) {
         int newLen = first.length + second.length;
         T[] result = createGeneric(first, newLen);

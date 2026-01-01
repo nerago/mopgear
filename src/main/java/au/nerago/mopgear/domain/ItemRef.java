@@ -22,7 +22,10 @@ public record ItemRef(int itemId, int itemLevel, int itemLevelBase, int duplicat
     }
 
     public int upgradeLevel() {
-        return (itemLevel - itemLevelBase) / ItemLevel.ITEM_LEVELS_PER_UPGRADE_LEVEL;
+        if (itemLevelBase < ItemLevel.LOW_HIGH_MOP_ITEM_LEVELS_THRESHOLD)
+            return (itemLevel - itemLevelBase) / ItemLevel.LOW_MOP_ITEM_LEVELS_PER_UPGRADE_LEVEL;
+        else
+            return (itemLevel - itemLevelBase) / ItemLevel.HIGH_MOP_ITEM_LEVELS_PER_UPGRADE_LEVEL;
     }
 
     public boolean thunderforged() {
