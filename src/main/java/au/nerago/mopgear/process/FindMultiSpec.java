@@ -560,7 +560,7 @@ public class FindMultiSpec {
                 itemOptions = ItemMapUtil.upgradeAllTo2(itemOptions);
 
             remapDuplicates();
-            replaceGems();
+//            replaceGems();
         }
 
         private void replaceGems() {

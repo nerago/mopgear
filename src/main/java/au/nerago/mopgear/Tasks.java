@@ -519,47 +519,48 @@ public class Tasks {
                 StandardModels.pallyProtDpsModel(),
                 0.60,
                 new int[]{
-//                        86979, // heroic impaling treads
-//                        87062 // elegion heroic
-//                        86957, // heroic bladed tempest
-//                        85343, // normal ret chest
-
-//                        87015, // heroic clawfeet
-//                        86979, // heroic impaling treads
-//                        87071, // yang-xi heroic
-//                        87145, // defiled earth
-//                        85340, // normal ret legs
-//                        87101, // heroic ret head
-//                        86946, // ruby signet heroic
+                        86979, // heroic impaling treads
+////                        87062 // elegion heroic
+////                        86957, // heroic bladed tempest
+////                        85343, // normal ret chest
+//
+////                        87015, // heroic clawfeet
+////                        86979, // heroic impaling treads
+////                        87071, // yang-xi heroic
+                        87145, // defiled earth
+                        89934, // soul bracer
+////                        85340, // normal ret legs
+////                        87101, // heroic ret head
+////                        86946, // ruby signet heroic
                         94726, // cloudbreaker belt
-
-//                        87026, // heroic peacock cloak
-                        86955, // heroic overwhelm assault belt
+//
+                        87026, // heroic peacock cloak
+//                        86955, // heroic overwhelm assault belt
                         95535, // normal lightning legs
-
-//                        87050, // steelskin heroic
-//                        95652, // Puncture-Proof Greathelm head
+//
+////                        87050, // steelskin heroic
+////                        95652, // Puncture-Proof Greathelm head
                         95687, // celestial beakbreaker cloak
-
-//                        95924, // prot tier15 shoulder celestial
-                        // TODO add all prot tier15 celestial (not farming today)
-
-                        85340, // ret tier14 legs
+//
+////                        95924, // prot tier15 shoulder celestial
+//                        // TODO add all prot tier15 celestial (not farming today)
+//
+//                        85340, // ret tier14 legs
                         87101, // ret tier14 head
                         85339, // ret tier14 shoulder
                         85343, // ret tier14 chest
                         87100, // ret tier14 hands
-                        95914, // ret tier15 shoulder celestial
-                        95910, // ret tier15 chest celestial
-                        95910, // ret tier15 gloves celestial
-
+//                        95914, // ret tier15 shoulder celestial
+//                        95910, // ret tier15 chest celestial
+//                        95910, // ret tier15 gloves celestial
+//
                         95142, // striker's battletags
                         95205, // terra-cotta neck
-                        87036, // soulgrasp heroic
-
+//                        87036, // soulgrasp heroic
+//
                         96182, // ultimate prot of the emperor thunder
-
-                        // bags upgrades none
+//
+//                        // bags upgrades none
 
                 },
                 extraUpgrade,
@@ -568,7 +569,7 @@ public class Tasks {
 //                .addRemoveItem(86680) // remove celestial ret legs
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
 //                .setWorstCommonPenalty(98.5)
-//                .setWorstCommonPenalty(99)
+                .setWorstCommonPenalty(99)
         ;
 
         multi.addSpec(
@@ -577,52 +578,51 @@ public class Tasks {
                 StandardModels.pallyProtMitigationModel(),
                 0.35,
                 new int[]{
-//                        86979, // heroic impaling treads
-//                        86957, // heroic bladed tempest
+                        86979, // heroic impaling treads
+//////                        86957, // heroic bladed tempest
                         87071, // yang-xi heroic
 //                        87145, // defiled earth
 //                        89934, // soul bracer
                         87024, // null greathelm
-//                        86946, // ruby signet heroic
-//                        94726, // cloudbreaker belt
+//////                        86946, // ruby signet heroic
+                        94726, // cloudbreaker belt
                         86955, // heroic overwhelm assault belt
-//                        87060, // Star-Stealer Waistguard
-
+//////                        87060, // Star-Stealer Waistguard
+////
                         87026, // heroic peacock cloak
-                        86325, // daybreak
-                        95687, // celestial beakbreaker cloak
-
+////                        86325, // daybreak
+////                        95687, // celestial beakbreaker cloak
+////
                         95535, // normal lightning legs
-
-//                        95652, // Puncture-Proof Greathelm head
-//                        95808, // celestial whipping legs
-//                        95924, // prot tier shoulder celestial
-
+////
+//////                        95652, // Puncture-Proof Greathelm head
+//////                        95808, // celestial whipping legs
+//////                        95924, // prot tier shoulder celestial
+////
                         86659, // prot tier14 shoulder
                         85323, // prot tier14 chest
                         86662, // prot tier14 hand
                         85320, // prot tier14 legs
-
-                        85340, // ret tier14 legs
+////
+//                        85340, // ret tier14 legs
                         87101, // ret tier14 head
-                        85339, // ret tier14 shoulder
+//                        85339, // ret tier14 shoulder
                         85343, // ret tier14 chest
                         87100, // ret tier14 hands
-
-                        95914, // ret tier15 shoulder celestial
-                        95910, // ret tier15 chest celestial
-                        95910, // ret tier15 gloves celestial
-
+////
+//                        95914, // ret tier15 shoulder celestial
+//                        95910, // ret tier15 chest celestial
+////                        95910, // ret tier15 gloves celestial
+////
 //                        95142, // striker's battletags
                         95205, // terra-cotta neck
-                        87036, // soulgrasp heroic
-
-                        96182, // ultimate prot of the emperor thunder
-
-                        // bags upgrades
+////                        87036, // soulgrasp heroic
+////
+////                        96182, // ultimate prot of the emperor thunder
+////
+////                        // bags upgrades
                         95735, // artery ripper
-                        89934, // bonded soul bracer
-                        95874, // Bloody Shoulderplates
+////                        95874, // Bloody Shoulderplates
                         95683, // Shoulderguards of Centripetal Destruction
                 },
                 extraUpgrade,
@@ -631,7 +631,7 @@ public class Tasks {
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
 //                .setWorstCommonPenalty(98.5)
-//                .setWorstCommonPenalty(99)
+                .setWorstCommonPenalty(99)
         ;
 
 //        multi.multiSetFilter(proposedResults -> {
@@ -649,9 +649,9 @@ public class Tasks {
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
-        multi.solve(1000);
+//        multi.solve(1000);
 //        multi.solve(15000);
-//        multi.solve(50000);
+        multi.solve(50000);
 //        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);
