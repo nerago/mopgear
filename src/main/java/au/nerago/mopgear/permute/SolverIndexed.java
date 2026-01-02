@@ -14,16 +14,10 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class SolverIndexed {
-    public static Optional<SolvableItemSet> runSolver(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, long comboCount, Predicate<SolvableItemSet> specialFilter) {
-        Stream<SolvableItemSet> partialSets = runSolverPartial(itemOptions, adjustment, comboCount);
+    public static Optional<SolvableItemSet> runFullScan(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, long comboCount, Predicate<SolvableItemSet> specialFilter) {
+        Stream<Long> dumbStream = generateDumbStream(comboCount).parallel();
+        Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
         return finishToResult(model, specialFilter, partialSets);
-    }
-
-    private static Optional<SolvableItemSet> finishToResult(ModelCombined model, Predicate<SolvableItemSet> specialFilter, Stream<SolvableItemSet> partialSets) {
-        Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
-        if (specialFilter != null)
-            finalSets = finalSets.filter(specialFilter);
-        return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 
     public static Optional<SolvableItemSet> runSolverSkipping(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long desiredRunSize, BigInteger estimateFullCombos, Predicate<SolvableItemSet> specialFilter) {
@@ -34,15 +28,24 @@ public class SolverIndexed {
             skipSize = Primes.roundToPrime(skipSize);
         BigInteger plannedCount = estimateFullCombos.divide(skipSize);
 
-        Stream<BigInteger> dumbStream = generateDumbStream(estimateFullCombos, skipSize).parallel();
-        Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
-        partialSets = BigStreamUtil.countProgress(plannedCount, startTime, partialSets);
-        return finishToResult(model, specialFilter, partialSets);
+        if (fitsLong(estimateFullCombos) && fitsLong(plannedCount) && fitsLong(skipSize)) {
+            Stream<Long> dumbStream = generateDumbStream(estimateFullCombos.longValueExact(), skipSize.longValueExact()).parallel();
+            Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
+            partialSets = BigStreamUtil.countProgress(plannedCount.longValueExact(), startTime, partialSets);
+            return finishToResult(model, specialFilter, partialSets);
+        } else {
+            Stream<BigInteger> dumbStream = generateDumbStream(estimateFullCombos, skipSize).parallel();
+            Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
+            partialSets = BigStreamUtil.countProgress(plannedCount, startTime, partialSets);
+            return finishToResult(model, specialFilter, partialSets);
+        }
     }
 
-    private static Stream<SolvableItemSet> runSolverPartial(SolvableEquipOptionsMap itemOptions, StatBlock adjustment, long comboCount) {
-        Stream<Long> dumbStream = generateDumbStream(comboCount).parallel();
-        return dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
+    private static Optional<SolvableItemSet> finishToResult(ModelCombined model, Predicate<SolvableItemSet> specialFilter, Stream<SolvableItemSet> partialSets) {
+        Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
+        if (specialFilter != null)
+            finalSets = finalSets.filter(specialFilter);
+        return finalSets.max(Comparator.comparingLong(model::calcRating));
     }
 
     private static SolvableItemSet makeSet(SolvableEquipOptionsMap itemOptions, StatBlock adjustment, long mainIndex) {
@@ -86,7 +89,17 @@ public class SolverIndexed {
     }
 
     private static Stream<BigInteger> generateDumbStream(BigInteger max, BigInteger skip) {
-        int start = ThreadLocalRandom.current().nextInt(0, 61);
+        int start = ThreadLocalRandom.current().nextInt(0, skip.intValueExact());
         return Stream.iterate(BigInteger.valueOf(start), x -> x.compareTo(max) < 0, x -> x.add(skip));
+    }
+
+    private static Stream<Long> generateDumbStream(long max, long skip) {
+        long start = ThreadLocalRandom.current().nextLong(0, skip);
+        return Stream.iterate(start, x -> x < max, x -> x + skip);
+    }
+
+    private static final BigInteger maxLong = BigInteger.valueOf(Long.MAX_VALUE);
+    private static boolean fitsLong(BigInteger number) {
+        return number.compareTo(maxLong) < 0;
     }
 }

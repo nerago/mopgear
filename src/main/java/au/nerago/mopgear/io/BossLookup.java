@@ -17,10 +17,44 @@ import java.util.Map;
 public class BossLookup {
     private static final URL fileUrl = WowSimDB.class.getClassLoader().getResource("bosslookup.tsv");
 
-    private static Map<Integer, String> itemMap = readInput();
-    private static Map<String, String> nameMap = readInputName();
-    private static Map<String, Integer> bossIdMap = readInputBosses();
-    private static Map<Integer, String > bossIdMapInverse = MapUtil.inverse(bossIdMap);
+    private static final Map<Integer, String> itemMap = readInput();
+    private static final Map<String, String> nameMap = readInputName();
+    private static final Map<Integer, String > bossIdMapInverse = makeBossesMap();
+    private static final Map<String, Integer> bossIdMap = MapUtil.inverse(bossIdMapInverse);
+
+    private static Map<Integer, String> makeBossesMap() {
+        Map<Integer, String> map = new HashMap<>();
+        map.put(101,"Dogs MSV");
+        map.put(102,"Feng MSV");
+        map.put(103,"Gara'jal MSV");
+        map.put(104,"Kings MSV");
+        map.put(105,"Elegon MSV");
+        map.put(106,"Will MSV");
+        map.put(301,"Vizier HOF");
+        map.put(302,"Blade Lord HOF");
+        map.put(303,"Garalon HOF");
+        map.put(304,"Wind Lord HOF");
+        map.put(305,"Amber-Shaper HOF");
+        map.put(306,"Empress HOF");
+        map.put(501,"Protectors ToES");
+        map.put(502,"Tsulong ToES");
+        map.put(503,"Lei Shi ToES");
+        map.put(504,"Sha ToES");
+        map.put(701,"Jinrokh ToT");
+        map.put(702,"Horridon ToT");
+        map.put(703,"Council ToT");
+        map.put(704,"Tortos ToT");
+        map.put(705,"Megaera ToT");
+        map.put(706,"Ji-Kun ToT");
+        map.put(707,"Durumu ToT");
+        map.put(708,"Primordius ToT");
+        map.put(709,"Dark Animus ToT");
+        map.put(710,"Iron Qon ToT");
+        map.put(711,"Twin Consorts ToT");
+        map.put(712,"Lei Shen ToT");
+        map.put(713,"Raden ToT");
+        return map;
+    }
 
     private static @NotNull BufferedReader openFile() throws IOException, URISyntaxException {
         return Files.newBufferedReader(Path.of(fileUrl.toURI()), StandardCharsets.UTF_8);

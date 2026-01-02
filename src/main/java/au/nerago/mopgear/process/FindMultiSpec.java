@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -401,6 +402,7 @@ public class FindMultiSpec {
                 job.input.printRecorder.outputNow();
                 set.outputSetDetailed(spec.model);
                 OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", job.resultRating / spec.optimalRating * 100.0);
+                spec.recordSolutionSeen(set);
             }
             OutputText.println("#######################################");
         }
@@ -446,8 +448,9 @@ public class FindMultiSpec {
                 FullItemSet revisedSet = null;
                 double revisedSpecRating = 0;
                 if (revisedJob.resultSet.isPresent()) {
-                    revisedSet = revisedJob.getFinalResultSet().orElse(null);
+                    revisedSet = revisedJob.getFinalResultSet().orElseThrow();
                     revisedSpecRating = revisedJob.resultRating;
+                    spec.recordSolutionSeen(revisedSet);
                 }
 
                 if (revisedSet != null && revisedSpecRating > draftSpecRating) {
@@ -463,6 +466,8 @@ public class FindMultiSpec {
 
                 double specRating = Math.max(draftSpecRating, revisedSpecRating);
                 OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
+
+                spec.reportExtrasUsed();
             }
 
             // TODO report on changed enchant
@@ -506,6 +511,7 @@ public class FindMultiSpec {
         FullItemSet optimalBaselineSet;
         EquipMap equippedGear;
         EquipOptionsMap itemOptions;
+        final Map<Integer, AtomicInteger> itemsSeenInSolutions = new HashMap<>();
 
         private SpecDetails(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
             this.label = label;
@@ -715,6 +721,22 @@ public class FindMultiSpec {
             ratingMultiply = (int) Math.round(targetForThis / optimalRating);
 
             OutputText.printf("MULTIPLIERS %s base=%,d mult=%d value=%,d\n", label, Math.round(optimalRating), ratingMultiply, Math.round(optimalRating * ratingMultiply));
+        }
+
+        public void recordSolutionSeen(FullItemSet set) {
+            set.items().forEachValue(item -> {
+                int itemId = item.itemId();
+                itemsSeenInSolutions.computeIfAbsent(itemId, x -> new AtomicInteger()).incrementAndGet();
+            });
+        }
+
+        public void reportExtrasUsed() {
+            OutputText.println("EXTRAS USED");
+            Arrays.stream(extraItems).sorted().forEach(itemId -> {
+                AtomicInteger countSeenAtom = itemsSeenInSolutions.get(itemId);
+                int countSeen = countSeenAtom != null ? countSeenAtom.intValue() : 0;
+                OutputText.printf("%d %d\n", itemId, countSeen);
+            });
         }
     }
 

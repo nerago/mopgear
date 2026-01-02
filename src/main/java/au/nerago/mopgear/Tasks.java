@@ -582,13 +582,13 @@ public class Tasks {
                 new int[]{
                         86979, // heroic impaling treads
 //////                        86957, // heroic bladed tempest
-                        87071, // yang-xi heroic
+//                        87071, // yang-xi heroic
 //                        87145, // defiled earth
 //                        89934, // soul bracer
                         87024, // null greathelm
 //////                        86946, // ruby signet heroic
                         94726, // cloudbreaker belt
-                        86955, // heroic overwhelm assault belt
+//                        86955, // heroic overwhelm assault belt
 //////                        87060, // Star-Stealer Waistguard
 ////
                         87026, // heroic peacock cloak
@@ -597,7 +597,7 @@ public class Tasks {
 ////
                         95535, // normal lightning legs
 ////
-                        95652, // Puncture-Proof Greathelm head
+//                        95652, // Puncture-Proof Greathelm head
 //////                        95808, // celestial whipping legs
 //////                        95924, // prot tier shoulder celestial
 ////
@@ -652,8 +652,9 @@ public class Tasks {
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(1000);
+        multi.solve(2000);
 //        multi.solve(15000);
-        multi.solve(50000);
+//        multi.solve(50000);
 //        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);

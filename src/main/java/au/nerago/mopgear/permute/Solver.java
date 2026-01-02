@@ -1,7 +1,5 @@
 package au.nerago.mopgear.permute;
 
-import au.nerago.mopgear.domain.EquipOptionsMap;
-import au.nerago.mopgear.domain.FullItemSet;
 import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.model.ModelCombined;
@@ -12,14 +10,13 @@ import au.nerago.mopgear.util.BigStreamUtil;
 
 import java.math.BigInteger;
 import java.time.Instant;
-import java.util.Optional;
 
 import static au.nerago.mopgear.results.JobInput.SolveMethod.*;
 
 public class Solver {
     private static final long DEFAULT_RANDOM_RUN_SIZE = 10_000_000;
-    private static final long DEFAULT_INDEX_RUN_SIZE = 1_000_000;
-    private static final long PHASED_COMBOS_GENERATE = 500_000;
+    private static final long DEFAULT_INDEX_RUN_SIZE = 200_000;
+    private static final long PHASED_COMBOS_GENERATE = 200_000;
     private static final long MAX_BASIC_FULL_SEARCH = 50_000;
     private static final long MAX_SKINNY_FULL_SEARCH = 10_000;
     private static final long MAX_SKINNY_PHASED_ANY = 1_000_000;
@@ -37,7 +34,7 @@ public class Solver {
         assert runSizeMultiply >= 1;
         switch (job.runSizeCategory) {
             case Medium -> runSizeMultiply *= 16;
-            case Final -> runSizeMultiply *= 128;
+            case Final -> runSizeMultiply *= 256;
         }
 
         SolverCapPhased phased = null;
@@ -69,18 +66,18 @@ public class Solver {
         JobOutput output = new JobOutput(job);
         switch (method) {
             case SkipIndex -> {
-                job.println("SOLVE skip index");
-                long runSize = DEFAULT_INDEX_RUN_SIZE * runSizeMultiply; // ELSE job.forcedRunSized
+                long runSize = DEFAULT_INDEX_RUN_SIZE * runSizeMultiply;
+                job.printf("SOLVE skip index %d\n", runSize);
                 output.resultSet = SolverIndexed.runSolverSkipping(model, itemOptions, adjustment, startTime, runSize, estimateFullCombos, job.specialFilter);
             }
             case Random -> {
                 long runSize = DEFAULT_RANDOM_RUN_SIZE * runSizeMultiply;
-                job.println("SOLVE random (OBSOLETE)");
+                job.printf("SOLVE random %d (OBSOLETE)\n", runSize);
                 output.resultSet = SolverRandom.runSolver(model, itemOptions, adjustment, startTime, runSize, !job.singleThread, job.specialFilter);
             }
             case Full -> {
                 job.println("SOLVE full search");
-                output.resultSet = SolverIndexed.runSolver(model, itemOptions, adjustment, estimateFullCombos.longValueExact(), job.specialFilter);
+                output.resultSet = SolverIndexed.runFullScan(model, itemOptions, adjustment, estimateFullCombos.longValueExact(), job.specialFilter);
             }
             case PhasedFull -> {
                 job.println("SOLVE phased full");
@@ -88,16 +85,16 @@ public class Solver {
                 output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, false, false, null, null);
             }
             case PhasedTop -> {
-                job.println("SOLVE phased top only");
                 assert phased != null;
                 int topCombos = Math.toIntExact(TOP_HIT_COMBO_FILTER * runSizeMultiply);
+                job.printf("SOLVE phased top only %d\n", topCombos);
                 output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, false, true, null, topCombos);
             }
             case PhasedIndexedTop -> {
-                job.println("SOLVE phased top only");
                 assert phased != null;
                 int targetCombos = Math.toIntExact(PHASED_COMBOS_GENERATE * runSizeMultiply);
                 int topCombos = Math.toIntExact(TOP_HIT_COMBO_FILTER * runSizeMultiply);
+                job.printf("SOLVE phased top only %d -> %d\n", targetCombos, topCombos);
                 output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, true, true, targetCombos, topCombos);
             }
         }
