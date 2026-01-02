@@ -5,15 +5,16 @@ import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class SolverCapPhased {
-    public static final int TOP_HIT_COMBO_FILTER = 400;
     protected final ModelCombined model;
     protected final StatRequirements requirements;
     protected final StatBlock adjustment;
@@ -21,16 +22,14 @@ public class SolverCapPhased {
     protected SolvableEquipOptionsMap fullItems;
     protected List<SkinnyItem[]> skinnyOptions;
     protected BigInteger estimate;
-    protected final Long topCombosMultiply;
 
-    public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder, Long topCombosMultiply) {
+    public SolverCapPhased(ModelCombined model, StatBlock adjustment, PrintRecorder printRecorder) {
         if (!supportedModel(model))
             throw new IllegalArgumentException("can't use this model without skinny support");
         this.model = model;
         this.requirements = model.statRequirements();
         this.adjustment = adjustment;
         this.printRecorder = printRecorder;
-        this.topCombosMultiply = topCombosMultiply;
     }
 
     public static boolean supportedModel(ModelCombined model) {
@@ -44,38 +43,47 @@ public class SolverCapPhased {
         return estimate;
     }
 
-    public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter) {
-        Stream<SolvableItemSet> partialSets = runSolverPartial(parallel);
-        Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
-        if (specialFilter != null)
-            finalSets = finalSets.filter(specialFilter);
-        return BigStreamUtil.findBest(model, finalSets);
-    }
+    public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter, boolean indexed, boolean topOnly, Integer generateComboCount, Integer topCombosFilterCount) {
+        Stream<SkinnyItemSet> skinnyCombos = makeSkinnyCombos(parallel, indexed, generateComboCount);
 
-    private Stream<SolvableItemSet> runSolverPartial(boolean parallel) {
-        Stream<SkinnyItemSet> initialSets = generateSkinnyComboStream(skinnyOptions, parallel);
-
-        Stream<SkinnyItemSet> filteredSets = requirements.filterSetsSkinny(initialSets);
-
-        if (topCombosMultiply != null) {
-            int actualTop = (int) (topCombosMultiply * TOP_HIT_COMBO_FILTER);
-            printRecorder.printf("SKINNY COMBOS BEST %,d\n", actualTop);
-            ToLongFunction<SkinnyItemSet> ratingFunc = requirements.skinnyRatingMinimiseFunc();
-
-//            filteredSets = filteredSets.filter(new BottomNFilter<>(actualTop, ratingFunc));
-
-            // try a Top Collector (with good merging), re-stream combo
-            filteredSets = filteredSets.collect(new BottomCollectorN<>(actualTop, ratingFunc))
-                    .parallelStream();
-
-            // TODO minimise hit only?
-
-            // TODO multiple sets with equal combohit may be lost
+        if (topOnly) {
+            skinnyCombos = filterBestCapsOnly(skinnyCombos, topCombosFilterCount);
         } else {
             printRecorder.println("SKINNY COMBOS ALL");
         }
 
-        return filteredSets.map(this::makeFromSkinny);
+        Stream<SolvableItemSet> partialSets = skinnyCombos.map(this::makeFromSkinny);
+        Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
+        if (specialFilter != null)
+            finalSets = finalSets.filter(specialFilter);
+        if (parallel)
+            finalSets = finalSets.parallel();
+        return BigStreamUtil.findBest(model, finalSets);
+    }
+
+    private Stream<SkinnyItemSet> makeSkinnyCombos(boolean parallel, boolean indexed, Integer generateComboCount) {
+        Stream<SkinnyItemSet> initialSets;
+        if (indexed) {
+            BigInteger targetCombos = BigInteger.valueOf(generateComboCount);
+            initialSets = generateSkinnyComboStreamIndexed(parallel, targetCombos);
+        } else {
+            initialSets = generateSkinnyComboStreamFull(parallel);
+        }
+
+        return requirements.filterSetsSkinny(initialSets);
+    }
+
+    private @NotNull Stream<SkinnyItemSet> filterBestCapsOnly(Stream<SkinnyItemSet> filteredSets, int topCombosFilterCount) {
+        printRecorder.printf("SKINNY COMBOS BEST %,d\n", topCombosFilterCount);
+        ToLongFunction<SkinnyItemSet> ratingFunc = requirements.skinnyRatingMinimiseFunc();
+
+        // try a Top Collector (with good merging), re-stream combo
+        filteredSets = filteredSets.collect(new BottomCollectorN<>(topCombosFilterCount, ratingFunc))
+                .parallelStream();
+
+        // TODO minimise hit only?
+        // TODO multiple sets with equal combohit may be lost
+        return filteredSets;
     }
 
     private SolvableItemSet makeFromSkinny(SkinnyItemSet skinnySet) {
@@ -89,7 +97,6 @@ public class SolverCapPhased {
             BestHolder<SolvableItem> bestSlotItem = new BestHolder<>();
             for (SolvableItem item : fullSlotItems) {
                 if (requirements.skinnyMatch(skinny, item)) {
-                    // TODO but this ignores set bonuses etc?
                     long rating = model.calcRating(item);
                     bestSlotItem.add(item, rating);
                 }
@@ -118,15 +125,12 @@ public class SolverCapPhased {
         return optionsList;
     }
 
-    protected Stream<SkinnyItemSet> generateSkinnyComboStream(List<SkinnyItem[]> optionsList, boolean parallel) {
+    protected Stream<SkinnyItemSet> generateSkinnyComboStreamFull(boolean parallel) {
         Stream<SkinnyItemSet> stream = null;
 
-//        optionsList.sort(Comparator.comparingInt(array -> array.length));
         // TODO sort by biggest cap values so filter out faster
 
-        // TODO move to indexed, away from CurryQueue
-
-        for (SkinnyItem[] slotOptions : optionsList) {
+        for (SkinnyItem[] slotOptions : skinnyOptions) {
             if (stream == null) {
                 stream = newCombinationStream(slotOptions, parallel);
             } else {
@@ -136,6 +140,18 @@ public class SolverCapPhased {
         }
 
         return stream;
+    }
+
+    private Stream<SkinnyItemSet> generateSkinnyComboStreamIndexed(boolean parallel, BigInteger targetCombos) {
+        BigInteger skip = BigInteger.ONE;
+        if (estimate.compareTo(targetCombos) > 0) {
+            skip = Primes.roundToPrime(estimate.divide(targetCombos));
+        }
+        printRecorder.println("generateSkinnyComboStream skip=" + skip + " trying " + estimate.divide(skip));
+        Stream<BigInteger> numberStream = generateDumbStream(estimate, skip);
+        if (parallel)
+            numberStream = numberStream.parallel();
+        return numberStream.map(this::makeSkinnyFromIndex);
     }
 
     private Stream<SkinnyItemSet> addSlotToCombination(Stream<SkinnyItemSet> stream, SkinnyItem[] slotOptions) {
@@ -153,5 +169,32 @@ public class SolverCapPhased {
             initialSets[i] = SkinnyItemSet.single(item);
         }
         return parallel ? ArrayUtil.arrayStream(initialSets) : Arrays.stream(initialSets);
+    }
+
+    private static Stream<BigInteger> generateDumbStream(BigInteger max, BigInteger skip) {
+        long start = ThreadLocalRandom.current().nextLong(skip.longValueExact());
+        return Stream.iterate(BigInteger.valueOf(start), x -> x.compareTo(max) < 0, x -> x.add(skip));
+    }
+
+    private SkinnyItemSet makeSkinnyFromIndex(BigInteger mainIndex) {
+        SkinnyItemSet itemSet = null;
+
+        for (SkinnyItem[] list : skinnyOptions) {
+            int size = list.length;
+
+            BigInteger[] divRem = mainIndex.divideAndRemainder(BigInteger.valueOf(size));
+
+            int thisIndex = divRem[1].intValueExact();
+            mainIndex = divRem[0];
+
+            SkinnyItem choice = list[thisIndex];
+            if (itemSet == null) {
+                itemSet = SkinnyItemSet.single(choice);
+            } else {
+                itemSet = itemSet.withAddedItem(choice);
+            }
+        }
+
+        return itemSet;
     }
 }

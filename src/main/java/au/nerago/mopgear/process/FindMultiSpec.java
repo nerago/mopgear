@@ -24,10 +24,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static au.nerago.mopgear.domain.StatType.*;
+import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
-    private static final long individualRunSizeMultiply = 1L;
+    private final long individualRunSizeMultiply;
+    private final boolean phasedAcceptable;
     private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
@@ -35,6 +37,11 @@ public class FindMultiSpec {
     private final List<SpecDetails> specs = new ArrayList<>();
     private final Set<Integer> suppressSlotCheck = new HashSet<>();
     private Predicate<ProposedResults> multiSetFilter;
+
+    public FindMultiSpec(long individualRunSizeMultiply, boolean phasedAcceptable) {
+        this.individualRunSizeMultiply = individualRunSizeMultiply;
+        this.phasedAcceptable = phasedAcceptable;
+    }
 
     public void addFixedForge(int id, ReforgeRecipe reforge) {
         fixedForge.put(id, reforge);
@@ -67,7 +74,7 @@ public class FindMultiSpec {
         OutputText.println();
 
         OutputText.println("PREPARING BASELINE SPEC RUNS");
-        specs.stream().parallel().forEach(this::optimalWithoutCommon);
+        specs.stream().parallel().forEach(this::baselineOptimal);
         OutputText.println();
 
         specs.forEach(s -> s.prepareRatingMultiplier(specs));
@@ -111,6 +118,8 @@ public class FindMultiSpec {
                 .collect(new TopCollectorReporting<>(
                         s -> multiRating(s.resultJobs, specs),
                         s -> reportBetter(s.resultJobs, specs)));
+
+        OutputText.println("PREPARING RESULTS");
         outputResultFinal(best, specs);
 
         // TODO report on extras that are always unused in all candidate sets
@@ -211,13 +220,12 @@ public class FindMultiSpec {
         return commonOptions;
     }
 
-    private void optimalWithoutCommon(SpecDetails spec) {
-        JobInput job = new JobInput();
+    private void baselineOptimal(SpecDetails spec) {
+        JobInput job = new JobInput(Medium, individualRunSizeMultiply, phasedAcceptable);
         job.model = spec.model;
         job.setItemOptions(spec.itemOptions);
-        job.runSizeMultiply = individualRunSizeMultiply * 64;
         job.hackAllow = hackAllow;
-        job.forcePhased = true;
+//        job.startTime = Instant.now();
         JobOutput output = Solver.runJob(job);
 
         FullItemSet set = output.getFinalResultSet().orElseThrow();
@@ -265,7 +273,7 @@ public class FindMultiSpec {
     private ProposedResults subSolveEach(Map<ItemRef, FullItemData> commonChoices, List<SpecDetails> specList) {
         List<JobOutput> results = new ArrayList<>();
         for (SpecDetails spec : specList) {
-            JobOutput job = subSolvePart(spec.itemOptions, spec.model, commonChoices, 1, false);
+            JobOutput job = subSolvePart(spec.itemOptions, spec.model, commonChoices, false);
             if (job.resultSet.isEmpty()) {
                 return null;
             }
@@ -274,16 +282,15 @@ public class FindMultiSpec {
         return new ProposedResults(results, commonChoices);
     }
 
-    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, Map<ItemRef, FullItemData> chosenMap, int finalMultiply, boolean isFinal) {
+    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, Map<ItemRef, FullItemData> chosenMap, boolean isFinal) {
         EquipOptionsMap submitMap = fullItemMap.shallowClone();
         buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
 
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(isFinal ? Final : SubSolveItem, individualRunSizeMultiply, phasedAcceptable);
+//        job.printRecorder.outputImmediate = true;
         job.model = model;
         job.setItemOptions(submitMap);
-        job.runSizeMultiply = individualRunSizeMultiply * finalMultiply;
         job.hackAllow = hackAllow;
-        job.forcePhased = isFinal;
         job.singleThread = true;
         return Solver.runJob(job);
     }
@@ -434,7 +441,7 @@ public class FindMultiSpec {
                 AsWowSimJson.writeFullToOut(draftSet.items(), spec.model);
 
 //                ItemLoadUtil.duplicateAlternateEnchants(spec.itemOptions, spec.model);
-                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, 8, true);
+                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, true);
 
                 FullItemSet revisedSet = null;
                 double revisedSpecRating = 0;
@@ -457,7 +464,6 @@ public class FindMultiSpec {
                 double specRating = Math.max(draftSpecRating, revisedSpecRating);
                 OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
             }
-
 
             // TODO report on changed enchant
 

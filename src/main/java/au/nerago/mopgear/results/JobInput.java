@@ -7,7 +7,11 @@ import java.time.Instant;
 import java.util.function.Predicate;
 
 public class JobInput {
-    public final PrintRecorder printRecorder = new PrintRecorder();
+    public JobInput(RunSizeCategory runSizeCategory, long runSizeAdditionalMultiply, boolean phasedAcceptable) {
+        this.runSizeCategory = runSizeCategory;
+        this.runSizeAdditionalMultiply = runSizeAdditionalMultiply;
+        this.phasedAcceptable = phasedAcceptable;
+    }
 
     public ModelCombined model;
     public EquipOptionsMap fullItemOptions;
@@ -15,24 +19,18 @@ public class JobInput {
     public Instant startTime;
     public StatBlock adjustment;
 
-    public long runSizeMultiply = 1;
+    public long runSizeAdditionalMultiply;
+    public RunSizeCategory runSizeCategory;
     public boolean hackAllow;
-    public boolean forceRandom;
-    public boolean forceSkipIndex;
-    public boolean forcePhased;
-    public long forcedRunSized;
+    public SolveMethod forceMethod;
+    public boolean phasedAcceptable;
     public boolean singleThread;
 
     public FullItemData extraItem;
     public int cost;
     public Predicate<SolvableItemSet> specialFilter;
 
-    public void config(ModelCombined model, EquipOptionsMap itemOptions, Instant startTime, StatBlock adjustment) {
-        this.model = model;
-        setItemOptions(itemOptions);
-        this.startTime = startTime;
-        this.adjustment = adjustment;
-    }
+    public final PrintRecorder printRecorder = new PrintRecorder();
 
     public void setItemOptions(EquipOptionsMap itemOptions) {
         this.fullItemOptions = itemOptions;
@@ -45,5 +43,13 @@ public class JobInput {
 
     public void printf(String format, Object... args) {
         printRecorder.printf(format, args);
+    }
+
+    public enum SolveMethod {
+        PhasedTop, PhasedFull, Full, SkipIndex, PhasedIndexedTop, Random
+    }
+
+    public enum RunSizeCategory {
+        Final, Medium, SubSolveItem
     }
 }

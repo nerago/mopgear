@@ -19,13 +19,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static au.nerago.mopgear.results.JobInput.RunSizeCategory.Final;
+import static au.nerago.mopgear.results.JobInput.RunSizeCategory.SubSolveItem;
+
 @SuppressWarnings({"SameParameterValue", "unused"})
 public class FindUpgrades {
     private final ModelCombined model;
     private final boolean hackAllow;
 
-    private static final long runSizeMultiply = 2;
-//    private static final long runSizeMultiply = 1;
+    private static final long runSizeMultiply = 1;
     private static final boolean costsTraditional = false;
 
     public FindUpgrades(ModelCombined model, boolean hackAllow) {
@@ -112,10 +114,9 @@ public class FindUpgrades {
     }
 
     private double findBase(EquipOptionsMap baseItems, StatBlock adjustment) {
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(Final, runSizeMultiply, false);
         job.model = model;
         job.setItemOptions(baseItems);
-        job.runSizeMultiply = runSizeMultiply;
         job.adjustment = adjustment;
         job.hackAllow = hackAllow;
         JobOutput output = Solver.runJob(job);
@@ -233,7 +234,7 @@ public class FindUpgrades {
     }
 
     private JobInput buildUpgradeJob(ModelCombined model, EquipOptionsMap items, FullItemData extraItem, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(SubSolveItem, runSizeMultiply, false);
         job.singleThread = true;
 
         extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true, false);
@@ -251,8 +252,10 @@ public class FindUpgrades {
             job.hackAllow = true;
         }
 
-        job.config(model, items, null, adjustment);
-        job.runSizeMultiply = runSizeMultiply;
+        job.model = model;
+        job.setItemOptions(items);
+        job.startTime = null;
+        job.adjustment = adjustment;
         job.extraItem = extraItem;
         job.cost = cost;
         return job;

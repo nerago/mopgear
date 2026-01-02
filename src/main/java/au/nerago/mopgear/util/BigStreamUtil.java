@@ -36,17 +36,17 @@ public class BigStreamUtil {
     }
 
     private static <T> Stream<T> coreCount(long reportFrequency, double percentMultiply, Instant startTime, Stream<T> inputStream) {
+        if (startTime == null)
+            return inputStream;
+
         AtomicLong count = new AtomicLong();
         return inputStream.peek(set -> {
             long curr = count.incrementAndGet();
             if (curr % reportFrequency == 0) {
                 double percent = ((double) curr) * percentMultiply;
+                Duration estimateRemain = estimateRemain(startTime, percent);
                 synchronized (System.out) {
-                    System.out.print(curr);
-                    System.out.print(" ");
-                    System.out.printf("%.1f%%", percent);
-                    Duration estimateRemain = estimateRemain(startTime, percent);
-                    System.out.print(" ");
+                    System.out.printf("%d %.1f%% ", curr, percent);
                     printDuration(estimateRemain);
                     System.out.println();
                 }

@@ -18,20 +18,14 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
-import java.util.function.DoublePredicate;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
 
 import static au.nerago.mopgear.Tasks.*;
 import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.io.SourcesOfItems.*;
-import static au.nerago.mopgear.permute.Solver.chooseEngineAndRun;
 
 @SuppressWarnings({"SameParameterValue", "unused", "ConstantValue"})
 public class Main {
-    public static final long BILLION = 1000 * 1000 * 1000;
-
-    public static void main(String[] arg) throws IOException {
+    static void main(String[] arg) throws IOException {
         try {
             new Main().run();
         } catch (Throwable ex) {
@@ -69,7 +63,6 @@ public class Main {
 
 //        everyoneBis();
 
-//
 //        determineRatingMultipliers();
         paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
@@ -405,104 +398,106 @@ public class Main {
     private void reforgeProcessRetChallenge(ModelCombined model, Instant startTime) {
         // CHALLENGE MODE SET
 
-        List<EquippedItem> itemIds = InputGearParser.readInput(DataLocation.gearRetFile);
-        List<FullItemData> inputSetItems = ItemLoadUtil.loadItems(itemIds, model.enchants(), true);
-
-        OutputText.println("FINDING EXPECTED REFORGE IN RAID RET");
-        EquipOptionsMap raidMap = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, commonFixedItems());
-        FullItemSet raidSet = chooseEngineAndRun(model, raidMap, null, null).orElseThrow();
-        OutputText.println("FOUND REFORGE RAID RET");
-        outputResultSimple(Optional.of(raidSet), model, false);
-
-        Map<Integer, List<ReforgeRecipe>> presetReforge = commonFixedItems();
-        raidSet.items().forEachValue(item -> presetReforge.put(item.itemId(), Collections.singletonList(item.reforge)));
-        presetReforge.put(89954, List.of(new ReforgeRecipe(Crit, Haste)));
-
-        EquipOptionsMap map = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
-
-        // compared to raid dps
-        int[] extraItems = new int[]{
-                81129, 89665, 90910, 81268, 81138, 77539, 85991,
-                81098, 89503, 82975, 81694, 86799, 82856, 86682,
-                86794, 89954, 81130, 87060, 82812, 86145, 86680,
-                81284, 86852, 86742, 88862, 81113, 90862, 81251,
-                89526, 82822, 82814
-        };
-
-//        Function<FullItemData, FullItemData> customiseItem = extraItem -> {
-////            if (extraItem.id == 82812) { // Pyretic Legguards
-////                return extraItem.changeFixed(new StatBlock(285, 0, 0, 165, 160, 160 + 60, 0, 0, 0, 0));
-////            } else if (extraItem.id == 81284) { // Anchoring Sabatons
-////                return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0, 0));
-////            } else if (extraItem.id == 81113) { // Spike-Soled Stompers
-////                return extraItem.changeFixed(new StatBlock(60, 0, 0, 0, 160, 175 + 160, 0, 0, 0, 0));
-//            if (extraItem.itemId() == 87060) { // Star-Stealer Waistguard
-//                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 0, 160, 320 * 2 + 160, 0, 120, 0, 0));
-////            } else if (extraItem.id == 86794) { // starcrusher gauntlets
-////                return extraItem.changeFixed(new StatBlock(170, 0, 0, 0, 160, 60 + 320 + 160, 0, 0, 0, 0));
-////            } else if (extraItem.id == 86145) { // jang-xi devastating legs
-////                return extraItem.changeFixed(new StatBlock(120, 430, 0, 0, 160, 160 * 2, 160, 0, 0, 0));
-//            } else if (extraItem.itemId() == 77539) { // engineer helm
-//                return extraItem.changeEnchant(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
-//            } else if (extraItem.itemId() == 89503) { // Greenstone Drape
-//                return extraItem.changeStatsBase(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
-//                        .changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
-//            } else if (extraItem.slot() == SlotItem.Back) {
-//                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
-//            } else {
-//                OutputText.println("DEFAULT ENCHANT " + extraItem);
-//                return ItemLoadUtil.defaultEnchants(extraItem, model, false, null);
-//            }
+//        List<EquippedItem> itemIds = InputGearParser.readInput(DataLocation.gearRetFile);
+//        List<FullItemData> inputSetItems = ItemLoadUtil.loadItems(itemIds, model.enchants(), true);
+//
+//        OutputText.println("FINDING EXPECTED REFORGE IN RAID RET");
+//        EquipOptionsMap raidMap = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, commonFixedItems());
+//        FullItemSet raidSet = chooseEngineAndRun(model, raidMap, null, null).orElseThrow();
+//        OutputText.println("FOUND REFORGE RAID RET");
+//        outputResultSimple(Optional.of(raidSet), model, false);
+//
+//        Map<Integer, List<ReforgeRecipe>> presetReforge = commonFixedItems();
+//        raidSet.items().forEachValue(item -> presetReforge.put(item.itemId(), Collections.singletonList(item.reforge)));
+//        presetReforge.put(89954, List.of(new ReforgeRecipe(Crit, Haste)));
+//
+//        EquipOptionsMap map = ItemMapUtil.limitedItemsReforgedToMap(model.reforgeRules(), inputSetItems, presetReforge);
+//
+//        // compared to raid dps
+//        int[] extraItems = new int[]{
+//                81129, 89665, 90910, 81268, 81138, 77539, 85991,
+//                81098, 89503, 82975, 81694, 86799, 82856, 86682,
+//                86794, 89954, 81130, 87060, 82812, 86145, 86680,
+//                81284, 86852, 86742, 88862, 81113, 90862, 81251,
+//                89526, 82822, 82814
 //        };
-
-        for (int extraId : extraItems) {
-            ReforgeRecipe reforge = null;
-            if (presetReforge.containsKey(extraId))
-                reforge = presetReforge.get(extraId).getFirst();
-            FullItemData extraItem = addExtra(map, model, extraId, 0, EnchantMode.BothDefaultAndAlternate, reforge, false, false);
-            if (extraItem != null)
-                OutputText.println("EXTRA " + extraItem);
-        }
-
-        EquipOptionsMap scaledMap = ItemLevel.scaleForChallengeMode(map);
-
-        JobInput job = new JobInput();
-        job.printRecorder.outputImmediate = true;
-        job.config(model, scaledMap, startTime, null);
-        job.runSizeMultiply = 16;
-        job.forceRandom = true;
-        job.forcedRunSized = BILLION;
-        JobOutput output = Solver.runJob(job);
-        FullItemSet bestScaledSet = output.getFinalResultSet().orElseThrow();
-
-        OutputText.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
-        outputResultSimple(Optional.of(bestScaledSet), model, true);
-
-        for (SlotEquip slot : SlotEquip.values()) {
-            FullItemData scaledChoice = bestScaledSet.items().get(slot);
-            if (scaledChoice != null) {
-                FullItemData[] options = map.get(slot);
-                boolean inRaidDPSSet = inputSetItems.stream().anyMatch(x -> x.itemId() == scaledChoice.itemId());
-
-                if (inRaidDPSSet) {
-                    // need exact item + forge but prescale
-                    // note were using id match only, scaled stuff could confused normal "exact" match
-                    // avoid engineering heads mixup
-                    FullItemData match = ArrayUtil.findOne(options, x -> x.itemId() == scaledChoice.itemId() && Objects.equals(x.reforge, scaledChoice.reforge));
-                    options = new FullItemData[]{match};
-                } else {
-                    options = ArrayUtil.allMatch(options, x -> x.itemId() == scaledChoice.itemId());
-                }
-
-                map.put(slot, options);
-            }
-        }
-
-        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsHitExpertise.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus(), SpecType.PaladinRet, model.defaultGemAlternateChoice());
-        Optional<FullItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null);
-
-        OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
-        outputResultSimple(bestSetFinal, model, true);
+//
+////        Function<FullItemData, FullItemData> customiseItem = extraItem -> {
+//////            if (extraItem.id == 82812) { // Pyretic Legguards
+//////                return extraItem.changeFixed(new StatBlock(285, 0, 0, 165, 160, 160 + 60, 0, 0, 0, 0));
+//////            } else if (extraItem.id == 81284) { // Anchoring Sabatons
+//////                return extraItem.changeFixed(new StatBlock(60 + 60, 0, 140, 0, 0, 120, 0, 0, 0, 0));
+//////            } else if (extraItem.id == 81113) { // Spike-Soled Stompers
+//////                return extraItem.changeFixed(new StatBlock(60, 0, 0, 0, 160, 175 + 160, 0, 0, 0, 0));
+////            if (extraItem.itemId() == 87060) { // Star-Stealer Waistguard
+////                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 0, 160, 320 * 2 + 160, 0, 120, 0, 0));
+//////            } else if (extraItem.id == 86794) { // starcrusher gauntlets
+//////                return extraItem.changeFixed(new StatBlock(170, 0, 0, 0, 160, 60 + 320 + 160, 0, 0, 0, 0));
+//////            } else if (extraItem.id == 86145) { // jang-xi devastating legs
+//////                return extraItem.changeFixed(new StatBlock(120, 430, 0, 0, 160, 160 * 2, 160, 0, 0, 0));
+////            } else if (extraItem.itemId() == 77539) { // engineer helm
+////                return extraItem.changeEnchant(new StatBlock(216, 0, 0, 0, 600, 600, 0, 0, 0, 0));
+////            } else if (extraItem.itemId() == 89503) { // Greenstone Drape
+////                return extraItem.changeStatsBase(new StatBlock(501, 751, 0, 334, 334, 0, 0, 0, 0, 0))
+////                        .changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
+////            } else if (extraItem.slot() == SlotItem.Back) {
+////                return extraItem.changeEnchant(new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
+////            } else {
+////                OutputText.println("DEFAULT ENCHANT " + extraItem);
+////                return ItemLoadUtil.defaultEnchants(extraItem, model, false, null);
+////            }
+////        };
+//
+//        for (int extraId : extraItems) {
+//            ReforgeRecipe reforge = null;
+//            if (presetReforge.containsKey(extraId))
+//                reforge = presetReforge.get(extraId).getFirst();
+//            FullItemData extraItem = addExtra(map, model, extraId, 0, EnchantMode.BothDefaultAndAlternate, reforge, false, false);
+//            if (extraItem != null)
+//                OutputText.println("EXTRA " + extraItem);
+//        }
+//
+//        EquipOptionsMap scaledMap = ItemLevel.scaleForChallengeMode(map);
+//
+//        JobInput job = new JobInput();
+//        job.printRecorder.outputImmediate = true;
+//        job.model = model;
+//        job.setItemOptions(scaledMap);
+//        job.startTime = startTime;
+//        job.runSizeMultiply = 16;
+//        job.forceRandom = true;
+//        job.forcedRunSized = BILLION;
+//        JobOutput output = Solver.runJob(job);
+//        FullItemSet bestScaledSet = output.getFinalResultSet().orElseThrow();
+//
+//        OutputText.println("SCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALEDSCALED");
+//        outputResultSimple(Optional.of(bestScaledSet), model, true);
+//
+//        for (SlotEquip slot : SlotEquip.values()) {
+//            FullItemData scaledChoice = bestScaledSet.items().get(slot);
+//            if (scaledChoice != null) {
+//                FullItemData[] options = map.get(slot);
+//                boolean inRaidDPSSet = inputSetItems.stream().anyMatch(x -> x.itemId() == scaledChoice.itemId());
+//
+//                if (inRaidDPSSet) {
+//                    // need exact item + forge but prescale
+//                    // note were using id match only, scaled stuff could confused normal "exact" match
+//                    // avoid engineering heads mixup
+//                    FullItemData match = ArrayUtil.findOne(options, x -> x.itemId() == scaledChoice.itemId() && Objects.equals(x.reforge, scaledChoice.reforge));
+//                    options = new FullItemData[]{match};
+//                } else {
+//                    options = ArrayUtil.allMatch(options, x -> x.itemId() == scaledChoice.itemId());
+//                }
+//
+//                map.put(slot, options);
+//            }
+//        }
+//
+//        ModelCombined finalModel = new ModelCombined(model.statRatings(), StatRequirementsHitExpertise.retWideCapRange(), model.reforgeRules(), model.enchants(), model.setBonus(), SpecType.PaladinRet, model.defaultGemAlternateChoice());
+//        Optional<FullItemSet> bestSetFinal = chooseEngineAndRun(finalModel, map, startTime, null);
+//
+//        OutputText.println("FINALFINALFINALFINALFINALFINALFINALFINALFINALFINALFINAL");
+//        outputResultSimple(bestSetFinal, model, true);
     }
 
     private void multiSpecSpecifiedRating() {

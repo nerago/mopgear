@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import static au.nerago.mopgear.domain.StatType.Crit;
 import static au.nerago.mopgear.domain.StatType.Haste;
 import static au.nerago.mopgear.io.SourcesOfItems.*;
+import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "SameParameterValue", "unused"})
 public class Tasks {
@@ -59,19 +60,10 @@ public class Tasks {
                     }
                 });
 
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(Final, 1, false);
         job.model = model;
         job.setItemOptions(optionsMap);
         job.startTime = startTime;
-
-        job.forceSkipIndex = true;
-        job.forcedRunSized = BILLION/6;
-
-//        job.forcePhased = true;
-//        job.runSizeMultiply = 10;
-
-//        job.forcedRunSized = BILLION;
-//        job.forcedRunSized = BILLION*4;
         job.printRecorder.outputImmediate = true;
         if (requireFullSetBonus) {
             job.specialFilter = set -> model.setBonus().countInAnySet(set.items()) >= 4;
@@ -138,7 +130,14 @@ public class Tasks {
                 optionItems.add(item);
             }
 
-            FullItemSet set = Solver.chooseEngineAndRun(model, submitMap, null, null).orElseThrow();
+            JobInput job = new JobInput(SubSolveItem, 1, false);
+            job.model = model;
+            job.setItemOptions(submitMap);
+            job.startTime = null;
+            job.adjustment = null;
+            JobOutput output = Solver.runJob(job);
+            job.printRecorder.outputNow();
+            FullItemSet set = output.getFinalResultSet().orElseThrow();
             set.outputSet(model);
             long rating = model.calcRating(set);
             OutputText.println("RATING " + rating);
@@ -151,11 +150,12 @@ public class Tasks {
     }
 
     public static void reforgeProcess(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime) {
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(Final, 1, true);
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
-        job.runSizeMultiply = 8;
-        job.config(model, itemOptions, startTime, null);
+        job.model = model;
+        job.setItemOptions(itemOptions);
+        job.startTime = startTime;
         JobOutput output = Solver.runJob(job);
         Optional<FullItemSet> resultSet = output.getFinalResultSet();
 
@@ -178,10 +178,12 @@ public class Tasks {
         if (alternateEnchantsAllSlots)
             ItemLoadUtil.duplicateAlternateEnchants(runItems, model);
 
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(Final, 1, false);
         job.printRecorder.outputImmediate = true;
-        job.config(model, runItems, startTime, adjustment);
-        job.runSizeMultiply = 8;
+        job.model = model;
+        job.setItemOptions(runItems);
+        job.startTime = startTime;
+        job.adjustment = adjustment;
         JobOutput output = Solver.runJob(job);
         Optional<FullItemSet> resultSet = output.getFinalResultSet();
 
@@ -300,9 +302,11 @@ public class Tasks {
         if (alternateEnchants)
             ItemLoadUtil.duplicateAlternateEnchants(runItems, model);
 
-        JobInput job = new JobInput();
-        job.config(model, runItems, startTime, adjustment);
-        job.runSizeMultiply = 16;
+        JobInput job = new JobInput(Final, 1, false);
+        job.model = model;
+        job.setItemOptions(runItems);
+        job.startTime = startTime;
+        job.adjustment = adjustment;
         job.printRecorder.outputImmediate = true;
         JobOutput output = Solver.runJob(job);
         Optional<FullItemSet> resultSet = output.getFinalResultSet();
@@ -340,7 +344,7 @@ public class Tasks {
 
 //        items.put(SlotEquip.Leg, Arrays.stream(items.get(SlotEquip.Leg)).filter(x -> x.itemId() == 87071).toList());
 
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(Final, 1, false);
         job.model = model;
         job.setItemOptions(items);
         job.startTime = startTime;
@@ -349,8 +353,6 @@ public class Tasks {
 //        job.runSizeMultiply = 12;
 //        job.runSizeMultiply = 42;
 
-        job.forcePhased = true;
-        job.runSizeMultiply = 512;
         job.specialFilter = specialFilter;
 
         JobOutput output = Solver.runJob(job);
@@ -377,12 +379,11 @@ public class Tasks {
             }
         }
 
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(Final, 1, false);
         job.model = model;
         job.setItemOptions(items);
         job.startTime = startTime;
         job.printRecorder.outputImmediate = true;
-        job.runSizeMultiply = 20;
         JobOutput output = Solver.runJob(job);
         job.printRecorder.outputNow();
         FullItemSet best = output.getFinalResultSet().orElseThrow();
@@ -459,7 +460,8 @@ public class Tasks {
     }
 
     public static void paladinMultiSpecSolve() {
-        FindMultiSpec multi = new FindMultiSpec();
+        FindMultiSpec multi = new FindMultiSpec(1, false);
+
         multi.addFixedForge(95757, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
 //        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 //        multi.addFixedForge(94526, ReforgeRecipe.empty()); // zandalar trinket
@@ -660,7 +662,7 @@ public class Tasks {
     }
 
     public static void druidMultiSpecSolve() {
-        FindMultiSpec multi = new FindMultiSpec();
+        FindMultiSpec multi = new FindMultiSpec(1, true);
 
         multi.addSpec(
                 "BOOM",
@@ -697,39 +699,6 @@ public class Tasks {
 //        multi.overrideEnchant(86893, StatBlock.empty); // no sha gem
 
         multi.solve(3000);
-    }
-
-    public static void compareBestReforgesWithCommon(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> commonOne, Map<Integer, List<ReforgeRecipe>> commonTwo) {
-        EquipOptionsMap optionsOne = ItemLoadUtil.readAndLoad(file, model, commonOne, true);
-        EquipOptionsMap optionsTwo = ItemLoadUtil.readAndLoad(file, model, commonTwo, true);
-
-        int runSizeMultiply = 2;
-
-        JobInput jobOne = new JobInput();
-        jobOne.printRecorder.outputImmediate = true;
-        jobOne.runSizeMultiply = runSizeMultiply;
-        jobOne.model = model;
-        jobOne.setItemOptions(optionsOne);
-        JobOutput outputOne = Solver.runJob(jobOne);
-        Optional<FullItemSet> resultOne = outputOne.getFinalResultSet();
-
-        OutputText.println("111111111111111111111111111111111111");
-        resultOne.orElseThrow().outputSetDetailed(model);
-        double ratingOne = model.calcRating(resultOne.orElseThrow());
-
-        JobInput jobTwo = new JobInput();
-        jobTwo.printRecorder.outputImmediate = true;
-        jobTwo.runSizeMultiply = runSizeMultiply;
-        jobTwo.model = model;
-        jobTwo.setItemOptions(optionsTwo);
-        JobOutput outputTwo = Solver.runJob(jobTwo);
-        Optional<FullItemSet> resultTwo = outputTwo.getFinalResultSet();
-
-        OutputText.println("22222222222222222222222222222222222222");
-        resultTwo.orElseThrow().outputSetDetailed(model);
-        double ratingTwo = model.calcRating(resultTwo.orElseThrow());
-
-        OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", ratingOne / ratingTwo * 100);
     }
 
     public static void determineRatingMultipliers() {
@@ -793,7 +762,7 @@ public class Tasks {
 
     private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req, SpecType spec) {
         ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, SetBonus.empty(), spec, null);
-        JobInput job = new JobInput();
+        JobInput job = new JobInput(Medium, 1, true);
         job.model = model;
         job.setItemOptions(items);
         JobOutput output = Solver.runJob(job);
