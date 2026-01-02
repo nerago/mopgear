@@ -71,11 +71,11 @@ public class Main {
 
 //
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);

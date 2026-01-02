@@ -89,6 +89,7 @@ public class SolverCapPhased {
             BestHolder<SolvableItem> bestSlotItem = new BestHolder<>();
             for (SolvableItem item : fullSlotItems) {
                 if (requirements.skinnyMatch(skinny, item)) {
+                    // TODO but this ignores set bonuses etc?
                     long rating = model.calcRating(item);
                     bestSlotItem.add(item, rating);
                 }

@@ -487,10 +487,10 @@ public class Tasks {
 //                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
                         89934, // soul bracer
-//                        87024, // null greathelm
+                        87024, // null greathelm
 //                        87145, // defiled earth
                         94726, // cloudbreaker belt
-//                        95652, // Puncture-Proof Greathelm head
+                        95652, // Puncture-Proof Greathelm head
                         95535, // normal lightning legs
 
                         85340, // ret tier14 legs
@@ -505,6 +505,8 @@ public class Tasks {
                         95142, // striker's battletags
                         95205, // terra-cotta neck
 //                        87036, // soulgrasp heroic
+
+                        94773, // centripetal shoulders normal
                 },
                 extraUpgrade,
                 preUpgrade
@@ -520,7 +522,6 @@ public class Tasks {
                 0.60,
                 new int[]{
                         86979, // heroic impaling treads
-////                        87062 // elegion heroic
 ////                        86957, // heroic bladed tempest
 ////                        85343, // normal ret chest
 //
@@ -539,7 +540,7 @@ public class Tasks {
                         95535, // normal lightning legs
 //
 ////                        87050, // steelskin heroic
-////                        95652, // Puncture-Proof Greathelm head
+                        95652, // Puncture-Proof Greathelm head
                         95687, // celestial beakbreaker cloak
 //
 ////                        95924, // prot tier15 shoulder celestial
@@ -550,9 +551,9 @@ public class Tasks {
                         85339, // ret tier14 shoulder
                         85343, // ret tier14 chest
                         87100, // ret tier14 hands
-//                        95914, // ret tier15 shoulder celestial
-//                        95910, // ret tier15 chest celestial
-//                        95910, // ret tier15 gloves celestial
+                        95914, // ret tier15 shoulder celestial
+                        95910, // ret tier15 chest celestial
+                        95910, // ret tier15 gloves celestial
 //
                         95142, // striker's battletags
                         95205, // terra-cotta neck
@@ -560,8 +561,7 @@ public class Tasks {
 //
                         96182, // ultimate prot of the emperor thunder
 //
-//                        // bags upgrades none
-
+                        94773, // centripetal shoulders normal
                 },
                 extraUpgrade,
                 preUpgrade
@@ -595,7 +595,7 @@ public class Tasks {
 ////
                         95535, // normal lightning legs
 ////
-//////                        95652, // Puncture-Proof Greathelm head
+                        95652, // Puncture-Proof Greathelm head
 //////                        95808, // celestial whipping legs
 //////                        95924, // prot tier shoulder celestial
 ////
@@ -610,8 +610,8 @@ public class Tasks {
                         85343, // ret tier14 chest
                         87100, // ret tier14 hands
 ////
-//                        95914, // ret tier15 shoulder celestial
-//                        95910, // ret tier15 chest celestial
+                        95914, // ret tier15 shoulder celestial
+                        95910, // ret tier15 chest celestial
 ////                        95910, // ret tier15 gloves celestial
 ////
 //                        95142, // striker's battletags
