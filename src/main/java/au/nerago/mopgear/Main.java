@@ -3,10 +3,7 @@ package au.nerago.mopgear;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.*;
 import au.nerago.mopgear.model.*;
-import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.FindUpgrades;
-import au.nerago.mopgear.results.JobInput;
-import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.ArrayUtil;
 
@@ -130,19 +127,21 @@ public class Main {
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //        findUpgradeSetup(items, strengthPlateCurrentItemsProt(model), model);
 //        findUpgrade(items, bagItemsArray(ignoredItems), model, true, null);
-        findUpgrade(items, ArrayUtil.concat(bagItemsArray(ignoredItems), SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile)), model, true, null);
+//        findUpgrade(items, ArrayUtil.concat(bagItemsArray(ignoredItems), SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile)), model, true, null, 2);
 
 //        findUpgrade(items, ArrayUtil.concat(new CostedItem[][]{strengthPlateMsvArray(), strengthPlateMsvHeroicArray(), strengthPlateHeartOfFear(), strengthPlateHeartOfFearHeroic(), strengthPlateTerrace(), strengthPlateTerraceHeroic()}), model, true, null, 2);
 
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
 
-//          reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
-//                new CostedItem(87071,0), // yang-xi
-//                new CostedItem(86681,0), // bad head
-//                new CostedItem(85343,0), // normal chest
-//                new CostedItem(87015,0) // clawfeet
-//                },
-//                2, true);
+        Difficulty difficulty = Difficulty.Celestial;
+        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+                pallyPhase3Valor(),
+                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+                strengthPlateThroneNormal(difficulty),
+                strengthDpsTrinketsThroneNormal(difficulty),
+        });
+        upgradeShit = minusRadenLoot(upgradeShit);
+        findUpgrade(items, upgradeShit, model, true, null, 2, 4);
     }
 
     private void reforgeProt(Instant startTime) {
@@ -247,7 +246,7 @@ public class Main {
 //        new FindUpgrades(model, true).runMaxedItems(items, strengthPlateValorCelestialTank(), null);
 //        new FindUpgrades(model, true).run(items, strengthPlateCurrentItemsProtAllUpgradable(), null, 2);
 //        new FindUpgrades(itemCache, model, true).run(items, strengthPlateCrafted());
-//        findUpgrade(items, ArrayUtil.concat(bagItemsArray(ignoredItems), SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile)), model, true, null);
+//        findUpgrade(items, ArrayUtil.concat(bagItemsArray(ignoredItems), SourcesOfItems.currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile)), model, true, null, 2);
 
 //        new FindUpgrades(itemCache, model, true).findUpgradeSetup(items, new Tuple.Tuple2[] { Tuple.create(84950,0)});
 //                reforgeProcessPlus(items, model, startTime, true,86751, true, true, null);
@@ -289,17 +288,17 @@ public class Main {
 //        findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
 //        findUpgrade(items, new CostedItem[]{new CostedItem(95142	,1250)}, model, true, null, 2);
 
-        Difficulty difficulty = Difficulty.Normal;
+        Difficulty difficulty = Difficulty.Celestial;
         CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-//                pallyPhase3Valor(),
+                pallyPhase3Valor(),
                 throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
                 throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
                 strengthPlateThroneNormal(difficulty),
-                tankTrinketsThroneNormal(difficulty),
-                strengthDpsTrinketsThroneNormal(difficulty),
+//                tankTrinketsThroneNormal(difficulty),
+//                strengthDpsTrinketsThroneNormal(difficulty),
         });
         upgradeShit = minusRadenLoot(upgradeShit);
-        findUpgrade(items, upgradeShit, model, true, null, 2);
+        findUpgrade(items, upgradeShit, model, true, null, 2, 8);
 
     }
 

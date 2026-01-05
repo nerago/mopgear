@@ -57,7 +57,7 @@ public class ServiceEntry {
                 } else {
                     throw new IllegalArgumentException("no upgrade items specified");
                 }
-                Tasks.findUpgrade(items, extraItems, model, false, null, params.upgradeLevel);
+                Tasks.findUpgrade(items, extraItems, model, false, null, params.upgradeLevel, 1);
             }
         }
     }

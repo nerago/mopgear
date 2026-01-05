@@ -35,12 +35,12 @@ import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 public class Tasks {
     public static final long BILLION = 1000 * 1000 * 1000;
 
-    public static void findUpgrade(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, int upgradeLevel) {
-        new FindUpgrades(model, allowHacks).run(baseItems, extraItems, adjustment, upgradeLevel);
+    public static void findUpgrade(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, int upgradeLevel, long multiply) {
+        new FindUpgrades(model, allowHacks).setRunSizeMultiply(multiply).run(baseItems, extraItems, adjustment, upgradeLevel);
     }
 
-    public static void findUpgrade(EquipOptionsMap baseItems, List<EquippedItem> extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
-        new FindUpgrades(model, allowHacks).run(baseItems, extraItems, adjustment);
+    public static void findUpgrade(EquipOptionsMap baseItems, List<EquippedItem> extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, long multiply) {
+        new FindUpgrades(model, allowHacks).setRunSizeMultiply(multiply).run(baseItems, extraItems, adjustment);
     }
 
     public static void findUpgradeMaxedItems(EquipOptionsMap baseItems, List<EquippedItem> extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment) {
@@ -460,7 +460,7 @@ public class Tasks {
     }
 
     public static void paladinMultiSpecSolve() {
-        FindMultiSpec multi = new FindMultiSpec(1, false);
+        FindMultiSpec multi = new FindMultiSpec(1);
 
         multi.addFixedForge(95757, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
 //        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
@@ -479,6 +479,7 @@ public class Tasks {
                 DataLocation.gearRetFile,
                 StandardModels.pallyRetModel(),
                 0.05,
+                false,
                 new int[]{
                         87026, // heroic peacock cloak
 //                        86880, // dread shadow ring
@@ -489,26 +490,27 @@ public class Tasks {
 //                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
                         89934, // soul bracer
-                        87024, // null greathelm
+//                        87024, // null greathelm
 //                        87145, // defiled earth
                         94726, // cloudbreaker belt
-                        95652, // Puncture-Proof Greathelm head
+//                        95652, // Puncture-Proof Greathelm head
                         95535, // normal lightning legs
 
-                        85340, // ret tier14 legs
+//                        85340, // ret tier14 legs
                         87101, // ret tier14 head
                         85339, // ret tier14 shoulder
                         85343, // ret tier14 chest
                         87100, // ret tier14 hands
                         95914, // ret tier15 shoulder celestial
                         95910, // ret tier15 chest celestial
-                        95910, // ret tier15 gloves celestial
+                        95911, // ret tier15 gloves celestial
 
                         95142, // striker's battletags
                         95205, // terra-cotta neck
 //                        87036, // soulgrasp heroic
 
                         94773, // centripetal shoulders normal
+                        95140, // shado assault band
                 },
                 extraUpgrade,
                 preUpgrade
@@ -522,56 +524,58 @@ public class Tasks {
                 DataLocation.gearProtDpsFile,
                 StandardModels.pallyProtDpsModel(),
                 0.60,
-                new int[]{
-                        86979, // heroic impaling treads
-////                        86957, // heroic bladed tempest
-////                        85343, // normal ret chest
-//
-////                        87015, // heroic clawfeet
-////                        86979, // heroic impaling treads
-////                        87071, // yang-xi heroic
-                        87145, // defiled earth
-                        89934, // soul bracer
-////                        85340, // normal ret legs
-////                        87101, // heroic ret head
-////                        86946, // ruby signet heroic
-                        94726, // cloudbreaker belt
-//
-                        87026, // heroic peacock cloak
-//                        86955, // heroic overwhelm assault belt
-                        95535, // normal lightning legs
-//
-////                        87050, // steelskin heroic
-                        95652, // Puncture-Proof Greathelm head
-                        95687, // celestial beakbreaker cloak
-//
-////                        95924, // prot tier15 shoulder celestial
-//                        // TODO add all prot tier15 celestial (not farming today)
-//
-//                        85340, // ret tier14 legs
-                        87101, // ret tier14 head
-                        85339, // ret tier14 shoulder
-                        85343, // ret tier14 chest
-                        87100, // ret tier14 hands
-                        95914, // ret tier15 shoulder celestial
-                        95910, // ret tier15 chest celestial
-                        95910, // ret tier15 gloves celestial
-//
-                        95142, // striker's battletags
-                        95205, // terra-cotta neck
-//                        87036, // soulgrasp heroic
-//
-                        96182, // ultimate prot of the emperor thunder
-//
-                        94773, // centripetal shoulders normal
-                },
-                extraUpgrade,
-                preUpgrade
-        )
+                true,
+                        new int[]{
+                                86979, // heroic impaling treads
+        ////                        86957, // heroic bladed tempest
+        ////                        85343, // normal ret chest
+        //
+        ////                        87015, // heroic clawfeet
+        ////                        86979, // heroic impaling treads
+        ////                        87071, // yang-xi heroic
+                                87145, // defiled earth
+                                89934, // soul bracer
+        ////                        85340, // normal ret legs
+        ////                        87101, // heroic ret head
+        ////                        86946, // ruby signet heroic
+                                94726, // cloudbreaker belt
+                                87024, // null greathelm
+        //
+                                87026, // heroic peacock cloak
+        //                        86955, // heroic overwhelm assault belt
+                                95535, // normal lightning legs
+        //
+        ////                        87050, // steelskin heroic
+        //                        95652, // Puncture-Proof Greathelm head
+                                95687, // celestial beakbreaker cloak
+        //
+        ////                        95924, // prot tier15 shoulder celestial
+        //                        // TODO add all prot tier15 celestial (not farming today)
+        //
+        //                        85340, // ret tier14 legs
+                                87101, // ret tier14 head
+        //                        85339, // ret tier14 shoulder
+                                85343, // ret tier14 chest
+                                87100, // ret tier14 hands
+        //                        95914, // ret tier15 shoulder celestial
+                                95910, // ret tier15 chest celestial
+                                95911, // ret tier15 gloves celestial
+        //
+                                95142, // striker's battletags
+                                95205, // terra-cotta neck
+        //                        87036, // soulgrasp heroic
+        //
+                                96182, // ultimate prot of the emperor thunder
+        //
+                                94773, // centripetal shoulders normal
+                                95140, // shado assault band
+                        },
+                        extraUpgrade,
+                        preUpgrade)
 //                .addRemoveItem(86680) // remove celestial ret legs
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
 //                .setWorstCommonPenalty(98.5)
-                .setWorstCommonPenalty(99)
+//                .setWorstCommonPenalty(99)
         ;
 
         multi.addSpec(
@@ -579,61 +583,62 @@ public class Tasks {
                 DataLocation.gearProtDefenceFile,
                 StandardModels.pallyProtMitigationModel(),
                 0.35,
-                new int[]{
-                        86979, // heroic impaling treads
-//////                        86957, // heroic bladed tempest
-//                        87071, // yang-xi heroic
-//                        87145, // defiled earth
-//                        89934, // soul bracer
-                        87024, // null greathelm
-//////                        86946, // ruby signet heroic
-                        94726, // cloudbreaker belt
-//                        86955, // heroic overwhelm assault belt
-//////                        87060, // Star-Stealer Waistguard
-////
-                        87026, // heroic peacock cloak
-////                        86325, // daybreak
-////                        95687, // celestial beakbreaker cloak
-////
-                        95535, // normal lightning legs
-////
-//                        95652, // Puncture-Proof Greathelm head
-//////                        95808, // celestial whipping legs
-//////                        95924, // prot tier shoulder celestial
-////
-                        86659, // prot tier14 shoulder
-                        85323, // prot tier14 chest
-                        86662, // prot tier14 hand
-                        85320, // prot tier14 legs
-////
-//                        85340, // ret tier14 legs
-                        87101, // ret tier14 head
-//                        85339, // ret tier14 shoulder
-                        85343, // ret tier14 chest
-                        87100, // ret tier14 hands
-////
-                        95914, // ret tier15 shoulder celestial
-                        95910, // ret tier15 chest celestial
-////                        95910, // ret tier15 gloves celestial
-////
-//                        95142, // striker's battletags
-                        95205, // terra-cotta neck
-////                        87036, // soulgrasp heroic
-////
-////                        96182, // ultimate prot of the emperor thunder
-////
-////                        // bags upgrades
-                        95735, // artery ripper
-////                        95874, // Bloody Shoulderplates
-                        95683, // Shoulderguards of Centripetal Destruction
-                },
-                extraUpgrade,
-                preUpgrade
-        )
+                true,
+                        new int[]{
+                                86979, // heroic impaling treads
+        //////                        86957, // heroic bladed tempest
+        //                        87071, // yang-xi heroic
+        //                        87145, // defiled earth
+        //                        89934, // soul bracer
+                                87024, // null greathelm
+        //////                        86946, // ruby signet heroic
+                                94726, // cloudbreaker belt
+        //                        86955, // heroic overwhelm assault belt
+        //////                        87060, // Star-Stealer Waistguard
+        ////
+                                87026, // heroic peacock cloak
+        ////                        86325, // daybreak
+        ////                        95687, // celestial beakbreaker cloak
+        ////
+                                95535, // normal lightning legs
+        ////
+        //                        95652, // Puncture-Proof Greathelm head
+        //////                        95808, // celestial whipping legs
+        //////                        95924, // prot tier shoulder celestial
+        ////
+        //                        86659, // prot tier14 shoulder celestial, w/mastery
+                                85323, // prot tier14 chest normal, w/parry
+                                86662, // prot tier14 hand celestial w/dodge
+        //                        85320, // prot tier14 legs normal w/dodge+mostery
+        ////
+        //                        85340, // ret tier14 legs
+                                87101, // ret tier14 head
+        //                        85339, // ret tier14 shoulder
+                                85343, // ret tier14 chest
+                                87100, // ret tier14 hands
+        ////
+        //                        95914, // ret tier15 shoulder celestial
+                                95910, // ret tier15 chest celestial
+        ////                        95911, // ret tier15 gloves celestial
+        ////
+        //                        95142, // striker's battletags
+                                95205, // terra-cotta neck
+        ////                        87036, // soulgrasp heroic
+        ////
+        ////                        96182, // ultimate prot of the emperor thunder
+        ////
+        ////                        // bags upgrades
+        //                        95735, // artery ripper celestial
+        ////                        95874, // Bloody Shoulderplates
+                                94773, // Shoulderguards of Centripetal Destruction celestial
+                                95140, // shado assault band
+                        },
+                        extraUpgrade,
+                        preUpgrade)
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
 //                .setWorstCommonPenalty(98.5)
-                .setWorstCommonPenalty(99)
+//                .setWorstCommonPenalty(99)
         ;
 
 //        multi.multiSetFilter(proposedResults -> {
@@ -645,16 +650,16 @@ public class Tasks {
 //            return !uniqueItems.contains(87111) || !uniqueItems.contains(87101);
 //        });
 
-//        multi.suppressSlotCheck(86957);
+        multi.suppressSlotCheck(95140);
 //        multi.suppressSlotCheck(84829);
 //        multi.suppressSlotCheck(86946);
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(1000);
-        multi.solve(2000);
+//        multi.solve(5000);
 //        multi.solve(15000);
-//        multi.solve(50000);
+        multi.solve(50000);
 //        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);
@@ -663,13 +668,14 @@ public class Tasks {
     }
 
     public static void druidMultiSpecSolve() {
-        FindMultiSpec multi = new FindMultiSpec(1, true);
+        FindMultiSpec multi = new FindMultiSpec(1);
 
         multi.addSpec(
                 "BOOM",
                 DataLocation.gearBoomFile,
                 StandardModels.modelFor(SpecType.DruidBoom),
                 0.5,
+                false,
                 new int[]{
 //                        86909 // regail dagger
 //                        86694, // Eternal Blossom Mantle
@@ -678,14 +684,14 @@ public class Tasks {
 //                        89078, // sagewhisper cloak
                 },
                 0,
-                false
-        );
+                false);
 
         multi.addSpec(
                 "TREE",
                 DataLocation.gearTreeFile,
                 StandardModels.modelFor(SpecType.DruidTree),
                 0.5,
+                false,
                 new int[]{
 //                        86909 // regail dagger
                         88885, // Clever Ashyo's Armbands
@@ -693,8 +699,7 @@ public class Tasks {
 //                        89078, // sagewhisper cloak
                 },
                 0,
-                false
-        );
+                false);
 
 //        multi.overrideEnchant(86865, StatBlock.empty); // no sha gem
 //        multi.overrideEnchant(86893, StatBlock.empty); // no sha gem
@@ -721,20 +726,7 @@ public class Tasks {
         OutputText.printf("RET        %,d\n", (long)rateRet);
         OutputText.println();
 
-        int dmgPercentMit = 20, dmgPercentDps = 100 - dmgPercentMit;
-        OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
-        long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation * 10);
-        long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps * 10);
-        OutputText.printf("USE mitigation %d dps %d\n", dmgMultiplyA, dmgMultiplyB);
-        double dmgTotal = dmgMultiplyA * rateMitigation + dmgMultiplyB * rateTankDps;
-        OutputText.printf("EFFECTIVE %.2f %.2f\n",
-                dmgMultiplyA * rateMitigation / dmgTotal,
-                dmgMultiplyB * rateTankDps / dmgTotal);
-        StatRatingsWeights dmgMix = StatRatingsWeights.mix(tankMitigation, (int) dmgMultiplyA, tankDps, (int) dmgMultiplyB, null);
-        StatType dmgBestStat = dmgMix.bestNonHit();
-        OutputText.printf("BEST STAT %s\n\n", dmgBestStat);
-
-        int defPercentMit = 80, defPercentDps = 100 - defPercentMit;
+        int defPercentMit = 85, defPercentDps = 100 - defPercentMit;
         OutputText.printf("defenceProtModel %d%% mitigation, %d%% dps\n", defPercentMit , defPercentDps);
         long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation * 10);
         long defMultiplyB = Math.round(targetCombined * (defPercentDps / 100.0) / rateTankDps * 10);
@@ -746,6 +738,19 @@ public class Tasks {
         StatRatingsWeights defMix = StatRatingsWeights.mix(tankMitigation, (int) defMultiplyA, tankDps, (int) defMultiplyB, null);
         StatType defBestStat = defMix.bestNonHit();
         OutputText.printf("BEST STAT %s\n\n", defBestStat);
+
+        int dmgPercentMit = 15, dmgPercentDps = 100 - dmgPercentMit;
+        OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
+        long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation * 10);
+        long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps * 10);
+        OutputText.printf("USE mitigation %d dps %d\n", dmgMultiplyA, dmgMultiplyB);
+        double dmgTotal = dmgMultiplyA * rateMitigation + dmgMultiplyB * rateTankDps;
+        OutputText.printf("EFFECTIVE %.2f %.2f\n",
+                dmgMultiplyA * rateMitigation / dmgTotal,
+                dmgMultiplyB * rateTankDps / dmgTotal);
+        StatRatingsWeights dmgMix = StatRatingsWeights.mix(tankMitigation, (int) dmgMultiplyA, tankDps, (int) dmgMultiplyB, null);
+        StatType dmgBestStat = dmgMix.bestNonHit();
+        OutputText.printf("BEST STAT %s\n\n", dmgBestStat);
 
 //        double multiTargetCombined = 1000000000000L;
 //        int multiRet = 5, multiDmg = 70, multiDef = 25;

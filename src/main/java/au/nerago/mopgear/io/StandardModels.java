@@ -58,14 +58,14 @@ public class StandardModels {
         }
     }
 
-    private static boolean useHasteMinimums = false;
-    private static StatBlock hasteGem = StatBlock.of(Haste, 320);
+    private static final boolean useHasteMinimums = false;
+    private static final StatBlock hasteGem = StatBlock.of(Haste, 320);
 
     public static ModelCombined pallyProtMitigationModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 7, statDps, 194, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 30, statDps, 35, standardGems);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -86,7 +86,7 @@ public class StandardModels {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 28, statDps, 49, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 5, statDps, 200, standardGems);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -99,9 +99,10 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
 //        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusThunderTank();
 //        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
-        SetBonus setBonus = SetBonus.empty();
+//        SetBonus setBonus = SetBonus.empty();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtDps, hasteGem);
     }
 

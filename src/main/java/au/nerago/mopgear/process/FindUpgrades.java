@@ -27,12 +27,17 @@ public class FindUpgrades {
     private final ModelCombined model;
     private final boolean hackAllow;
 
-    private static final long runSizeMultiply = 1;
+    private static long runSizeMultiply = 1;
     private static final boolean costsTraditional = false;
 
     public FindUpgrades(ModelCombined model, boolean hackAllow) {
         this.model = model;
         this.hackAllow = hackAllow;
+    }
+
+    public FindUpgrades setRunSizeMultiply(long multiply) {
+        runSizeMultiply = multiply;
+        return this;
     }
 
     public void run(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {

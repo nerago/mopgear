@@ -13,7 +13,6 @@ import au.nerago.mopgear.results.JobInput;
 import au.nerago.mopgear.results.JobOutput;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -30,7 +29,6 @@ import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
     private final long individualRunSizeMultiply;
-    private final boolean phasedAcceptable;
     private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
@@ -39,9 +37,8 @@ public class FindMultiSpec {
     private final Set<Integer> suppressSlotCheck = new HashSet<>();
     private Predicate<ProposedResults> multiSetFilter;
 
-    public FindMultiSpec(long individualRunSizeMultiply, boolean phasedAcceptable) {
+    public FindMultiSpec(long individualRunSizeMultiply) {
         this.individualRunSizeMultiply = individualRunSizeMultiply;
-        this.phasedAcceptable = phasedAcceptable;
     }
 
     public void addFixedForge(int id, ReforgeRecipe reforge) {
@@ -56,8 +53,8 @@ public class FindMultiSpec {
         this.multiSetFilter = multiSetFilter;
     }
 
-    public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
-        SpecDetails spec = new SpecDetails(label, gearFile, model, ratingTargetPercent, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
+    public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+        SpecDetails spec = new SpecDetails(label, gearFile, model, ratingTargetPercent, phasedAcceptable, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
         specs.add(spec);
         return spec;
     }
@@ -222,7 +219,7 @@ public class FindMultiSpec {
     }
 
     private void baselineOptimal(SpecDetails spec) {
-        JobInput job = new JobInput(Medium, individualRunSizeMultiply, phasedAcceptable);
+        JobInput job = new JobInput(Medium, individualRunSizeMultiply, spec.phasedAcceptable);
         job.model = spec.model;
         job.setItemOptions(spec.itemOptions);
         job.hackAllow = hackAllow;
@@ -235,10 +232,8 @@ public class FindMultiSpec {
         synchronized (OutputText.class) {
             OutputText.println("SET " + spec.label);
             set.outputSet(spec.model);
-
-//            int setItems = spec.model.setBonus().countInAnySet(output.resultSet.orElseThrow().items());
-//            OutputText.println("Set Items " + setItems);
         }
+        spec.recordSolutionSeen(set);
     }
 
     private static List<FullItemData> commonForges(List<FullItemData> prior, List<FullItemData> forges) {
@@ -264,9 +259,15 @@ public class FindMultiSpec {
                             .flatMap(job -> job.resultSet.orElseThrow().items().itemStream())
                             .filter(item -> item.isSameItem(ref))
                             .count();
-                    if (count < 2)
+                    if (count < 2 && fixedForge.containsKey(ref.itemId())) {
+                        OutputText.println("WOULD REMOVE COMMON BUT HAS fixedForge " + entry.getValue());
+                        return false;
+                    } else if (count < 2) {
                         OutputText.println("REMOVING COMMON " + entry.getValue());
-                    return count < 2;
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
         );
     }
@@ -274,7 +275,7 @@ public class FindMultiSpec {
     private ProposedResults subSolveEach(Map<ItemRef, FullItemData> commonChoices, List<SpecDetails> specList) {
         List<JobOutput> results = new ArrayList<>();
         for (SpecDetails spec : specList) {
-            JobOutput job = subSolvePart(spec.itemOptions, spec.model, commonChoices, false);
+            JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonChoices, false);
             if (job.resultSet.isEmpty()) {
                 return null;
             }
@@ -283,7 +284,7 @@ public class FindMultiSpec {
         return new ProposedResults(results, commonChoices);
     }
 
-    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, Map<ItemRef, FullItemData> chosenMap, boolean isFinal) {
+    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap, boolean isFinal) {
         EquipOptionsMap submitMap = fullItemMap.shallowClone();
         buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
 
@@ -443,7 +444,7 @@ public class FindMultiSpec {
                 AsWowSimJson.writeFullToOut(draftSet.items(), spec.model);
 
 //                ItemLoadUtil.duplicateAlternateEnchants(spec.itemOptions, spec.model);
-                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, commonFinal, true);
+                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonFinal, true);
 
                 FullItemSet revisedSet = null;
                 double revisedSpecRating = 0;
@@ -500,6 +501,7 @@ public class FindMultiSpec {
         final ModelCombined model;
         final double ratingTargetPercent;
         int ratingMultiply;
+        final boolean phasedAcceptable;
         final int[] extraItems;
         final int extraItemsUpgradeLevel;
         final boolean upgradeCurrentItems;
@@ -513,11 +515,12 @@ public class FindMultiSpec {
         EquipOptionsMap itemOptions;
         final Map<Integer, AtomicInteger> itemsSeenInSolutions = new HashMap<>();
 
-        private SpecDetails(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+        private SpecDetails(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
             this.label = label;
             this.gearFile = gearFile;
             this.model = model;
             this.ratingTargetPercent = ratingTargetPercent;
+            this.phasedAcceptable = phasedAcceptable;
             this.extraItems = extraItems;
             this.extraItemsUpgradeLevel = extraItemsUpgradeLevel;
             this.upgradeCurrentItems = upgradeCurrentItems;
@@ -735,7 +738,10 @@ public class FindMultiSpec {
             Arrays.stream(extraItems).sorted().forEach(itemId -> {
                 AtomicInteger countSeenAtom = itemsSeenInSolutions.get(itemId);
                 int countSeen = countSeenAtom != null ? countSeenAtom.intValue() : 0;
-                OutputText.printf("%d %d\n", itemId, countSeen);
+                if (countSeen == 0)
+                    OutputText.printf("%d 0 NONE\n", itemId);
+                else
+                    OutputText.printf("%d %d\n", itemId, countSeen);
             });
         }
     }

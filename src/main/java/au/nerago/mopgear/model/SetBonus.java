@@ -46,6 +46,11 @@ public class SetBonus {
             85341, 85339, 85343, 85342, 85340,
             87101, 87103, 87099, 87100, 87102
     });
+
+    public static SetBonus activateWhiteTigerBattlegearOnly4pc() {
+        return new SetBonus(Collections.singletonList(pallyBattlegearForTank));
+    }
+
     public static SetBonus activateWhiteTigerBattlegearOnly4pcPlusThunderTank() {
         return new SetBonus(Arrays.asList(pallyBattlegearForTank, findSet("Plate of the Lightning Emperor")));
     }
