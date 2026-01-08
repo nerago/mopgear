@@ -99,10 +99,10 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
+//        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
 //        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusThunderTank();
 //        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
-//        SetBonus setBonus = SetBonus.empty();
+        SetBonus setBonus = SetBonus.empty();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtDps, hasteGem);
     }
 

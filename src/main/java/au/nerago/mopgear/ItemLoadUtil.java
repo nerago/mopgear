@@ -119,6 +119,10 @@ public class ItemLoadUtil {
             item = item.changeEnchant(gemInfo.a(), gemInfo.b(), equippedItem.enchant());
         }
 
+        if (id == 94820 && equippedItem.randomSuffix() == -336) {
+            item = item.changeStatsBase(item.statBase.plus(StatBlock.of(StatType.Crit, 882)));
+        }
+
         if (detailedOutput) {
             if (expectedEnchant.contains(item.slot())) {
                 if (equippedItem.enchant() != null) {

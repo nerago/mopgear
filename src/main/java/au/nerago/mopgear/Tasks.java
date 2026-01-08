@@ -478,7 +478,7 @@ public class Tasks {
                 "RET",
                 DataLocation.gearRetFile,
                 StandardModels.pallyRetModel(),
-                0.05,
+                0.02,
                 false,
                 new int[]{
                         87026, // heroic peacock cloak
@@ -489,7 +489,6 @@ public class Tasks {
 
 //                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
-                        89934, // soul bracer
 //                        87024, // null greathelm
 //                        87145, // defiled earth
                         94726, // cloudbreaker belt
@@ -502,15 +501,19 @@ public class Tasks {
                         85343, // ret tier14 chest
                         87100, // ret tier14 hands
                         95914, // ret tier15 shoulder celestial
-                        95910, // ret tier15 chest celestial
+//                        95910, // ret tier15 chest celestial
                         95911, // ret tier15 gloves celestial
 
-                        95142, // striker's battletags
+//                        95142, // striker's battletags
                         95205, // terra-cotta neck
 //                        87036, // soulgrasp heroic
 
-                        94773, // centripetal shoulders normal
-                        95140, // shado assault band
+//                        94773, // centripetal shoulders normal
+//                        95140, // shado assault band
+
+                        87145, // defiled earth
+                        89934, // soul bracer
+                        94820, // caustic spike bracers
                 },
                 extraUpgrade,
                 preUpgrade
@@ -533,8 +536,6 @@ public class Tasks {
         ////                        87015, // heroic clawfeet
         ////                        86979, // heroic impaling treads
         ////                        87071, // yang-xi heroic
-                                87145, // defiled earth
-                                89934, // soul bracer
         ////                        85340, // normal ret legs
         ////                        87101, // heroic ret head
         ////                        86946, // ruby signet heroic
@@ -568,7 +569,11 @@ public class Tasks {
                                 96182, // ultimate prot of the emperor thunder
         //
                                 94773, // centripetal shoulders normal
-                                95140, // shado assault band
+//                                95140, // shado assault band
+
+                                87145, // defiled earth
+                                89934, // soul bracer
+                                94820, // caustic spike bracers
                         },
                         extraUpgrade,
                         preUpgrade)
@@ -582,14 +587,12 @@ public class Tasks {
                 "PROT-DEFENCE",
                 DataLocation.gearProtDefenceFile,
                 StandardModels.pallyProtMitigationModel(),
-                0.35,
+                0.38,
                 true,
                         new int[]{
                                 86979, // heroic impaling treads
         //////                        86957, // heroic bladed tempest
         //                        87071, // yang-xi heroic
-        //                        87145, // defiled earth
-        //                        89934, // soul bracer
                                 87024, // null greathelm
         //////                        86946, // ruby signet heroic
                                 94726, // cloudbreaker belt
@@ -618,7 +621,7 @@ public class Tasks {
                                 87100, // ret tier14 hands
         ////
         //                        95914, // ret tier15 shoulder celestial
-                                95910, // ret tier15 chest celestial
+//                                95910, // ret tier15 chest celestial
         ////                        95911, // ret tier15 gloves celestial
         ////
         //                        95142, // striker's battletags
@@ -631,7 +634,11 @@ public class Tasks {
         //                        95735, // artery ripper celestial
         ////                        95874, // Bloody Shoulderplates
                                 94773, // Shoulderguards of Centripetal Destruction celestial
-                                95140, // shado assault band
+//                                95140, // shado assault band
+
+                                87145, // defiled earth
+                                89934, // soul bracer
+                                94820, // caustic spike bracers
                         },
                         extraUpgrade,
                         preUpgrade)
@@ -650,7 +657,7 @@ public class Tasks {
 //            return !uniqueItems.contains(87111) || !uniqueItems.contains(87101);
 //        });
 
-        multi.suppressSlotCheck(95140);
+//        multi.suppressSlotCheck(95140);
 //        multi.suppressSlotCheck(84829);
 //        multi.suppressSlotCheck(86946);
 
@@ -659,8 +666,8 @@ public class Tasks {
 //        multi.solve(1000);
 //        multi.solve(5000);
 //        multi.solve(15000);
-        multi.solve(50000);
-//        multi.solve(120000);
+//        multi.solve(50000);
+        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);
 //        multi.solve(1490000);

@@ -540,6 +540,16 @@ public class SourcesOfItems {
         };
     }
 
+    public static CostedItem[] strengthPlateCraftedT3() {
+        // haunted plate
+        return new CostedItem[]{
+                new CostedItem(94265, 0),
+                new CostedItem(94266, 0),
+                new CostedItem(94267, 0),
+                new CostedItem(94268, 0),
+        };
+    }
+
     public static CostedItem[] pallyPhase3Valor() {
         return new CostedItem[]{
                 new CostedItem(95142, 1250),
@@ -798,6 +808,10 @@ public class SourcesOfItems {
         if (baseItems.size() == 2 && baseItems.getFirst().slot() == SlotItem.Trinket && baseItems.getFirst().itemLevel() == 496 && baseItems.getLast().itemLevel() == 535)
             return difficulty == Difficulty.Heroic ? baseItems.getLast() : baseItems.getFirst();
 
+        // TODO dodgey remove
+        if (difficulty == Difficulty.Heroic)
+            return baseItems.getLast();
+
         throw new IllegalStateException();
     }
 
@@ -814,5 +828,13 @@ public class SourcesOfItems {
                 .map(example -> replaceWithNormal(example, difficulty))
                 .map(x -> new CostedItem(x.itemId(), -1))
                 .toArray(CostedItem[]::new);
+    }
+
+    public static CostedItem[] strengthPlateThroneNormalBoss(Difficulty difficulty, int bossId) {
+        CostedItem[] initial = strengthPlateThroneNormal(difficulty);
+        Stream<CostedItem> itemsWithBossId = Arrays.stream(initial).map(ci -> ItemLoadUtil.loadItemBasic(ci.itemId(), 0))
+                .map(it -> new CostedItem(it.itemId(), BossLookup.bossIdForItemName(it.shared.name())));
+        Stream<CostedItem> filtered = itemsWithBossId.filter(ci -> ci.cost() == bossId);
+        return filtered.toArray(CostedItem[]::new);
     }
 }

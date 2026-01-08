@@ -79,6 +79,11 @@ public class InputGearParser {
             reforging = elementObject.get("reforging").getAsInt();
         }
 
-        return new EquippedItem(id, gems, enchant, upgradeStep, reforging);
+        Integer randomSuffix = null;
+        if (elementObject.has("random_suffix")) {
+            randomSuffix = elementObject.get("random_suffix").getAsInt();
+        }
+
+        return new EquippedItem(id, gems, enchant, upgradeStep, reforging, randomSuffix);
     }
 }

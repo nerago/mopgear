@@ -57,7 +57,7 @@ public class FindUpgrades {
     public void runMaxedItems(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {
         baseItems = ItemMapUtil.upgradeAllTo2(baseItems);
         List<CostedItemData> extraItemList = extraItems.stream()
-                .map(ei -> new EquippedItem(ei.itemId(), ei.gems(), ei.enchant(), ItemLevel.MAX_UPGRADE_LEVEL, ei.reforging()))
+                .map(ei -> new EquippedItem(ei.itemId(), ei.gems(), ei.enchant(), ItemLevel.MAX_UPGRADE_LEVEL, ei.reforging(), ei.randomSuffix()))
                 .map(ei -> new CostedItemData(ItemLoadUtil.loadItem(ei, model.enchants(), false), 0))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
@@ -72,12 +72,14 @@ public class FindUpgrades {
     }
 
     public void runMain(EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment) {
+        OutputText.println("FINDING BASELINE");
         double baseRating = findBase(baseItems, adjustment);
 
         extraItemList = checkDuplicates(extraItemList);
         if (!costsTraditional)
             extraItemList = costsToBossIds(extraItemList);
 
+        OutputText.println("RUNNING MAIN");
         List<UpgradeResultItem> jobList =
                 makeJobs(model, baseItems, extraItemList, adjustment, baseRating)
                 .toList().parallelStream() // helps verify

@@ -36,7 +36,7 @@ public class Main {
 
         lowerPriority();
 
-        try (ForkJoinPool myPool = new ForkJoinPool(8, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, false, 0, 32, 1, null, 60, TimeUnit.SECONDS)) {
+        try (ForkJoinPool myPool = new ForkJoinPool(8, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, false, 0, 64, 1, null, 60, TimeUnit.SECONDS)) {
             myPool.submit(() -> launchpad(startTime)).get();
         }
 
@@ -61,11 +61,11 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -145,11 +145,11 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = StandardModels.pallyProtDpsModel();
-        Path file = DataLocation.gearProtDpsFile;
+//        ModelCombined model = StandardModels.pallyProtDpsModel();
+//        Path file = DataLocation.gearProtDpsFile;
 
-//        ModelCombined model = StandardModels.pallyProtMitigationModel();
-//        Path file = DataLocation.gearProtDefenceFile;
+        ModelCombined model = StandardModels.pallyProtMitigationModel();
+        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -286,19 +286,20 @@ public class Main {
 //        findBestBySlot(model, allTheGoodShit, startTime);
 
 //        findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
-//        findUpgrade(items, new CostedItem[]{new CostedItem(95142	,1250)}, model, true, null, 2);
+//        findUpgrade(items, SourcesOfItems.strengthPlateCraftedT3(), model, true, null, 0, 8);
+        findUpgrade(items, SourcesOfItems.strengthPlateThroneNormalBoss(Difficulty.Heroic, 701), model, true, null, 2, 8);
 
-        Difficulty difficulty = Difficulty.Celestial;
-        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-                pallyPhase3Valor(),
-                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
-                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
-                strengthPlateThroneNormal(difficulty),
+//        Difficulty difficulty = Difficulty.Normal;
+//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+//                pallyPhase3Valor(),
+//                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
+//                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+//                strengthPlateThroneNormal(difficulty),
 //                tankTrinketsThroneNormal(difficulty),
 //                strengthDpsTrinketsThroneNormal(difficulty),
-        });
-        upgradeShit = minusRadenLoot(upgradeShit);
-        findUpgrade(items, upgradeShit, model, true, null, 2, 8);
+//        });
+//        upgradeShit = minusRadenLoot(upgradeShit);
+//        findUpgrade(items, upgradeShit, model, true, null, 2, 16);
 
     }
 
