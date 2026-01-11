@@ -1,10 +1,7 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.DataLocation;
-import au.nerago.mopgear.io.SourcesOfItems;
-import au.nerago.mopgear.io.StandardModels;
-import au.nerago.mopgear.io.WowSimDB;
+import au.nerago.mopgear.io.*;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.process.*;
@@ -26,8 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static au.nerago.mopgear.domain.StatType.Crit;
-import static au.nerago.mopgear.domain.StatType.Haste;
+import static au.nerago.mopgear.domain.PrimaryStatType.Strength;
+import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.io.SourcesOfItems.*;
 import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 
@@ -553,9 +550,9 @@ public class Tasks {
         ////                        95924, // prot tier15 shoulder celestial
         //                        // TODO add all prot tier15 celestial (not farming today)
         //
-        //                        85340, // ret tier14 legs
+                                85340, // ret tier14 legs
                                 87101, // ret tier14 head
-        //                        85339, // ret tier14 shoulder
+                                85339, // ret tier14 shoulder
                                 85343, // ret tier14 chest
                                 87100, // ret tier14 hands
         //                        95914, // ret tier15 shoulder celestial
@@ -579,7 +576,7 @@ public class Tasks {
                         preUpgrade)
 //                .addRemoveItem(86680) // remove celestial ret legs
 //                .setDuplicatedItems(Map.of(89934, 1)) // soul bracer
-//                .setWorstCommonPenalty(98.5)
+                .setWorstCommonPenalty(98)
 //                .setWorstCommonPenalty(99)
         ;
 
@@ -644,7 +641,7 @@ public class Tasks {
                         preUpgrade)
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
-//                .setWorstCommonPenalty(98.5)
+                .setWorstCommonPenalty(98)
 //                .setWorstCommonPenalty(99)
         ;
 
@@ -926,5 +923,29 @@ public class Tasks {
         );
 
         findBIS(model, allItems, Instant.now(), 2, false);
+    }
+
+    public static void generateRatingDataFromSims() {
+        //        SimOutputReader.main();
+        //
+        try {
+            SimCliExecute.run(SimInputModify.INPUT_FILE, SimInputModify.BASELINE_FILE);
+            SimOutputReader.readInput(SimInputModify.BASELINE_FILE);
+
+            int add = 800;
+            StatType[] statsCheck = new StatType[]{Primary, Stam, Crit, Haste, Expertise, Mastery, Dodge, Parry};
+            for (StatType stat : statsCheck) {
+                Path inFile = SimInputModify.make(stat, add);
+                Path outFile = SimInputModify.outName(stat);
+                Files.deleteIfExists(outFile);
+
+                SimCliExecute.run(inFile, outFile);
+
+                System.out.println(stat);
+                SimOutputReader.readInput(outFile);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

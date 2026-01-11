@@ -65,7 +65,7 @@ public class StandardModels {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 30, statDps, 35, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 127, statDps, 34, standardGems);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -86,7 +86,7 @@ public class StandardModels {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 5, statDps, 200, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 22, statDps, 191, standardGems);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -99,10 +99,10 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
-//        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
 //        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusThunderTank();
 //        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
-        SetBonus setBonus = SetBonus.empty();
+//        SetBonus setBonus = SetBonus.empty();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtDps, hasteGem);
     }
 

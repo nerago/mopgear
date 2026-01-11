@@ -52,6 +52,8 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
+//        generateRatingDataFromSims();
+
 //        WowSimDB.discoverSetBonuses();
 //        Tasks.dumpTier2Gear();
 //        ItemCache.instance.get(null);
@@ -61,11 +63,11 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
