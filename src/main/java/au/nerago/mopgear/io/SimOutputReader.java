@@ -1,6 +1,7 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.EquippedItem;
+import au.nerago.mopgear.results.OutputText;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -34,12 +35,12 @@ public class SimOutputReader {
         double hps = player.getAsJsonObject("hps").getAsJsonPrimitive("avg").getAsDouble();
         double death = player.getAsJsonPrimitive("chanceOfDeath").getAsDouble();
 
-        System.out.println(dps);
-        System.out.println(tps);
-        System.out.println(dtps);
-        System.out.println(hps);
-        System.out.println(tmi);
-        System.out.println(death * 100);
-        System.out.println();
+        OutputText.printf("%.2f\n", dps);
+        OutputText.printf("%.2f\n", tps);
+        OutputText.printf("%.2f\n", dtps);
+        OutputText.printf("%.2f\n", hps);
+        OutputText.printf("%.2f\n", tmi);
+        OutputText.printf("%.2f\n", death * 100);
+        OutputText.println();
     }
 }

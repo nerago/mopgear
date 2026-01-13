@@ -4,6 +4,7 @@ import au.nerago.mopgear.Difficulty;
 import au.nerago.mopgear.ItemLoadUtil;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.SetBonus;
+import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -591,7 +592,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateCurrentItemsRet() {
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, StandardModels.modelFor(SpecType.PaladinRet), null, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, StandardModels.modelFor(SpecType.PaladinRet), null, PrintRecorder.swallow());
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot() != SlotItem.Weapon2H && it.b()[0].slot() != SlotItem.Trinket && it.b()[0].slot() != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].itemId(), 0));
@@ -599,7 +600,7 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProt() {
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, StandardModels.modelFor(SpecType.PaladinProtDps), null, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, StandardModels.modelFor(SpecType.PaladinProtDps), null, PrintRecorder.swallow());
         Stream<CostedItem> itemStream = items.entryStream()
                 .filter(it -> it.b()[0].slot() != SlotItem.Weapon1H && it.b()[0].slot() != SlotItem.Trinket && it.b()[0].slot() != SlotItem.Ring)
                 .map(tup -> new CostedItem(tup.b()[0].itemId(), 0));
@@ -607,14 +608,14 @@ public class SourcesOfItems {
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProtAll() {
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, StandardModels.modelFor(SpecType.PaladinProtDps), null, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, StandardModels.modelFor(SpecType.PaladinProtDps), null, PrintRecorder.swallow());
         Stream<CostedItem> itemStream = items.entryStream()
                 .map(tup -> new CostedItem(tup.b()[0].itemId(), 0));
         return itemStream.toArray(CostedItem[]::new);
     }
 
     public static CostedItem[] strengthPlateCurrentItemsProtAllUpgradable() {
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, StandardModels.modelFor(SpecType.PaladinProtDps), null, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, StandardModels.modelFor(SpecType.PaladinProtDps), null, PrintRecorder.swallow());
         Stream<CostedItem> itemStream = items.itemStream()
                 .filter(FullItemData::isUpgradable)
                 .map(item -> new CostedItem(item.itemId(), 0))

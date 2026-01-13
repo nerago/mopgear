@@ -7,6 +7,16 @@ public class PrintRecorder {
     private final List<String> prints = new ArrayList<>();
     public boolean outputImmediate;
 
+    public static PrintRecorder withAutoOutput() {
+        PrintRecorder print = new PrintRecorder();
+        print.outputImmediate = true;
+        return print;
+    }
+
+    public static PrintRecorder swallow() {
+        return new PrintRecorder();
+    }
+
     public void println(String str) {
         prints.add(str);
         if (outputImmediate)

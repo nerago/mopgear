@@ -50,9 +50,9 @@ public class StatRatingsWeights extends StatRatings {
 
     public static StatRatingsWeights mix(StatRatingsWeights weightA, int multiplyA, StatRatingsWeights weightB, int multiplyB, EnumMap<SocketType, StatBlock> standardGems) {
         StatBlock mixed = weightA.weight.multiply(multiplyA);
-        if (weightB != null) {
+//        if (weightB != null) {
             mixed = mixed.plus(weightB.weight.multiply(multiplyB));
-        }
+//        }
         return new StatRatingsWeights(mixed, standardGems);
     }
 

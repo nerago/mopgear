@@ -3,6 +3,7 @@ package au.nerago.mopgear;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.results.PrintRecorder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -37,7 +38,7 @@ public class ServiceEntry {
         Path gearFile = Path.of(params.gearFile);
         ModelCombined model = ModelCombined.load(params.model);
         Map<Integer, List<ReforgeRecipe>> fixedForges = new HashMap<>(params.fixedForges);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(gearFile, model, fixedForges, false);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(gearFile, model, fixedForges, PrintRecorder.swallow());
 
         switch (params.taskType) {
             case REFORGE -> {

@@ -13,17 +13,20 @@ import au.nerago.mopgear.util.Tuple;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import static au.nerago.mopgear.domain.PrimaryStatType.Strength;
 import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.io.SourcesOfItems.*;
 import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
@@ -197,31 +200,31 @@ public class Tasks {
 
     public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, EnchantMode enchantMode, ReforgeRecipe reforge, boolean replace, boolean errorOnExists) {
         FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
-        return addExtra(reforgedItems, model, extraItem, slot, enchantMode, reforge, replace, errorOnExists);
+        return addExtra(reforgedItems, model, extraItem, slot, enchantMode, reforge, replace, errorOnExists, PrintRecorder.withAutoOutput());
     }
 
     public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, FullItemData extraItem, EnchantMode enchantMode, ReforgeRecipe reforge, boolean replace, boolean errorOnExists) {
-        return addExtra(reforgedItems, model, extraItem, extraItem.slot().toSlotEquip(), enchantMode, reforge, replace, errorOnExists);
+        return addExtra(reforgedItems, model, extraItem, extraItem.slot().toSlotEquip(), enchantMode, reforge, replace, errorOnExists, PrintRecorder.withAutoOutput());
     }
 
     @Nullable
-    private static FullItemData addExtra(EquipOptionsMap itemOptions, ModelCombined model, FullItemData extraItem, SlotEquip slot, EnchantMode enchantMode, ReforgeRecipe recipe, boolean replace, boolean errorOnExists) {
+    private static FullItemData addExtra(EquipOptionsMap itemOptions, ModelCombined model, FullItemData extraItem, SlotEquip slot, EnchantMode enchantMode, ReforgeRecipe recipe, boolean replace, boolean errorOnExists, PrintRecorder printer) {
         ItemRef ref = extraItem.ref();
         FullItemData[] existing = itemOptions.get(slot);
         HashSet<FullItemData> resultingList = new HashSet<>();
 
         if (slot == SlotEquip.Weapon && existing != null && extraItem.slot() != existing[0].slot()) {
-            OutputText.println("WRONG WEAPON " + extraItem);
+            printer.println("WRONG WEAPON " + extraItem);
             return null;
         } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(ref))) {
             if (errorOnExists)
                 throw new IllegalArgumentException("item already included " + extraItem);
-            OutputText.println("ALREADY INCLUDED " + extraItem);
+            printer.println("ALREADY INCLUDED " + extraItem);
             return null;
         } else if (existing == null) {
             throw new IllegalArgumentException("can't add extra to empty slot");
         } else if (replace) {
-            OutputText.println("REPLACING " + existing[0]);
+            printer.println("REPLACING " + existing[0]);
         }
 
         StatBlock gemStat = model.gemChoiceBestAlternate();
@@ -269,17 +272,17 @@ public class Tasks {
         resultingList.addAll(forged);
         itemOptions.put(slot, resultingList.toArray(FullItemData[]::new));
 
-        listSlotContent(itemOptions, slot);
+        listSlotContent(itemOptions, slot, printer);
 
         return forged.getFirst();
     }
 
-    private static void listSlotContent(EquipOptionsMap reforgedItems, SlotEquip slot) {
+    private static void listSlotContent(EquipOptionsMap reforgedItems, SlotEquip slot, PrintRecorder printer) {
         FullItemData[] slotArray = reforgedItems.get(slot);
         HashSet<ItemRef> seen = new HashSet<>();
         ArrayUtil.forEach(slotArray, it -> {
             if (seen.add(it.ref())) {
-                OutputText.println("NEW " + slot + " " + it);
+                printer.println("NEW " + slot + " " + it);
             }
         });
     }
@@ -361,20 +364,9 @@ public class Tasks {
     public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, List<EquippedItem> extraItems) {
         EquipOptionsMap itemsOriginal = items.deepClone();
 
-        for (EquippedItem entry : extraItems) {
-            if (SourcesOfItems.ignoredItems.contains(entry.itemId())) continue;
-            FullItemData extraItem = ItemLoadUtil.loadItem(entry, model.enchants(), true);
-            for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
-                FullItemData[] existing = items.get(slot);
-                if (existing == null) {
-                    OutputText.println("SKIP SLOT NOT NEEDED " + extraItem);
-                } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(extraItem.ref()))) {
-                    OutputText.println("SKIP DUP " + extraItem);
-                } else {
-                    addExtra(items, model, extraItem, slot, EnchantMode.BothDefaultAndAlternate, null, false, true);
-                }
-            }
-        }
+        PrintRecorder printer = new PrintRecorder();
+        printer.outputImmediate = true;
+        plusManyItems(items, model, extraItems, printer);
 
         JobInput job = new JobInput(Final, 1, false);
         job.model = model;
@@ -385,6 +377,36 @@ public class Tasks {
         job.printRecorder.outputNow();
         FullItemSet best = output.getFinalResultSet().orElseThrow();
         outputResultChanges(itemsOriginal, best, model);
+    }
+
+    public static JobOutput reforgeProcessPlusManyQuiet(EquipOptionsMap items, ModelCombined model, List<EquippedItem> extraItems) {
+        items = items.deepClone();
+
+        PrintRecorder printRecorder = new PrintRecorder();
+        plusManyItems(items, model, extraItems, printRecorder);
+
+        JobInput job = new JobInput(Final, 1, false);
+        job.printRecorder.append(printRecorder);
+        job.model = model;
+        job.setItemOptions(items);
+        return Solver.runJob(job);
+    }
+
+    private static void plusManyItems(EquipOptionsMap items, ModelCombined model, List<EquippedItem> extraItems, PrintRecorder printer) {
+        for (EquippedItem entry : extraItems) {
+            if (SourcesOfItems.ignoredItems.contains(entry.itemId())) continue;
+            FullItemData extraItem = ItemLoadUtil.loadItem(entry, model.enchants(), printer);
+            for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
+                FullItemData[] existing = items.get(slot);
+                if (existing == null) {
+                    printer.println("SKIP SLOT NOT NEEDED " + extraItem);
+                } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(extraItem.ref()))) {
+                    printer.println("SKIP DUP " + extraItem);
+                } else {
+                    addExtra(items, model, extraItem, slot, EnchantMode.BothDefaultAndAlternate, null, false, true, printer);
+                }
+            }
+        }
     }
 
     public static void outputResultSimple(Optional<FullItemSet> bestSet, ModelCombined model, boolean detailedOutput) {
@@ -494,7 +516,7 @@ public class Tasks {
 
 //                        85340, // ret tier14 legs
                         87101, // ret tier14 head
-                        85339, // ret tier14 shoulder
+//                        85339, // ret tier14 shoulder
                         85343, // ret tier14 chest
                         87100, // ret tier14 hands
                         95914, // ret tier15 shoulder celestial
@@ -508,8 +530,8 @@ public class Tasks {
 //                        94773, // centripetal shoulders normal
 //                        95140, // shado assault band
 
-                        87145, // defiled earth
-                        89934, // soul bracer
+//                        87145, // defiled earth
+//                        89934, // soul bracer
                         94820, // caustic spike bracers
                 },
                 extraUpgrade,
@@ -524,7 +546,7 @@ public class Tasks {
                 DataLocation.gearProtDpsFile,
                 StandardModels.pallyProtDpsModel(),
                 0.60,
-                true,
+                false,
                         new int[]{
                                 86979, // heroic impaling treads
         ////                        86957, // heroic bladed tempest
@@ -545,7 +567,7 @@ public class Tasks {
         //
         ////                        87050, // steelskin heroic
         //                        95652, // Puncture-Proof Greathelm head
-                                95687, // celestial beakbreaker cloak
+//                                95687, // celestial beakbreaker cloak
         //
         ////                        95924, // prot tier15 shoulder celestial
         //                        // TODO add all prot tier15 celestial (not farming today)
@@ -556,8 +578,8 @@ public class Tasks {
                                 85343, // ret tier14 chest
                                 87100, // ret tier14 hands
         //                        95914, // ret tier15 shoulder celestial
-                                95910, // ret tier15 chest celestial
-                                95911, // ret tier15 gloves celestial
+//                                95910, // ret tier15 chest celestial
+//                                95911, // ret tier15 gloves celestial
         //
                                 95142, // striker's battletags
                                 95205, // terra-cotta neck
@@ -568,9 +590,28 @@ public class Tasks {
                                 94773, // centripetal shoulders normal
 //                                95140, // shado assault band
 
-                                87145, // defiled earth
-                                89934, // soul bracer
+//                                87145, // defiled earth
+//                                89934, // soul bracer
                                 94820, // caustic spike bracers
+
+                                // from other processes
+                                85339,
+                                85343,
+                                86387,
+                                86957,
+                                86979,
+                                87026,
+                                87100,
+                                87101,
+                                94526,
+                                94726,
+                                94820,
+                                95140,
+                                95142,
+                                95205,
+                                95535,
+                                96182,
+
                         },
                         extraUpgrade,
                         preUpgrade)
@@ -585,12 +626,12 @@ public class Tasks {
                 DataLocation.gearProtDefenceFile,
                 StandardModels.pallyProtMitigationModel(),
                 0.38,
-                true,
+                false,
                         new int[]{
                                 86979, // heroic impaling treads
         //////                        86957, // heroic bladed tempest
         //                        87071, // yang-xi heroic
-                                87024, // null greathelm
+//                                87024, // null greathelm
         //////                        86946, // ruby signet heroic
                                 94726, // cloudbreaker belt
         //                        86955, // heroic overwhelm assault belt
@@ -611,9 +652,9 @@ public class Tasks {
                                 86662, // prot tier14 hand celestial w/dodge
         //                        85320, // prot tier14 legs normal w/dodge+mostery
         ////
-        //                        85340, // ret tier14 legs
+                                85340, // ret tier14 legs
                                 87101, // ret tier14 head
-        //                        85339, // ret tier14 shoulder
+                                85339, // ret tier14 shoulder
                                 85343, // ret tier14 chest
                                 87100, // ret tier14 hands
         ////
@@ -630,12 +671,30 @@ public class Tasks {
         ////                        // bags upgrades
         //                        95735, // artery ripper celestial
         ////                        95874, // Bloody Shoulderplates
-                                94773, // Shoulderguards of Centripetal Destruction celestial
+                                94773, // centripetal shoulders normal
 //                                95140, // shado assault band
 
-                                87145, // defiled earth
-                                89934, // soul bracer
+//                                87145, // defiled earth
+//                                89934, // soul bracer
                                 94820, // caustic spike bracers
+
+                                // from other processes
+                                85339,
+                                85343,
+                                86387,
+                                86957,
+                                86979,
+                                87026,
+                                87100,
+                                87101,
+                                94526,
+                                94726,
+                                94820,
+                                95140,
+//                                95142,
+                                95205,
+                                95535,
+                                96182,
                         },
                         extraUpgrade,
                         preUpgrade)
@@ -664,11 +723,11 @@ public class Tasks {
 //        multi.solve(5000);
 //        multi.solve(15000);
 //        multi.solve(50000);
-        multi.solve(120000);
+//        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);
 //        multi.solve(1490000);
-//        multi.solve(4000000);
+        multi.solve(4000000);
     }
 
     public static void druidMultiSpecSolve() {
@@ -716,8 +775,8 @@ public class Tasks {
         StatRatingsWeights tankDps = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights retRet = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinRet));
 
-        EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, ReforgeRules.melee(), new DefaultEnchants(SpecType.PaladinRet, true), null, true);
-        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, true);
+        EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, ReforgeRules.melee(), new DefaultEnchants(SpecType.PaladinRet, true), null, PrintRecorder.withAutoOutput());
+        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, PrintRecorder.withAutoOutput());
 
         double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtMitigation);
         double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtDps);
@@ -730,7 +789,7 @@ public class Tasks {
         OutputText.printf("RET        %,d\n", (long)rateRet);
         OutputText.println();
 
-        int defPercentMit = 85, defPercentDps = 100 - defPercentMit;
+        int defPercentMit = 70, defPercentDps = 100 - defPercentMit;
         OutputText.printf("defenceProtModel %d%% mitigation, %d%% dps\n", defPercentMit , defPercentDps);
         long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation * 10);
         long defMultiplyB = Math.round(targetCombined * (defPercentDps / 100.0) / rateTankDps * 10);
@@ -743,7 +802,7 @@ public class Tasks {
         StatType defBestStat = defMix.bestNonHit();
         OutputText.printf("BEST STAT %s\n\n", defBestStat);
 
-        int dmgPercentMit = 15, dmgPercentDps = 100 - dmgPercentMit;
+        int dmgPercentMit = 30, dmgPercentDps = 100 - dmgPercentMit;
         OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
         long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation * 10);
         long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps * 10);
@@ -778,6 +837,48 @@ public class Tasks {
         JobOutput output = Solver.runJob(job);
         FullItemSet set = output.getFinalResultSet().orElseThrow();
         return model.calcRating(set);
+    }
+
+    public static IntFunction<StatRatingsWeights> determineRatingMultipliersVariable() {
+        StatRatingsWeights tankMitigation = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
+        StatRatingsWeights tankDps = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtDps), false, true, false);
+
+        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, PrintRecorder.withAutoOutput());
+
+        double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtMitigation);
+        double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtDps);
+
+        double targetCombined = 10000000000L;
+
+        return percentMit -> {
+            int percentDps = 100 - percentMit;
+            int multiplyA = Math.toIntExact(Math.round(targetCombined * (percentMit / 100.0) / rateMitigation));
+            int multiplyB = Math.toIntExact(Math.round(targetCombined * (percentDps / 100.0) / rateTankDps));
+            double total = multiplyA * rateMitigation + multiplyB * rateTankDps;
+            if (Math.abs(total - targetCombined) > targetCombined / 100)
+                throw new RuntimeException("couldn't hit target within 1%");
+            return StatRatingsWeights.mix(tankMitigation, multiplyA, tankDps, multiplyB, StandardModels.protGems());
+        };
+    }
+
+    public static void optimalForVariedRating(EquipOptionsMap items, List<EquippedItem> extraItems) {
+        IntFunction<StatRatingsWeights> modelGenerator = determineRatingMultipliersVariable();
+        for (int percent = 0; percent <= 100; percent += 5) {
+            OutputText.printf("WEIGHTED SET %d\n", percent);
+            StatRatingsWeights weights = modelGenerator.apply(percent);
+            ModelCombined model = StandardModels.pallyProtVariableModel(weights);
+            JobOutput result = reforgeProcessPlusManyQuiet(items, model, extraItems);
+//            result.input.printRecorder.outputNow();
+            FullItemSet resultSet = result.getFinalResultSet().orElseThrow();
+            resultSet.outputSetDetailed(model);
+            AsWowSimJson.writeFullToOut(resultSet.items(), model);
+            SimInputModify.makeWithGear(resultSet.items(), "PERCENT-" + percent);
+
+        }
+
+        // TODO bonsus set forced variants
+        // what about soul barrier
+
     }
 
     public static void dumpTier2Gear() {
@@ -935,9 +1036,8 @@ public class Tasks {
             int add = 800;
             StatType[] statsCheck = new StatType[]{Primary, Stam, Crit, Haste, Expertise, Mastery, Dodge, Parry};
             for (StatType stat : statsCheck) {
-                Path inFile = SimInputModify.make(stat, add);
+                Path inFile = SimInputModify.makeWithBonusStat(stat, add);
                 Path outFile = SimInputModify.outName(stat);
-                Files.deleteIfExists(outFile);
 
                 SimCliExecute.run(inFile, outFile);
 
@@ -947,5 +1047,24 @@ public class Tasks {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public static void runPrebuiltSimFiles() {
+        Pattern pattern = Pattern.compile("\\D*(\\d+)\\D*");
+        ToIntFunction<String> extractNum = str -> { Matcher m = pattern.matcher(str); return m.matches() ? Integer.parseInt(m.group(1)) : -1; };
+
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(SimInputModify.basePath, "in-PERCENT-*.json")) {
+            StreamSupport.stream(dirStream.spliterator(), false)
+                .sorted(Comparator.comparingInt(x -> extractNum.applyAsInt(x.getFileName().toString())))
+                .forEach(inFile -> {
+                    Path outFile = inFile.resolveSibling(inFile.getFileName() + ".out");
+                    OutputText.println(inFile.toString());
+                    SimCliExecute.run(inFile, outFile);
+                    SimOutputReader.readInput(outFile);
+                });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }

@@ -14,6 +14,10 @@ public abstract class StatRatings {
     protected StatType bestNonHit;
     protected StatType worstNonHit;
 
+    public EnumMap<SocketType, StatBlock> getStandardGems() {
+        return standardGems;
+    }
+
     public abstract long calcRating(StatBlock totals);
 
     public abstract long calcRating(StatType stat, int value);

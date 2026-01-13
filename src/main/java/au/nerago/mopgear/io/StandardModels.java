@@ -13,7 +13,6 @@ import java.util.EnumMap;
 
 import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.domain.StatType.Crit;
-import static au.nerago.mopgear.domain.WowClass.Mage;
 
 public class StandardModels {
     public static ModelCombined modelFor(SpecType spec) {
@@ -65,7 +64,7 @@ public class StandardModels {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 127, statDps, 34, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 105, statDps, 68, standardGems);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -78,7 +77,8 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = SetBonus.named("White Tiger Plate", "Plate of the Lightning Emperor");
+//        SetBonus setBonus = SetBonus.named("White Tiger Plate", "Plate of the Lightning Emperor");
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtMitigation, hasteGem);
     }
 
@@ -86,7 +86,7 @@ public class StandardModels {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 22, statDps, 191, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 45, statDps, 159, standardGems);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -99,11 +99,20 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
+//        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
 //        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusThunderTank();
-//        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
 //        SetBonus setBonus = SetBonus.empty();
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtDps, hasteGem);
+    }
+
+    public static ModelCombined pallyProtVariableModel(StatRatings stats) {
+        StatRequirements combinedRequire = StatRequirementsHitExpertise.protFlexibleParry();
+
+        DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
+        ReforgeRules reforge = ReforgeRules.tank();
+        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
+        return new ModelCombined(stats, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtMitigation, hasteGem);
     }
 
     public static ModelCombined pallyRetModel() {
@@ -224,7 +233,7 @@ public class StandardModels {
         return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.MonkMistweaver, null);
     }
 
-    private static EnumMap<SocketType, StatBlock> protGems() {
+    public static EnumMap<SocketType, StatBlock> protGems() {
         EnumMap<SocketType, StatBlock> gems = new EnumMap<>(SocketType.class);
         gems.put(SocketType.Red, StatBlock.of(Haste, 160, Expertise, 160));
         gems.put(SocketType.Blue, StatBlock.of(Haste, 160, Stam, 120));

@@ -5,6 +5,7 @@ import au.nerago.mopgear.io.*;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.process.FindUpgrades;
 import au.nerago.mopgear.results.OutputText;
+import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.io.IOException;
@@ -63,11 +64,14 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
+//        variableRatingProt(startTime);
+//        runPrebuiltSimFiles();
+
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -83,7 +87,7 @@ public class Main {
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, model, commonItems, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, model, commonItems, PrintRecorder.withAutoOutput());
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(model, startTime, 89069, SlotEquip.Ring1, true);
@@ -147,16 +151,16 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = StandardModels.pallyProtDpsModel();
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = StandardModels.pallyProtDpsModel();
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = StandardModels.pallyProtMitigationModel();
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = StandardModels.pallyProtMitigationModel();
+//        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, PrintRecorder.withAutoOutput());
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, SlotEquip.Trinket2,79327, false, true, null);
@@ -289,25 +293,73 @@ public class Main {
 
 //        findUpgrade(items, pallyPhase3Valor(), model, true, null, 0);
 //        findUpgrade(items, SourcesOfItems.strengthPlateCraftedT3(), model, true, null, 0, 8);
-        findUpgrade(items, SourcesOfItems.strengthPlateThroneNormalBoss(Difficulty.Heroic, 701), model, true, null, 2, 8);
+//        findUpgrade(items, SourcesOfItems.strengthPlateThroneNormalBoss(Difficulty.Heroic, 701), model, true, null, 2, 8);
 
-//        Difficulty difficulty = Difficulty.Normal;
-//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-//                pallyPhase3Valor(),
-//                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
-//                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
-//                strengthPlateThroneNormal(difficulty),
-//                tankTrinketsThroneNormal(difficulty),
-//                strengthDpsTrinketsThroneNormal(difficulty),
-//        });
-//        upgradeShit = minusRadenLoot(upgradeShit);
-//        findUpgrade(items, upgradeShit, model, true, null, 2, 16);
+        Difficulty difficulty = Difficulty.Heroic;
+        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+                pallyPhase3Valor(),
+                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
+                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+                strengthPlateThroneNormal(difficulty),
+                tankTrinketsThroneNormal(difficulty),
+                strengthDpsTrinketsThroneNormal(difficulty),
+        });
+        upgradeShit = minusRadenLoot(upgradeShit);
+        findUpgrade(items, upgradeShit, model, true, null, 2, 16);
 
+    }
+
+    private void variableRatingProt(Instant startTime) {
+        Path file = DataLocation.gearProtDefenceFile;
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, StandardModels.pallyProtDpsModel(), null, PrintRecorder.withAutoOutput());
+
+        int[] extraItems = new int[]{
+                85320, // prot tier14 legs normal w/dodge+mostery
+                85323, // prot tier14 chest normal, w/parry
+                85339, // ret tier14 shoulder
+                85340, // ret tier14 legs
+                85343, // ret tier14 chest
+                86325, // daybreak
+                86659, // prot tier14 shoulder celestial, w/mastery
+                86662, // prot tier14 hand celestial w/dodge
+                86955, // heroic overwhelm assault belt
+                86979, // heroic impaling treads
+                87024, // null greathelm
+                87026, // heroic peacock cloak
+                87060, // Star-Stealer Waistguard
+                87100, // ret tier14 hands
+                87101, // ret tier14 head
+                87145, // defiled earth
+                89934, // soul bracer
+                94726, // cloudbreaker belt
+                94773, // centripetal shoulders normal
+//                94820, // caustic spike bracers
+                95140, // shado assault band
+                95142, // striker's battletags
+                95205, // terra-cotta neck
+                95535, // normal lightning legs
+                95652, // Puncture-Proof Greathelm head
+                95687, // celestial beakbreaker cloak
+                95910, // ret tier15 chest celestial
+                95911, // ret tier15 gloves celestial
+                95914, // ret tier15 shoulder celestial
+                95924, // prot tier15 shoulder celestial
+                96182, // ultimate prot of the emperor thunder
+        };
+        List<EquippedItem> bagsItems = bagItemsArray(ignoredItems);
+        List<EquippedItem> extraItems2 = Arrays.stream(extraItems).mapToObj(id ->
+                bagsItems.stream().filter(x -> x.itemId()==id).findAny().orElse(new EquippedItem(id, new int[0], null, 2, 0, null))
+        ).toList();
+//        List<EquippedItem> extraItems2 = Arrays.stream(extraItems).mapToObj(id -> new EquippedItem(id, new int[0], null, 2, 0, null)).toList();
+
+        List<EquippedItem> extraItemsAll = ArrayUtil.concat(extraItems2, currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile));
+        extraItemsAll = extraItemsAll.stream().filter(ei -> ei.itemId() != 87172).toList(); // remove Darkmist Vortex
+        optimalForVariedRating(items, extraItemsAll);
     }
 
     private void reforgeBoom(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.DruidBoom);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearBoomFile, model, null, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearBoomFile, model, null, PrintRecorder.withAutoOutput());
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
@@ -338,7 +390,7 @@ public class Main {
 
     private void reforgeTree(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.DruidTree);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearTreeFile, model, null, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearTreeFile, model, null, PrintRecorder.withAutoOutput());
 
 //        reforgeProcess(items, model, startTime);
 //        reforgeProcessPlus(items, model, startTime, null, 90429, false, true, null);
@@ -356,7 +408,7 @@ public class Main {
 
     private void reforgeBear(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.DruidBear);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearBearFile, model, null, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearBearFile, model, null, PrintRecorder.withAutoOutput());
 
         reforgeProcess(items, model, startTime);
 //        findUpgradeSetup(items, ArrayUtil.concat(SourcesOfItems.agilityLeatherCelestialArray(), SourcesOfItems.agilityLeatherValorArray()), model, true, null);
@@ -364,7 +416,7 @@ public class Main {
 
     private void reforgeWarlock(Instant startTime) {
         ModelCombined model = StandardModels.modelFor(SpecType.Warlock);
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearWarlockFile, model, null, true);
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearWarlockFile, model, null, PrintRecorder.withAutoOutput());
 
 //        reforgeProcess(items, model, startTime);
         new FindUpgrades(model, true).run(items, intellectClothValorCelestialP1Array(), null, 0);
@@ -507,9 +559,9 @@ public class Main {
         ModelCombined modelProt = StandardModels.modelFor(SpecType.PaladinProtMitigation);
 
         OutputText.println("RET GEAR CURRENT");
-        List<FullItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), modelRet.enchants(), true);
+        List<FullItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), modelRet.enchants(), PrintRecorder.withAutoOutput());
         OutputText.println("PROT GEAR CURRENT");
-        List<FullItemData> protItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), modelProt.enchants(), true);
+        List<FullItemData> protItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), modelProt.enchants(), PrintRecorder.withAutoOutput());
 
         Map<SlotEquip, ReforgeRecipe> reforgeRet = new EnumMap<>(SlotEquip.class);
         reforgeRet.put(SlotEquip.Head, new ReforgeRecipe(null, null));

@@ -8,10 +8,7 @@ import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.permute.Solver;
-import au.nerago.mopgear.results.JobInput;
-import au.nerago.mopgear.results.JobOutput;
-import au.nerago.mopgear.results.OutputText;
-import au.nerago.mopgear.results.UpgradeResultItem;
+import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.RankedGroupsCollection;
 
@@ -26,6 +23,7 @@ import static au.nerago.mopgear.results.JobInput.RunSizeCategory.SubSolveItem;
 public class FindUpgrades {
     private final ModelCombined model;
     private final boolean hackAllow;
+    private final PrintRecorder printer = PrintRecorder.withAutoOutput();
 
     private static long runSizeMultiply = 1;
     private static final boolean costsTraditional = false;
@@ -42,7 +40,7 @@ public class FindUpgrades {
 
     public void run(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {
         List<CostedItemData> extraItemList = extraItems.stream()
-                .map(ei -> new CostedItemData(ItemLoadUtil.loadItem(ei, model.enchants(), false), 0))
+                .map(ei -> new CostedItemData(ItemLoadUtil.loadItem(ei, model.enchants(), printer), 0))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
     }
@@ -58,7 +56,7 @@ public class FindUpgrades {
         baseItems = ItemMapUtil.upgradeAllTo2(baseItems);
         List<CostedItemData> extraItemList = extraItems.stream()
                 .map(ei -> new EquippedItem(ei.itemId(), ei.gems(), ei.enchant(), ItemLevel.MAX_UPGRADE_LEVEL, ei.reforging(), ei.randomSuffix()))
-                .map(ei -> new CostedItemData(ItemLoadUtil.loadItem(ei, model.enchants(), false), 0))
+                .map(ei -> new CostedItemData(ItemLoadUtil.loadItem(ei, model.enchants(), printer), 0))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
     }

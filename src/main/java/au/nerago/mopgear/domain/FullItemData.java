@@ -24,16 +24,20 @@ public final class FullItemData implements IItem {
     public final List<StatBlock> gemChoice;
     @Nullable
     public final Integer enchantChoice;
+    @Nullable
+    public final Integer randomSuffix;
 
     private FullItemData(@NotNull ItemShared shared, @NotNull ReforgeRecipe reforge,
                          @NotNull StatBlock statBase, @NotNull StatBlock statEnchant,
-                         @Nullable List<StatBlock> gemChoice, @Nullable Integer enchantChoice) {
+                         @Nullable List<StatBlock> gemChoice, @Nullable Integer enchantChoice,
+                         @Nullable Integer randomSuffix) {
         this.shared = shared;
         this.reforge = reforge;
         this.statBase = statBase;
         this.statEnchant = statEnchant;
         this.gemChoice = gemChoice;
         this.enchantChoice = enchantChoice;
+        this.randomSuffix = randomSuffix;
 
         if (statEnchant.isEmpty()) {
             totalCap = totalRated = statBase;
@@ -50,7 +54,7 @@ public final class FullItemData implements IItem {
                                                @NotNull PrimaryStatType primaryStatType, @NotNull ArmorType armorType,
                                                @NotNull SocketType[] socketSlots, StatBlock socketBonus, int phase) {
         ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus, phase);
-        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty, null, null);
+        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty, null, null, null);
     }
 
     public static FullItemData buildFromWowHead(int id, @NotNull SlotItem slot, @NotNull String name,
@@ -59,15 +63,15 @@ public final class FullItemData implements IItem {
                                                 @NotNull SocketType[] socketSlots, StatBlock socketBonus, int itemLevel) {
         ItemRef ref = ItemRef.buildBasic(id, itemLevel);
         ItemShared shared = ItemSharedCache.get(ref, slot, name, primaryStatType, armorType, socketSlots, socketBonus, -1);
-        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty, null, null);
+        return new FullItemData(shared, ReforgeRecipe.empty(), statBase, StatBlock.empty, null, null, null);
     }
 
     public FullItemData changeForReforge(@NotNull StatBlock changedStats, @NotNull ReforgeRecipe recipe) {
-        return new FullItemData(shared, recipe, changedStats, statEnchant, gemChoice, enchantChoice);
+        return new FullItemData(shared, recipe, changedStats, statEnchant, gemChoice, enchantChoice, randomSuffix);
     }
 
     public FullItemData changeStatsBase(@NotNull StatBlock changedStats) {
-        return new FullItemData(shared, reforge, changedStats, statEnchant, gemChoice, enchantChoice);
+        return new FullItemData(shared, reforge, changedStats, statEnchant, gemChoice, enchantChoice, randomSuffix);
     }
 
 //    public FullItemData changeEnchant(@NotNull StatBlock changedEnchant) {
@@ -75,24 +79,28 @@ public final class FullItemData implements IItem {
 //    }
 
     public FullItemData changeEnchant(@NotNull StatBlock changedEnchant, List<StatBlock> gemChoice, Integer enchant) {
-        return new FullItemData(shared, reforge, statBase, changedEnchant, gemChoice, enchant);
+        return new FullItemData(shared, reforge, statBase, changedEnchant, gemChoice, enchant, randomSuffix);
     }
 
     public FullItemData changeDuplicate(int dupNum) {
         ItemRef changeRef = ref().changeDuplicate(dupNum);
         ItemShared changeShared = ItemSharedCache.get(changeRef, shared);
-        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice, enchantChoice);
+        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice, enchantChoice, randomSuffix);
     }
 
     public FullItemData changeItemLevel(int itemLevel) {
         ItemRef changeRef = ref().changeItemLevel(itemLevel);
         ItemShared changeShared = ItemSharedCache.get(changeRef, shared);
-        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice, enchantChoice);
+        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice, enchantChoice, randomSuffix);
     }
 
     public FullItemData changeName(String replaceName) {
         ItemShared changeShared = ItemSharedCache.get(replaceName, shared);
-        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice, enchantChoice);
+        return new FullItemData(changeShared, reforge, statBase, statEnchant, gemChoice, enchantChoice, randomSuffix);
+    }
+
+    public FullItemData withRandomSuffix(Integer replaceRandomSuffix) {
+        return new FullItemData(shared, reforge, statBase, statEnchant, gemChoice, enchantChoice, replaceRandomSuffix);
     }
 
     @Override

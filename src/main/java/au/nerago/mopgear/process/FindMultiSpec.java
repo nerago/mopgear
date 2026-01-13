@@ -8,10 +8,7 @@ import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.permute.PossibleIndexed;
 import au.nerago.mopgear.permute.PossibleRandom;
 import au.nerago.mopgear.permute.Solver;
-import au.nerago.mopgear.results.AsWowSimJson;
-import au.nerago.mopgear.results.JobInput;
-import au.nerago.mopgear.results.JobOutput;
-import au.nerago.mopgear.results.OutputText;
+import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.*;
 
 import java.nio.file.Path;
@@ -568,7 +565,7 @@ public class FindMultiSpec {
         }
 
         public void prepareStartingGear(List<SpecDetails> allSpecs) {
-            itemOptions = ItemLoadUtil.readAndLoad(gearFile, model, null, false);
+            itemOptions = ItemLoadUtil.readAndLoad(gearFile, model, null, PrintRecorder.withAutoOutput());
             equippedGear = ItemLoadUtil.readAndLoadExistingForge(gearFile, model.enchants());
 
             if (upgradeCurrentItems)

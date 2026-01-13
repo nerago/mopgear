@@ -8,6 +8,7 @@ import au.nerago.mopgear.io.WowSimDB;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.process.Reforger;
 import au.nerago.mopgear.results.OutputText;
+import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
 import org.jetbrains.annotations.NotNull;
@@ -37,13 +38,13 @@ public class ItemLoadUtil {
         return set;
     }
 
-    public static EquipOptionsMap readAndLoad(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> presetForge, boolean detailedOutput) {
-        return readAndLoad(file, model.reforgeRules(), model.enchants(), presetForge, detailedOutput);
+    public static EquipOptionsMap readAndLoad(Path file, ModelCombined model, Map<Integer, List<ReforgeRecipe>> presetForge, PrintRecorder printer) {
+        return readAndLoad(file, model.reforgeRules(), model.enchants(), presetForge, printer);
     }
 
-    public static EquipOptionsMap readAndLoad(Path file, ReforgeRules reforge, DefaultEnchants enchants, Map<Integer, List<ReforgeRecipe>> presetForge, boolean detailedOutput) {
+    public static EquipOptionsMap readAndLoad(Path file, ReforgeRules reforge, DefaultEnchants enchants, Map<Integer, List<ReforgeRecipe>> presetForge, PrintRecorder printer) {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
-        List<FullItemData> items = loadItems(itemIds, enchants, detailedOutput);
+        List<FullItemData> items = loadItems(itemIds, enchants, printer);
         EquipOptionsMap result = presetForge != null
                 ? ItemMapUtil.limitedItemsReforgedToMap(reforge, items, presetForge)
                 : ItemMapUtil.standardItemsReforgedToMap(reforge, items);
@@ -56,7 +57,7 @@ public class ItemLoadUtil {
 
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
         for (EquippedItem equippedItem : itemIds) {
-            FullItemData item = loadItem(equippedItem, enchants, false);
+            FullItemData item = loadItem(equippedItem, enchants, PrintRecorder.swallow());
 
             ReforgeRecipe forge = null;
             if (equippedItem.reforging() != 0) {
@@ -89,16 +90,16 @@ public class ItemLoadUtil {
         itemCache.cacheSave();
     }
 
-    public static List<FullItemData> loadItems(List<EquippedItem> itemIds, DefaultEnchants enchants, boolean detailedOutput) {
+    public static List<FullItemData> loadItems(List<EquippedItem> itemIds, DefaultEnchants enchants, PrintRecorder printer) {
         List<FullItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
-            FullItemData item = loadItem(equippedItem, enchants, detailedOutput);
+            FullItemData item = loadItem(equippedItem, enchants, printer);
             items.add(item);
         }
         return items;
     }
 
-    public static FullItemData loadItem(EquippedItem equippedItem, DefaultEnchants enchants, boolean detailedOutput) {
+    public static FullItemData loadItem(EquippedItem equippedItem, DefaultEnchants enchants, PrintRecorder printer) {
         int id = equippedItem.itemId(), upgrade = equippedItem.upgradeStep();
         FullItemData item = loadItemBasic(id, upgrade);
 
@@ -120,30 +121,28 @@ public class ItemLoadUtil {
         }
 
         if (id == 94820 && equippedItem.randomSuffix() == -336) {
-            item = item.changeStatsBase(item.statBase.plus(StatBlock.of(StatType.Crit, 882)));
+            item = item.changeStatsBase(item.statBase.plus(StatBlock.of(StatType.Crit, 882))).withRandomSuffix(equippedItem.randomSuffix());
         }
 
-        if (detailedOutput) {
-            if (expectedEnchant.contains(item.slot())) {
-                if (equippedItem.enchant() != null) {
-                    StatBlock standardEnchant = enchants.standardEnchant(item.slot());
-                    StatBlock actualEnchant = GemData.getEnchant(equippedItem.enchant());
-                    if (standardEnchant == null || standardEnchant.equalsStats(actualEnchant)) {
-                        OutputText.println(id + ": " + item.toStringExtended() + " ENCHANTED");
-                    } else {
-                        OutputText.println(id + ": " + item.toStringExtended() + " ENCHANT WRONG ENCHANT WRONG ENCHANT WRONG " + equippedItem.enchant());
-                    }
+        if (expectedEnchant.contains(item.slot())) {
+            if (equippedItem.enchant() != null) {
+                StatBlock standardEnchant = enchants.standardEnchant(item.slot());
+                StatBlock actualEnchant = GemData.getEnchant(equippedItem.enchant());
+                if (standardEnchant == null || standardEnchant.equalsStats(actualEnchant)) {
+                    printer.println(id + ": " + item.toStringExtended() + " ENCHANTED");
                 } else {
-                    OutputText.println(id + ": " + item.toStringExtended() + " MISSING EXPECTED ENCHANT MISSING MISSING MISSING");
+                    printer.println(id + ": " + item.toStringExtended() + " ENCHANT WRONG ENCHANT WRONG ENCHANT WRONG " + equippedItem.enchant());
                 }
-            } else if (equippedItem.enchant() != null) {
-                OutputText.println(id + ": " + item.toStringExtended() + " UNEXPECTED ENCHANT UNEXPECTED ENCHANT UNEXPECTED ENCHANT " + equippedItem.enchant());
             } else {
-                OutputText.println(id + ": " + item.toStringExtended());
+                printer.println(id + ": " + item.toStringExtended() + " MISSING EXPECTED ENCHANT MISSING MISSING MISSING");
             }
-            if (item.statBase.isEmpty()) {
-                OutputText.println("MISSING STATS MISSING STATS MISSING STATS MISSING STATS");
-            }
+        } else if (equippedItem.enchant() != null) {
+            printer.println(id + ": " + item.toStringExtended() + " UNEXPECTED ENCHANT UNEXPECTED ENCHANT UNEXPECTED ENCHANT " + equippedItem.enchant());
+        } else {
+            printer.println(id + ": " + item.toStringExtended());
+        }
+        if (item.statBase.isEmpty()) {
+            printer.println("MISSING STATS MISSING STATS MISSING STATS MISSING STATS");
         }
         return item;
     }

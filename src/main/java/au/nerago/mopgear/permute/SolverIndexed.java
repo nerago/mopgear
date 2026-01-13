@@ -89,7 +89,7 @@ public class SolverIndexed {
     }
 
     private static Stream<BigInteger> generateDumbStream(BigInteger max, BigInteger skip) {
-        int start = ThreadLocalRandom.current().nextInt(0, skip.intValueExact());
+        long start = ThreadLocalRandom.current().nextLong(0, skip.longValueExact());
         return Stream.iterate(BigInteger.valueOf(start), x -> x.compareTo(max) < 0, x -> x.add(skip));
     }
 

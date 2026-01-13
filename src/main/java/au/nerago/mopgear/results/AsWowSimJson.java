@@ -35,7 +35,7 @@ public class AsWowSimJson {
 //        }
 //    }
 
-    private static JsonObject makeItemObject(FullItemData item) {
+    public static JsonObject makeItemObject(FullItemData item) {
         JsonObject object = new JsonObject();
         object.add("id", new JsonPrimitive(item.itemId()));
         object.add("upgrade_step", new JsonPrimitive(item.shared.ref().upgradeLevel()));
@@ -62,6 +62,10 @@ public class AsWowSimJson {
             if (!expectedEnchants.equalsStats(item.statEnchant)) {
                 throw new RuntimeException("enchant details don't match");
             }
+        }
+
+        if (item.randomSuffix != null) {
+            object.add("random_suffix", new JsonPrimitive(item.randomSuffix));
         }
 
         // NOTE tinker don't bother, just synapse springs of interest
