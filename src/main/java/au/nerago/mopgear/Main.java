@@ -64,14 +64,14 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        variableRatingProt(startTime);
 //        runPrebuiltSimFiles();
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -316,19 +316,19 @@ public class Main {
         int[] extraItems = new int[]{
                 85320, // prot tier14 legs normal w/dodge+mostery
                 85323, // prot tier14 chest normal, w/parry
+                86659, // prot tier14 shoulder celestial, w/mastery
+                86662, // prot tier14 hand celestial w/dodge
                 85339, // ret tier14 shoulder
                 85340, // ret tier14 legs
                 85343, // ret tier14 chest
+                87100, // ret tier14 hands
+                87101, // ret tier14 head
                 86325, // daybreak
-                86659, // prot tier14 shoulder celestial, w/mastery
-                86662, // prot tier14 hand celestial w/dodge
                 86955, // heroic overwhelm assault belt
                 86979, // heroic impaling treads
                 87024, // null greathelm
                 87026, // heroic peacock cloak
                 87060, // Star-Stealer Waistguard
-                87100, // ret tier14 hands
-                87101, // ret tier14 head
                 87145, // defiled earth
                 89934, // soul bracer
                 94726, // cloudbreaker belt
@@ -340,11 +340,22 @@ public class Main {
                 95535, // normal lightning legs
                 95652, // Puncture-Proof Greathelm head
                 95687, // celestial beakbreaker cloak
+                96182, // ultimate prot of the emperor thunder
+
                 95910, // ret tier15 chest celestial
                 95911, // ret tier15 gloves celestial
+                95912, // ret tier15 celestial
+                95913, // ret tier15 celestial
                 95914, // ret tier15 shoulder celestial
+
+                95920, // prot tier15 chest celestial
+                95921, // prot tier15 hand celestial
+                95922, // prot tier15 head celestial
+                95923, // prot tier15 leg celestial
                 95924, // prot tier15 shoulder celestial
-                96182, // ultimate prot of the emperor thunder
+
+                 95191, // tanky belt
+                95291, // prot gloves
         };
         List<EquippedItem> bagsItems = bagItemsArray(ignoredItems);
         List<EquippedItem> extraItems2 = Arrays.stream(extraItems).mapToObj(id ->

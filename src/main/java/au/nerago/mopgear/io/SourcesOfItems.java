@@ -833,7 +833,7 @@ public class SourcesOfItems {
 
     public static CostedItem[] strengthPlateThroneNormalBoss(Difficulty difficulty, int bossId) {
         CostedItem[] initial = strengthPlateThroneNormal(difficulty);
-        Stream<CostedItem> itemsWithBossId = Arrays.stream(initial).map(ci -> ItemLoadUtil.loadItemBasic(ci.itemId(), 0))
+        Stream<CostedItem> itemsWithBossId = Arrays.stream(initial).map(ci -> ItemLoadUtil.loadItemBasic(ci.itemId(), 0, PrintRecorder.withAutoOutput()))
                 .map(it -> new CostedItem(it.itemId(), BossLookup.bossIdForItemName(it.shared.name())));
         Stream<CostedItem> filtered = itemsWithBossId.filter(ci -> ci.cost() == bossId);
         return filtered.toArray(CostedItem[]::new);

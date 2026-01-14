@@ -39,25 +39,11 @@ public class SetBonus {
     // seal,judge +10%
     private static final int WHITE_TIGER_BATTLEGEAR_4 = 1024;
     private static final int WHITE_TIGER_BATTLEGEAR_4_TANK = 1035; // gives 2% to dps, a bit more overall
-    private static final int PLATE_LIGHTNING_BONUS = 1010;
 
-    private static final SetInfo pallyBattlegearForTank = new SetInfo(SpecType.PaladinRet, "Paladin Ret T14 for Prot", DENOMIATOR, WHITE_TIGER_BATTLEGEAR_4_TANK, new int[]{
-            86681, 86679, 86683, 86682, 86680,
-            85341, 85339, 85343, 85342, 85340,
-            87101, 87103, 87099, 87100, 87102
-    });
-
-    public static SetBonus activateWhiteTigerBattlegearOnly4pc() {
-        return new SetBonus(Collections.singletonList(pallyBattlegearForTank));
-    }
-
-    public static SetBonus activateWhiteTigerBattlegearOnly4pcPlusThunderTank() {
-        return new SetBonus(Arrays.asList(pallyBattlegearForTank, findSet("Plate of the Lightning Emperor")));
-    }
-
-    public static SetBonus activateWhiteTigerBattlegearOnly4pcPlusAll() {
-        return new SetBonus(Arrays.asList(pallyBattlegearForTank, findSet("White Tiger Plate"), findSet("Plate of the Lightning Emperor")));
-    }
+    private static final int PLATE_LIGHTNING_BONUS_2_MITI = 1013; // 1.3% bonus applies to death chance only, from sim
+    private static final int PLATE_LIGHTNING_BONUS_4_MITI = 1050; // compromise number, it's situational after all
+    private static final int PLATE_LIGHTNING_BONUS_4_DPS = 1027; // sim result for horridon H10, might not always apply
+    private static final int PLATE_LIGHTNING_BONUS_4_DEATH = 1250; // actual result of sim for horridon H10
 
     // <<<<<<<<<<<<< DRUID BOOM TEIR 14 >>>>>>>>>>>>>>>>
 
@@ -71,21 +57,28 @@ public class SetBonus {
 
     private static List<SetInfo> buildSets() {
         List<SetInfo> sets = new ArrayList<>();
+
+        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "White Tiger Battlegear Prot Mitigation", DENOMIATOR, WHITE_TIGER_BATTLEGEAR_4_TANK, new int[]{86681, 86679, 86683, 86682, 86680, 85341, 85339, 85343, 85342, 85340, 87101, 87103, 87099, 87100, 87102}));
+        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "White Tiger Plate", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85319, 85320, 85321, 85322, 85323, 86659, 86660, 86661, 86662, 86663, 87109, 87110, 87111, 87112, 87113}));
+
+        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "Plate of the Lightning Emperor Prot Mitigation", PLATE_LIGHTNING_BONUS_2_MITI, PLATE_LIGHTNING_BONUS_4_MITI, new int[]{95290, 95291, 95292, 95293, 95294, 95920, 95921, 95922, 95923, 95924, 96664, 96665, 96666, 96667, 96668}));
+        sets.add(new SetInfo(SpecType.PaladinProtDps, "Plate of the Lightning Emperor Prot Damage", DENOMIATOR, PLATE_LIGHTNING_BONUS_4_DPS, new int[]{95290, 95291, 95292, 95293, 95294, 95920, 95921, 95922, 95923, 95924, 96664, 96665, 96666, 96667, 96668}));
+
+        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "Plate of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99026, 99027, 99028, 99029, 99031, 99126, 99127, 99128, 99129, 99130, 99364, 99368, 99369, 99370, 99371, 99593, 99594, 99595, 99596, 99598}));
+        sets.add(new SetInfo(SpecType.PaladinRet, "White Tiger Battlegear", WHITE_TIGER_BATTLEGEAR_2, WHITE_TIGER_BATTLEGEAR_4, new int[]{85339, 85340, 85341, 85342, 85343, 86679, 86680, 86681, 86682, 86683, 87099, 87100, 87101, 87102, 87103}));
+        sets.add(new SetInfo(SpecType.PaladinRet, "Battlegear of the Lightning Emperor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95280, 95281, 95282, 95283, 95284, 95910, 95911, 95912, 95913, 95914, 96654, 96655, 96656, 96657, 96658}));
+        sets.add(new SetInfo(SpecType.PaladinRet, "Battlegear of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{98985, 98986, 98987, 99002, 99052, 99132, 99136, 99137, 99138, 99139, 99372, 99373, 99379, 99380, 99387, 99566, 99625, 99651, 99661, 99662}));
+        sets.add(new SetInfo(SpecType.PaladinHoly, "White Tiger Vestments", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85344, 85345, 85346, 85347, 85348, 86684, 86685, 86686, 86687, 86688, 87104, 87105, 87106, 87107, 87108}));
+        sets.add(new SetInfo(SpecType.PaladinHoly, "Vestments of the Lightning Emperor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95285, 95286, 95287, 95288, 95289, 95915, 95916, 95917, 95918, 95919, 96659, 96660, 96661, 96662, 96663}));
+        sets.add(new SetInfo(SpecType.PaladinHoly, "Vestments of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{98979, 98980, 98982, 99003, 99076, 99124, 99125, 99133, 99134, 99135, 99374, 99375, 99376, 99377, 99378, 99626, 99648, 99656, 99665, 99666}));
+
         sets.add(new SetInfo(SpecType.WarriorArms, "Battleplate of Resounding Rings", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85329, 85330, 85331, 85332, 85333, 86669, 86670, 86671, 86672, 86673, 87192, 87193, 87194, 87195, 87196}));
         sets.add(new SetInfo(SpecType.WarriorArms, "Battleplate of the Last Mogu", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95330, 95331, 95332, 95333, 95334, 95986, 95987, 95988, 95989, 95990, 96730, 96731, 96732, 96733, 96734}));
         sets.add(new SetInfo(SpecType.WarriorArms, "Battleplate of the Prehistoric Marauder", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99034, 99035, 99036, 99046, 99047, 99197, 99198, 99199, 99200, 99206, 99411, 99412, 99413, 99414, 99418, 99559, 99560, 99561, 99602, 99603}));
         sets.add(new SetInfo(SpecType.WarriorProt, "Plate of Resounding Rings", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85324, 85325, 85326, 85327, 85328, 86664, 86665, 86666, 86667, 86668, 87197, 87198, 87199, 87200, 87201}));
         sets.add(new SetInfo(SpecType.WarriorProt, "Plate of the Last Mogu", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95335, 95336, 95337, 95338, 95339, 95991, 95992, 95993, 95994, 95995, 96735, 96736, 96737, 96738, 96739}));
         sets.add(new SetInfo(SpecType.WarriorProt, "Plate of the Prehistoric Marauder", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99030, 99032, 99033, 99037, 99038, 99195, 99196, 99201, 99202, 99203, 99407, 99408, 99409, 99410, 99415, 99557, 99558, 99562, 99563, 99597}));
-        sets.add(new SetInfo(SpecType.PaladinRet, "Battlegear of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{98985, 98986, 98987, 99002, 99052, 99132, 99136, 99137, 99138, 99139, 99372, 99373, 99379, 99380, 99387, 99566, 99625, 99651, 99661, 99662}));
-        sets.add(new SetInfo(SpecType.PaladinRet, "Battlegear of the Lightning Emperor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95280, 95281, 95282, 95283, 95284, 95910, 95911, 95912, 95913, 95914, 96654, 96655, 96656, 96657, 96658}));
-        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "Plate of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99026, 99027, 99028, 99029, 99031, 99126, 99127, 99128, 99129, 99130, 99364, 99368, 99369, 99370, 99371, 99593, 99594, 99595, 99596, 99598}));
-        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "Plate of the Lightning Emperor", PLATE_LIGHTNING_BONUS, PLATE_LIGHTNING_BONUS, new int[]{95290, 95291, 95292, 95293, 95294, 95920, 95921, 95922, 95923, 95924, 96664, 96665, 96666, 96667, 96668}));
-        sets.add(new SetInfo(SpecType.PaladinHoly, "Vestments of Winged Triumph", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{98979, 98980, 98982, 99003, 99076, 99124, 99125, 99133, 99134, 99135, 99374, 99375, 99376, 99377, 99378, 99626, 99648, 99656, 99665, 99666}));
-        sets.add(new SetInfo(SpecType.PaladinHoly, "Vestments of the Lightning Emperor", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95285, 95286, 95287, 95288, 95289, 95915, 95916, 95917, 95918, 95919, 96659, 96660, 96661, 96662, 96663}));
-        sets.add(new SetInfo(SpecType.PaladinRet, "White Tiger Battlegear", WHITE_TIGER_BATTLEGEAR_2, WHITE_TIGER_BATTLEGEAR_4, new int[]{85339, 85340, 85341, 85342, 85343, 86679, 86680, 86681, 86682, 86683, 87099, 87100, 87101, 87102, 87103}));
-        sets.add(new SetInfo(SpecType.PaladinProtMitigation, "White Tiger Plate", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85319, 85320, 85321, 85322, 85323, 86659, 86660, 86661, 86662, 86663, 87109, 87110, 87111, 87112, 87113}));
-        sets.add(new SetInfo(SpecType.PaladinHoly, "White Tiger Vestments", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85344, 85345, 85346, 85347, 85348, 86684, 86685, 86686, 86687, 86688, 87104, 87105, 87106, 87107, 87108}));
+
         sets.add(new SetInfo(SpecType.Hunter, "Battlegear of the Saurok Stalker", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{95255, 95256, 95257, 95258, 95259, 95882, 95883, 95884, 95885, 95886, 96626, 96627, 96628, 96629, 96630}));
         sets.add(new SetInfo(SpecType.Hunter, "Battlegear of the Unblinking Vigil", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{99080, 99081, 99082, 99085, 99086, 99157, 99158, 99159, 99167, 99168, 99402, 99403, 99404, 99405, 99406, 99573, 99574, 99577, 99578, 99660}));
         sets.add(new SetInfo(SpecType.Hunter, "Yaungol Slayer Battlegear", DEFAULT_BONUS, DEFAULT_BONUS, new int[]{85294, 85295, 85296, 85297, 85298, 86634, 86635, 86636, 86637, 86638, 87002, 87003, 87004, 87005, 87006}));

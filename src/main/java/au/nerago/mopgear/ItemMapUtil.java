@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ItemLevel;
 import au.nerago.mopgear.model.ReforgeRules;
 import au.nerago.mopgear.process.Reforger;
+import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.util.List;
@@ -89,7 +90,7 @@ public class ItemMapUtil {
             return oldItem;
         }
 
-        FullItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL);
+        FullItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL, PrintRecorder.withAutoOutput());
         loaded = Reforger.presetReforge(loaded, oldItem.reforge);
         return loaded.changeEnchant(oldItem.statEnchant, oldItem.gemChoice, oldItem.enchantChoice);
     }

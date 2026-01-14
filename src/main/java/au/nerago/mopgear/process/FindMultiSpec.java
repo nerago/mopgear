@@ -117,7 +117,6 @@ public class FindMultiSpec {
         OutputText.println("PREPARING RESULTS");
         outputResultFinal(best, specs);
 
-        // TODO report on extras that are always unused in all candidate sets
         // TODO highlight gems changed vs as loaded
         // TODO keep track of good indexes and search near
     }
@@ -518,7 +517,7 @@ public class FindMultiSpec {
             this.model = model;
             this.ratingTargetPercent = ratingTargetPercent;
             this.phasedAcceptable = phasedAcceptable;
-            this.extraItems = extraItems;
+            this.extraItems = Arrays.stream(extraItems).sorted().distinct().toArray();
             this.extraItemsUpgradeLevel = extraItemsUpgradeLevel;
             this.upgradeCurrentItems = upgradeCurrentItems;
         }
@@ -645,7 +644,7 @@ public class FindMultiSpec {
         }
 
         private boolean checkAlreadyIncluded(int itemId) {
-            FullItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
+            FullItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel, PrintRecorder.withAutoOutput());
             SlotEquip[] slots = extraItem.slot().toSlotEquipOptions();
             for (SlotEquip slot : slots) {
                 FullItemData[] existing = itemOptions.get(slot);
@@ -677,9 +676,9 @@ public class FindMultiSpec {
         }
 
         private void loadAndGenerate(int itemId) {
-            FullItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, 0);
+            FullItemData extraItem = ItemLoadUtil.loadItemBasic(itemId, 0, PrintRecorder.withAutoOutput());
             if (extraItem.isUpgradable() && extraItemsUpgradeLevel > 0)
-                extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel);
+                extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel, PrintRecorder.withAutoOutput());
 
             if (overrideEnchant.containsKey(itemId)) {
                 Tuple.Tuple3<StatBlock, List<StatBlock>, Integer> info = overrideEnchant.get(itemId);

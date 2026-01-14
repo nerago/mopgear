@@ -47,7 +47,7 @@ public class FindUpgrades {
 
     public void run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment, int upgradeLevel) {
         List<CostedItemData> extraItemList = Arrays.stream(extraItemArray)
-                .map(ci -> new CostedItemData(ItemLoadUtil.loadItemBasic(ci.itemId(), upgradeLevel), ci.cost()))
+                .map(ci -> new CostedItemData(ItemLoadUtil.loadItemBasic(ci.itemId(), upgradeLevel, printer), ci.cost()))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
     }
@@ -64,7 +64,7 @@ public class FindUpgrades {
     public void runMaxedItems(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment) {
         baseItems = ItemMapUtil.upgradeAllTo2(baseItems);
         List<CostedItemData> extraItemList = Arrays.stream(extraItemArray)
-                .map(ci -> new CostedItemData(ItemLoadUtil.loadItemBasic(ci.itemId(), ItemLevel.MAX_UPGRADE_LEVEL), ci.cost()))
+                .map(ci -> new CostedItemData(ItemLoadUtil.loadItemBasic(ci.itemId(), ItemLevel.MAX_UPGRADE_LEVEL, printer), ci.cost()))
                 .toList();
         runMain(baseItems, extraItemList, adjustment);
     }
@@ -103,10 +103,9 @@ public class FindUpgrades {
         HashMap<Integer, CostedItemData> result = new HashMap<>();
         for (CostedItemData item : extraItemList) {
             CostedItemData current = result.get(item.item().itemId());
-            // TODO consider reenabling check, should delete the old celestial version etc
-//            if (result.values().stream().anyMatch(x -> x.item().shared.name().equals(item.item().shared.name()) && x.item().itemId() != item.item().itemId())) {
-//                throw new RuntimeException("alternate items for " + item.item().shared.name());
-//            }
+            if (result.values().stream().anyMatch(x -> x.item().shared.name().equals(item.item().shared.name()) && x.item().itemId() != item.item().itemId())) {
+                throw new RuntimeException("alternate items for " + item.item().shared.name());
+            }
             if (current == null || current.cost() == 0 || current.cost() == -1) {
                 result.put(item.item().itemId(), item);
             } else if (item.cost() == 0 || item.cost() == -1) {

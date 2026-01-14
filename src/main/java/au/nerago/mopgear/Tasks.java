@@ -49,7 +49,8 @@ public class Tasks {
 
     public static void findBIS(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel, boolean requireFullSetBonus) {
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
-        Arrays.stream(allItems).flatMap(equip -> ItemLoadUtil.loadItemBasicWithRandomVariants(equip.itemId(), upgradeLevel).stream())
+        Arrays.stream(allItems).flatMap(equip -> ItemLoadUtil.loadItemBasicWithRandomVariants(equip.itemId(), upgradeLevel, PrintRecorder.withAutoOutput())
+                .stream())
                 .filter(item -> item.slot() != SlotItem.Weapon2H)
                 .forEach(item -> {
                     item = ItemLoadUtil.defaultEnchants(item, model, true, false);
@@ -76,9 +77,10 @@ public class Tasks {
     public static void findBestBySlot(ModelCombined model, CostedItem[] allItems, Instant startTime, int upgradeLevel) {
         Map<Integer, Integer> costs = new HashMap<>();
         EquipOptionsMap optionsMap = EquipOptionsMap.empty();
+        PrintRecorder print = PrintRecorder.swallow();
         Arrays.stream(allItems)
                 .peek(costed -> costs.put(costed.itemId(), costed.cost()))
-                .map(equip -> ItemLoadUtil.loadItemBasic(equip.itemId(), upgradeLevel))
+                .map(equip -> ItemLoadUtil.loadItemBasic(equip.itemId(), upgradeLevel, print))
                 .filter(item -> item.slot() != SlotItem.Weapon2H)
                 .forEach(item -> {
                     item = ItemLoadUtil.defaultEnchants(item, model, true, false);
@@ -111,7 +113,7 @@ public class Tasks {
     public static void rankSingleItems(ModelCombined model, List<Integer> items) {
         RankedGroupsCollection<FullItemData> ranked = new RankedGroupsCollection<>();
         for (int itemId : items) {
-            FullItemData item = ItemLoadUtil.loadItemBasic(itemId, 2);
+            FullItemData item = ItemLoadUtil.loadItemBasic(itemId, 2, PrintRecorder.withAutoOutput());
             ranked.add(item, model.calcRating(item));
         }
 
@@ -166,7 +168,7 @@ public class Tasks {
 
     @SuppressWarnings("SameParameterValue")
     public static void reforgeProcessPlus(EquipOptionsMap itemOptions, ModelCombined model, Instant startTime, SlotEquip slot, int extraItemId, int upgradeLevel, boolean replace, EnchantMode enchantMode, StatBlock adjustment, boolean alternateEnchantsAllSlots) {
-        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
+        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel, PrintRecorder.withAutoOutput());
 
         if (slot == null)
             slot = extraItem.slot().toSlotEquip();
@@ -194,12 +196,12 @@ public class Tasks {
     }
 
     public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, EnchantMode enchantMode, ReforgeRecipe reforge, boolean replace, boolean errorOnExists) {
-        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
+        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel, PrintRecorder.withAutoOutput());
         return addExtra(reforgedItems, model, extraItem, enchantMode, reforge, replace, errorOnExists);
     }
 
     public static FullItemData addExtra(EquipOptionsMap reforgedItems, ModelCombined model, int extraItemId, int upgradeLevel, SlotEquip slot, EnchantMode enchantMode, ReforgeRecipe reforge, boolean replace, boolean errorOnExists) {
-        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
+        FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel, PrintRecorder.withAutoOutput());
         return addExtra(reforgedItems, model, extraItem, slot, enchantMode, reforge, replace, errorOnExists, PrintRecorder.withAutoOutput());
     }
 
@@ -326,7 +328,7 @@ public class Tasks {
         for (CostedItem entry : extraItems) {
             int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
-            FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel);
+            FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel, PrintRecorder.withAutoOutput());
             for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
                 FullItemData[] existing = items.get(slot);
                 if (existing == null) {
@@ -379,13 +381,13 @@ public class Tasks {
         outputResultChanges(itemsOriginal, best, model);
     }
 
-    public static JobOutput reforgeProcessPlusManyQuiet(EquipOptionsMap items, ModelCombined model, List<EquippedItem> extraItems) {
+    public static JobOutput reforgeProcessPlusManyQuiet(EquipOptionsMap items, ModelCombined model, List<EquippedItem> extraItems, JobInput.RunSizeCategory sizeCategory, int sizeMultiply) {
         items = items.deepClone();
 
         PrintRecorder printRecorder = new PrintRecorder();
         plusManyItems(items, model, extraItems, printRecorder);
 
-        JobInput job = new JobInput(Final, 1, false);
+        JobInput job = new JobInput(sizeCategory, sizeMultiply, false);
         job.printRecorder.append(printRecorder);
         job.model = model;
         job.setItemOptions(items);
@@ -517,17 +519,20 @@ public class Tasks {
 //                        85340, // ret tier14 legs
                         87101, // ret tier14 head
 //                        85339, // ret tier14 shoulder
-                        85343, // ret tier14 chest
+//                        85343, // ret tier14 chest
                         87100, // ret tier14 hands
-                        95914, // ret tier15 shoulder celestial
-//                        95910, // ret tier15 chest celestial
+
+                        95910, // ret tier15 chest celestial
                         95911, // ret tier15 gloves celestial
+//                        95912, // ret tier15 celestial (don't have yet)
+//                        95913, // ret tier15 celestial (don't have yet)
+                        95914, // ret tier15 shoulder celestial
 
 //                        95142, // striker's battletags
                         95205, // terra-cotta neck
 //                        87036, // soulgrasp heroic
 
-//                        94773, // centripetal shoulders normal
+                        94773, // centripetal shoulders normal
 //                        95140, // shado assault band
 
 //                        87145, // defiled earth
@@ -548,54 +553,53 @@ public class Tasks {
                 0.60,
                 false,
                         new int[]{
+        //                        86957, // heroic bladed tempest
+//                                95140, // shado assault band
+
+        //                        87015, // heroic clawfeet
                                 86979, // heroic impaling treads
-        ////                        86957, // heroic bladed tempest
-        ////                        85343, // normal ret chest
-        //
-        ////                        87015, // heroic clawfeet
-        ////                        86979, // heroic impaling treads
-        ////                        87071, // yang-xi heroic
-        ////                        85340, // normal ret legs
-        ////                        87101, // heroic ret head
-        ////                        86946, // ruby signet heroic
+        //                        87071, // yang-xi heroic
+        //                        86946, // ruby signet heroic
                                 94726, // cloudbreaker belt
                                 87024, // null greathelm
         //
                                 87026, // heroic peacock cloak
-        //                        86955, // heroic overwhelm assault belt
+//                                86955, // heroic overwhelm assault belt
                                 95535, // normal lightning legs
+                                94773, // centripetal shoulders normal
         //
-        ////                        87050, // steelskin heroic
-        //                        95652, // Puncture-Proof Greathelm head
+//                                95652, // Puncture-Proof Greathelm head
 //                                95687, // celestial beakbreaker cloak
         //
-        ////                        95924, // prot tier15 shoulder celestial
-        //                        // TODO add all prot tier15 celestial (not farming today)
-        //
-                                85340, // ret tier14 legs
-                                87101, // ret tier14 head
-                                85339, // ret tier14 shoulder
+//                                85340, // ret tier14 legs
+//                                87101, // ret tier14 head
+//                                85339, // ret tier14 shoulder
                                 85343, // ret tier14 chest
                                 87100, // ret tier14 hands
-        //                        95914, // ret tier15 shoulder celestial
-//                                95910, // ret tier15 chest celestial
-//                                95911, // ret tier15 gloves celestial
+
+                                95910, // ret tier15 chest celestial
+                                95911, // ret tier15 gloves celestial
+//                        95912, // ret tier15 celestial (don't have yet)
+//                        95913, // ret tier15 celestial (don't have yet)
+                                95914, // ret tier15 shoulder celestial
+
+                                95291, // prot tier15 hand normal
+//                                95920, // prot tier15 chest celestial
+//                                95922, // prot tier15 head celestial
+//                                95923, // prot tier15 leg celestial
+//                                95924, // prot tier15 shoulder celestial
         //
-                                95142, // striker's battletags
+//                                95142, // striker's battletags
                                 95205, // terra-cotta neck
         //                        87036, // soulgrasp heroic
         //
                                 96182, // ultimate prot of the emperor thunder
-        //
-                                94773, // centripetal shoulders normal
-//                                95140, // shado assault band
 
 //                                87145, // defiled earth
 //                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 // from other processes
-                                85339,
                                 85343,
                                 86387,
                                 86957,
@@ -607,11 +611,8 @@ public class Tasks {
                                 94726,
                                 94820,
                                 95140,
-                                95142,
                                 95205,
                                 95535,
-                                96182,
-
                         },
                         extraUpgrade,
                         preUpgrade)
@@ -629,48 +630,48 @@ public class Tasks {
                 false,
                         new int[]{
                                 86979, // heroic impaling treads
-        //////                        86957, // heroic bladed tempest
+        //                        86957, // heroic bladed tempest
         //                        87071, // yang-xi heroic
-//                                87024, // null greathelm
-        //////                        86946, // ruby signet heroic
+        //                        87024, // null greathelm
+        //                        86946, // ruby signet heroic
+        
                                 94726, // cloudbreaker belt
-        //                        86955, // heroic overwhelm assault belt
-        //////                        87060, // Star-Stealer Waistguard
-        ////
+                                86955, // heroic overwhelm assault belt
+//                                87060, // Star-Stealer Waistguard
+								95191, // belt voolar tanky
+																
                                 87026, // heroic peacock cloak
-        ////                        86325, // daybreak
-        ////                        95687, // celestial beakbreaker cloak
-        ////
+                                86325, // daybreak
+//                                95687, // celestial beakbreaker cloak
+        
                                 95535, // normal lightning legs
-        ////
-        //                        95652, // Puncture-Proof Greathelm head
-        //////                        95808, // celestial whipping legs
-        //////                        95924, // prot tier shoulder celestial
-        ////
-        //                        86659, // prot tier14 shoulder celestial, w/mastery
-                                85323, // prot tier14 chest normal, w/parry
-                                86662, // prot tier14 hand celestial w/dodge
-        //                        85320, // prot tier14 legs normal w/dodge+mostery
-        ////
-                                85340, // ret tier14 legs
-                                87101, // ret tier14 head
-                                85339, // ret tier14 shoulder
-                                85343, // ret tier14 chest
-                                87100, // ret tier14 hands
-        ////
-        //                        95914, // ret tier15 shoulder celestial
+        
+//                                86659, // prot tier14 shoulder celestial, w/mastery
+//                                85323, // prot tier14 chest normal, w/parry
+//                                86662, // prot tier14 hand celestial w/dodge
+//                                85320, // prot tier14 legs normal w/dodge+mostery
+
+//                                85340, // ret tier14 legs 0
+                                87101, // ret tier14 head 0
+//                                85339, // ret tier14 shoulder 0
+//                                85343, // ret tier14 chest 0
+                                87100, // ret tier14 hands 0
+
+//                                95914, // ret tier15 shoulder celestial
 //                                95910, // ret tier15 chest celestial
-        ////                        95911, // ret tier15 gloves celestial
-        ////
-        //                        95142, // striker's battletags
+//                                95911, // ret tier15 gloves celestial
+
+                                95291, // prot tier15 hand normal
+                                95920, // prot tier15 chest celestial (don't have yet)
+                                95922, // prot tier15 head celestial (don't have yet)
+//                                95923, // prot tier15 leg celestial (don't have yet)
+                                95924, // prot tier15 shoulder celestial
+
+//                                95142, // striker's battletags
                                 95205, // terra-cotta neck
-        ////                        87036, // soulgrasp heroic
-        ////
-        ////                        96182, // ultimate prot of the emperor thunder
-        ////
-        ////                        // bags upgrades
-        //                        95735, // artery ripper celestial
-        ////                        95874, // Bloody Shoulderplates
+
+                                96182, // ultimate prot of the emperor thunder
+
                                 94773, // centripetal shoulders normal
 //                                95140, // shado assault band
 
@@ -679,22 +680,7 @@ public class Tasks {
                                 94820, // caustic spike bracers
 
                                 // from other processes
-                                85339,
-                                85343,
-                                86387,
-                                86957,
-                                86979,
-                                87026,
-                                87100,
-                                87101,
-                                94526,
-                                94726,
-                                94820,
-                                95140,
-//                                95142,
-                                95205,
-                                95535,
-                                96182,
+                                86387, // sha weapon
                         },
                         extraUpgrade,
                         preUpgrade)
@@ -722,12 +708,12 @@ public class Tasks {
 //        multi.solve(1000);
 //        multi.solve(5000);
 //        multi.solve(15000);
-//        multi.solve(50000);
+        multi.solve(50000);
 //        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);
 //        multi.solve(1490000);
-        multi.solve(4000000);
+//        multi.solve(4000000);
     }
 
     public static void druidMultiSpecSolve() {
@@ -789,7 +775,7 @@ public class Tasks {
         OutputText.printf("RET        %,d\n", (long)rateRet);
         OutputText.println();
 
-        int defPercentMit = 70, defPercentDps = 100 - defPercentMit;
+        int defPercentMit = 80, defPercentDps = 100 - defPercentMit;
         OutputText.printf("defenceProtModel %d%% mitigation, %d%% dps\n", defPercentMit , defPercentDps);
         long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation * 10);
         long defMultiplyB = Math.round(targetCombined * (defPercentDps / 100.0) / rateTankDps * 10);
@@ -802,7 +788,7 @@ public class Tasks {
         StatType defBestStat = defMix.bestNonHit();
         OutputText.printf("BEST STAT %s\n\n", defBestStat);
 
-        int dmgPercentMit = 30, dmgPercentDps = 100 - dmgPercentMit;
+        int dmgPercentMit = 35, dmgPercentDps = 100 - dmgPercentMit;
         OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
         long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation * 10);
         long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps * 10);
@@ -850,9 +836,9 @@ public class Tasks {
 
         double targetCombined = 10000000000L;
 
-        return percentMit -> {
-            int percentDps = 100 - percentMit;
-            int multiplyA = Math.toIntExact(Math.round(targetCombined * (percentMit / 100.0) / rateMitigation));
+        return percentMiti -> {
+            int percentDps = 100 - percentMiti;
+            int multiplyA = Math.toIntExact(Math.round(targetCombined * (percentMiti / 100.0) / rateMitigation));
             int multiplyB = Math.toIntExact(Math.round(targetCombined * (percentDps / 100.0) / rateTankDps));
             double total = multiplyA * rateMitigation + multiplyB * rateTankDps;
             if (Math.abs(total - targetCombined) > targetCombined / 100)
@@ -863,20 +849,20 @@ public class Tasks {
 
     public static void optimalForVariedRating(EquipOptionsMap items, List<EquippedItem> extraItems) {
         IntFunction<StatRatingsWeights> modelGenerator = determineRatingMultipliersVariable();
-        for (int percent = 0; percent <= 100; percent += 5) {
-            OutputText.printf("WEIGHTED SET %d\n", percent);
-            StatRatingsWeights weights = modelGenerator.apply(percent);
-            ModelCombined model = StandardModels.pallyProtVariableModel(weights);
-            JobOutput result = reforgeProcessPlusManyQuiet(items, model, extraItems);
+        for (int percentMiti = 0; percentMiti <= 100; percentMiti += 5) {
+            OutputText.printf("WEIGHTED SET %d\n", percentMiti);
+            StatRatingsWeights weights = modelGenerator.apply(percentMiti);
+            ModelCombined model = StandardModels.pallyProtVariableModel(weights, percentMiti > 50);
+            JobOutput result = reforgeProcessPlusManyQuiet(items, model, extraItems, Final, 1);
+//            JobOutput result = reforgeProcessPlusManyQuiet(items, model, extraItems, Medium, 1);
 //            result.input.printRecorder.outputNow();
             FullItemSet resultSet = result.getFinalResultSet().orElseThrow();
             resultSet.outputSetDetailed(model);
             AsWowSimJson.writeFullToOut(resultSet.items(), model);
-            SimInputModify.makeWithGear(resultSet.items(), "PERCENT-" + percent);
-
+            SimInputModify.makeWithGear(resultSet.items(), "PERCENT-" + percentMiti);
         }
 
-        // TODO bonsus set forced variants
+        // TODO bonus set forced variants
         // what about soul barrier
 
     }
@@ -1054,14 +1040,23 @@ public class Tasks {
         ToIntFunction<String> extractNum = str -> { Matcher m = pattern.matcher(str); return m.matches() ? Integer.parseInt(m.group(1)) : -1; };
 
         try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(SimInputModify.basePath, "in-PERCENT-*.json")) {
-            StreamSupport.stream(dirStream.spliterator(), false)
-                .sorted(Comparator.comparingInt(x -> extractNum.applyAsInt(x.getFileName().toString())))
-                .forEach(inFile -> {
-                    Path outFile = inFile.resolveSibling(inFile.getFileName() + ".out");
-                    OutputText.println(inFile.toString());
-                    SimCliExecute.run(inFile, outFile);
-                    SimOutputReader.readInput(outFile);
-                });
+            List<Tuple.Tuple2<Path, SimOutputReader.SimResultStats>> statList = StreamSupport.stream(dirStream.spliterator(), false)
+                    .sorted(Comparator.comparingInt(x -> extractNum.applyAsInt(x.getFileName().toString())))
+                    .map(inFile -> {
+                        Path outFile = inFile.resolveSibling(inFile.getFileName() + ".out");
+                        OutputText.println(inFile.toString());
+                        SimCliExecute.run(inFile, outFile);
+                        return Tuple.create(inFile, SimOutputReader.readInput(outFile));
+                    })
+                    .toList();
+
+            OutputText.println(statList.stream().map(s -> s.a().getFileName().toString()).collect(Collectors.joining(",")));
+            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().dps())).collect(Collectors.joining(",")));
+            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().tps())).collect(Collectors.joining(",")));
+            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().dtps())).collect(Collectors.joining(",")));
+            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().hps())).collect(Collectors.joining(",")));
+            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().tmi())).collect(Collectors.joining(",")));
+            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().death())).collect(Collectors.joining(",")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

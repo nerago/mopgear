@@ -64,7 +64,7 @@ public class StandardModels {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 105, statDps, 68, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 123, statDps, 45, standardGems);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -77,8 +77,11 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, true);
         ReforgeRules reforge = ReforgeRules.tank();
+
 //        SetBonus setBonus = SetBonus.named("White Tiger Plate", "Plate of the Lightning Emperor");
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
+//        SetBonus setBonus = SetBonus.named("White Tiger Plate", "White Tiger Battlegear Prot Mitigation", "Plate of the Lightning Emperor Prot Mitigation");
+        SetBonus setBonus = SetBonus.named("White Tiger Battlegear Prot Mitigation", "Plate of the Lightning Emperor Prot Mitigation");
+
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtMitigation, hasteGem);
     }
 
@@ -86,7 +89,7 @@ public class StandardModels {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 45, statDps, 159, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 54, statDps, 145, standardGems);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -99,19 +102,21 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
-//        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pc();
-//        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusThunderTank();
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
-//        SetBonus setBonus = SetBonus.empty();
+
+        //        SetBonus setBonus = SetBonus.empty();
+        SetBonus setBonus = SetBonus.named("Plate of the Lightning Emperor Prot Damage");
+
         return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtDps, hasteGem);
     }
 
-    public static ModelCombined pallyProtVariableModel(StatRatings stats) {
+    public static ModelCombined pallyProtVariableModel(StatRatings stats, boolean mitigationSetBonuses) {
         StatRequirements combinedRequire = StatRequirementsHitExpertise.protFlexibleParry();
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
-        SetBonus setBonus = SetBonus.activateWhiteTigerBattlegearOnly4pcPlusAll();
+        SetBonus setBonus = mitigationSetBonuses
+            ? SetBonus.named("White Tiger Battlegear Prot Mitigation", "Plate of the Lightning Emperor Prot Mitigation")
+            : SetBonus.empty();
         return new ModelCombined(stats, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtMitigation, hasteGem);
     }
 

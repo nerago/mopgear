@@ -7,7 +7,6 @@ import au.nerago.mopgear.io.WowHead;
 import au.nerago.mopgear.io.WowSimDB;
 import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.process.Reforger;
-import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
@@ -101,7 +100,7 @@ public class ItemLoadUtil {
 
     public static FullItemData loadItem(EquippedItem equippedItem, DefaultEnchants enchants, PrintRecorder printer) {
         int id = equippedItem.itemId(), upgrade = equippedItem.upgradeStep();
-        FullItemData item = loadItemBasic(id, upgrade);
+        FullItemData item = loadItemBasic(id, upgrade, printer);
 
         int[] equippedGems = equippedItem.gems();
         @NotNull SocketType[] socketSlots = item.shared.socketSlots();
@@ -147,8 +146,8 @@ public class ItemLoadUtil {
         return item;
     }
 
-    public static List<FullItemData> loadItemBasicWithRandomVariants(int itemId, int upgradeLevel) {
-        FullItemData item = loadItemBasic(itemId, upgradeLevel);
+    public static List<FullItemData> loadItemBasicWithRandomVariants(int itemId, int upgradeLevel, PrintRecorder printer) {
+        FullItemData item = loadItemBasic(itemId, upgradeLevel, printer);
         return switch (itemId) {
             // Caustic Spike Bracers
             case 95732 -> itemWithRandomVariants(item, 712);
@@ -174,14 +173,14 @@ public class ItemLoadUtil {
         return item.changeStatsBase(item.statBase.withChange(statType, statValue)).changeName(item.shared.name() + " of " + statType);
     }
 
-    public static FullItemData loadItemBasic(int itemId, int upgradeLevel) {
+    public static FullItemData loadItemBasic(int itemId, int upgradeLevel, PrintRecorder print) {
         ItemCache itemCache = ItemCache.instance;
         FullItemData item = itemCache.get(itemId, upgradeLevel);
         if (item == null) {
             if (upgradeLevel > 0) {
                 item = itemCache.get(itemId, 0);
                 if (item != null) {
-                    OutputText.println("DOWNGRADE SUBSTITUTED BASE ITEM " + item.toStringExtended());
+                    print.println("DOWNGRADE SUBSTITUTED BASE ITEM " + item.toStringExtended());
                 } else {
                     throw new RuntimeException("item " + itemId + " not found in wowsim data, even downgraded");
                 }
@@ -199,18 +198,17 @@ public class ItemLoadUtil {
 
 //            if (upgradeLevel != 0) {
 //                if (item.isUpgradable()) {
-//                    OutputText.println("INACCURATE-UPGRADE " + item.toStringExtended());
+//                    print.println("INACCURATE-UPGRADE " + item.toStringExtended());
 //                    item = ItemLevel.upgrade(item, upgradeLevel);
 //                    itemCache.put(item);
 //                } else {
-//                    OutputText.println("CANNOT-UPGRADE " + item.toStringExtended());
+//                    print.println("CANNOT-UPGRADE " + item.toStringExtended());
 //                }
 //            }
         }
         if (item.slot() == SlotItem.Trinket) {
             item = Trinkets.updateTrinket(item);
         }
-        // TODO trinket vs upgrade ordering?
         return item;
     }
 

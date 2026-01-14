@@ -135,6 +135,9 @@ public class Trinkets {
         map.put(96026, new TrinketData(Primary, 700, 10, 54, null));
         map.put(94526, new TrinketData(Primary, 700, 10, 54, null));
         map.put(95654, new TrinketData(Primary, 700, 10, 54, null));
+
+        // TODO model based on sim
+
         return map;
     }
 

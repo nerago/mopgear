@@ -2,7 +2,6 @@ package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.EquippedItem;
 import au.nerago.mopgear.results.OutputText;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -15,15 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimOutputReader {
-    public static void readInput(Path file) {
+    public static SimResultStats readInput(Path file) {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
-            parseReader(reader);
+            return parseReader(reader);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    private static void parseReader(Reader reader) {
+    private static SimResultStats parseReader(Reader reader) {
         List<EquippedItem> result = new ArrayList<>();
         JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
         JsonObject party = root.getAsJsonObject("raidMetrics").getAsJsonArray("parties").get(0).getAsJsonObject();
@@ -42,5 +41,10 @@ public class SimOutputReader {
         OutputText.printf("%.2f\n", tmi);
         OutputText.printf("%.2f\n", death * 100);
         OutputText.println();
+
+        return new SimResultStats(dps, tps, dtps, hps, tmi, death);
+    }
+
+    public record SimResultStats(double dps, double tps, double dtps, double hps, double tmi, double death) {
     }
 }
