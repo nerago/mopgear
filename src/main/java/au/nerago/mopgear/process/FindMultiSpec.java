@@ -12,6 +12,7 @@ import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -84,24 +85,36 @@ public class FindMultiSpec {
     private Stream<Map<ItemRef, FullItemData>> makeCommonStream(long targetComboCount, Map<ItemRef, List<FullItemData>> commonMap) {
         // TODO keep track of good indexes and search near
 
-        long commonCombos = BigStreamUtil.estimateSets(commonMap);
-        long skip;
-        if (commonCombos < targetComboCount * 2) {
-            skip = 1;
+        Stream<Map<ItemRef, FullItemData>> commonStream;
+        long estimateRun;
+        BigInteger commonCombosBig = BigStreamUtil.estimateSets(commonMap);
+
+        if (BigStreamUtil.fitsMaxLong(commonCombosBig)) {
+            long commonCombos = commonCombosBig.longValueExact();
+            long skip;
+            if (commonCombos < targetComboCount * 2) {
+                skip = 1;
+            } else {
+                skip = Primes.roundToPrimeInt(commonCombos / targetComboCount * 2);
+            }
+
+            OutputText.println("COMMON COMBOS " + commonCombos + " SKIP SIZE " + skip);
+
+            long indexedOutputSize = commonCombos / skip;
+            Stream<Map<ItemRef, FullItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
+            Stream<Map<ItemRef, FullItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize / 2);
+            commonStream = Stream.concat(commonStream1, commonStream2);
+            estimateRun = indexedOutputSize * 3 / 2;
         } else {
-            skip = Primes.roundToPrimeInt(commonCombos / targetComboCount * 2);
+            OutputText.println("COMMON COMBOS RANDOM " + targetComboCount);
+            commonStream = PossibleRandom.runSolverPartial(commonMap, targetComboCount);
+            estimateRun = targetComboCount;
         }
 
-        OutputText.println("COMMON COMBOS " + commonCombos + " SKIP SIZE " + skip);
-
-        long indexedOutputSize = commonCombos / skip;
-        Stream<Map<ItemRef, FullItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
-        Stream<Map<ItemRef, FullItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize / 2);
         Stream<Map<ItemRef, FullItemData>> baselineStream = baselineAsCommonOptionsStream(commonMap);
         Stream<Map<ItemRef, FullItemData>> equippedStream = equippedAsCommonOptionsStream(commonMap);
-        Stream<Map<ItemRef, FullItemData>> commonStream = Stream.concat(Stream.concat(commonStream1, commonStream2), Stream.concat(baselineStream, equippedStream));
-
-        commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 3 / 2, Instant.now(), commonStream);
+        commonStream = Stream.concat(commonStream, Stream.concat(baselineStream, equippedStream));
+        commonStream = BigStreamUtil.countProgressSmall(estimateRun, Instant.now(), commonStream);
         return commonStream;
     }
 
@@ -316,7 +329,7 @@ public class FindMultiSpec {
         job.model = model;
         job.setItemOptions(submitMap);
         job.hackAllow = hackAllow;
-        job.singleThread = true;
+//        job.singleThread = true;
         return Solver.runJob(job);
     }
 

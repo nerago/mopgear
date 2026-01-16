@@ -81,11 +81,15 @@ public class BigStreamUtil {
     }
 
     private static long chooseReportFrequency(BigInteger estimate) {
-        if (estimate.compareTo(BigInteger.valueOf(Long.MAX_VALUE / 2)) > 0) {
+        if (!fitsMaxLong(estimate)) {
             return chooseReportFrequency(Long.MAX_VALUE / 2, 100, 100000000);
         } else {
             return chooseReportFrequency(estimate.longValueExact(), 100, 100000000);
         }
+    }
+
+    public static boolean fitsMaxLong(BigInteger estimate) {
+        return estimate.compareTo(BigInteger.valueOf(Long.MAX_VALUE / 2)) < 0;
     }
 
     public static Duration estimateRemain(Instant startTime, double percent) {
@@ -133,7 +137,12 @@ public class BigStreamUtil {
         }
     }
 
-    public static <X, T> long estimateSets(Map<X, List<T>> commonMap) {
-        return commonMap.values().stream().mapToLong(x -> (long) x.size()).reduce((a, b) -> a * b).orElse(0);
+    public static <X, T> BigInteger estimateSets(Map<X, List<T>> commonMap) {
+        Optional<BigInteger> number = commonMap.values().stream().map(x -> BigInteger.valueOf(x.size())).reduce(BigInteger::multiply);
+        if (number.isPresent()) {
+            return number.get();
+        } else {
+            throw new RuntimeException("unable to determine item combination estimate");
+        }
     }
 }

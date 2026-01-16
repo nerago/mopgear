@@ -5,12 +5,8 @@ import au.nerago.mopgear.util.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class SetBonus {
@@ -18,11 +14,11 @@ public class SetBonus {
     public static final long DENOMIATOR = 1000;
 
     public static SetBonus forSpec(SpecType spec) {
-        return new SetBonus(allSets.stream().filter(s -> s.spec == spec).toList());
+        return new SetBonus(DefaultEnchants.known(spec), allSets.stream().filter(s -> s.spec == spec).toList());
     }
 
-    public static SetBonus named(String... nameArray) {
-        return new SetBonus(Arrays.stream(nameArray).map(SetBonus::findSet).toList());
+    public static SetBonus named(AllowedMeta allowedMeta, String... nameArray) {
+        return new SetBonus(allowedMeta, Arrays.stream(nameArray).map(SetBonus::findSet).toList());
     }
 
     private static SetInfo findSet(String name) {
@@ -30,7 +26,7 @@ public class SetBonus {
     }
 
     public static SetBonus empty() {
-        return new SetBonus(Collections.emptyList());
+        return new SetBonus(AllowedMeta.None, Collections.emptyList());
     }
 
     // <<<<<<<<<<<<< PALADIN RET TEIR 14 >>>>>>>>>>>>>>>>
@@ -136,12 +132,14 @@ public class SetBonus {
         return sets;
     }
 
+    private final AllowedMeta allowedMeta;
     private final List<SetInfo> activeSets;
     private final SetInfo lookupSingleSet;
     private final Map<Integer, Integer> lookupManySets;
     private static final List<SetInfo> allSets = buildSets();
 
-    private SetBonus(List<SetInfo> selectedSets) {
+    private SetBonus(AllowedMeta allowedMeta, List<SetInfo> selectedSets) {
+        this.allowedMeta = allowedMeta;
         activeSets = selectedSets;
         if (selectedSets.isEmpty()) {
             lookupSingleSet = null;
@@ -162,6 +160,16 @@ public class SetBonus {
     }
 
     // NOTE main entry for model calc
+    public long calcAndMultiply(FullItemSet set, long value) {
+        return value * calc(set) / DENOMIATOR;
+    }
+
+    // NOTE main entry for model calc
+    public long calcAndMultiply(SolvableItemSet set, long value) {
+        return value * calc(set) / DENOMIATOR;
+    }
+
+    // NOTE alternate entry point
     public long calc(FullItemSet items) {
         if (lookupSingleSet != null) {
             int numInSet = countInSingle(lookupSingleSet, items.items());
@@ -175,7 +183,7 @@ public class SetBonus {
     }
 
     // NOTE main entry for model calc
-    public long calc(SolvableItemSet items) {
+    private long calc(SolvableItemSet items) {
         if (lookupSingleSet != null) {
             int numInSet = countInSingle(lookupSingleSet, items.items());
             return calcMuliplier(numInSet);

@@ -11,13 +11,13 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
 
     public long calcRating(FullItemSet set) {
         long value = statRatings.calcRating(set.totalForRating());
-        value = value * setBonus.calc(set) / SetBonus.DENOMIATOR;
+        value = setBonus.calcAndMultiply(set, value);
         return value;
     }
 
     public long calcRating(SolvableItemSet set) {
         long value = statRatings.calcRating(set.totalForRating());
-        value = value * setBonus.calc(set) / SetBonus.DENOMIATOR;
+        value = setBonus.calcAndMultiply(set, value);
         return value;
     }
 

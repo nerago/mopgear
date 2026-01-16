@@ -15,9 +15,9 @@ import static au.nerago.mopgear.results.JobInput.SolveMethod.*;
 
 public class Solver {
     private static final long DEFAULT_RANDOM_RUN_SIZE = 10_000_000;
-    private static final long DEFAULT_INDEX_RUN_SIZE = 500_000;
+    private static final long DEFAULT_INDEX_RUN_SIZE = 100_000;
     private static final long PHASED_COMBOS_GENERATE = 2_000_000;
-    private static final long MAX_BASIC_FULL_SEARCH = 500_000;
+    private static final long MAX_BASIC_FULL_SEARCH = 100_000;
     private static final long MAX_SKINNY_FULL_SEARCH = 100_000;
     private static final long MAX_SKINNY_PHASED_ANY = 10_000_000;
     private static final int TOP_HIT_COMBO_FILTER = 1000;
