@@ -37,7 +37,7 @@ public class Main {
 
         lowerPriority();
 
-        try (ForkJoinPool myPool = new ForkJoinPool(8, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, false, 0, 64, 1, null, 60, TimeUnit.SECONDS)) {
+        try (ForkJoinPool myPool = new ForkJoinPool(12, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, false, 0, 64, 1, null, 60, TimeUnit.SECONDS)) {
             myPool.submit(() -> launchpad(startTime)).get();
         }
 
@@ -151,11 +151,11 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = StandardModels.pallyProtDpsModel();
-        Path file = DataLocation.gearProtDpsFile;
+//        ModelCombined model = StandardModels.pallyProtDpsModel();
+//        Path file = DataLocation.gearProtDpsFile;
 
-//        ModelCombined model = StandardModels.pallyProtMitigationModel();
-//        Path file = DataLocation.gearProtDefenceFile;
+        ModelCombined model = StandardModels.pallyProtMitigationModel();
+        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -200,10 +200,9 @@ public class Main {
 //        reforgeProcessPlusMany(items, model, startTime, bagItemsArray(ignoredItems));
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
-        /*
+
                 reforgeProcessPlusMany(items, model, startTime, new int[]{
                                 86979, // heroic impaling treads
-                                87062, // elegion heroic
                                 86957, // heroic bladed tempest
                                 85343, // normal ret chest
 
@@ -224,17 +223,57 @@ public class Main {
                                 95768, // greatshield gloaming celestial
                                 95652, // Puncture-Proof Greathelm head
                                 95687, // celestial beakbreaker cloak
-//                                95914, // ret tier shoulder celestial
-//                                95924, // prot tier shoulder celestial
-                        95910, 95911, 95912, 95913, 95914,
-                        95920, 95921, 95922, 95923, 95924,
 
                                 95142, // striker's battletags
                                 95205, // terra-cotta neck
                                 87036, // soulgrasp heroic
+
+
+                        86979, // heroic impaling treads
+                        87024, // null greathelm
+
+                        94726, // cloudbreaker belt
+                        86955, // heroic overwhelm assault belt
+
+                        87026, // heroic peacock cloak
+                        86325, // daybreak
+
+                        95535, // normal lightning legs
+
+                                85340, // ret tier14 legs
+                                87101, // ret tier14 head
+                                85339, // ret tier14 shoulder
+                                85343, // ret tier14 chest
+                                87100, // ret tier14 hands
+
+                                95914, // ret tier15 shoulder celestial
+                                95910, // ret tier15 chest celestial
+                                95911, // ret tier15 gloves celestial
+
+                        95291, // prot tier15 hand normal
+                        95920, // prot tier15 chest celestial (don't have yet)
+                        95922, // prot tier15 head celestial (don't have yet)
+                        96667, // prot tier15 leg heroic
+                        95924, // prot tier15 shoulder celestial
+
+                        95142, // striker's battletags
+                        95205, // terra-cotta neck
+
+                        96182, // ultimate prot of the emperor thunder
+
+                                94773, // centripetal shoulders normal
+                                95140, // shado assault band
+
+                                87145, // defiled earth
+                                89934, // soul bracer
+                        94820, // caustic spike bracers
+
+                        // from other processes
+                        86387, // sha weapon
+
                         }, 2, false, null);
 
-         */
+
 
 //        findUpgradeSetup(items, strengthPlateCurrentItemsRet(model), model);
 //        findUpgrade(items, strengthPlateHeartOfFear(), model, true, null, 2);
@@ -295,18 +334,17 @@ public class Main {
 //        findUpgrade(items, SourcesOfItems.strengthPlateCraftedT3(), model, true, null, 0, 8);
 //        findUpgrade(items, SourcesOfItems.strengthPlateThroneNormalBoss(Difficulty.Heroic, 701), model, true, null, 2, 8);
 
-        Difficulty difficulty = Difficulty.Heroic;
-        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-                pallyPhase3Valor(),
-                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
-                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
-                strengthPlateThroneNormal(difficulty),
-                tankTrinketsThroneNormal(difficulty),
-                strengthDpsTrinketsThroneNormal(difficulty),
-        });
-        upgradeShit = minusRadenLoot(upgradeShit);
-        findUpgrade(items, upgradeShit, model, true, null, 2, 16);
-
+//        Difficulty difficulty = Difficulty.Heroic;
+//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+//                pallyPhase3Valor(),
+//                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
+//                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+//                strengthPlateThroneNormal(difficulty),
+//                tankTrinketsThroneNormal(difficulty),
+//                strengthDpsTrinketsThroneNormal(difficulty),
+//        });
+//        upgradeShit = minusRadenLoot(upgradeShit);
+//        findUpgrade(items, upgradeShit, model, true, null, 2, 16);
     }
 
     private void variableRatingProt(Instant startTime) {

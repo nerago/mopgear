@@ -57,11 +57,11 @@ public class TopCollectorN<T> implements Collector<T, TopCollectorN.State<T>, Co
             if (worstValue == 0.0) {
                 sortedSet.add(add);
                 worstValue = addValue;
-            } else if (addValue <= worstValue && !isFull) {
+            } else if (!isFull) {
                 sortedSet.add(add);
                 worstValue = getValue.applyAsLong(sortedSet.getFirst());
                 isFull = sortedSet.size() == size;
-            } else if (addValue > worstValue || !isFull) {
+            } else if (addValue > worstValue) {
                 sortedSet.add(add);
                 trim();
             }

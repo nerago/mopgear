@@ -10,6 +10,7 @@ import au.nerago.mopgear.permute.PossibleRandom;
 import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -60,7 +61,7 @@ public class FindMultiSpec {
         suppressSlotCheck.add(id);
     }
 
-    public void solve(long targetComboCount) {
+    private @NotNull Map<ItemRef, List<FullItemData>> prepareInitialAndCommons() {
         OutputText.println("PREPARING SPECS");
         specs.forEach(s -> s.prepareStartingGear(specs));
         specs.forEach(s -> s.prepareExtraItems(specs));
@@ -77,6 +78,11 @@ public class FindMultiSpec {
         OutputText.println("PREPARING COMMON ITEMS");
         Map<ItemRef, List<FullItemData>> commonMap = commonInMultiSet(specs);
         OutputText.println();
+        return commonMap;
+    }
+
+    private Stream<Map<ItemRef, FullItemData>> makeCommonStream(long targetComboCount, Map<ItemRef, List<FullItemData>> commonMap) {
+        // TODO keep track of good indexes and search near
 
         long commonCombos = BigStreamUtil.estimateSets(commonMap);
         long skip;
@@ -96,29 +102,49 @@ public class FindMultiSpec {
         Stream<Map<ItemRef, FullItemData>> commonStream = Stream.concat(Stream.concat(commonStream1, commonStream2), Stream.concat(baselineStream, equippedStream));
 
         commonStream = BigStreamUtil.countProgressSmall(indexedOutputSize * 3 / 2, Instant.now(), commonStream);
+        return commonStream;
+    }
+
+    private @NotNull Stream<ProposedResults> makeCandidateStream(long targetComboCount) {
+        Map<ItemRef, List<FullItemData>> commonMap = prepareInitialAndCommons();
+        Stream<Map<ItemRef, FullItemData>> commonStream = makeCommonStream(targetComboCount, commonMap);
 
         Stream<ProposedResults> resultStream = commonStream
                 .map(r -> subSolveEach(r, specs))
                 .filter(Objects::nonNull)
+                .filter(s -> checkGood(s.resultJobs, specs))
                 .unordered()
                 .parallel();
 
         if (multiSetFilter != null) {
             resultStream = resultStream.filter(multiSetFilter);
         }
+        return resultStream;
+    }
+
+    public void solve(long targetComboCount) {
+        Stream<ProposedResults> resultStream = makeCandidateStream(targetComboCount);
 
         OutputText.println("RUNNING");
-        Optional<ProposedResults> best = resultStream
-                .filter(s -> checkGood(s.resultJobs, specs))
-                .collect(new TopCollectorReporting<>(
-                        s -> multiRating(s.resultJobs, specs),
-                        s -> reportBetter(s.resultJobs, specs)));
+        Optional<ProposedResults> best = resultStream.collect(new TopCollectorReporting<>(
+                s -> multiRating(s.resultJobs, specs),
+                s -> reportBetter(s.resultJobs, specs)));
 
         OutputText.println("PREPARING RESULTS");
         outputResultFinal(best, specs);
+    }
 
-        // TODO highlight gems changed vs as loaded
-        // TODO keep track of good indexes and search near
+    public void suggestCulls(long targetComboCount) {
+        Stream<ProposedResults> resultStream = makeCandidateStream(targetComboCount);
+
+        OutputText.println("RUNNING");
+        Collection<ProposedResults> bestList = resultStream.collect(new TopCollectorN<>(
+                256,
+                s -> multiRating(s.resultJobs, specs)
+                ));
+
+        OutputText.println("PREPARING RESULTS");
+        outputResultForCull(bestList, specs);
     }
 
     private Stream<Map<ItemRef, FullItemData>> equippedAsCommonOptionsStream(Map<ItemRef, List<FullItemData>> commonMap) {
@@ -227,6 +253,7 @@ public class FindMultiSpec {
         spec.optimalBaselineSet = set;
         synchronized (OutputText.class) {
             OutputText.println("SET " + spec.label);
+            job.printRecorder.outputNow();
             set.outputSet(spec.model);
         }
         spec.recordSolutionSeen(set);
@@ -336,7 +363,7 @@ public class FindMultiSpec {
                     if (val == null) {
                         seen.put(itemId, slot);
                     } else if (val != slot && !suppressSlotCheck.contains(itemId)) {
-                        throw new IllegalArgumentException("duplicate in non matching slot " + item);
+                        throw new IllegalArgumentException("duplicate in non matching slot " + item.toStringExtended());
                     }
                 }
             });
@@ -424,6 +451,8 @@ public class FindMultiSpec {
                     OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(%s, %s))); // %s %s\n", item.itemId(), item.reforge.source(), item.reforge.dest(), item.slot(), item.shared.name());
             });
 
+            // TODO highlight gems changed vs as loaded
+
             OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
             OutputText.printf("^^^^^^^^^^^^^ %d ^^^^^^^^^^^^^\n", totalRating);
 
@@ -471,6 +500,26 @@ public class FindMultiSpec {
 
         } else {
             OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
+        }
+    }
+
+    private void outputResultForCull(Collection<ProposedResults> bestList, List<SpecDetails> specList) {
+        if (bestList.isEmpty())  {
+            OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
+        } else {
+            OutputText.println("@@@@@@@@@ CULLING SET(s) @@@@@@@@@");
+
+            for (int i = 0; i < specList.size(); i++) {
+                SpecDetails spec = specList.get(i);
+                OutputText.printf("-------------- %s --------------\n", spec.label);
+
+                int finalI = i;
+                bestList.forEach(proposed -> {
+                    spec.recordSolutionSeen(proposed.resultJobs.get(finalI).getFinalResultSet().orElseThrow());
+                });
+
+                spec.reportExtrasUsed();
+            }
         }
     }
 
@@ -731,7 +780,15 @@ public class FindMultiSpec {
 
         public void reportExtrasUsed() {
             OutputText.println("EXTRAS USED");
-            Arrays.stream(extraItems).sorted().forEach(itemId -> {
+            Arrays.stream(extraItems)
+//                    .sorted()
+                    .boxed()
+                    .sorted(Comparator.comparingInt(id -> {
+                                AtomicInteger atom = itemsSeenInSolutions.get(id);
+                                return atom != null ? atom.intValue() : 0;
+                            }
+                    ))
+                    .forEach(itemId -> {
                 AtomicInteger countSeenAtom = itemsSeenInSolutions.get(itemId);
                 int countSeen = countSeenAtom != null ? countSeenAtom.intValue() : 0;
                 if (countSeen == 0)

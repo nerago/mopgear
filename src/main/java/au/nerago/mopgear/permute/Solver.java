@@ -15,12 +15,12 @@ import static au.nerago.mopgear.results.JobInput.SolveMethod.*;
 
 public class Solver {
     private static final long DEFAULT_RANDOM_RUN_SIZE = 10_000_000;
-    private static final long DEFAULT_INDEX_RUN_SIZE = 200_000;
-    private static final long PHASED_COMBOS_GENERATE = 200_000;
-    private static final long MAX_BASIC_FULL_SEARCH = 50_000;
-    private static final long MAX_SKINNY_FULL_SEARCH = 10_000;
-    private static final long MAX_SKINNY_PHASED_ANY = 1_000_000;
-    private static final int TOP_HIT_COMBO_FILTER = 10_00;
+    private static final long DEFAULT_INDEX_RUN_SIZE = 500_000;
+    private static final long PHASED_COMBOS_GENERATE = 2_000_000;
+    private static final long MAX_BASIC_FULL_SEARCH = 500_000;
+    private static final long MAX_SKINNY_FULL_SEARCH = 100_000;
+    private static final long MAX_SKINNY_PHASED_ANY = 10_000_000;
+    private static final int TOP_HIT_COMBO_FILTER = 1000;
 
     public static JobOutput runJob(JobInput job) {
         ModelCombined model = job.model;
