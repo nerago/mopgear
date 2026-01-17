@@ -1,5 +1,7 @@
 package au.nerago.mopgear.domain;
 
+import au.nerago.mopgear.model.AllowedMeta;
+import au.nerago.mopgear.model.GemData;
 import au.nerago.mopgear.model.IItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +23,7 @@ public final class FullItemData implements IItem {
     @NotNull
     public final StatBlock totalRated;
     @Nullable
-    public final List<StatBlock> gemChoice;
+    public final List<GemInfo> gemChoice;
     @Nullable
     public final Integer enchantChoice;
     @Nullable
@@ -29,7 +31,7 @@ public final class FullItemData implements IItem {
 
     private FullItemData(@NotNull ItemShared shared, @NotNull ReforgeRecipe reforge,
                          @NotNull StatBlock statBase, @NotNull StatBlock statEnchant,
-                         @Nullable List<StatBlock> gemChoice, @Nullable Integer enchantChoice,
+                         @Nullable List<GemInfo> gemChoice, @Nullable Integer enchantChoice,
                          @Nullable Integer randomSuffix) {
         this.shared = shared;
         this.reforge = reforge;
@@ -78,7 +80,7 @@ public final class FullItemData implements IItem {
 //        return new FullItemData(shared, reforge, statBase, changedEnchant, null, enchantChoice);
 //    }
 
-    public FullItemData changeEnchant(@NotNull StatBlock changedEnchant, List<StatBlock> gemChoice, Integer enchant) {
+    public FullItemData changeEnchant(@NotNull StatBlock changedEnchant, List<GemInfo> gemChoice, Integer enchant) {
         return new FullItemData(shared, reforge, statBase, changedEnchant, gemChoice, enchant, randomSuffix);
     }
 
@@ -116,8 +118,12 @@ public final class FullItemData implements IItem {
         append(sb);
         if (gemChoice != null && !gemChoice.isEmpty()) {
             sb.append("GEMS ");
-            for (StatBlock choice : gemChoice) {
-                sb.append(choice);
+            for (GemInfo choice : gemChoice) {
+                AllowedMeta meta = AllowedMeta.forId(choice.gemId());
+                if (meta != null)
+                    sb.append(meta.name());
+                else
+                    sb.append(choice.stat());
             }
             sb.append(' ');
         }

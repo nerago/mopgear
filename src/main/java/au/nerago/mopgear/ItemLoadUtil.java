@@ -115,7 +115,7 @@ public class ItemLoadUtil {
 //                }
             }
 
-            Tuple.Tuple2<StatBlock, List<StatBlock>> gemInfo = GemData.process(equippedGems, equippedItem.enchant(), socketSlots, item.shared.socketBonus(), item.shared.name(), possibleBlacksmith);
+            Tuple.Tuple2<StatBlock, List<GemInfo>> gemInfo = GemData.process(equippedGems, equippedItem.enchant(), socketSlots, item.shared.socketBonus(), item.shared.name(), possibleBlacksmith);
             item = item.changeEnchant(gemInfo.a(), gemInfo.b(), equippedItem.enchant());
         }
 
@@ -236,33 +236,33 @@ public class ItemLoadUtil {
 
         boolean socketBonusMet = true;
         StatBlock total = StatBlock.empty;
-        List<StatBlock> gemChoice = new ArrayList<>();
+        List<GemInfo> gemChoice = new ArrayList<>();
         if (socketSlots != null) {
             int engineer = 0;
             for (SocketType type : socketSlots) {
-                StatBlock value;
+                GemInfo gemInfo;
                 if (type == SocketType.Engineer) {
                     if (engineer == 0)
-                        value = StatBlock.of(StatType.Haste, 600);
+                        gemInfo = GemData.getGemInfo(77542);
                     else if (engineer == 1)
-                        value = StatBlock.of(StatType.Mastery, 600);
+                        gemInfo = GemData.getGemInfo(77547);
                     else if (engineer == 2)
-                        value = StatBlock.of(StatType.Crit, 600);
+                        gemInfo = GemData.getGemInfo(77541);
                     else
                         throw new IllegalArgumentException("don't know what engineer gem to add");
                     engineer++;
                 } else if (alternateGem && (type == Red || type == Blue || type == Yellow)) {
-                    value = model.gemChoiceBestAlternate();
+                    gemInfo = model.gemChoiceBestAlternate();
                 } else {
-                    value = model.gemChoice(type);
+                    gemInfo = model.gemChoice(type);
                 }
 
-                gemChoice.add(value);
-                if (!GemData.matchesSocket(type, value)) {
+                gemChoice.add(gemInfo);
+                if (!GemData.matchesSocket(type, gemInfo.stat())) {
                     socketBonusMet = false;
                 }
 
-                total = total.plus(value);
+                total = total.plus(gemInfo.stat());
             }
         }
 

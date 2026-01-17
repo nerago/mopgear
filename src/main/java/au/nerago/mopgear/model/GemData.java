@@ -1,9 +1,6 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.domain.PrimaryStatType;
-import au.nerago.mopgear.domain.SocketType;
-import au.nerago.mopgear.domain.StatBlock;
-import au.nerago.mopgear.domain.StatType;
+import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BestHolder;
 import au.nerago.mopgear.util.Tuple;
@@ -13,11 +10,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.ToLongFunction;
 
-import static au.nerago.mopgear.domain.StatType.Haste;
-import static au.nerago.mopgear.domain.StatType.Stam;
+import static au.nerago.mopgear.domain.StatType.*;
 
 public class GemData {
     private static final Map<Integer, StatBlock> standardGems = buildGemsStandard();
+    private static final Map<Integer, StatBlock> engineerGems = buildGemsEngineer();
     private static final Map<Integer, StatBlock> knownGems = buildGems();
     private static final Map<Integer, StatBlock> knownEnchants = buildEnchant();
     private static final Map<Integer, StatBlock> knownSocketBonus = buildSocketBonus();
@@ -74,6 +71,12 @@ public class GemData {
         return map;
     }
 
+    private static Map<Integer, StatBlock> buildGemsEngineer() {
+        Map<Integer, StatBlock> map = new HashMap<>();
+        gemsEngineering(map);
+        return map;
+    }
+
     private static void gemsStandard(Map<Integer, StatBlock> map) {
         map.put(76628, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76694, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
@@ -119,6 +122,8 @@ public class GemData {
         map.put(76886, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76885, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
         map.put(76895, new StatBlock(0, 324, 0, 0, 0, 0, 0, 0, 0, 0)); // tank meta, stam
+        map.put(95344, StatBlock.of(Stam, 324));
+        map.put(95346, StatBlock.of(Crit, 324));
     }
 
     private static void gemsShaTouched(Map<Integer, StatBlock> map) {
@@ -162,7 +167,7 @@ public class GemData {
         return map;
     }
 
-    public static StatBlock process(List<StatBlock> gemChoice, Integer enchant, SocketType[] socketTypes, StatBlock socketBonus, String name, boolean possibleBlacksmith) {
+    public static StatBlock process(@Nullable List<GemInfo> gemChoice, Integer enchant, SocketType[] socketTypes, StatBlock socketBonus, String name, boolean possibleBlacksmith) {
         boolean socketBonusMet = true;
 
         StatBlock result = StatBlock.empty;
@@ -172,7 +177,8 @@ public class GemData {
 
         for (int i = 0; i < socketTypes.length; ++i) {
             SocketType socket = socketTypes[i];
-            StatBlock gemStat = gemChoice.get(i);
+            GemInfo gemInfo = gemChoice != null ? gemChoice.get(i) : new GemInfo(-1, StatBlock.empty);
+            StatBlock gemStat = gemInfo.stat();
             if (!matchesSocket(socket, gemStat)) {
                 socketBonusMet = false;
             }
@@ -182,7 +188,7 @@ public class GemData {
 
         if (gemChoice != null) {
             if (possibleBlacksmith && gemChoice.size() == socketTypes.length + 1) {
-                StatBlock gemStat = gemChoice.getLast();
+                StatBlock gemStat = gemChoice.getLast().stat();
                 result = result.plus(gemStat);
             } else if (gemChoice.size() != socketTypes.length) {
                 throw new IllegalArgumentException("gem count");
@@ -196,10 +202,16 @@ public class GemData {
         return result;
     }
 
-    public static Tuple.Tuple2<StatBlock, List<StatBlock>> process(int[] gemIds, Integer enchant, SocketType[] socketTypes, StatBlock socketBonus, String name, boolean possibleBlacksmith) {
-        List<StatBlock> gemChoice = Arrays.stream(gemIds).mapToObj(id -> findGemStats(name, id)).toList();
+    public static Tuple.Tuple2<StatBlock, List<GemInfo>> process(int[] gemIds, Integer enchant, SocketType[] socketTypes, StatBlock socketBonus, String name, boolean possibleBlacksmith) {
+        List<GemInfo> gemChoice = Arrays.stream(gemIds).mapToObj(id -> findGemInfo(name, id)).toList();
         StatBlock stat = process(gemChoice, enchant, socketTypes, socketBonus, name, possibleBlacksmith);
         return Tuple.create(stat, gemChoice);
+    }
+
+    @NotNull
+    private static GemInfo findGemInfo(String name, int id) {
+        StatBlock gemStat = findGemStats(name, id);
+        return new GemInfo(id, gemStat);
     }
 
     @NotNull
@@ -212,6 +224,7 @@ public class GemData {
         return gemStat;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean matchesSocket(SocketType socket, StatBlock gemStat) {
         StatType[] statArray = socket.getMatchingStats();
         if (statArray.length == 0)
@@ -251,9 +264,18 @@ public class GemData {
         return standardGems;
     }
 
-    public static void chooseGem(EnumMap<SocketType, StatBlock> map, SocketType socket, ToLongFunction<StatBlock> calcRating) {
-        BestHolder<StatBlock> best = new BestHolder<>(StatBlock.empty, 0);
-        for (StatBlock block : standardGems().values()) {
+    public static Map<Integer, StatBlock> engineerGems() {
+        return engineerGems;
+    }
+
+    public static Map<Integer, StatBlock> allGems() {
+        return knownGems;
+    }
+
+    public static void chooseGem(EnumMap<SocketType, GemInfo> map, SocketType socket, ToLongFunction<StatBlock> calcRating, Map<Integer, StatBlock> available) {
+        BestHolder<GemInfo> best = new BestHolder<>();
+        for (Map.Entry<Integer, StatBlock> entry : available.entrySet()) {
+            StatBlock block = entry.getValue();
             boolean hasMatchingStat = socket == SocketType.General;
             for (StatType type : socket.getMatchingStats()) {
                 if (block.get(type) > 0) {
@@ -263,10 +285,10 @@ public class GemData {
             }
             if (hasMatchingStat) {
                 long rating = calcRating.applyAsLong(block);
-                best.add(block, rating);
+                best.add(new GemInfo(entry.getKey(), block), rating);
             }
         }
-        map.put(socket, best.get());
+        map.put(socket, best.orElseThrow());
     }
 
     public static StatBlock getEnchant(Integer enchant) {
@@ -288,5 +310,12 @@ public class GemData {
                 return entry.getKey();
         }
         throw new RuntimeException("stat/enchant not found " + stat.toStringExtended());
+    }
+
+    public static GemInfo getGemInfo(int gemId) {
+        StatBlock stat = allKnown.get(gemId);
+        if (stat == null)
+            throw new RuntimeException("unknown meta gem");
+        return new GemInfo(gemId, stat);
     }
 }

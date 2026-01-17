@@ -10,7 +10,6 @@ public class StatRatingsPriority extends StatRatings {
 
     public StatRatingsPriority(StatType[] priority) {
         this.priority = priority;
-        chooseGems();
         chooseBestStats();
         validate();
     }

@@ -3,6 +3,7 @@ package au.nerago.mopgear.model;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.util.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.ToIntFunction;
@@ -14,7 +15,7 @@ public class SetBonus {
     public static final long DENOMIATOR = 1000;
 
     public static SetBonus forSpec(SpecType spec) {
-        return new SetBonus(DefaultEnchants.known(spec), allSets.stream().filter(s -> s.spec == spec).toList());
+        return new SetBonus(AllowedMeta.forSpec(spec), allSets.stream().filter(s -> s.spec == spec).toList());
     }
 
     public static SetBonus named(AllowedMeta allowedMeta, String... nameArray) {
@@ -25,8 +26,8 @@ public class SetBonus {
         return allSets.stream().filter(s -> s.setName.equals(name)).findAny().orElseThrow();
     }
 
-    public static SetBonus empty() {
-        return new SetBonus(AllowedMeta.None, Collections.emptyList());
+    public static SetBonus empty(AllowedMeta allowedMeta) {
+        return new SetBonus(allowedMeta, Collections.emptyList());
     }
 
     // <<<<<<<<<<<<< PALADIN RET TEIR 14 >>>>>>>>>>>>>>>>
@@ -159,14 +160,24 @@ public class SetBonus {
         }
     }
 
+
+
     // NOTE main entry for model calc
     public long calcAndMultiply(FullItemSet set, long value) {
-        return value * calc(set) / DENOMIATOR;
+        value = value * calc(set) / DENOMIATOR;
+        if (usesAllowedMeta(set)) {
+            value = multiplyMetaBonus(value);
+        }
+        return value;
     }
 
     // NOTE main entry for model calc
     public long calcAndMultiply(SolvableItemSet set, long value) {
-        return value * calc(set) / DENOMIATOR;
+        value = value * calc(set) / DENOMIATOR;
+        if (usesAllowedMeta(set)) {
+            value = multiplyMetaBonus(value);
+        }
+        return value;
     }
 
     // NOTE alternate entry point
@@ -293,7 +304,7 @@ public class SetBonus {
     }
 
     public static ToIntFunction<SolvableEquipMap> countInSpecifiedSet(String setName) {
-        SetBonus inst = named(setName);
+        SetBonus inst = named(AllowedMeta.None, setName);
         return inst::countInAnySet;
     }
 
@@ -311,6 +322,39 @@ public class SetBonus {
 
     public IntStream allSetItems() {
         return activeSets.stream().flatMapToInt(set -> Arrays.stream(set.itemsArray));
+    }
+
+    private boolean usesAllowedMeta(FullItemSet set) {
+        List<GemInfo> gems = set.items().getHead().gemChoice;
+        if (gems != null) {
+            GemInfo candidate = gems.getFirst();
+            return allowedMeta.gemId == candidate.gemId();
+        }
+        return false;
+    }
+
+    private boolean usesAllowedMeta(SolvableItemSet set) {
+        List<GemInfo> gems = set.items().getHead().gemChoice();
+        if (gems != null) {
+            GemInfo candidate = gems.getFirst();
+            return allowedMeta.gemId == candidate.gemId();
+        }
+        return false;
+    }
+
+    private long multiplyMetaBonus(long value) {
+        switch (allowedMeta) {
+            case None -> {
+                return value;
+            }
+            case Tank -> {
+                return value * 1237 / 1000; // DTPS bonus 23.7%, TMI is 30.27%, DEATH halved or more
+            }
+            case Melee -> {
+                return value * 1057 / 1000;
+            }
+            default -> throw new IllegalArgumentException("unknown meta bonus");
+        }
     }
 
     private static final class SetInfo {

@@ -31,7 +31,7 @@ public class FindMultiSpec {
     private final boolean hackAllow = false;
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
-    private final Map<Integer, Tuple.Tuple3<StatBlock, List<StatBlock>, Integer>> overrideEnchant = new HashMap<>();
+    private final Map<Integer, Tuple.Tuple3<StatBlock, List<GemInfo>, Integer>> overrideEnchant = new HashMap<>();
     private final List<SpecDetails> specs = new ArrayList<>();
     private final Set<Integer> suppressSlotCheck = new HashSet<>();
     private Predicate<ProposedResults> multiSetFilter;
@@ -44,7 +44,7 @@ public class FindMultiSpec {
         fixedForge.put(id, reforge);
     }
 
-    public void overrideEnchant(int id, StatBlock stats, List<StatBlock> gemChoice, Integer enchantId) {
+    public void overrideEnchant(int id, StatBlock stats, List<GemInfo> gemChoice, Integer enchantId) {
         overrideEnchant.put(id, Tuple.create(stats, gemChoice, enchantId));
     }
 
@@ -107,6 +107,7 @@ public class FindMultiSpec {
             estimateRun = indexedOutputSize * 3 / 2;
         } else {
             OutputText.println("COMMON COMBOS RANDOM " + targetComboCount);
+            OutputText.println("COMMON COMBOS SHOULD BE LOWER TIMES " + commonCombosBig.divide(BigInteger.valueOf(Long.MAX_VALUE / 2)));
             commonStream = PossibleRandom.runSolverPartial(commonMap, targetComboCount);
             estimateRun = targetComboCount;
         }
@@ -636,40 +637,40 @@ public class FindMultiSpec {
 //            replaceGems();
         }
 
-        private void replaceGems() {
-            if (this.model.spec() == SpecType.PaladinRet) {
-                EquipOptionsMap result = EquipOptionsMap.empty();
-                itemOptions.forEachPair((slot, itemArray) ->
-                        result.put(slot, ArrayUtil.concat(itemArray, ArrayUtil.mapAsNew(itemArray, this::replaceGems, FullItemData[]::new))));
-                itemOptions = result;
-            } else {
-                itemOptions = ItemMapUtil.mapReplaceAll(itemOptions, this::replaceGems);
-            }
-        }
+//        private void replaceGems() {
+//            if (this.model.spec() == SpecType.PaladinRet) {
+//                EquipOptionsMap result = EquipOptionsMap.empty();
+//                itemOptions.forEachPair((slot, itemArray) ->
+//                        result.put(slot, ArrayUtil.concat(itemArray, ArrayUtil.mapAsNew(itemArray, this::replaceGems, FullItemData[]::new))));
+//                itemOptions = result;
+//            } else {
+//                itemOptions = ItemMapUtil.mapReplaceAll(itemOptions, this::replaceGems);
+//            }
+//        }
 
-        private FullItemData replaceGems(FullItemData item) {
-            if (item.slot() == SlotItem.Trinket)
-                return item;
-
-            Integer changedEnchantChoice = item.enchantChoice;
-//            if (changedEnchantChoice == 4421)
-            if (item.slot() == SlotItem.Back)
-                changedEnchantChoice = 4424;
-
-            StatBlock checkGem = StatBlock.of(Haste, 160, Hit, 160);
-            StatBlock replaceGem = StatBlock.of(Haste, 160, Stam, 120);
-            List<StatBlock> changedGems = item.gemChoice != null
-                    ? item.gemChoice.stream().map(gem -> gem.equalsStats(checkGem) ? replaceGem : gem).toList()
-                    : null;
-
-            StatBlock changedEnchantValue = GemData.process(changedGems, item.enchantChoice, item.shared.socketSlots(), item.shared.socketBonus(), item.shared.name(), item.slot().possibleBlacksmith());
-            if (!changedEnchantValue.equalsStats(item.statEnchant)) {
-                item = item.changeEnchant(changedEnchantValue, changedGems, changedEnchantChoice);
-                OutputText.println("CHANGED ENCHANTS " + item);
-            }
-
-            return item;
-        }
+//        private FullItemData replaceGems(FullItemData item) {
+//            if (item.slot() == SlotItem.Trinket)
+//                return item;
+//
+//            Integer changedEnchantChoice = item.enchantChoice;
+////            if (changedEnchantChoice == 4421)
+//            if (item.slot() == SlotItem.Back)
+//                changedEnchantChoice = 4424;
+//
+//            StatBlock checkGem = StatBlock.of(Haste, 160, Hit, 160);
+//            StatBlock replaceGem = StatBlock.of(Haste, 160, Stam, 120);
+//            List<StatBlock> changedGems = item.gemChoice != null
+//                    ? item.gemChoice.stream().map(gem -> gem.equalsStats(checkGem) ? replaceGem : gem).toList()
+//                    : null;
+//
+//            StatBlock changedEnchantValue = GemData.process(changedGems, item.enchantChoice, item.shared.socketSlots(), item.shared.socketBonus(), item.shared.name(), item.slot().possibleBlacksmith());
+//            if (!changedEnchantValue.equalsStats(item.statEnchant)) {
+//                item = item.changeEnchant(changedEnchantValue, changedGems, changedEnchantChoice);
+//                OutputText.println("CHANGED ENCHANTS " + item);
+//            }
+//
+//            return item;
+//        }
 
         public void prepareExtraItems(List<SpecDetails> allSpecs) {
             for (int itemId : extraItems) {
@@ -743,7 +744,7 @@ public class FindMultiSpec {
                 extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel, PrintRecorder.withAutoOutput());
 
             if (overrideEnchant.containsKey(itemId)) {
-                Tuple.Tuple3<StatBlock, List<StatBlock>, Integer> info = overrideEnchant.get(itemId);
+                Tuple.Tuple3<StatBlock, List<GemInfo>, Integer> info = overrideEnchant.get(itemId);
                 extraItem = extraItem.changeEnchant(info.a(), info.b(), info.c());
             } else {
                 extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true, false);

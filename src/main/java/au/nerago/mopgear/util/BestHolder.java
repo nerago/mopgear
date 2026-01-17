@@ -18,6 +18,12 @@ public class BestHolder<T> {
         return bestObject;
     }
 
+    public T orElseThrow() {
+        if (bestObject == null)
+            throw new IllegalStateException("missing best");
+        return bestObject;
+    }
+
     @SuppressWarnings("unused")
     public long getRating() {
         return bestRating;

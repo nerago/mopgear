@@ -46,9 +46,8 @@ public class AsWowSimJson {
 
         if (item.gemChoice != null && !item.gemChoice.isEmpty()) {
             JsonArray gemArray = new JsonArray();
-            for (StatBlock gemStat : item.gemChoice) {
-                int gemId = GemData.reverseLookup(gemStat, item.shared.primaryStatType());
-                gemArray.add(gemId);
+            for (GemInfo gemInfo : item.gemChoice) {
+                gemArray.add(gemInfo.gemId());
             }
             object.add("gems", gemArray);
         }

@@ -34,26 +34,20 @@ public class StatRatingsWeights extends StatRatings {
         }
         if (weight.isEmpty())
             throw new IllegalArgumentException("empty weight file " + weightFile);
-        chooseGems();
         chooseBestStats();
     }
 
-    private StatRatingsWeights(StatBlock weight, EnumMap<SocketType, StatBlock> standardGems) {
+    private StatRatingsWeights(StatBlock weight) {
         this.weight = weight;
-        if (standardGems != null) {
-            this.standardGems = standardGems;
-        } else {
-            chooseGems();
-        }
         chooseBestStats();
     }
 
-    public static StatRatingsWeights mix(StatRatingsWeights weightA, int multiplyA, StatRatingsWeights weightB, int multiplyB, EnumMap<SocketType, StatBlock> standardGems) {
+    public static StatRatingsWeights mix(StatRatingsWeights weightA, int multiplyA, StatRatingsWeights weightB, int multiplyB) {
         StatBlock mixed = weightA.weight.multiply(multiplyA);
 //        if (weightB != null) {
             mixed = mixed.plus(weightB.weight.multiply(multiplyB));
 //        }
-        return new StatRatingsWeights(mixed, standardGems);
+        return new StatRatingsWeights(mixed);
     }
 
     private static StatBlock parseReader(BufferedReader reader) throws IOException {

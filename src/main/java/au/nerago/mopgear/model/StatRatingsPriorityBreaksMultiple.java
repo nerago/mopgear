@@ -18,7 +18,6 @@ public class StatRatingsPriorityBreaksMultiple extends StatRatings {
         this.breakpointStat = breakpointStat;
         this.breakpointsArray = breakpointsArray;
         this.remainPriority = remainPriority;
-        chooseGems();
         chooseBestStats();
         validate();
     }

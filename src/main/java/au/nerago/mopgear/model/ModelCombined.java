@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public record ModelCombined(StatRatings statRatings, StatRequirements statRequirements, ReforgeRules reforgeRules,
-                            DefaultEnchants enchants, SetBonus setBonus, SpecType spec, StatBlock defaultGemAlternateChoice) {
+                            DefaultEnchants enchants, SetBonus setBonus, SpecType spec, GemChoice gemChoice) {
 
     public long calcRating(FullItemSet set) {
         long value = statRatings.calcRating(set.totalForRating());
@@ -46,30 +46,15 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
     }
 
     public ModelCombined withNoRequirements() {
-        return new ModelCombined(statRatings, new StatRequirementsNull(), reforgeRules, enchants, setBonus, spec, defaultGemAlternateChoice);
+        return new ModelCombined(statRatings, new StatRequirementsNull(), reforgeRules, enchants, setBonus, spec, gemChoice);
     }
 
-    public StatBlock gemChoice(SocketType socket) {
-        StatBlock choice = statRatings.gemChoice(socket);
-        if (choice == null && socket == SocketType.Meta)
-            return StatBlock.empty;
-        else if (choice == null && socket == SocketType.Engineer)
-            return new StatBlock(0, 0, 0, 0, 0, 600, 0, 0, 0, 0);
-        else if (choice == null && socket == SocketType.Sha)
-            return new StatBlock(500, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-//            return StatBlock.empty;
-        else if (choice == null)
-            throw new RuntimeException("no gem choice for " + socket);
-        return choice;
+    public GemInfo gemChoice(SocketType socket) {
+        return gemChoice.gemChoice(socket);
     }
 
-    public StatBlock gemChoiceBestAlternate() {
-        if (defaultGemAlternateChoice != null) {
-            return defaultGemAlternateChoice;
-        }
-
-        StatType stat = statRatings.bestNonHit();
-        return StatBlock.of(stat, 320);
+    public GemInfo gemChoiceBestAlternate() {
+        return gemChoice.gemChoiceBestAlternate();
     }
 
     public StatBlock standardEnchant(SlotItem slot) {
@@ -81,7 +66,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         if (modelParam.weight().size() == 1) {
             ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
             rating = new StatRatingsWeights(Path.of(a.file()));
-            rating = StatRatingsWeights.mix(rating, a.scale(), null, 0, null);
+            rating = StatRatingsWeights.mix(rating, a.scale(), null, 0);
         } else if (modelParam.weight().size() == 2) {
             ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
             StatRatingsWeights ratingA = new StatRatingsWeights(Path.of(a.file()));
@@ -89,7 +74,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
             ServiceEntry.ServiceWeightStats b = modelParam.weight().get(1);
             StatRatingsWeights ratingB = new StatRatingsWeights(Path.of(b.file()));
 
-            rating = StatRatingsWeights.mix(ratingA, a.scale(), ratingB, b.scale(), null);
+            rating = StatRatingsWeights.mix(ratingA, a.scale(), ratingB, b.scale());
         } else {
             throw new IllegalArgumentException("expected one or two weights only");
         }

@@ -229,7 +229,6 @@ public class Tasks {
             printer.println("REPLACING " + existing[0]);
         }
 
-        StatBlock gemStat = model.gemChoiceBestAlternate();
         Function<FullItemData, FullItemData> enchantDefault =
                 item -> ItemLoadUtil.defaultEnchants(item, model, true, false);
         Function<FullItemData, FullItemData> enchantAlternate =
@@ -511,29 +510,30 @@ public class Tasks {
 
 //                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
-//                        87024, // null greathelm
+                        87024, // null greathelm
 //                        87145, // defiled earth
 //                        94726, // cloudbreaker belt
 //                        95652, // Puncture-Proof Greathelm head
+
                         95535, // normal lightning legs
+                        94773, // centripetal shoulders normal
 
 //                        85340, // ret tier14 legs
-                        87101, // ret tier14 head
-//                        85339, // ret tier14 shoulder
-//                        85343, // ret tier14 chest
+//                        87101, // ret tier14 head
+                        85339, // ret tier14 shoulder
+                        85343, // ret tier14 chest
                         87100, // ret tier14 hands
 
                         95910, // ret tier15 chest celestial
 //                        95911, // ret tier15 gloves celestial
 //                        95912, // ret tier15 celestial (don't have yet)
 //                        95913, // ret tier15 celestial (don't have yet)
-                        95914, // ret tier15 shoulder celestial
+//                        95914, // ret tier15 shoulder celestial
 
 //                        95142, // striker's battletags
                         95205, // terra-cotta neck
 //                        87036, // soulgrasp heroic
 
-//                        94773, // centripetal shoulders normal
 
                         87145, // defiled earth
 //                        89934, // soul bracer
@@ -571,24 +571,24 @@ public class Tasks {
 //                                95652, // Puncture-Proof Greathelm head
         //
 //                                85340, // ret tier14 legs
-//                                87101, // ret tier14 head
+//                                87101, // ret tier14 head (has tank gem currently)
 //                                85339, // ret tier14 shoulder
                                 85343, // ret tier14 chest
                                 87100, // ret tier14 hands
 
                                 95910, // ret tier15 chest celestial
 //                                95911, // ret tier15 gloves celestial
-                        95912, // ret tier15 celestial (don't have yet) Lightning Emperor's Helmet
+//                        95912, // ret tier15 celestial (don't have yet) Lightning Emperor's Helmet
 //                        95913, // ret tier15 celestial (don't have yet)
 //                                95914, // ret tier15 shoulder celestial
 
-                                95291, // prot tier15 hand normal
-//                                95920, // prot tier15 chest celestial (don't have yet)
+//                                95291, // prot tier15 hand normal
+//                                95920, // prot tier15 chest celestial
 //                                95922, // prot tier15 head celestial (don't have yet)
-                                96667, // prot tier15 leg heroic
+//                                96667, // prot tier15 leg heroic
 //                                95924, // prot tier15 shoulder celestial
         //
-//                                95142, // striker's battletags
+                                95142, // striker's battletags
                                 95205, // terra-cotta neck
                                 87036, // soulgrasp heroic
         //
@@ -622,7 +622,7 @@ public class Tasks {
 //                                86946, // ruby signet heroic
 //                                87071, // yang-xi heroic
 
-                                87024, // null greathelm
+//                                87024, // null greathelm (dps gem)
         
                                 94726, // cloudbreaker belt
                                 86955, // heroic overwhelm assault belt
@@ -633,7 +633,8 @@ public class Tasks {
                                 86325, // daybreak
 //                                95687, // celestial beakbreaker cloak
         
-                                95535, // normal lightning legs
+//                                95535, // normal lightning legs
+//                                94773, // centripetal shoulders normal
         
 //                                86659, // prot tier14 shoulder celestial, w/mastery
 //                                85323, // prot tier14 chest normal, w/parry
@@ -641,7 +642,7 @@ public class Tasks {
 //                                85320, // prot tier14 legs normal w/dodge+mostery
 
 //                                85340, // ret tier14 legs
-//                                87101, // ret tier14 head
+                                87101, // ret tier14 head
 //                                85339, // ret tier14 shoulder
 //                                85343, // ret tier14 chest
 //                                87100, // ret tier14 hands
@@ -651,8 +652,8 @@ public class Tasks {
 //                                95911, // ret tier15 gloves celestial
 
                                 95291, // prot tier15 hand normal
-                                95920, // prot tier15 chest celestial (don't have yet)
-                                95922, // prot tier15 head celestial (don't have yet)
+                                95920, // prot tier15 chest celestial
+//                                95922, // prot tier15 head celestial (don't have yet)
                                 96667, // prot tier15 leg heroic
                                 95924, // prot tier15 shoulder celestial
 
@@ -661,11 +662,10 @@ public class Tasks {
 
                                 96182, // ultimate prot of the emperor thunder
 
-                                94773, // centripetal shoulders normal
 //                                95140, // shado assault band
 
 //                                87145, // defiled earth
-                                89934, // soul bracer
+//                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 // from other processes
@@ -696,7 +696,7 @@ public class Tasks {
 
 //        multi.solve(1000);
 //        multi.solve(5000);
-//        multi.suggestCulls(5000);
+//        multi.suggestCulls(10000);
 //        multi.solve(50000);
         multi.solve(120000);
 //        multi.solve(220000);
@@ -773,7 +773,7 @@ public class Tasks {
         OutputText.printf("EFFECTIVE %.2f %.2f\n",
                 defMultiplyA * rateMitigation / defTotal,
                 defMultiplyB * rateTankDps / defTotal);
-        StatRatingsWeights defMix = StatRatingsWeights.mix(tankMitigation, (int) defMultiplyA, tankDps, (int) defMultiplyB, null);
+        StatRatingsWeights defMix = StatRatingsWeights.mix(tankMitigation, (int) defMultiplyA, tankDps, (int) defMultiplyB);
         StatType defBestStat = defMix.bestNonHit();
         OutputText.printf("BEST STAT %s\n\n", defBestStat);
 
@@ -786,7 +786,7 @@ public class Tasks {
         OutputText.printf("EFFECTIVE %.2f %.2f\n",
                 dmgMultiplyA * rateMitigation / dmgTotal,
                 dmgMultiplyB * rateTankDps / dmgTotal);
-        StatRatingsWeights dmgMix = StatRatingsWeights.mix(tankMitigation, (int) dmgMultiplyA, tankDps, (int) dmgMultiplyB, null);
+        StatRatingsWeights dmgMix = StatRatingsWeights.mix(tankMitigation, (int) dmgMultiplyA, tankDps, (int) dmgMultiplyB);
         StatType dmgBestStat = dmgMix.bestNonHit();
         OutputText.printf("BEST STAT %s\n\n", dmgBestStat);
 
@@ -805,7 +805,7 @@ public class Tasks {
     }
 
     private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req, SpecType spec) {
-        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, SetBonus.empty(), spec, null);
+        ModelCombined model = new ModelCombined(weights, req, ReforgeRules.tank(), null, SetBonus.forSpec(spec), spec, null);
         JobInput job = new JobInput(Medium, 1, true);
         job.model = model;
         job.setItemOptions(items);
@@ -832,7 +832,7 @@ public class Tasks {
             double total = multiplyA * rateMitigation + multiplyB * rateTankDps;
             if (Math.abs(total - targetCombined) > targetCombined / 100)
                 throw new RuntimeException("couldn't hit target within 1%");
-            return StatRatingsWeights.mix(tankMitigation, multiplyA, tankDps, multiplyB, StandardModels.protGems());
+            return StatRatingsWeights.mix(tankMitigation, multiplyA, tankDps, multiplyB);
         };
     }
 

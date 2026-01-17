@@ -63,8 +63,7 @@ public class StandardModels {
     public static ModelCombined pallyProtMitigationModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
-        EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 123, statDps, 45, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 123, statDps, 45);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -77,19 +76,19 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, true);
         ReforgeRules reforge = ReforgeRules.tank();
+        GemChoice gemChoice = GemChoice.protMitigationGems();
 
 //        SetBonus setBonus = SetBonus.named("White Tiger Plate", "Plate of the Lightning Emperor");
 //        SetBonus setBonus = SetBonus.named("White Tiger Plate", "White Tiger Battlegear Prot Mitigation", "Plate of the Lightning Emperor Prot Mitigation");
-        SetBonus setBonus = SetBonus.named("White Tiger Battlegear Prot Mitigation", "Plate of the Lightning Emperor Prot Mitigation");
+        SetBonus setBonus = SetBonus.named(AllowedMeta.Tank, "White Tiger Battlegear Prot Mitigation", "Plate of the Lightning Emperor Prot Mitigation");
 
-        return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtMitigation, hasteGem);
+        return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtMitigation, gemChoice);
     }
 
     public static ModelCombined pallyProtDpsModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
-        EnumMap<SocketType, StatBlock> standardGems = protGems();
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 54, statDps, 145, standardGems);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 54, statDps, 145);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -102,11 +101,12 @@ public class StandardModels {
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
+        GemChoice gemChoice = GemChoice.protDpsGems();
 
         //        SetBonus setBonus = SetBonus.empty();
-        SetBonus setBonus = SetBonus.named("Plate of the Lightning Emperor Prot Damage");
+        SetBonus setBonus = SetBonus.named(AllowedMeta.Melee, "Plate of the Lightning Emperor Prot Damage");
 
-        return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtDps, hasteGem);
+        return new ModelCombined(statMix, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtDps, gemChoice);
     }
 
     public static ModelCombined pallyProtVariableModel(StatRatings stats, boolean mitigationSetBonuses) {
@@ -115,9 +115,10 @@ public class StandardModels {
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtDps, true);
         ReforgeRules reforge = ReforgeRules.tank();
         SetBonus setBonus = mitigationSetBonuses
-            ? SetBonus.named("White Tiger Battlegear Prot Mitigation", "Plate of the Lightning Emperor Prot Mitigation")
-            : SetBonus.empty();
-        return new ModelCombined(stats, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtMitigation, hasteGem);
+            ? SetBonus.named(AllowedMeta.Tank, "White Tiger Battlegear Prot Mitigation", "Plate of the Lightning Emperor Prot Mitigation")
+            : SetBonus.empty(AllowedMeta.Melee);
+        GemChoice gemChoice = mitigationSetBonuses ? GemChoice.protMitigationGems() : GemChoice.protDpsGems();
+        return new ModelCombined(stats, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinProtMitigation, gemChoice);
     }
 
     public static ModelCombined pallyRetModel() {
@@ -134,27 +135,30 @@ public class StandardModels {
         }
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Melee, null);
         ReforgeRules reforge = ReforgeRules.melee();
-        SetBonus setBonus = SetBonus.named("White Tiger Battlegear", "Battlegear of the Lightning Emperor");
-        return new ModelCombined(statRatings, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinRet, hasteGem);
+        SetBonus setBonus = SetBonus.named(AllowedMeta.Melee, "White Tiger Battlegear", "Battlegear of the Lightning Emperor");
+        return new ModelCombined(statRatings, combinedRequire, reforge, enchants, setBonus, SpecType.PaladinRet, gemChoice);
     }
 
     private static ModelCombined standardTankModel(SpecType spec) {
         StatRatings statRatings = new StatRatingsWeights(specToWeightFile(spec));
         StatRequirements statRequirements = StatRequirementsHitExpertise.protFlexibleParry();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinProtMitigation, false);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Tank, null);
         ReforgeRules reforge = ReforgeRules.tank();
         SetBonus setBonus = SetBonus.forSpec(spec);
-        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus, spec, null);
+        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus, spec, gemChoice);
     }
 
     private static ModelCombined standardMeleeModel(SpecType spec) {
         StatRatingsWeights statRatings = new StatRatingsWeights(specToWeightFile(spec));
         StatRequirements statRequirements = StatRequirementsHitExpertise.retWideCapRange();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Melee, null);
         ReforgeRules reforge = ReforgeRules.melee();
         SetBonus setBonus = SetBonus.forSpec(spec);
-        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus, spec, null);
+        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus, spec, gemChoice);
     }
 
     private static ModelCombined standardHybridCasterModel(SpecType spec) {
@@ -162,9 +166,10 @@ public class StandardModels {
         StatRequirements statRequirements = new StatRequirementsHitCombined(
                 StatRequirements.TARGET_RATING_CAST, StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Caster, null);
         ReforgeRules reforge = ReforgeRules.casterHybrid();
         SetBonus setBonus = SetBonus.forSpec(spec);
-        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus, spec, null);
+        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus, spec, gemChoice);
     }
 
     private static ModelCombined standardCasterModel(SpecType spec) {
@@ -172,9 +177,10 @@ public class StandardModels {
         StatRequirements statRequirements = new StatRequirementsHitOnly(
                 StatRequirements.TARGET_RATING_CAST, StatRequirements.DEFAULT_CAP_ALLOW_EXCEED);
         DefaultEnchants enchants = new DefaultEnchants(SpecType.Warlock, false);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Caster, null);
         ReforgeRules reforge = ReforgeRules.casterPure();
         SetBonus setBonus = SetBonus.forSpec(spec);
-        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus, spec, null);
+        return new ModelCombined(statRatings, statRequirements, reforge, enchants, setBonus, spec, gemChoice);
     }
 
     private static ModelCombined druidTreeModel() {
@@ -188,8 +194,9 @@ public class StandardModels {
         );
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Heal, null);
         SetBonus setBonus = SetBonus.forSpec(SpecType.DruidTree);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.DruidTree, null);
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.DruidTree, gemChoice);
     }
 
     private static ModelCombined paladinHolyModel() {
@@ -198,8 +205,9 @@ public class StandardModels {
         );
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Heal, null);
         SetBonus setBonus = SetBonus.forSpec(SpecType.PaladinHoly);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.PaladinHoly, null);
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.PaladinHoly, gemChoice);
     }
 
     private static ModelCombined shamanRestoration() {
@@ -210,8 +218,9 @@ public class StandardModels {
         );
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Heal, null);
         SetBonus setBonus = SetBonus.forSpec(SpecType.ShamanRestoration);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.ShamanRestoration, null);
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.ShamanRestoration, gemChoice);
     }
 
     private static ModelCombined priestHoly() {
@@ -220,8 +229,9 @@ public class StandardModels {
         );
         StatRequirements statRequirements = new StatRequirementsNull();
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Heal, null);
         SetBonus setBonus = SetBonus.forSpec(SpecType.PriestHoly);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.PriestHoly, null);
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.PriestHoly, gemChoice);
     }
 
     private static ModelCombined monkMistweaver() {
@@ -234,18 +244,9 @@ public class StandardModels {
         // https://www.icy-veins.com/mists-of-pandaria-classic/mistweaver-monk-pve-stat-priority
         StatRequirements statRequirements = new StatRequirementsGenericOne(Spirit, 5100);
         DefaultEnchants enchants = new DefaultEnchants(SpecType.DruidBoom, false);
+        GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Heal, null);
         SetBonus setBonus = SetBonus.forSpec(SpecType.MonkMistweaver);
-        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.MonkMistweaver, null);
-    }
-
-    public static EnumMap<SocketType, StatBlock> protGems() {
-        EnumMap<SocketType, StatBlock> gems = new EnumMap<>(SocketType.class);
-        gems.put(SocketType.Red, StatBlock.of(Haste, 160, Expertise, 160));
-        gems.put(SocketType.Blue, StatBlock.of(Haste, 160, Stam, 120));
-        gems.put(SocketType.Yellow, StatBlock.of(Haste, 320));
-        gems.put(SocketType.General, StatBlock.of(Haste, 320));
-        gems.put(SocketType.Meta, StatBlock.of(Primary, 216));
-        return gems;
+        return new ModelCombined(statRatings, statRequirements, ReforgeRules.casterHybrid(), enchants, setBonus, SpecType.MonkMistweaver, gemChoice);
     }
 
     public static Path specToWeightFile(SpecType spec) {

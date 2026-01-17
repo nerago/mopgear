@@ -43,30 +43,31 @@ public class BigStreamUtil {
         return inputStream.peek(set -> {
             long curr = count.incrementAndGet();
             if (curr % reportFrequency == 0) {
-                double percent = ((double) curr) * percentMultiply;
-                Duration estimateRemain = estimateRemain(startTime, percent);
-                synchronized (System.out) {
-                    System.out.printf("%d %.1f%% ", curr, percent);
-                    printDuration(estimateRemain);
-                    System.out.println();
-                }
+                reportProgress(curr, percentMultiply, startTime);
             }
         });
     }
 
-    private static final Duration HOUR_ONE = Duration.ofHours(1);
-    private static final Duration MINUTE_ONE = Duration.ofMinutes(1);
-    private static void printDuration(Duration duration) {
-        if (duration.compareTo(HOUR_ONE) > 0) {
-            System.out.printf("%d:%02d:%02d", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
-        } else if (duration.compareTo(MINUTE_ONE) > 0) {
-            System.out.printf("%02d:%02d", duration.toMinutes(), duration.toSecondsPart());
+    static void reportProgress(long curr, double percentMultiply, Instant startTime) {
+        double percent = ((double) curr) * percentMultiply;
+        Duration estimateRemain = estimateRemain(startTime, curr);
+        printProgressLine(curr, percent, estimateRemain);
+    }
+
+    static void printProgressLine(long curr, double percent, Duration estimateRemain) {
+        if (estimateRemain.compareTo(HOUR_ONE) > 0) {
+            System.out.printf("%d %.1f%% %d:%02d:%02d\n", curr, percent, estimateRemain.toHours(), estimateRemain.toMinutesPart(), estimateRemain.toSecondsPart());
+        } else if (estimateRemain.compareTo(MINUTE_ONE) > 0) {
+            System.out.printf("%d %.1f%% %02d:%02d\n", curr, percent, estimateRemain.toMinutes(), estimateRemain.toSecondsPart());
         } else {
-            System.out.printf("%dS", duration.toSecondsPart());
+            System.out.printf("%d %.1f%% %dS\n", curr, percent, estimateRemain.toSecondsPart());
         }
     }
 
-    private static long chooseReportFrequency(long estimate, long min, long max) {
+    private static final Duration HOUR_ONE = Duration.ofHours(1);
+    private static final Duration MINUTE_ONE = Duration.ofMinutes(1);
+
+private static long chooseReportFrequency(long estimate, long min, long max) {
         long freq = Math.round(estimate / 100.0);
         int digitCount = 0;
         while (freq >= 10) {

@@ -7,7 +7,7 @@ public enum SocketType {
     Yellow(3, new StatType[]{StatType.Crit, StatType.Haste, StatType.Mastery}),
     Blue(4, new StatType[]{StatType.Hit , StatType.Spirit}),
     Sha(5, new StatType[]{}),
-    Engineer(6, new StatType[]{}),;
+    Engineer(6, new StatType[]{StatType.Crit, StatType.Haste, StatType.Mastery, StatType.Expertise, StatType.Hit, StatType.Spirit}),;
 
     private final int wowHeadType;
     private final StatType[] matchingStats;
