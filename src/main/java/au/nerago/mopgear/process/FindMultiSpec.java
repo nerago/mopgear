@@ -3,7 +3,6 @@ package au.nerago.mopgear.process;
 import au.nerago.mopgear.ItemLoadUtil;
 import au.nerago.mopgear.ItemMapUtil;
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.model.GemData;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.permute.PossibleIndexed;
 import au.nerago.mopgear.permute.PossibleRandom;
@@ -22,7 +21,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
@@ -115,7 +113,7 @@ public class FindMultiSpec {
         Stream<Map<ItemRef, FullItemData>> baselineStream = baselineAsCommonOptionsStream(commonMap);
         Stream<Map<ItemRef, FullItemData>> equippedStream = equippedAsCommonOptionsStream(commonMap);
         commonStream = Stream.concat(commonStream, Stream.concat(baselineStream, equippedStream));
-        commonStream = BigStreamUtil.countProgressSmall(estimateRun, Instant.now(), commonStream);
+        commonStream = BigStreamUtil.countProgress(estimateRun, Instant.now(), commonStream);
         return commonStream;
     }
 

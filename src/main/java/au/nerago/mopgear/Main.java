@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.function.ToIntFunction;
 
 import static au.nerago.mopgear.Tasks.*;
 import static au.nerago.mopgear.domain.StatType.*;
@@ -84,8 +85,8 @@ public class Main {
     private void reforgeRet(Instant startTime) {
         ModelCombined model = StandardModels.pallyRetModel();
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, model, commonItems, PrintRecorder.withAutoOutput());
 
@@ -119,6 +120,54 @@ public class Main {
 ////                  new CostedItem(86822,0)
 //          }, 0);
 
+        ToIntFunction<SolvableEquipMap> countSet = SetBonus.countInSpecifiedSet("Battlegear of the Lightning Emperor");
+        reforgeProcessPlusMany(items, model, startTime, new int[]{
+                87015, // heroic clawfeet
+                86979, // heroic impaling treads
+                94726, // cloudbreaker belt
+
+                87026, // heroic peacock cloak
+                86955, // heroic overwhelm assault belt
+                95535, // normal lightning legs
+
+                95142, // striker's battletags
+                95205, // terra-cotta neck
+                87036, // soulgrasp heroic
+
+                86979, // heroic impaling treads
+                87024, // null greathelm
+
+                94726, // cloudbreaker belt
+                86955, // heroic overwhelm assault belt
+
+                87026, // heroic peacock cloak
+                86325, // daybreak
+
+                95535, // normal lightning legs
+
+                85340, // ret tier14 legs
+                87101, // ret tier14 head
+                85339, // ret tier14 shoulder
+                85343, // ret tier14 chest
+                87100, // ret tier14 hands
+
+                95914, // ret tier15 shoulder celestial
+                95910, // ret tier15 chest celestial
+                95911, // ret tier15 gloves celestial
+                95912, // ret tier15  celestial
+                95913, // ret tier15  celestial
+
+                95142, // striker's battletags
+                95205, // terra-cotta neck
+
+                94773, // centripetal shoulders normal
+                95140, // shado assault band
+
+                89934, // soul bracer
+                94820, // caustic spike bracers
+        }, 2, false,
+                set -> countSet.applyAsInt(set.items()) >= 4);
+
 //            reforgeProcessRetFixed(model, startTime, true);
 //            reforgeProcessRetFixedAlone(model, startTime, true);
 //        reforgeProcessRetChallenge(model, startTime);
@@ -139,23 +188,23 @@ public class Main {
 
 //                findUpgradeSetup(items, strengthPlateCrafted(), model);
 
-        Difficulty difficulty = Difficulty.Celestial;
-        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-                pallyPhase3Valor(),
-                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
-                strengthPlateThroneNormal(difficulty),
-                strengthDpsTrinketsThroneNormal(difficulty),
-        });
-        upgradeShit = minusRadenLoot(upgradeShit);
-        findUpgrade(items, upgradeShit, model, true, null, 2, 4);
+//        Difficulty difficulty = Difficulty.Celestial;
+//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+//                pallyPhase3Valor(),
+//                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+//                strengthPlateThroneNormal(difficulty),
+//                strengthDpsTrinketsThroneNormal(difficulty),
+//        });
+//        upgradeShit = minusRadenLoot(upgradeShit);
+//        findUpgrade(items, upgradeShit, model, true, null, 2, 4);
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = StandardModels.pallyProtDpsModel();
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = StandardModels.pallyProtDpsModel();
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = StandardModels.pallyProtMitigationModel();
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = StandardModels.pallyProtMitigationModel();
+//        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -201,77 +250,77 @@ public class Main {
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
 
-                reforgeProcessPlusMany(items, model, startTime, new int[]{
-                                86979, // heroic impaling treads
-                                86957, // heroic bladed tempest
-                                85343, // normal ret chest
-
-                                87015, // heroic clawfeet
-                                86979, // heroic impaling treads
-                                87071, // yang-xi heroic
-                                87145, // defiled earth
-                                85340, // normal ret legs
-                                87101, // heroic ret head
-                                86946, // ruby signet heroic
-                                94726, // cloudbreaker belt
-
-                                87026, // heroic peacock cloak
-                                86955, // heroic overwhelm assault belt
-                                95535, // normal lightning legs
-
-                                87050, // steelskin heroic
-                                95768, // greatshield gloaming celestial
-                                95652, // Puncture-Proof Greathelm head
-                                95687, // celestial beakbreaker cloak
-
-                                95142, // striker's battletags
-                                95205, // terra-cotta neck
-                                87036, // soulgrasp heroic
-
-
-                        86979, // heroic impaling treads
-                        87024, // null greathelm
-
-                        94726, // cloudbreaker belt
-                        86955, // heroic overwhelm assault belt
-
-                        87026, // heroic peacock cloak
-                        86325, // daybreak
-
-                        95535, // normal lightning legs
-
-                                85340, // ret tier14 legs
-                                87101, // ret tier14 head
-                                85339, // ret tier14 shoulder
-                                85343, // ret tier14 chest
-                                87100, // ret tier14 hands
-
-                                95914, // ret tier15 shoulder celestial
-                                95910, // ret tier15 chest celestial
-                                95911, // ret tier15 gloves celestial
-
-                        95291, // prot tier15 hand normal
-                        95920, // prot tier15 chest celestial (don't have yet)
-                        95922, // prot tier15 head celestial (don't have yet)
-                        96667, // prot tier15 leg heroic
-                        95924, // prot tier15 shoulder celestial
-
-                        95142, // striker's battletags
-                        95205, // terra-cotta neck
-
-                        96182, // ultimate prot of the emperor thunder
-
-                                94773, // centripetal shoulders normal
-                                95140, // shado assault band
-
-                                87145, // defiled earth
-                                89934, // soul bracer
-                        94820, // caustic spike bracers
-
-                        // from other processes
-                        86387, // sha weapon
-
-                        }, 2, false, null);
+//                reforgeProcessPlusMany(items, model, startTime, new int[]{
+//                                86979, // heroic impaling treads
+//                                86957, // heroic bladed tempest
+//                                85343, // normal ret chest
+//
+//                                87015, // heroic clawfeet
+//                                86979, // heroic impaling treads
+//                                87071, // yang-xi heroic
+//                                87145, // defiled earth
+//                                85340, // normal ret legs
+//                                87101, // heroic ret head
+//                                86946, // ruby signet heroic
+//                                94726, // cloudbreaker belt
+//
+//                                87026, // heroic peacock cloak
+//                                86955, // heroic overwhelm assault belt
+//                                95535, // normal lightning legs
+//
+//                                87050, // steelskin heroic
+//                                95768, // greatshield gloaming celestial
+//                                95652, // Puncture-Proof Greathelm head
+//                                95687, // celestial beakbreaker cloak
+//
+//                                95142, // striker's battletags
+//                                95205, // terra-cotta neck
+//                                87036, // soulgrasp heroic
+//
+//
+//                        86979, // heroic impaling treads
+//                        87024, // null greathelm
+//
+//                        94726, // cloudbreaker belt
+//                        86955, // heroic overwhelm assault belt
+//
+//                        87026, // heroic peacock cloak
+//                        86325, // daybreak
+//
+//                        95535, // normal lightning legs
+//
+//                                85340, // ret tier14 legs
+//                                87101, // ret tier14 head
+//                                85339, // ret tier14 shoulder
+//                                85343, // ret tier14 chest
+//                                87100, // ret tier14 hands
+//
+//                                95914, // ret tier15 shoulder celestial
+//                                95910, // ret tier15 chest celestial
+//                                95911, // ret tier15 gloves celestial
+//
+//                        95291, // prot tier15 hand normal
+//                        95920, // prot tier15 chest celestial (don't have yet)
+//                        95922, // prot tier15 head celestial (don't have yet)
+//                        96667, // prot tier15 leg heroic
+//                        95924, // prot tier15 shoulder celestial
+//
+//                        95142, // striker's battletags
+//                        95205, // terra-cotta neck
+//
+//                        96182, // ultimate prot of the emperor thunder
+//
+//                                94773, // centripetal shoulders normal
+//                                95140, // shado assault band
+//
+//                                87145, // defiled earth
+//                                89934, // soul bracer
+//                        94820, // caustic spike bracers
+//
+//                        // from other processes
+//                        86387, // sha weapon
+//
+//                        }, 2, false, null);
 
 
 
@@ -334,21 +383,22 @@ public class Main {
 //        findUpgrade(items, SourcesOfItems.strengthPlateCraftedT3(), model, true, null, 0, 8);
 //        findUpgrade(items, SourcesOfItems.strengthPlateThroneNormalBoss(Difficulty.Heroic, 701), model, true, null, 2, 8);
 
-//        Difficulty difficulty = Difficulty.Heroic;
-//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-//                pallyPhase3Valor(),
-//                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
-//                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
-//                strengthPlateThroneNormal(difficulty),
-//                tankTrinketsThroneNormal(difficulty),
-//                strengthDpsTrinketsThroneNormal(difficulty),
-//        });
-//        upgradeShit = minusRadenLoot(upgradeShit);
-//        findUpgrade(items, upgradeShit, model, true, null, 2, 16);
+        Difficulty difficulty = Difficulty.Normal;
+        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+                pallyPhase3Valor(),
+                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
+                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+                strengthPlateThroneNormal(difficulty),
+                tankTrinketsThroneNormal(difficulty),
+                strengthDpsTrinketsThroneNormal(difficulty),
+        });
+        upgradeShit = minusRadenLoot(upgradeShit);
+        findUpgrade(items, upgradeShit, model, true, null, 2, 16);
     }
 
     private void variableRatingProt(Instant startTime) {
-        Path file = DataLocation.gearProtDefenceFile;
+//        Path file = DataLocation.gearProtDefenceFile;
+        Path file = DataLocation.gearProtDpsFile;
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, StandardModels.pallyProtDpsModel(), null, PrintRecorder.withAutoOutput());
 
         int[] extraItems = new int[]{
@@ -366,18 +416,18 @@ public class Main {
                 86979, // heroic impaling treads
                 87024, // null greathelm
                 87026, // heroic peacock cloak
+                94942, // hydra bloodcloak
                 87060, // Star-Stealer Waistguard
                 87145, // defiled earth
                 89934, // soul bracer
                 94726, // cloudbreaker belt
                 94773, // centripetal shoulders normal
 //                94820, // caustic spike bracers
-                95140, // shado assault band
+//                95140, // shado assault band
                 95142, // striker's battletags
                 95205, // terra-cotta neck
                 95535, // normal lightning legs
                 95652, // Puncture-Proof Greathelm head
-                95687, // celestial beakbreaker cloak
                 96182, // ultimate prot of the emperor thunder
 
                 95910, // ret tier15 chest celestial
@@ -386,14 +436,11 @@ public class Main {
                 95913, // ret tier15 celestial
                 95914, // ret tier15 shoulder celestial
 
+                95291, // prot tier15 hand normal
                 95920, // prot tier15 chest celestial
-                95921, // prot tier15 hand celestial
-                95922, // prot tier15 head celestial
-                95923, // prot tier15 leg celestial
+                95922, // prot tier15 head celestial (don't have yet)
+                96667, // prot tier15 leg heroic
                 95924, // prot tier15 shoulder celestial
-
-                 95191, // tanky belt
-                95291, // prot gloves
         };
         List<EquippedItem> bagsItems = bagItemsArray(ignoredItems);
         List<EquippedItem> extraItems2 = Arrays.stream(extraItems).mapToObj(id ->
@@ -402,7 +449,10 @@ public class Main {
 //        List<EquippedItem> extraItems2 = Arrays.stream(extraItems).mapToObj(id -> new EquippedItem(id, new int[0], null, 2, 0, null)).toList();
 
         List<EquippedItem> extraItemsAll = ArrayUtil.concat(extraItems2, currentItemsAll(DataLocation.gearRetFile, DataLocation.gearProtDpsFile, DataLocation.gearProtDefenceFile));
-        extraItemsAll = extraItemsAll.stream().filter(ei -> ei.itemId() != 87172).toList(); // remove Darkmist Vortex
+        extraItemsAll = extraItemsAll.stream()
+                .filter(ei -> ItemCache.instance.get(ei.itemId(), 0).slot() != SlotItem.Trinket)
+                .filter(ei -> ItemCache.instance.get(ei.itemId(), 0).slot() != SlotItem.Ring)
+                .toList();
         optimalForVariedRating(items, extraItemsAll);
     }
 
@@ -480,20 +530,23 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 19/11/2025
-        map.put(87172, List.of(new ReforgeRecipe(null, null))); // Trinket Darkmist Vortex
-        map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
-        map.put(87036, List.of(new ReforgeRecipe(null, null))); // Neck Soulgrasp Choker
+        // 17/01/2026
+        map.put(95205, List.of(new ReforgeRecipe(Mastery, Haste))); // Neck Necklace of the Terra-Cotta Vanquisher
+        map.put(86979, List.of(new ReforgeRecipe(Haste, Expertise))); // Foot Impaling Treads
         map.put(85343, List.of(new ReforgeRecipe(null, null))); // Chest White Tiger Battleplate
-        map.put(85339, List.of(new ReforgeRecipe(Hit, Crit))); // Shoulder White Tiger Pauldrons
-        map.put(89934, List.of(new ReforgeRecipe(Haste, Crit))); // Wrist Bonded Soul Bracers
-        map.put(86387, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon1H Kilrak, Jaws of Terror
-        map.put(87100, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets
-        map.put(87024, List.of(new ReforgeRecipe(Crit, Expertise))); // Head Nullification Greathelm
-        map.put(87026, List.of(new ReforgeRecipe(Expertise, Hit))); // Back Cloak of Peacock Feathers
-        map.put(87050, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Steelskin, Qiang's Impervious Shield
-        map.put(86957, List.of(new ReforgeRecipe(null, null))); // Ring Ring of the Bladed Tempest
-        map.put(86955, List.of(new ReforgeRecipe(Mastery, Expertise))); // Belt Waistplate of Overwhelming Assault
+        map.put(96182, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Ultimate Protection of the Emperor
+        map.put(95535, List.of(new ReforgeRecipe(Haste, Expertise))); // Leg Legplates of the Lightning Throne
+        map.put(94526, List.of(new ReforgeRecipe(null, null))); // Trinket Spark of Zandalar
+        map.put(86387, List.of(new ReforgeRecipe(Mastery, Haste))); // Weapon1H Kilrak, Jaws of Terror
+        map.put(94773, List.of(new ReforgeRecipe(Crit, Hit))); // Shoulder Shoulderguards of Centripetal Destruction
+        map.put(95140, List.of(new ReforgeRecipe(null, null))); // Ring Band of the Shado-Pan Assault
+        map.put(95757, List.of(new ReforgeRecipe(null, null))); // Trinket Primordius' Talisman of Rage
+        map.put(87100, List.of(new ReforgeRecipe(Expertise, Haste))); // Hand White Tiger Gauntlets
+        map.put(87024, List.of(new ReforgeRecipe(Crit, Hit))); // Head Nullification Greathelm
+        map.put(87026, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Cloak of Peacock Feathers
+        map.put(94726, List.of(new ReforgeRecipe(Mastery, Expertise))); // Belt Cloudbreaker Greatbelt
+        map.put(94820, List.of(new ReforgeRecipe(null, null))); // Wrist Caustic Spike Bracers
+        map.put(86957, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Ring of the Bladed Tempest
         return map;
     }
 

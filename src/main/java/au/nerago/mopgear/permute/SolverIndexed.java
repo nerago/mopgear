@@ -31,12 +31,12 @@ public class SolverIndexed {
         if (fitsLong(estimateFullCombos) && fitsLong(plannedCount) && fitsLong(skipSize)) {
             Stream<Long> dumbStream = generateDumbStream(estimateFullCombos.longValueExact(), skipSize.longValueExact()).parallel();
             Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
-            partialSets = BigStreamUtil.countProgress(plannedCount.longValueExact(), startTime, partialSets);
+            partialSets = BigStreamUtil.countProgress(plannedCount.doubleValue(), startTime, partialSets);
             return finishToResult(model, specialFilter, partialSets);
         } else {
             Stream<BigInteger> dumbStream = generateDumbStream(estimateFullCombos, skipSize).parallel();
             Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
-            partialSets = BigStreamUtil.countProgress(plannedCount, startTime, partialSets);
+            partialSets = BigStreamUtil.countProgress(plannedCount.doubleValue(), startTime, partialSets);
             return finishToResult(model, specialFilter, partialSets);
         }
     }

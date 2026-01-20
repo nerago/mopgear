@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SimCliExecute {
-    private static final String EXEC = "D:\\prog\\wowsim\\wowsimcli-windows.exe";
+    private static final String EXEC = "C:\\Users\\nicholas\\Dropbox\\prog\\wow-sim-mop\\wowsimcli-windows.exe";
 
     public static void run(Path inFile, Path outFile) {
         try {

@@ -16,8 +16,8 @@ import static au.nerago.mopgear.results.AsWowSimJson.makeItemObject;
 
 @SuppressWarnings("SameParameterValue")
 public class SimInputModify {
-    public static final Path basePath = Path.of("D:\\prog\\wowsim\\gen-files");
-    public static final Path INPUT_FILE = Path.of("D:\\prog\\wowsim\\test-cli.json");
+    public static final Path basePath = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\wow-sim-mop\\gen-files");
+    public static final Path INPUT_FILE = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\wow-sim-mop\\test-cli.json");
     public static final Path BASELINE_FILE = basePath.resolve("out-base.json");
 
     public static Path outName(StatType statType) {

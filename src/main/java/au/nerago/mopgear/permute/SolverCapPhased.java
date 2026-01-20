@@ -8,6 +8,7 @@ import au.nerago.mopgear.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
@@ -43,8 +44,8 @@ public class SolverCapPhased {
         return estimate;
     }
 
-    public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter, boolean indexed, boolean topOnly, Integer generateComboCount, Integer topCombosFilterCount) {
-        Stream<SkinnyItemSet> skinnyCombos = makeSkinnyCombos(parallel, indexed, generateComboCount);
+    public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter, boolean indexed, boolean topOnly, Integer generateComboCount, Integer topCombosFilterCount, Instant startTime) {
+        Stream<SkinnyItemSet> skinnyCombos = makeSkinnyCombos(parallel, indexed, generateComboCount, startTime);
 
         if (topOnly) {
             skinnyCombos = filterBestCapsOnly(skinnyCombos, topCombosFilterCount);
@@ -58,16 +59,18 @@ public class SolverCapPhased {
             finalSets = finalSets.filter(specialFilter);
         if (parallel)
             finalSets = finalSets.parallel();
-        return BigStreamUtil.findBest(model, finalSets);
+        return finalSets.collect(new TopCollector1<>(model::calcRating));
     }
 
-    private Stream<SkinnyItemSet> makeSkinnyCombos(boolean parallel, boolean indexed, Integer generateComboCount) {
+    private Stream<SkinnyItemSet> makeSkinnyCombos(boolean parallel, boolean indexed, Integer generateComboCount, Instant startTime) {
         Stream<SkinnyItemSet> initialSets;
         if (indexed) {
             BigInteger targetCombos = BigInteger.valueOf(generateComboCount);
             initialSets = generateSkinnyComboStreamIndexed(parallel, targetCombos);
+            initialSets = BigStreamUtil.countProgress(generateComboCount, startTime, initialSets);
         } else {
             initialSets = generateSkinnyComboStreamFull(parallel);
+            initialSets = BigStreamUtil.countProgress(estimate.doubleValue(), startTime, initialSets);
         }
 
         return requirements.filterSetsSkinny(initialSets);

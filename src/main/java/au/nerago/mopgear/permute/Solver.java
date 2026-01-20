@@ -82,20 +82,20 @@ public class Solver {
             case PhasedFull -> {
                 job.println("SOLVE phased full");
                 assert phased != null;
-                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, false, false, null, null);
+                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, false, false, null, null, startTime);
             }
             case PhasedTop -> {
                 assert phased != null;
                 int topCombos = Math.toIntExact(TOP_HIT_COMBO_FILTER * runSizeMultiply);
                 job.printf("SOLVE phased top only %d\n", topCombos);
-                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, false, true, null, topCombos);
+                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, false, true, null, topCombos, startTime);
             }
             case PhasedIndexedTop -> {
                 assert phased != null;
                 int targetCombos = Math.toIntExact(PHASED_COMBOS_GENERATE * runSizeMultiply);
                 int topCombos = Math.toIntExact(TOP_HIT_COMBO_FILTER * runSizeMultiply);
                 job.printf("SOLVE phased top only %d -> %d\n", targetCombos, topCombos);
-                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, true, true, targetCombos, topCombos);
+                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, true, true, targetCombos, topCombos, startTime);
             }
         }
 

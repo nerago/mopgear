@@ -120,7 +120,7 @@ public class ItemLoadUtil {
         }
 
         if (id == 94820 && equippedItem.randomSuffix() == -336) {
-            item = item.changeStatsBase(item.statBase.plus(StatBlock.of(StatType.Crit, 882))).withRandomSuffix(equippedItem.randomSuffix());
+            item = item.changeStatsBase(item.statBase.plus(StatBlock.of(StatType.Crit, 907))).withRandomSuffix(equippedItem.randomSuffix());
         }
 
         if (expectedEnchant.contains(item.slot())) {
