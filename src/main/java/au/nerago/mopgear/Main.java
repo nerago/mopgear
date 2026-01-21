@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.ToIntFunction;
+import java.util.stream.IntStream;
 
 import static au.nerago.mopgear.Tasks.*;
 import static au.nerago.mopgear.domain.StatType.*;
@@ -122,51 +123,48 @@ public class Main {
 
         ToIntFunction<SolvableEquipMap> countSet = SetBonus.countInSpecifiedSet("Battlegear of the Lightning Emperor");
         reforgeProcessPlusMany(items, model, startTime, new int[]{
-                87015, // heroic clawfeet
-                86979, // heroic impaling treads
-                94726, // cloudbreaker belt
+                        87026, // heroic peacock cloak
+                        94942, // hydra bloodcloak
 
-                87026, // heroic peacock cloak
-                86955, // heroic overwhelm assault belt
-                95535, // normal lightning legs
+//                        86880, // dread shadow ring
+//                        95140, // shado assault band
+//                        86957, // heroic bladed tempest ring
+//                        87071, // yang-xi heroic
 
-                95142, // striker's battletags
-                95205, // terra-cotta neck
-                87036, // soulgrasp heroic
+                        87015, // heroic clawfeet
+                        86979, // heroic impaling treads
+                        87024, // null greathelm
+                        87145, // defiled earth
+                        86955, // heroic overwhelm assault belt
+                        94726, // cloudbreaker belt
+                        95652, // Puncture-Proof Greathelm head
+                        95778, // celestial golden golem head
 
-                86979, // heroic impaling treads
-                87024, // null greathelm
+                        95535, // normal lightning legs
+                        94773, // centripetal shoulders normal
 
-                94726, // cloudbreaker belt
-                86955, // heroic overwhelm assault belt
+                        85340, // ret tier14 legs
+//                        87101, // ret tier14 head [running tank gem]
+                        85339, // ret tier14 shoulder
+                        85343, // ret tier14 chest
+                        87100, // ret tier14 hands
 
-                87026, // heroic peacock cloak
-                86325, // daybreak
+                        95910, // ret tier15 chest celestial
+                        95911, // ret tier15 gloves celestial
+//                        95912, // ret tier15 celestial (don't have yet) [would need gem, AVOID]
+//                        95913, // ret tier15 celestial (don't have yet)
+                        95914, // ret tier15 shoulder celestial
 
-                95535, // normal lightning legs
+                        95142, // striker's battletags
+                        95205, // terra-cotta neck
+//                        87036, // soulgrasp heroic
 
-                85340, // ret tier14 legs
-                87101, // ret tier14 head
-                85339, // ret tier14 shoulder
-                85343, // ret tier14 chest
-                87100, // ret tier14 hands
-
-                95914, // ret tier15 shoulder celestial
-                95910, // ret tier15 chest celestial
-                95911, // ret tier15 gloves celestial
-                95912, // ret tier15  celestial
-                95913, // ret tier15  celestial
-
-                95142, // striker's battletags
-                95205, // terra-cotta neck
-
-                94773, // centripetal shoulders normal
-                95140, // shado assault band
-
-                89934, // soul bracer
-                94820, // caustic spike bracers
+                        87145, // defiled earth
+                        89934, // soul bracer
+                        94820, // caustic spike bracers
         }, 2, false,
-                set -> countSet.applyAsInt(set.items()) >= 4);
+                null);
+//                set -> countSet.applyAsInt(set.items()) >= 4);
 
 //            reforgeProcessRetFixed(model, startTime, true);
 //            reforgeProcessRetFixedAlone(model, startTime, true);
@@ -530,23 +528,20 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 17/01/2026
+        // 20/01/2026
         map.put(95205, List.of(new ReforgeRecipe(Mastery, Haste))); // Neck Necklace of the Terra-Cotta Vanquisher
-        map.put(86979, List.of(new ReforgeRecipe(Haste, Expertise))); // Foot Impaling Treads
-        map.put(85343, List.of(new ReforgeRecipe(null, null))); // Chest White Tiger Battleplate
+        map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
+        map.put(85343, List.of(new ReforgeRecipe(Haste, Expertise))); // Chest White Tiger Battleplate
         map.put(96182, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Ultimate Protection of the Emperor
-        map.put(95535, List.of(new ReforgeRecipe(Haste, Expertise))); // Leg Legplates of the Lightning Throne
-        map.put(94526, List.of(new ReforgeRecipe(null, null))); // Trinket Spark of Zandalar
-        map.put(86387, List.of(new ReforgeRecipe(Mastery, Haste))); // Weapon1H Kilrak, Jaws of Terror
-        map.put(94773, List.of(new ReforgeRecipe(Crit, Hit))); // Shoulder Shoulderguards of Centripetal Destruction
+        map.put(95535, List.of(new ReforgeRecipe(Crit, Hit))); // Leg Legplates of the Lightning Throne
+        map.put(86387, List.of(new ReforgeRecipe(Mastery, Expertise))); // Weapon1H Kilrak, Jaws of Terror
         map.put(95140, List.of(new ReforgeRecipe(null, null))); // Ring Band of the Shado-Pan Assault
-        map.put(95757, List.of(new ReforgeRecipe(null, null))); // Trinket Primordius' Talisman of Rage
         map.put(87100, List.of(new ReforgeRecipe(Expertise, Haste))); // Hand White Tiger Gauntlets
-        map.put(87024, List.of(new ReforgeRecipe(Crit, Hit))); // Head Nullification Greathelm
-        map.put(87026, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Cloak of Peacock Feathers
-        map.put(94726, List.of(new ReforgeRecipe(Mastery, Expertise))); // Belt Cloudbreaker Greatbelt
+        map.put(94519, List.of(new ReforgeRecipe(null, null))); // Trinket Primordius' Talisman of Rage
+        map.put(94726, List.of(new ReforgeRecipe(Mastery, Hit))); // Belt Cloudbreaker Greatbelt
         map.put(94820, List.of(new ReforgeRecipe(null, null))); // Wrist Caustic Spike Bracers
-        map.put(86957, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Ring of the Bladed Tempest
+        map.put(86957, List.of(new ReforgeRecipe(null, null))); // Ring Ring of the Bladed Tempest
+        map.put(94942, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Hydra-Scale Bloodcloak
         return map;
     }
 

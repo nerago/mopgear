@@ -8,7 +8,14 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Supplier;
+import java.util.stream.Gatherer;
+import java.util.stream.Gatherers;
 import java.util.stream.Stream;
 
 public class BigStreamUtil {
@@ -19,13 +26,14 @@ public class BigStreamUtil {
             return inputStream;
 
         Timer timer = new Timer(true);
-        ProgressTask task = new ProgressTask(estimate, startTime);
+        ProgressTask<T> task = new ProgressTask<>(estimate, startTime);
         timer.scheduleAtFixedRate(task, TIME_RATE, TIME_RATE);
         return task.monitorStream(inputStream);
     }
 
-    private static class ProgressTask extends TimerTask {
+    private static class ProgressTask<T> extends TimerTask {
         private final ThreadCounters counters = new ThreadCounters();
+//        private final GathererPeekAndCount<T> gatherCount = new GathererPeekAndCount<>();
         private final double percentMultiply;
         private final Instant startTime;
 
@@ -37,14 +45,75 @@ public class BigStreamUtil {
         @Override
         public void run() {
             long curr = counters.getTotal();
+//            long curr = gatherCount.getTotal();
             reportProgress(curr, percentMultiply, startTime);
         }
 
-        public <T> Stream<T> monitorStream(Stream<T> inputStream) {
-            // TODO some kinda acculate op passing state?
+        public Stream<T> monitorStream(Stream<T> inputStream) {
+            // TODO some kinda accumulate op passing state?
+
             return inputStream
                     .peek(_ -> counters.incrementAndGet())
+//                    .gather(gatherCount)
                     .onClose(this::cancel);
+        }
+
+        private static class GathererPeekAndCount<T> implements Gatherer<T, GathererPeekAndCount.CountState, T>, Gatherer.Integrator.Greedy<GathererPeekAndCount.CountState, T, T> {
+//            private final ArrayList<CountState> stateInstances = new ArrayList<>();
+            private final java.util.concurrent.ConcurrentLinkedQueue<CountState> stateInstances = new ConcurrentLinkedQueue<>();
+
+            private static class CountState {
+                long processedCount;
+            }
+
+            @Override
+            public Supplier<CountState> initializer() {
+                return () -> {
+                    CountState counter = new CountState();
+//                    synchronized (stateInstances) {
+                        stateInstances.add(counter);
+//                    }
+                    return counter;
+                };
+            }
+
+            @Override
+            public boolean integrate(CountState state, T element, Downstream<? super T> downstream) {
+                downstream.push(element);
+                state.processedCount++;
+                return true;
+            }
+
+            @Override
+            public Integrator<CountState, T, T> integrator() {
+                return this;
+            }
+
+            @Override
+            public BinaryOperator<CountState> combiner() {
+                return (a, b) -> {
+//                    synchronized (stateInstances) {
+                        a.processedCount += b.processedCount;
+                        stateInstances.remove(b);
+//                    }
+                    return a;
+                };
+            }
+
+            @Override
+            public BiConsumer<CountState, Downstream<? super T>> finisher() {
+                return Gatherer.defaultFinisher();
+            }
+
+            public long getTotal() {
+                long total = 0;
+//                synchronized (stateInstances) {
+                    for (CountState counter : stateInstances) {
+                        total += counter.processedCount;
+                    }
+//                }
+                return total;
+            }
         }
     }
 

@@ -5,24 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea07a34a-2e86-429e-8348-7ed7a5cfaa9c" name="Changes" comment="stuff">
-      <change afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/BigStreamUtilOld.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gear-prot-defence.json" beforeDir="false" afterPath="$PROJECT_DIR$/gear-prot-defence.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gear-prot-dps.json" beforeDir="false" afterPath="$PROJECT_DIR$/gear-prot-dps.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gear-ret.json" beforeDir="false" afterPath="$PROJECT_DIR$/gear-ret.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/ItemLoadUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/ItemLoadUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/SocketType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/SocketType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/SimCliExecute.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/SimCliExecute.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/SimInputModify.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/SimInputModify.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/StandardModels.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/io/StandardModels.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/permute/Solver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/permute/Solver.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/permute/SolverCapPhased.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/permute/SolverCapPhased.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/permute/SolverIndexed.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/permute/SolverIndexed.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindMultiSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindMultiSpec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/DefaultEnchants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/DefaultEnchants.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/BigStreamUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/BigStreamUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/BigStreamUtil2.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -362,7 +352,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768613550462</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="stuff">
+      <option name="closed" value="true" />
+      <created>1768888874506</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1768888874506</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -396,18 +394,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java</url>
-          <line>834</line>
+          <line>836</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemChoice.java</url>
           <line>37</line>
           <option name="timeStamp" value="34" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/BigStreamUtil.java</url>
-          <line>20</line>
-          <option name="timeStamp" value="37" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

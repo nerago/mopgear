@@ -501,7 +501,7 @@ public class Tasks {
                 0.02,
                 false,
                 new int[]{
-                        87026, // heroic peacock cloak
+//                        87026, // heroic peacock cloak
                         94942, // hydra bloodcloak
 
 //                        86880, // dread shadow ring
@@ -509,36 +509,36 @@ public class Tasks {
 //                        86957, // heroic bladed tempest ring
 //                        87071, // yang-xi heroic
 
-                        87015, // heroic clawfeet
+//                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
                         87024, // null greathelm
-                        87145, // defiled earth
-                        86955, // heroic overwhelm assault belt
+//                        87145, // defiled earth
+//                        86955, // heroic overwhelm assault belt
                         94726, // cloudbreaker belt
-                        95652, // Puncture-Proof Greathelm head
-                        95778, // celestial golden golem head
+//                        95652, // Puncture-Proof Greathelm head
+//                        95778, // celestial golden golem head
 
                         95535, // normal lightning legs
-                        94773, // centripetal shoulders normal
+//                        94773, // centripetal shoulders normal
 
-                        85340, // ret tier14 legs
-                        87101, // ret tier14 head
-                        85339, // ret tier14 shoulder
+//                        85340, // ret tier14 legs
+//                        87101, // ret tier14 head
+//                        85339, // ret tier14 shoulder
                         85343, // ret tier14 chest
                         87100, // ret tier14 hands
 
                         95910, // ret tier15 chest celestial
                         95911, // ret tier15 gloves celestial
-                        95912, // ret tier15 celestial (don't have yet)
-                        95913, // ret tier15 celestial (don't have yet)
-                        95914, // ret tier15 shoulder celestial
+//                        95912, // ret tier15 celestial (don't have yet) [would need gem, AVOID]
+//                        95913, // ret tier15 celestial (don't have yet)
+//                        95914, // ret tier15 shoulder celestial
 
-                        95142, // striker's battletags
+//                        95142, // striker's battletags
                         95205, // terra-cotta neck
-                        87036, // soulgrasp heroic
+//                        87036, // soulgrasp heroic
 
-                        87145, // defiled earth
-                        89934, // soul bracer
+//                        87145, // defiled earth
+//                        89934, // soul bracer
                         94820, // caustic spike bracers
                 },
                 extraUpgrade,
@@ -559,7 +559,7 @@ public class Tasks {
 //                                95140, // shado assault band
 //                                86946, // ruby signet heroic
 
-                                87015, // heroic clawfeet
+//                                87015, // heroic clawfeet
                                 86979, // heroic impaling treads
 //                                87071, // yang-xi heroic
                                 94726, // cloudbreaker belt
@@ -567,30 +567,30 @@ public class Tasks {
                                 94942, // hydra bloodcloak
         //
                                 87026, // heroic peacock cloak
-                                86955, // heroic overwhelm assault belt
+//                                86955, // heroic overwhelm assault belt
                                 95535, // normal lightning legs
                                 94773, // centripetal shoulders normal
                                 95778, // celestial golden golem head
         //
-                                95652, // Puncture-Proof Greathelm head
+//                                95652, // Puncture-Proof Greathelm head
         //
-                                85340, // ret tier14 legs
-                                87101, // ret tier14 head (has tank gem currently)
-                                85339, // ret tier14 shoulder
+//                                85340, // ret tier14 legs
+//                                87101, // ret tier14 head (has tank gem currently)
+//                                85339, // ret tier14 shoulder
                                 85343, // ret tier14 chest
                                 87100, // ret tier14 hands
 
-                                95910, // ret tier15 chest celestial
-                                95911, // ret tier15 gloves celestial
-                                95912, // ret tier15 celestial (don't have yet) Lightning Emperor's Helmet
-                                95913, // ret tier15 celestial (don't have yet)
-                                95914, // ret tier15 shoulder celestial
+//                                95910, // ret tier15 chest celestial
+//                                95911, // ret tier15 gloves celestial
+//                                95912, // ret tier15 celestial (don't have yet) Lightning Emperor's Helmet
+//                                95913, // ret tier15 celestial (don't have yet)
+//                                95914, // ret tier15 shoulder celestial
 
-                                95291, // prot tier15 hand normal
-                                95920, // prot tier15 chest celestial
-                                95922, // prot tier15 head celestial (don't have yet)
+//                                95291, // prot tier15 hand normal
+//                                95920, // prot tier15 chest celestial
+//                                95922, // prot tier15 head celestial (don't have yet)
                                 96667, // prot tier15 leg heroic
-                                95924, // prot tier15 shoulder celestial
+//                                95924, // prot tier15 shoulder celestial
 
                                 95142, // striker's battletags
                                 95205, // terra-cotta neck
@@ -598,8 +598,8 @@ public class Tasks {
 
                                 96182, // ultimate prot of the emperor thunder
 
-                                87145, // defiled earth
-                                89934, // soul bracer
+//                                87145, // defiled earth
+//                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 // from other processes
@@ -626,37 +626,38 @@ public class Tasks {
 //                                86946, // ruby signet heroic
 //                                87071, // yang-xi heroic
 
-                                87024, // null greathelm (dps gem)
+//                                87024, // null greathelm (dps gem)
         
                                 94726, // cloudbreaker belt
-                                86955, // heroic overwhelm assault belt
-                                87060, // Star-Stealer Waistguard
+//                                86955, // heroic overwhelm assault belt
+//                                87060, // Star-Stealer Waistguard
 																
-                                87026, // heroic peacock cloak
-                                86325, // daybreak
+//                                87026, // heroic peacock cloak
+//                                86325, // daybreak
                                 94942, // hydra bloodcloak
         
-                                95535, // normal lightning legs
-                                94773, // centripetal shoulders normal
+//                                95535, // normal lightning legs
+//                                94773, // centripetal shoulders normal
 //
-                                95778, // celestial golden golem head
+//                                95778, // celestial golden golem head
 //                                86659, // prot tier14 shoulder celestial, w/mastery
 //                                85323, // prot tier14 chest normal, w/parry
 //                                86662, // prot tier14 hand celestial w/dodge
 //                                85320, // prot tier14 legs normal w/dodge+moster
+
 //                                85340, // ret tier14 legs
                                 87101, // ret tier14 head
-                                85339, // ret tier14 shoulder
-                                85343, // ret tier14 chest
-                                87100, // ret tier14 hands
+//                                85339, // ret tier14 shoulder
+//                                85343, // ret tier14 chest
+//                                87100, // ret tier14 hands
 
-                                95914, // ret tier15 shoulder celestial
-                                95910, // ret tier15 chest celestial
-                                95911, // ret tier15 gloves celestial
+//                                95914, // ret tier15 shoulder celestial
+//                                95910, // ret tier15 chest celestial
+//                                95911, // ret tier15 gloves celestial
 
                                 95291, // prot tier15 hand normal
                                 95920, // prot tier15 chest celestial
-                                95922, // prot tier15 head celestial (don't have yet)
+//                                95922, // prot tier15 head celestial (don't have yet)
                                 96667, // prot tier15 leg heroic
                                 95924, // prot tier15 shoulder celestial
 
@@ -667,8 +668,8 @@ public class Tasks {
 
 //                                95140, // shado assault band
 
-                                87145, // defiled earth
-                                89934, // soul bracer
+//                                87145, // defiled earth
+//                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 // from other processes
@@ -697,10 +698,11 @@ public class Tasks {
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(1000);
-        multi.suggestCulls(10000);
+//        multi.suggestCulls(10000);
+//        multi.solve(10000);
 //        multi.solve(50000);
 //        multi.solve(120000);
-//        multi.solve(220000);
+        multi.solve(220000);
 //        multi.solve(490000);
 //        multi.solve(1490000);
 //        multi.solve(4000000);
