@@ -381,7 +381,7 @@ public class Main {
 //        findUpgrade(items, SourcesOfItems.strengthPlateCraftedT3(), model, true, null, 0, 8);
 //        findUpgrade(items, SourcesOfItems.strengthPlateThroneNormalBoss(Difficulty.Heroic, 701), model, true, null, 2, 8);
 
-        Difficulty difficulty = Difficulty.Normal;
+        Difficulty difficulty = Difficulty.Heroic;
         CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
                 pallyPhase3Valor(),
                 throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),

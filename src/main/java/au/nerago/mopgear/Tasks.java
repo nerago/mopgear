@@ -507,19 +507,18 @@ public class Tasks {
 //                        86880, // dread shadow ring
 //                        95140, // shado assault band
 //                        86957, // heroic bladed tempest ring
-//                        87071, // yang-xi heroic
 
 //                        87015, // heroic clawfeet
                         86979, // heroic impaling treads
                         87024, // null greathelm
-//                        87145, // defiled earth
-//                        86955, // heroic overwhelm assault belt
+                        87145, // defiled earth
+                        86955, // heroic overwhelm assault belt
                         94726, // cloudbreaker belt
 //                        95652, // Puncture-Proof Greathelm head
-//                        95778, // celestial golden golem head
+                        95778, // celestial golden golem head
 
                         95535, // normal lightning legs
-//                        94773, // centripetal shoulders normal
+                        94773, // centripetal shoulders normal
 
 //                        85340, // ret tier14 legs
 //                        87101, // ret tier14 head
@@ -537,7 +536,7 @@ public class Tasks {
                         95205, // terra-cotta neck
 //                        87036, // soulgrasp heroic
 
-//                        87145, // defiled earth
+                        87145, // defiled earth
 //                        89934, // soul bracer
                         94820, // caustic spike bracers
                 },
@@ -561,13 +560,12 @@ public class Tasks {
 
 //                                87015, // heroic clawfeet
                                 86979, // heroic impaling treads
-//                                87071, // yang-xi heroic
                                 94726, // cloudbreaker belt
                                 87024, // null greathelm
                                 94942, // hydra bloodcloak
         //
                                 87026, // heroic peacock cloak
-//                                86955, // heroic overwhelm assault belt
+                                86955, // heroic overwhelm assault belt
                                 95535, // normal lightning legs
                                 94773, // centripetal shoulders normal
                                 95778, // celestial golden golem head
@@ -581,7 +579,7 @@ public class Tasks {
                                 87100, // ret tier14 hands
 
 //                                95910, // ret tier15 chest celestial
-//                                95911, // ret tier15 gloves celestial
+                                95911, // ret tier15 gloves celestial
 //                                95912, // ret tier15 celestial (don't have yet) Lightning Emperor's Helmet
 //                                95913, // ret tier15 celestial (don't have yet)
 //                                95914, // ret tier15 shoulder celestial
@@ -589,7 +587,7 @@ public class Tasks {
 //                                95291, // prot tier15 hand normal
 //                                95920, // prot tier15 chest celestial
 //                                95922, // prot tier15 head celestial (don't have yet)
-                                96667, // prot tier15 leg heroic
+//                                96667, // prot tier15 leg heroic
 //                                95924, // prot tier15 shoulder celestial
 
                                 95142, // striker's battletags
@@ -602,8 +600,8 @@ public class Tasks {
 //                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
-                                // from other processes
                                 86387, // sha weapon
+                                96376, // worldbreaker weapon
                         },
                         extraUpgrade,
                         preUpgrade)
@@ -624,22 +622,22 @@ public class Tasks {
 
 //                                86957, // heroic bladed tempest ring
 //                                86946, // ruby signet heroic
-//                                87071, // yang-xi heroic
+//                                95140, // shado assault band
 
 //                                87024, // null greathelm (dps gem)
         
                                 94726, // cloudbreaker belt
-//                                86955, // heroic overwhelm assault belt
+                                86955, // heroic overwhelm assault belt
 //                                87060, // Star-Stealer Waistguard
 																
 //                                87026, // heroic peacock cloak
 //                                86325, // daybreak
                                 94942, // hydra bloodcloak
         
-//                                95535, // normal lightning legs
-//                                94773, // centripetal shoulders normal
+                                95535, // normal lightning legs
+                                94773, // centripetal shoulders normal
 //
-//                                95778, // celestial golden golem head
+                                95778, // celestial golden golem head
 //                                86659, // prot tier14 shoulder celestial, w/mastery
 //                                85323, // prot tier14 chest normal, w/parry
 //                                86662, // prot tier14 hand celestial w/dodge
@@ -651,9 +649,9 @@ public class Tasks {
 //                                85343, // ret tier14 chest
 //                                87100, // ret tier14 hands
 
-//                                95914, // ret tier15 shoulder celestial
-//                                95910, // ret tier15 chest celestial
-//                                95911, // ret tier15 gloves celestial
+                                95914, // ret tier15 shoulder celestial
+                                95910, // ret tier15 chest celestial
+                                95911, // ret tier15 gloves celestial
 
                                 95291, // prot tier15 hand normal
                                 95920, // prot tier15 chest celestial
@@ -666,20 +664,18 @@ public class Tasks {
 
                                 96182, // ultimate prot of the emperor thunder
 
-//                                95140, // shado assault band
-
 //                                87145, // defiled earth
-//                                89934, // soul bracer
+                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
-                                // from other processes
                                 86387, // sha weapon
+                                96376, // worldbreaker weapon
                         },
                         extraUpgrade,
                         preUpgrade)
 //                .setDuplicatedItems(Map.of(89934, 2)) // soul bracer
 //                .addRemoveItem(89934) // soul bracer
-                .setWorstCommonPenalty(98)
+                .setWorstCommonPenalty(99)
 //                .setWorstCommonPenalty(99)
         ;
 
@@ -698,11 +694,11 @@ public class Tasks {
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(1000);
-//        multi.suggestCulls(10000);
+        multi.suggestCulls(10000);
 //        multi.solve(10000);
 //        multi.solve(50000);
 //        multi.solve(120000);
-        multi.solve(220000);
+//        multi.solve(220000);
 //        multi.solve(490000);
 //        multi.solve(1490000);
 //        multi.solve(4000000);
