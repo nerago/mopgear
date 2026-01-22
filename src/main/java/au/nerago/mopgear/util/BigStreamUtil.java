@@ -32,8 +32,9 @@ public class BigStreamUtil {
     }
 
     private static class ProgressTask<T> extends TimerTask {
-        private final ThreadCounters counters = new ThreadCounters();
+//        private final ThreadCounters counters = new ThreadCounters();
 //        private final GathererPeekAndCount<T> gatherCount = new GathererPeekAndCount<>();
+        private final AtomicLong atomicCount = new AtomicLong();
         private final double percentMultiply;
         private final Instant startTime;
 
@@ -44,8 +45,9 @@ public class BigStreamUtil {
 
         @Override
         public void run() {
-            long curr = counters.getTotal();
+//            long curr = counters.getTotal();
 //            long curr = gatherCount.getTotal();
+            long curr = atomicCount.get();
             reportProgress(curr, percentMultiply, startTime);
         }
 
@@ -53,14 +55,15 @@ public class BigStreamUtil {
             // TODO some kinda accumulate op passing state?
 
             return inputStream
-                    .peek(_ -> counters.incrementAndGet())
+//                    .peek(_ -> counters.incrementAndGet())
+                      .peek(_ -> atomicCount.incrementAndGet())
 //                    .gather(gatherCount)
                     .onClose(this::cancel);
         }
 
         private static class GathererPeekAndCount<T> implements Gatherer<T, GathererPeekAndCount.CountState, T>, Gatherer.Integrator.Greedy<GathererPeekAndCount.CountState, T, T> {
 //            private final ArrayList<CountState> stateInstances = new ArrayList<>();
-            private final java.util.concurrent.ConcurrentLinkedQueue<CountState> stateInstances = new ConcurrentLinkedQueue<>();
+            private final ConcurrentLinkedQueue<CountState> stateInstances = new ConcurrentLinkedQueue<>();
 
             private static class CountState {
                 long processedCount;
@@ -70,18 +73,15 @@ public class BigStreamUtil {
             public Supplier<CountState> initializer() {
                 return () -> {
                     CountState counter = new CountState();
-//                    synchronized (stateInstances) {
-                        stateInstances.add(counter);
-//                    }
+                    stateInstances.add(counter);
                     return counter;
                 };
             }
 
             @Override
             public boolean integrate(CountState state, T element, Downstream<? super T> downstream) {
-                downstream.push(element);
                 state.processedCount++;
-                return true;
+                return downstream.push(element);
             }
 
             @Override
@@ -92,10 +92,8 @@ public class BigStreamUtil {
             @Override
             public BinaryOperator<CountState> combiner() {
                 return (a, b) -> {
-//                    synchronized (stateInstances) {
-                        a.processedCount += b.processedCount;
-                        stateInstances.remove(b);
-//                    }
+                    a.processedCount += b.processedCount;
+                    stateInstances.remove(b);
                     return a;
                 };
             }
@@ -107,11 +105,9 @@ public class BigStreamUtil {
 
             public long getTotal() {
                 long total = 0;
-//                synchronized (stateInstances) {
-                    for (CountState counter : stateInstances) {
-                        total += counter.processedCount;
-                    }
-//                }
+                for (CountState counter : stateInstances) {
+                    total += counter.processedCount;
+                }
                 return total;
             }
         }

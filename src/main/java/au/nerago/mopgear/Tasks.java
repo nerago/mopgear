@@ -482,7 +482,7 @@ public class Tasks {
     public static void paladinMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec(1);
 
-        multi.addFixedForge(95757, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
+        multi.addFixedForge(94519, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
 //        multi.addFixedForge(86802, ReforgeRecipe.empty()); // lei shen trinket
 //        multi.addFixedForge(94526, ReforgeRecipe.empty()); // zandalar trinket
 //        multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
@@ -515,7 +515,7 @@ public class Tasks {
                         86955, // heroic overwhelm assault belt
                         94726, // cloudbreaker belt
 //                        95652, // Puncture-Proof Greathelm head
-                        95778, // celestial golden golem head
+//                        95778, // celestial golden golem head [NOT WORTH META GEM, IGNORE]
 
                         95535, // normal lightning legs
                         94773, // centripetal shoulders normal
@@ -568,7 +568,6 @@ public class Tasks {
                                 86955, // heroic overwhelm assault belt
                                 95535, // normal lightning legs
                                 94773, // centripetal shoulders normal
-                                95778, // celestial golden golem head
         //
 //                                95652, // Puncture-Proof Greathelm head
         //
@@ -590,7 +589,7 @@ public class Tasks {
 //                                96667, // prot tier15 leg heroic
 //                                95924, // prot tier15 shoulder celestial
 
-                                95142, // striker's battletags
+//                                95142, // striker's battletags
                                 95205, // terra-cotta neck
                                 87036, // soulgrasp heroic
 
@@ -634,10 +633,9 @@ public class Tasks {
 //                                86325, // daybreak
                                 94942, // hydra bloodcloak
         
-                                95535, // normal lightning legs
-                                94773, // centripetal shoulders normal
+//                                95535, // normal lightning legs
+//                                94773, // centripetal shoulders normal
 //
-                                95778, // celestial golden golem head
 //                                86659, // prot tier14 shoulder celestial, w/mastery
 //                                85323, // prot tier14 chest normal, w/parry
 //                                86662, // prot tier14 hand celestial w/dodge
@@ -649,9 +647,9 @@ public class Tasks {
 //                                85343, // ret tier14 chest
 //                                87100, // ret tier14 hands
 
-                                95914, // ret tier15 shoulder celestial
-                                95910, // ret tier15 chest celestial
-                                95911, // ret tier15 gloves celestial
+//                                95914, // ret tier15 shoulder celestial
+//                                95910, // ret tier15 chest celestial
+//                                95911, // ret tier15 gloves celestial
 
                                 95291, // prot tier15 hand normal
                                 95920, // prot tier15 chest celestial
@@ -665,7 +663,7 @@ public class Tasks {
                                 96182, // ultimate prot of the emperor thunder
 
 //                                87145, // defiled earth
-                                89934, // soul bracer
+//                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 86387, // sha weapon
@@ -694,10 +692,10 @@ public class Tasks {
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(1000);
-        multi.suggestCulls(10000);
+//        multi.suggestCulls(10000);
 //        multi.solve(10000);
 //        multi.solve(50000);
-//        multi.solve(120000);
+        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);
 //        multi.solve(1490000);
