@@ -6,8 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="ea07a34a-2e86-429e-8348-7ed7a5cfaa9c" name="Changes" comment="stuff">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/BigStreamUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/BigStreamUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/ItemLoadUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/ItemLoadUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/FullItemSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/domain/FullItemSet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/DefaultEnchants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/DefaultEnchants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemChoice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemChoice.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/ModelCombined.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/ModelCombined.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRequirementsHitExpertise.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/StatRequirementsHitExpertise.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindMultiSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/process/FindMultiSpec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/ArrayUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/ArrayUtil.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -371,7 +378,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769003386437</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="stuff">
+      <option name="closed" value="true" />
+      <created>1769076427066</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1769076427066</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -395,7 +410,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/util/ArrayUtil.java</url>
-          <line>270</line>
+          <line>274</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -407,11 +422,6 @@
           <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/Tasks.java</url>
           <line>830</line>
           <option name="timeStamp" value="32" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/au/nerago/mopgear/model/GemChoice.java</url>
-          <line>37</line>
-          <option name="timeStamp" value="34" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

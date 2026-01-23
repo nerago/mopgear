@@ -35,6 +35,26 @@ public record FullItemSet(StatBlock totalForRating, StatBlock totalForCaps, Equi
         OutputText.printf("set bonus %1.2f\n", (double) model.setBonus().calc(this) / (double) SetBonus.DENOMIATOR);
     }
 
+    public void outputSetDetailedComparing(ModelCombined model, FullItemSet other) {
+        OutputText.println("SET RATED " + totalForRating.toStringExtended() + " " + model.calcRating(this));
+        OutputText.println("SET CONSTANT " + totalForCaps.toStringExtended());
+        for (SlotEquip slot : SlotEquip.values()) {
+            FullItemData a = this.items.get(slot);
+            FullItemData z = other.items.get(slot);
+            if (a == null ^ z == null) {
+                throw new IllegalStateException("null and non-null");
+            } else if (a == null) {
+                // nothing
+            } else if (a.equalsTyped(z)) {
+                OutputText.println(a.toStringExtended() + " " + model.calcRating(a));
+            } else {
+                OutputText.println(" -- " + z.toStringExtended() + " " + model.calcRating(z));
+                OutputText.println(" ++ " + a.toStringExtended() + " " + model.calcRating(a));
+            }
+        }
+        OutputText.printf("set bonus %1.2f\n", (double) model.setBonus().calc(this) / (double) SetBonus.DENOMIATOR);
+    }
+
     public void outputSetLight() {
         items.forEachValue(it -> OutputText.printf("%s [%d]\n", it.fullName(), it.ref().itemLevel()));
         OutputText.println();

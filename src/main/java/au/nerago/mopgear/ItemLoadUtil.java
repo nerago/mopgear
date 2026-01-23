@@ -230,9 +230,9 @@ public class ItemLoadUtil {
         SocketType[] socketSlots = item.shared.socketSlots();
 
         if (model.enchants().isBlacksmith() && (item.slot() == SlotItem.Wrist || item.slot() == SlotItem.Hand))
-            socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
+            socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, General) : new SocketType[]{General};
         else if (item.slot() == SlotItem.Belt)
-            socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, SocketType.General) : new SocketType[]{SocketType.General};
+            socketSlots = socketSlots != null ? ArrayUtil.append(socketSlots, General) : new SocketType[]{General};
 
         boolean socketBonusMet = true;
         StatBlock total = StatBlock.empty;
@@ -241,7 +241,7 @@ public class ItemLoadUtil {
             int engineer = 0;
             for (SocketType type : socketSlots) {
                 GemInfo gemInfo;
-                if (type == SocketType.Engineer) {
+                if (type == Engineer) {
                     if (engineer == 0)
                         gemInfo = GemData.getGemInfo(77542);
                     else if (engineer == 1)
@@ -294,5 +294,52 @@ public class ItemLoadUtil {
                 items.put(slot, updated.toArray(FullItemData[]::new));
             }
         }
+    }
+
+    public static HashSet<FullItemData> duplicateAlternateEnchantsAndGems(FullItemData item, List<StatBlock> enchantList, List<GemInfo> gemList) {
+        HashSet<FullItemData> allVersions = new HashSet<>();
+        allVersions.add(item);
+
+        if (enchantList != null) {
+            for (StatBlock enchantChoice : enchantList) {
+                Integer enchantId = GemData.getEnchantId(enchantChoice);
+                duplicateAlternateEnchantsAndGems(item, enchantId, gemList, allVersions);
+            }
+        } else {
+            duplicateAlternateEnchantsAndGems(item, null, gemList, allVersions);
+        }
+
+        return allVersions;
+    }
+
+    private static void duplicateAlternateEnchantsAndGems(FullItemData item, Integer enchantId, List<GemInfo> gemOptions, HashSet<FullItemData> allVersions) {
+        int gemCount = item.shared.socketSlots().length;
+        if (item.slot().possibleBlacksmith())
+            gemCount++;
+
+        if (gemCount == 0) {
+            allVersions.add(processNewEnchantAndGems(item, enchantId, null));
+        } else {
+            // setup first
+            List<GemInfo[]> gemSelections = gemOptions.stream()
+                    .map(gem -> new GemInfo[] { gem })
+                    .toList();
+
+            // add each other with all permutations
+            while (gemSelections.getFirst().length < gemCount) {
+                gemSelections = gemSelections.stream()
+                        .flatMap(array -> gemOptions.stream().map(g -> ArrayUtil.append(array, g)))
+                        .toList();
+            }
+
+            gemSelections.forEach(gemArray -> {
+                allVersions.add(processNewEnchantAndGems(item, enchantId, Arrays.stream(gemArray).toList()));
+            });
+        }
+    }
+
+    private static @NotNull FullItemData processNewEnchantAndGems(FullItemData item, Integer enchantId, List<GemInfo> gemChoices) {
+        StatBlock changedEnchant = GemData.process(gemChoices, enchantId, item.shared.socketSlots(), item.shared.socketBonus(), item.shared.name(), item.slot().possibleBlacksmith());
+        return item.changeEnchant(changedEnchant, gemChoices, enchantId);
     }
 }

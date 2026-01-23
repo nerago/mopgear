@@ -4,6 +4,7 @@ import au.nerago.mopgear.ItemLoadUtil;
 import au.nerago.mopgear.ItemMapUtil;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.model.StatRequirementsHitExpertise;
 import au.nerago.mopgear.permute.PossibleIndexed;
 import au.nerago.mopgear.permute.PossibleRandom;
 import au.nerago.mopgear.permute.Solver;
@@ -320,8 +321,7 @@ public class FindMultiSpec {
     }
 
     private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap, boolean isFinal) {
-        EquipOptionsMap submitMap = fullItemMap.shallowClone();
-        buildJobWithSpecifiedItemsFixed(chosenMap, submitMap);
+        EquipOptionsMap submitMap = buildJobWithSpecifiedItemsFixed(chosenMap, fullItemMap.shallowClone());
 
         JobInput job = new JobInput(isFinal ? Final : SubSolveItem, individualRunSizeMultiply, phasedAcceptable);
 //        job.printRecorder.outputImmediate = true;
@@ -332,16 +332,9 @@ public class FindMultiSpec {
         return Solver.runJob(job);
     }
 
-    static void buildJobWithSpecifiedItemsFixed(Map<ItemRef, FullItemData> chosenMap, EquipOptionsMap submitMap) {
-        for (SlotEquip slot : SlotEquip.values()) {
-            FullItemData[] options = submitMap.get(slot);
-            if (options == null) {
-                continue;
-            }
-
-            FullItemData[] newOptions = makeSlotFixed(chosenMap, options);
-            submitMap.put(slot, newOptions);
-        }
+    static EquipOptionsMap buildJobWithSpecifiedItemsFixed(Map<ItemRef, FullItemData> chosenMap, EquipOptionsMap submitMap) {
+        submitMap.mapSlots(options -> options != null ? makeSlotFixed(chosenMap, options) : null);
+        return submitMap;
     }
 
     private static FullItemData[] makeSlotFixed(Map<ItemRef, FullItemData> chosenMap, FullItemData[] options) {
@@ -363,6 +356,34 @@ public class FindMultiSpec {
         }
 
         return list.toArray(FullItemData[]::new);
+    }
+
+    private FullItemData[] makeSlotFixedOrAddAlternateEnchants(Map<ItemRef, FullItemData> chosenMap, FullItemData[] options, ModelCombined model, List<FullItemSet> allResultSets) {
+        HashSet<FullItemData> result = new HashSet<>();
+
+        for (FullItemData item : options) {
+            ItemRef ref = item.ref();
+
+            FullItemData chosenVersion = chosenMap.get(ref);
+            if (chosenVersion != null) {
+                // common/fixed just add that version
+                result.add(chosenVersion);
+                continue;
+            }
+
+            Optional<FullItemData> fromOtherSet = allResultSets.stream().flatMap(s -> s.items().entryStream().map(Tuple.Tuple2::b)).filter(it -> it.ref().equalsTyped(ref)).findAny();
+            if (fromOtherSet.isPresent()) {
+                result.add(fromOtherSet.get());
+                continue;
+            }
+
+            // not a common/fixed item
+            List<StatBlock> alternateEnchants = model.enchants().alternateEnchant(item.slot());
+            List<GemInfo> alternateGems = model.gemChoice().alternateGems();
+            result.addAll(ItemLoadUtil.duplicateAlternateEnchantsAndGems(item, alternateEnchants, alternateGems));
+        }
+
+        return result.toArray(FullItemData[]::new);
     }
 
     private void validateMultiSetAlignItemSlots(List<EquipOptionsMap> mapsParam) {
@@ -447,26 +468,12 @@ public class FindMultiSpec {
     private void outputResultFinal(Optional<ProposedResults> bestSets, List<SpecDetails> specList) {
         if (bestSets.isPresent()) {
             List<JobOutput> resultJobs = bestSets.get().resultJobs;
-            long totalRating = multiRating(resultJobs, specList);
+            List<FullItemSet> allResultSets = resultJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
 
-            Map<ItemRef, FullItemData> commonFinal = bestSets.get().chosenMap;
+            Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(bestSets, resultJobs);
+            outputCommonForPasteAndReuse(commonFinal);
 
-            OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
-            filterCommonActuallyUsed(commonFinal, resultJobs);
-            commonFinal.values().forEach(item -> OutputText.println(item.toString()));
-
-            OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
-            commonFinal.values().forEach(item -> {
-                if (item.reforge.isEmpty())
-                    OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(null, null))); // %s %s\n", item.itemId(), item.slot(), item.shared.name());
-                else
-                    OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(%s, %s))); // %s %s\n", item.itemId(), item.reforge.source(), item.reforge.dest(), item.slot(), item.shared.name());
-            });
-
-            // TODO highlight gems changed vs as loaded
-
-            OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
-            OutputText.printf("^^^^^^^^^^^^^ %d ^^^^^^^^^^^^^\n", totalRating);
+            outputResultSetHeader(specList, resultJobs);
 
             for (int i = 0; i < resultJobs.size(); ++i) {
                 SpecDetails spec = specList.get(i);
@@ -474,45 +481,94 @@ public class FindMultiSpec {
 
                 JobOutput draftJob = resultJobs.get(i);
                 FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
-                double draftSpecRating = draftJob.resultRating;
-                OutputText.printf("DRAFT %,d\n", (long) draftSpecRating);
-                draftJob.input.printRecorder.outputNow();
-                draftSet.outputSetDetailed(spec.model);
-                AsWowSimJson.writeFullToOut(draftSet.items(), spec.model);
+                double draftSpecRating = draftJobOutput(spec, draftJob);
 
-//                ItemLoadUtil.duplicateAlternateEnchants(spec.itemOptions, spec.model);
-                JobOutput revisedJob = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonFinal, true);
+                EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
+                double revisedSpecRating = processRevisedSet("REVISED", revisedItemMap, spec, commonFinal, draftSet, draftSpecRating, spec.phasedAcceptable);
 
-                FullItemSet revisedSet = null;
-                double revisedSpecRating = 0;
-                if (revisedJob.resultSet.isPresent()) {
-                    revisedSet = revisedJob.getFinalResultSet().orElseThrow();
-                    revisedSpecRating = revisedJob.resultRating;
-                    spec.recordSolutionSeen(revisedSet);
-                }
+                // TODO also deny on other specs choices
+                EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
+                double reEnchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantItemOptions, spec, commonFinal, draftSet, draftSpecRating, true);
 
-                if (revisedSet != null && revisedSpecRating > draftSpecRating) {
-                    OutputText.printf("REVISED %,d\n", (long) revisedSpecRating);
-                    revisedJob.input.printRecorder.outputNow();
-                    revisedSet.outputSetDetailed(spec.model);
-                    AsWowSimJson.writeFullToOut(revisedSet.items(), spec.model);
-                } else if (revisedSet == null) {
-                    OutputText.println("REVISED FAIL REVISED FAIL");
-                } else {
-                    OutputText.println("REVISED no better");
-                }
-
-                double specRating = Math.max(draftSpecRating, revisedSpecRating);
+                double specRating = Math.max(draftSpecRating, Math.max(revisedSpecRating, reEnchantSpecRating));
                 OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
 
                 spec.reportExtrasUsed();
             }
-
-            // TODO report on changed enchant
-
         } else {
             OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
         }
+    }
+
+    private EquipOptionsMap makeReenchantOptions(EquipOptionsMap itemOptions, ModelCombined model, Map<ItemRef, FullItemData> commonFinal, List<FullItemSet> allResultSets) {
+        EquipOptionsMap submitMap = itemOptions.deepClone();
+        submitMap.mapSlots(options -> options != null ? makeSlotFixedOrAddAlternateEnchants(commonFinal, options, model, allResultSets) : null);
+        return submitMap;
+    }
+
+    private void outputResultSetHeader(List<SpecDetails> specList, List<JobOutput> resultJobs) {
+        OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
+        long totalRating = multiRating(resultJobs, specList);
+        OutputText.printf("^^^^^^^ total multi rating %d ^^^^^^^\n", totalRating);
+    }
+
+    private static void outputCommonForPasteAndReuse(Map<ItemRef, FullItemData> commonFinal) {
+        OutputText.println("%%%%%%%%%%%%%% Main.commonFixedItems %%%%%%%%%%%%%%%");
+        commonFinal.values().forEach(item -> {
+            if (item.reforge.isEmpty())
+                OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(null, null))); // %s %s\n", item.itemId(), item.slot(), item.shared.name());
+            else
+                OutputText.printf("map.put(%d, List.of(new ReforgeRecipe(%s, %s))); // %s %s\n", item.itemId(), item.reforge.source(), item.reforge.dest(), item.slot(), item.shared.name());
+        });
+    }
+
+    private @NotNull Map<ItemRef, FullItemData> filterAndListFinalCommon(Optional<ProposedResults> bestSets, List<JobOutput> resultJobs) {
+        OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
+        Map<ItemRef, FullItemData> commonFinal = bestSets.get().chosenMap;
+        filterCommonActuallyUsed(commonFinal, resultJobs);
+        commonFinal.values().forEach(item -> OutputText.println(item.toString()));
+        return commonFinal;
+    }
+
+    private double processRevisedSet(String label, EquipOptionsMap submitMap, SpecDetails spec, Map<ItemRef, FullItemData> commonFinal, FullItemSet draftFullSet, double draftSpecRating, boolean phasedAcceptable) {
+        JobInput job = new JobInput(Final, individualRunSizeMultiply, phasedAcceptable);
+        if (phasedAcceptable)
+            job.model = spec.model.withChangedRequirements(StatRequirementsHitExpertise.protFlexibleParryNarrowHit());
+        else
+            job.model = spec.model;
+        job.setItemOptions(submitMap);
+        job.hackAllow = hackAllow;
+        JobOutput revisedJob = Solver.runJob(job);
+
+        FullItemSet revisedSet = null;
+        double revisedSpecRating = 0;
+        if (revisedJob.resultSet.isPresent()) {
+            revisedSet = revisedJob.getFinalResultSet().orElseThrow();
+            revisedSpecRating = revisedJob.resultRating;
+            spec.recordSolutionSeen(revisedSet);
+        }
+
+        if (revisedSet != null && revisedSpecRating > draftSpecRating) {
+            OutputText.printf("%s %,d\n", label, (long) revisedSpecRating);
+            revisedJob.input.printRecorder.outputNow();
+            revisedSet.outputSetDetailedComparing(spec.model, draftFullSet);
+            AsWowSimJson.writeFullToOut(revisedSet.items(), spec.model);
+        } else if (revisedSet == null) {
+            OutputText.println(label + " FAIL");
+        } else {
+            OutputText.println(label + " no better");
+        }
+        return revisedSpecRating;
+    }
+
+    private static double draftJobOutput(SpecDetails spec, JobOutput draftJob) {
+        FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
+        double draftSpecRating = draftJob.resultRating;
+        OutputText.printf("DRAFT %,d\n", (long) draftSpecRating);
+        draftJob.input.printRecorder.outputNow();
+        draftSet.outputSetDetailed(spec.model);
+        AsWowSimJson.writeFullToOut(draftSet.items(), spec.model);
+        return draftSpecRating;
     }
 
     private void outputResultForCull(Collection<ProposedResults> bestList, List<SpecDetails> specList) {

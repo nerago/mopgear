@@ -49,6 +49,13 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
                 false);
     }
 
+    public static StatRequirements protFlexibleParryNarrowHit() {
+        return new StatRequirementsHitExpertise(
+                StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_MELEE + 50,
+                StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_TANK,
+                false);
+    }
+
     @Override
     public boolean skinnyMatch(SkinnyItem skinny, SolvableItem item) {
         int hit = item.totalCap().hit();

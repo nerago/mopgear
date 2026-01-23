@@ -5,7 +5,9 @@ import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 
 import static au.nerago.mopgear.domain.StatType.*;
 import static au.nerago.mopgear.domain.StatType.Haste;
@@ -15,6 +17,7 @@ public class GemChoice {
     private static final GemInfo HASTE_INFO = new GemInfo(76699, StatBlock.of(Haste, 320));
     public static final GemInfo HASTE_EXP_INFO = new GemInfo(76667, StatBlock.of(StatType.Haste, 160, StatType.Expertise, 160));
     public static final GemInfo HASTE_STAM_INFO = new GemInfo(76588, StatBlock.of(StatType.Haste, 160, StatType.Stam, 120));
+    public static final GemInfo HASTE_HIT_INFO = new GemInfo(76588, StatBlock.of(StatType.Haste, 160, StatType.Hit, 160));
     public static final GemInfo HASTE_ENG_INFO = new GemInfo(77542, StatBlock.of(StatType.Haste, 600));
     private final GemInfo alternateBestGem;
     protected EnumMap<SocketType, GemInfo> chosen;
@@ -55,6 +58,10 @@ public class GemChoice {
         } else {
             return gemChoice(SocketType.General);
         }
+    }
+
+    public List<GemInfo> alternateGems() {
+        return Arrays.asList(HASTE_INFO, HASTE_STAM_INFO, HASTE_HIT_INFO, HASTE_EXP_INFO);
     }
 
     public static GemChoice protMitigationGems() {

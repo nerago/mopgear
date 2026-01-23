@@ -295,6 +295,10 @@ public class GemData {
         return knownEnchants.get(enchant);
     }
 
+    public static Integer getEnchantId(StatBlock stat) {
+        return knownEnchants.entrySet().stream().filter(entry -> entry.getValue().equalsStats(stat)).findAny().orElseThrow().getKey();
+    }
+
     public static int reverseLookup(StatBlock stat, PrimaryStatType primaryType) {
         if (stat.hasSingleStat() && stat.primary() == 216) {
             if (primaryType == PrimaryStatType.Strength)

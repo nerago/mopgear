@@ -1,9 +1,6 @@
 package au.nerago.mopgear.util;
 
-import au.nerago.mopgear.domain.CostedItem;
-import au.nerago.mopgear.domain.FullItemData;
-import au.nerago.mopgear.domain.StatBlock;
-import au.nerago.mopgear.domain.StatType;
+import au.nerago.mopgear.domain.*;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -246,6 +243,13 @@ public class ArrayUtil {
         char[] chars = new char[count];
         Arrays.fill(chars, c);
         return new String(chars);
+    }
+
+    public static <T> List<T> repeat(T single, int count) {
+        List<T> list = new ArrayList<>();
+        for (int i = 0; i < count; ++i)
+            list.add(single);
+        return list;
     }
 
     public static <T> T iteratorGetByIndex(Iterator<T> iterator, int index) {

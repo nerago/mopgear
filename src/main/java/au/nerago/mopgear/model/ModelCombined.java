@@ -49,6 +49,10 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return new ModelCombined(statRatings, new StatRequirementsNull(), reforgeRules, enchants, setBonus, spec, gemChoice);
     }
 
+    public ModelCombined withChangedRequirements(StatRequirements require) {
+        return new ModelCombined(statRatings, require, reforgeRules, enchants, setBonus, spec, gemChoice);
+    }
+
     public GemInfo gemChoice(SocketType socket) {
         return gemChoice.gemChoice(socket);
     }
