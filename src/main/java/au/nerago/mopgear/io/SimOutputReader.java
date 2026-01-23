@@ -11,7 +11,11 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.DoubleSupplier;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 public class SimOutputReader {
     public static SimResultStats readInput(Path file) {
@@ -46,5 +50,15 @@ public class SimOutputReader {
     }
 
     public record SimResultStats(double dps, double tps, double dtps, double hps, double tmi, double death) {
+        public static List<ToDoubleFunction<SimResultStats>> eachStat() { return Arrays.asList(SimResultStats::dps, SimResultStats::tps, SimResultStats::dtps, SimResultStats::hps, SimResultStats::tmi, SimResultStats::death); }
+
+        public void print() {
+            OutputText.printf("DPS\t%.2f\n", dps);
+            OutputText.printf("TPS\t%.2f\n", tps);
+            OutputText.printf("DTPS\t%.2f\n", dtps);
+            OutputText.printf("HPS\t,%.2f\n", hps);
+            OutputText.printf("TMI\t%.2f\n", tmi);
+            OutputText.printf("DEATH\t%.2f\n", death * 100);
+        }
     }
 }

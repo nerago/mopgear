@@ -3,6 +3,7 @@ package au.nerago.mopgear.results;
 import au.nerago.mopgear.ItemMapUtil;
 import au.nerago.mopgear.domain.FullItemSet;
 import au.nerago.mopgear.domain.SolvableItemSet;
+import au.nerago.mopgear.io.SimInputModify;
 
 import java.util.Optional;
 
@@ -29,5 +30,7 @@ public class JobOutput {
 
     public Optional<FullItemSet> getFinalResultSet() {
         return resultSet.map(set -> FullItemSet.ofSolvable(set, ItemMapUtil.mapperToFullItems(input.fullItemOptions)));
+
+
     }
 }

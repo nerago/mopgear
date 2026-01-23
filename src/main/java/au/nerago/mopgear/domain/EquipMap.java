@@ -262,8 +262,11 @@ public final class EquipMap /*implements IEquipMap */ {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        EquipMap equipMap = (EquipMap) o;
-        return Objects.equals(head, equipMap.head) && Objects.equals(neck, equipMap.neck) && Objects.equals(shoulder, equipMap.shoulder) && Objects.equals(back, equipMap.back) && Objects.equals(chest, equipMap.chest) && Objects.equals(wrist, equipMap.wrist) && Objects.equals(hand, equipMap.hand) && Objects.equals(belt, equipMap.belt) && Objects.equals(leg, equipMap.leg) && Objects.equals(foot, equipMap.foot) && Objects.equals(ring1, equipMap.ring1) && Objects.equals(ring2, equipMap.ring2) && Objects.equals(trinket1, equipMap.trinket1) && Objects.equals(trinket2, equipMap.trinket2) && Objects.equals(weapon, equipMap.weapon) && Objects.equals(offhand, equipMap.offhand);
+        return equalsTyped((EquipMap) o);
+    }
+
+    public boolean equalsTyped(EquipMap o) {
+        return Objects.equals(head, o.head) && Objects.equals(neck, o.neck) && Objects.equals(shoulder, o.shoulder) && Objects.equals(back, o.back) && Objects.equals(chest, o.chest) && Objects.equals(wrist, o.wrist) && Objects.equals(hand, o.hand) && Objects.equals(belt, o.belt) && Objects.equals(leg, o.leg) && Objects.equals(foot, o.foot) && Objects.equals(ring1, o.ring1) && Objects.equals(ring2, o.ring2) && Objects.equals(trinket1, o.trinket1) && Objects.equals(trinket2, o.trinket2) && Objects.equals(weapon, o.weapon) && Objects.equals(offhand, o.offhand);
     }
 
     @Override

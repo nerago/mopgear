@@ -1,6 +1,7 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.EquipMap;
+import au.nerago.mopgear.domain.SpecType;
 import au.nerago.mopgear.domain.StatType;
 import au.nerago.mopgear.results.AsWowSimJson;
 import com.google.gson.*;
@@ -17,22 +18,35 @@ import static au.nerago.mopgear.results.AsWowSimJson.makeItemObject;
 @SuppressWarnings("SameParameterValue")
 public class SimInputModify {
     public static final Path basePath = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\wow-sim-mop\\gen-files");
-    public static final Path INPUT_FILE = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\wow-sim-mop\\test-cli.json");
+    private static final Path INPUT_PROT_FILE = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\wow-sim-mop\\example-prot.json");
+    private static final Path INPUT_RET_FILE = Path.of("C:\\Users\\nicholas\\Dropbox\\prog\\wow-sim-mop\\example-ret.json");
     public static final Path BASELINE_FILE = basePath.resolve("out-base.json");
 
     public static Path outName(StatType statType) {
         return basePath.resolve("out-" + statType + ".json");
     }
 
-    public static Path makeWithBonusStat(StatType statType, int add) {
+    public static Path inputFileFor(SpecType spec) {
+        switch (spec) {
+            case PaladinProtMitigation, PaladinProtDps -> {
+                return INPUT_PROT_FILE;
+            }
+            case PaladinRet -> {
+                return INPUT_RET_FILE;
+            }
+            default -> throw new IllegalArgumentException();
+        }
+    }
+
+    public static Path makeWithBonusStat(SpecType spec, StatType statType, int add) {
         Path outFile = basePath.resolve("in-" + statType + ".json");
-        modifyFiles(INPUT_FILE, outFile, root -> modifyJsonBonusStat(root, statType, add));
+        modifyFiles(inputFileFor(spec), outFile, root -> modifyJsonBonusStat(root, statType, add));
         return outFile;
     }
 
-    public static Path makeWithGear(EquipMap map, String tag) {
+    public static Path makeWithGear(SpecType spec, EquipMap map, String tag) {
         Path outFile = basePath.resolve("in-" + tag + ".json");
-        modifyFiles(INPUT_FILE, outFile, root -> modifyJsonItems(root, map));
+        modifyFiles(inputFileFor(spec), outFile, root -> modifyJsonItems(root, map));
         return outFile;
     }
 
@@ -41,6 +55,7 @@ public class SimInputModify {
             JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
 
             modifyJson.accept(root);
+            changeIterations(root);
 
             try (JsonWriter jsonWriter = new JsonWriter(writer)) {
                 jsonWriter.setFormattingStyle(FormattingStyle.PRETTY);
@@ -49,6 +64,11 @@ public class SimInputModify {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private static void changeIterations(JsonObject root) {
+        JsonObject opts = root.getAsJsonObject("simOptions");
+        opts.addProperty("iterations", 500);
     }
 
     private static void modifyJsonBonusStat(JsonObject root, StatType statType, int add) {

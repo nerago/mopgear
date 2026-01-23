@@ -31,7 +31,7 @@ public class FindMultiSpec {
 
     private final Map<Integer, ReforgeRecipe> fixedForge = new HashMap<>();
     private final Map<Integer, Tuple.Tuple3<StatBlock, List<GemInfo>, Integer>> overrideEnchant = new HashMap<>();
-    private final List<SpecDetails> specs = new ArrayList<>();
+    final List<SpecDetails> specs = new ArrayList<>();
     private final Set<Integer> suppressSlotCheck = new HashSet<>();
     private Predicate<ProposedResults> multiSetFilter;
 
@@ -133,6 +133,19 @@ public class FindMultiSpec {
             resultStream = resultStream.filter(multiSetFilter);
         }
         return resultStream;
+    }
+
+    public Collection<ProposedResults> solveBestSelection(int targetComboCount, int select) {
+        Stream<ProposedResults> resultStream = makeCandidateStream(targetComboCount);
+
+        OutputText.println("RUNNING");
+        Collection<ProposedResults> collection = resultStream.collect(new TopCollectorN<>(select, s -> multiRating(s.resultJobs, specs)));
+        collection = proposedFinal(collection);
+        specs.forEach(spec -> {
+            OutputText.println("SPEC USED + " + spec.label);
+            spec.reportExtrasUsed();
+        });
+        return collection;
     }
 
     public void solve(long targetComboCount) {
@@ -317,7 +330,7 @@ public class FindMultiSpec {
             }
             results.add(job);
         }
-        return new ProposedResults(results, commonChoices);
+        return new ProposedResults(UUID.randomUUID(), results, commonChoices);
     }
 
     private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap, boolean isFinal) {
@@ -470,10 +483,10 @@ public class FindMultiSpec {
             List<JobOutput> resultJobs = bestSets.get().resultJobs;
             List<FullItemSet> allResultSets = resultJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
 
-            Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(bestSets, resultJobs);
-            outputCommonForPasteAndReuse(commonFinal);
+            outputResultSetHeader(bestSets.get().resultId, specList, resultJobs);
 
-            outputResultSetHeader(specList, resultJobs);
+            Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(bestSets.get().chosenMap, resultJobs);
+            outputCommonForPasteAndReuse(commonFinal);
 
             for (int i = 0; i < resultJobs.size(); ++i) {
                 SpecDetails spec = specList.get(i);
@@ -484,13 +497,14 @@ public class FindMultiSpec {
                 double draftSpecRating = draftJobOutput(spec, draftJob);
 
                 EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-                double revisedSpecRating = processRevisedSet("REVISED", revisedItemMap, spec, commonFinal, draftSet, draftSpecRating, spec.phasedAcceptable);
+                JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
+                double revisedSpecRating = processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
 
-                // TODO also deny on other specs choices
                 EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
-                double reEnchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantItemOptions, spec, commonFinal, draftSet, draftSpecRating, true);
+                JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
+                double reenchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
 
-                double specRating = Math.max(draftSpecRating, Math.max(revisedSpecRating, reEnchantSpecRating));
+                double specRating = Math.max(draftSpecRating, Math.max(revisedSpecRating, reenchantSpecRating));
                 OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
 
                 spec.reportExtrasUsed();
@@ -500,14 +514,67 @@ public class FindMultiSpec {
         }
     }
 
+    private Collection<ProposedResults> proposedFinal(Collection<ProposedResults> collection) {
+        Collection<ProposedResults> finalCollection = new ArrayList<>();
+        for (ProposedResults proposed : collection) {
+            List<JobOutput> specJobs = proposed.resultJobs;
+            List<FullItemSet> resultSets = specJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
+            outputResultSetHeader(proposed.resultId, specs, specJobs);
+
+            finalCollection.add(proposed);
+
+            Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(proposed.chosenMap, specJobs);
+            outputCommonForPasteAndReuse(commonFinal);
+
+            for (int i = 0; i < specJobs.size(); ++i) {
+                SpecDetails spec = specs.get(i);
+                OutputText.printf("-------------- %s --------------\n", spec.label);
+
+                JobOutput draftJob = specJobs.get(i);
+                FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
+                double draftSpecRating = draftJobOutput(spec, draftJob);
+
+                EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
+                JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
+                if (revisedJob.resultSet.isPresent()) {
+                    EquipMap revisedItems = revisedJob.getFinalResultSet().orElseThrow().items();
+                    if (!draftSet.items().equalsTyped(revisedItems)) {
+                        processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
+                        finalCollection.add(proposed.derive(i, revisedJob));
+                    } else {
+                        OutputText.println("REVISED unchanged");
+                    }
+                } else {
+                    OutputText.println("REVISED missing");
+                }
+
+                EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, resultSets);
+                JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
+                if (reenchantJob.resultSet.isPresent()) {
+                    EquipMap reenchantItems = reenchantJob.getFinalResultSet().orElseThrow().items();
+                    if (!draftSet.items().equalsTyped(reenchantItems) && !reenchantItems.equalsTyped(reenchantItems)) {
+                        processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
+                        finalCollection.add(proposed.derive(i, reenchantJob));
+                    } else {
+                        OutputText.println("RE-ENCHANT unchanged");
+                    }
+                } else {
+                    OutputText.println("RE-ENCHANT missing");
+                }
+            }
+
+        }
+        return finalCollection;
+    }
+
     private EquipOptionsMap makeReenchantOptions(EquipOptionsMap itemOptions, ModelCombined model, Map<ItemRef, FullItemData> commonFinal, List<FullItemSet> allResultSets) {
         EquipOptionsMap submitMap = itemOptions.deepClone();
         submitMap.mapSlots(options -> options != null ? makeSlotFixedOrAddAlternateEnchants(commonFinal, options, model, allResultSets) : null);
         return submitMap;
     }
 
-    private void outputResultSetHeader(List<SpecDetails> specList, List<JobOutput> resultJobs) {
-        OutputText.println("@@@@@@@@@ BEST SET(s) @@@@@@@@@");
+    private void outputResultSetHeader(UUID resultId, List<SpecDetails> specList, List<JobOutput> resultJobs) {
+        OutputText.println("@@@@@@@@@@ PROPOSED SET " + resultId.toString() + " @@@@@@@@@@");
         long totalRating = multiRating(resultJobs, specList);
         OutputText.printf("^^^^^^^ total multi rating %d ^^^^^^^\n", totalRating);
     }
@@ -522,24 +589,14 @@ public class FindMultiSpec {
         });
     }
 
-    private @NotNull Map<ItemRef, FullItemData> filterAndListFinalCommon(Optional<ProposedResults> bestSets, List<JobOutput> resultJobs) {
+    private @NotNull Map<ItemRef, FullItemData> filterAndListFinalCommon(Map<ItemRef, FullItemData> chosenMap, List<JobOutput> resultJobs) {
         OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
-        Map<ItemRef, FullItemData> commonFinal = bestSets.get().chosenMap;
-        filterCommonActuallyUsed(commonFinal, resultJobs);
-        commonFinal.values().forEach(item -> OutputText.println(item.toString()));
-        return commonFinal;
+        filterCommonActuallyUsed(chosenMap, resultJobs);
+        chosenMap.values().forEach(item -> OutputText.println(item.toString()));
+        return chosenMap;
     }
 
-    private double processRevisedSet(String label, EquipOptionsMap submitMap, SpecDetails spec, Map<ItemRef, FullItemData> commonFinal, FullItemSet draftFullSet, double draftSpecRating, boolean phasedAcceptable) {
-        JobInput job = new JobInput(Final, individualRunSizeMultiply, phasedAcceptable);
-        if (phasedAcceptable)
-            job.model = spec.model.withChangedRequirements(StatRequirementsHitExpertise.protFlexibleParryNarrowHit());
-        else
-            job.model = spec.model;
-        job.setItemOptions(submitMap);
-        job.hackAllow = hackAllow;
-        JobOutput revisedJob = Solver.runJob(job);
-
+    private double processRevisedSet(String label, JobOutput revisedJob, SpecDetails spec, FullItemSet draftFullSet, double draftSpecRating) {
         FullItemSet revisedSet = null;
         double revisedSpecRating = 0;
         if (revisedJob.resultSet.isPresent()) {
@@ -559,6 +616,17 @@ public class FindMultiSpec {
             OutputText.println(label + " no better");
         }
         return revisedSpecRating;
+    }
+
+    private @NotNull JobOutput solveRevisedSet(EquipOptionsMap submitMap, SpecDetails spec, boolean phasedAcceptable) {
+        JobInput job = new JobInput(Final, individualRunSizeMultiply, phasedAcceptable);
+        if (phasedAcceptable)
+            job.model = spec.model.withChangedRequirements(StatRequirementsHitExpertise.protFlexibleParryNarrowHit());
+        else
+            job.model = spec.model;
+        job.setItemOptions(submitMap);
+        job.hackAllow = hackAllow;
+        return Solver.runJob(job);
     }
 
     private static double draftJobOutput(SpecDetails spec, JobOutput draftJob) {
@@ -608,10 +676,10 @@ public class FindMultiSpec {
         SpecDetailsInterface addRemoveItem(int id);
     }
 
-    private class SpecDetails implements SpecDetailsInterface {
-        final String label;
+    public class SpecDetails implements SpecDetailsInterface {
+        public final String label;
         final Path gearFile;
-        final ModelCombined model;
+        public final ModelCombined model;
         final double ratingTargetPercent;
         int ratingMultiply;
         final boolean phasedAcceptable;
@@ -867,6 +935,11 @@ public class FindMultiSpec {
         }
     }
 
-    public record ProposedResults(List<JobOutput> resultJobs, Map<ItemRef, FullItemData> chosenMap) {
+    public record ProposedResults(UUID resultId, List<JobOutput> resultJobs, Map<ItemRef, FullItemData> chosenMap) {
+        public ProposedResults derive(int index, JobOutput revisedJob) {
+            ArrayList<JobOutput> list = new ArrayList<>(resultJobs);
+            list.set(index, revisedJob);
+            return new ProposedResults(UUID.randomUUID(), list, chosenMap);
+        }
     }
 }

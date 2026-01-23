@@ -18,10 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
+import java.util.function.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -695,11 +692,14 @@ public class Tasks {
 //        multi.suggestCulls(10000);
 //        multi.solve(10000);
 //        multi.solve(50000);
-        multi.solve(120000);
+//        multi.solve(120000);
 //        multi.solve(220000);
 //        multi.solve(490000);
 //        multi.solve(1490000);
 //        multi.solve(4000000);
+
+        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(500, 10);
+        new FindMultiSpecSim(multi).process(select);
     }
 
     public static void druidMultiSpecSolve() {
@@ -846,7 +846,7 @@ public class Tasks {
             FullItemSet resultSet = result.getFinalResultSet().orElseThrow();
             resultSet.outputSetDetailed(model);
             AsWowSimJson.writeFullToOut(resultSet.items(), model);
-            SimInputModify.makeWithGear(resultSet.items(), "PERCENT-" + percentMiti);
+            SimInputModify.makeWithGear(SpecType.PaladinProtMitigation, resultSet.items(), "PERCENT-" + percentMiti);
         }
 
         // TODO bonus set forced variants
@@ -1003,13 +1003,14 @@ public class Tasks {
         //        SimOutputReader.main();
         //
         try {
-            SimCliExecute.run(SimInputModify.INPUT_FILE, SimInputModify.BASELINE_FILE);
+            SpecType spec = SpecType.PaladinProtMitigation;
+            SimCliExecute.run(SimInputModify.inputFileFor(spec), SimInputModify.BASELINE_FILE);
             SimOutputReader.readInput(SimInputModify.BASELINE_FILE);
 
             int add = 800;
             StatType[] statsCheck = new StatType[]{Primary, Stam, Crit, Haste, Expertise, Mastery, Dodge, Parry};
             for (StatType stat : statsCheck) {
-                Path inFile = SimInputModify.makeWithBonusStat(stat, add);
+                Path inFile = SimInputModify.makeWithBonusStat(spec, stat, add);
                 Path outFile = SimInputModify.outName(stat);
 
                 SimCliExecute.run(inFile, outFile);
@@ -1038,12 +1039,9 @@ public class Tasks {
                     .toList();
 
             OutputText.println(statList.stream().map(s -> s.a().getFileName().toString()).collect(Collectors.joining(",")));
-            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().dps())).collect(Collectors.joining(",")));
-            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().tps())).collect(Collectors.joining(",")));
-            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().dtps())).collect(Collectors.joining(",")));
-            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().hps())).collect(Collectors.joining(",")));
-            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().tmi())).collect(Collectors.joining(",")));
-            OutputText.println(statList.stream().map(s -> String.valueOf(s.b().death())).collect(Collectors.joining(",")));
+            for (ToDoubleFunction<SimOutputReader.SimResultStats> stat : SimOutputReader.SimResultStats.eachStat()) {
+                OutputText.println(statList.stream().map(s -> String.valueOf(stat.applyAsDouble(s.b()))).collect(Collectors.joining(",")));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
