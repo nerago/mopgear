@@ -2,33 +2,30 @@ package au.nerago.mopgear.util;
 
 import au.nerago.mopgear.domain.SkinnyItem;
 import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
-import au.nerago.mopgear.domain.SolvableItemSet;
 
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 import java.util.stream.Gatherer;
-import java.util.stream.Gatherers;
 import java.util.stream.Stream;
 
 public class BigStreamUtil {
     private static final long TIME_RATE = 5000;
 
-    public static <T> Stream<T> countProgress(double estimate, Instant startTime, Stream<T> inputStream) {
+    public static <T> StreamNeedClose<T> countProgress(double estimate, Instant startTime, Stream<T> inputStream) {
         if (startTime == null)
-            return inputStream;
+            return new StreamNeedClose<>(inputStream);
 
         Timer timer = new Timer(true);
         ProgressTask<T> task = new ProgressTask<>(estimate, startTime);
         timer.scheduleAtFixedRate(task, TIME_RATE, TIME_RATE);
-        return task.monitorStream(inputStream);
+        return new StreamNeedClose<>(task.monitorStream(inputStream));
     }
 
     private static class ProgressTask<T> extends TimerTask {
@@ -115,11 +112,12 @@ public class BigStreamUtil {
 
     static void reportProgress(long curr, double percentMultiply, Instant startTime) {
         double percent = (double) curr * percentMultiply;
-
-        Duration timeTaken = Duration.between(startTime, Instant.now());
-        Duration totalEstimate = timeTaken.multipliedBy(10000).dividedBy((long) (100 * percent));
-        Duration estimateRemain = totalEstimate.minus(timeTaken);
-        printProgressLine(curr, percent, estimateRemain);
+        if (percent > 0) {
+            Duration timeTaken = Duration.between(startTime, Instant.now());
+            Duration totalEstimate = timeTaken.multipliedBy(10000).dividedBy((long) (100 * percent));
+            Duration estimateRemain = totalEstimate.minus(timeTaken);
+            printProgressLine(curr, percent, estimateRemain);
+        }
     }
 
     static void printProgressLine(long curr, double percent, Duration estimateRemain) {

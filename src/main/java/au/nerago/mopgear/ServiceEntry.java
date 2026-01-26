@@ -17,7 +17,7 @@ import java.util.Map;
 
 
 public class ServiceEntry {
-    public static void main(String[] args) {
+    static void main(String[] args) {
         if (args.length != 1 || args[0].isEmpty()) {
             System.out.println("MISSING FILENAME");
             return;

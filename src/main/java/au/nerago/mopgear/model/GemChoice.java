@@ -10,7 +10,6 @@ import java.util.EnumMap;
 import java.util.List;
 
 import static au.nerago.mopgear.domain.StatType.*;
-import static au.nerago.mopgear.domain.StatType.Haste;
 
 public class GemChoice {
     private static final GemInfo SHA_INFO = new GemInfo(89881, StatBlock.of(Primary, 500));
@@ -20,7 +19,7 @@ public class GemChoice {
     public static final GemInfo HASTE_HIT_INFO = new GemInfo(76588, StatBlock.of(StatType.Haste, 160, StatType.Hit, 160));
     public static final GemInfo HASTE_ENG_INFO = new GemInfo(77542, StatBlock.of(StatType.Haste, 600));
     private final GemInfo alternateBestGem;
-    protected EnumMap<SocketType, GemInfo> chosen;
+    protected final EnumMap<SocketType, GemInfo> chosen;
 
     public GemChoice(StatRatings ratings, AllowedMeta meta, GemInfo alternateBestGem) {
         this.alternateBestGem = alternateBestGem;

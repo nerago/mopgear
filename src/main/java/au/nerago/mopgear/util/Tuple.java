@@ -1,5 +1,7 @@
 package au.nerago.mopgear.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Objects;
 
 public interface Tuple {
@@ -45,7 +47,7 @@ public interface Tuple {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "Tuple{" + a + '}';
         }
     }
@@ -74,7 +76,7 @@ public interface Tuple {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "Tuple{" + a +
                     ", " + b +
                     '}';
@@ -106,7 +108,7 @@ public interface Tuple {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "Tuple{" + a +
                     ", " + b +
                     ", " + c +
@@ -140,7 +142,7 @@ public interface Tuple {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "Tuple{" + a +
                     ", " + b +
                     ", " + c +

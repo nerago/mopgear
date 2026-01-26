@@ -1,5 +1,7 @@
 package au.nerago.mopgear.domain;
 
+import org.jetbrains.annotations.NotNull;
+
 public record StatBlock(int primary, int stam, int mastery, int crit, int hit, int haste,
                         int expertise, int dodge, int parry, int spirit) {
 
@@ -444,7 +446,7 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("{ ");
         append(builder, false);
@@ -452,7 +454,7 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
         return builder.toString();
     }
 
-    public String toStringExtended() {
+    public @NotNull String toStringExtended() {
         StringBuilder builder = new StringBuilder();
         builder.append("{ ");
         append(builder, true);

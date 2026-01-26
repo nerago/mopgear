@@ -332,9 +332,9 @@ public class ItemLoadUtil {
                         .toList();
             }
 
-            gemSelections.forEach(gemArray -> {
-                allVersions.add(processNewEnchantAndGems(item, enchantId, Arrays.stream(gemArray).toList()));
-            });
+            gemSelections.forEach(gemArray ->
+                allVersions.add(processNewEnchantAndGems(item, enchantId, Arrays.stream(gemArray).toList()))
+            );
         }
     }
 

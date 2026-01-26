@@ -2,6 +2,7 @@ package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.ServiceEntry;
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.util.StreamNeedClose;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -33,8 +34,8 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         return statRequirements.filterOneSet(set) && set.validate();
     }
 
-    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream, boolean isFinal) {
-        Stream<SolvableItemSet> filtered = statRequirements.filterSets(stream);
+    public StreamNeedClose<SolvableItemSet> filterSets(StreamNeedClose<SolvableItemSet> stream, boolean isFinal) {
+        StreamNeedClose<SolvableItemSet> filtered = statRequirements.filterSets(stream);
         if (isFinal) {
             filtered = filtered.filter(SolvableItemSet::validate);
         }
@@ -70,7 +71,7 @@ public record ModelCombined(StatRatings statRatings, StatRequirements statRequir
         if (modelParam.weight().size() == 1) {
             ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
             rating = new StatRatingsWeights(Path.of(a.file()));
-            rating = StatRatingsWeights.mix(rating, a.scale(), null, 0);
+            rating = StatRatingsWeights.multiplied(rating, a.scale());
         } else if (modelParam.weight().size() == 2) {
             ServiceEntry.ServiceWeightStats a = modelParam.weight().getFirst();
             StatRatingsWeights ratingA = new StatRatingsWeights(Path.of(a.file()));

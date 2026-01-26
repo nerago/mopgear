@@ -1,14 +1,13 @@
 package au.nerago.mopgear.model;
 
-import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.EnumMap;
 
 import static au.nerago.mopgear.domain.StatType.*;
 
@@ -42,12 +41,14 @@ public class StatRatingsWeights extends StatRatings {
         chooseBestStats();
     }
 
-    public static StatRatingsWeights mix(StatRatingsWeights weightA, int multiplyA, StatRatingsWeights weightB, int multiplyB) {
+    public static StatRatingsWeights mix(@NotNull StatRatingsWeights weightA, int multiplyA, @NotNull StatRatingsWeights weightB, int multiplyB) {
         StatBlock mixed = weightA.weight.multiply(multiplyA);
-//        if (weightB != null) {
-            mixed = mixed.plus(weightB.weight.multiply(multiplyB));
-//        }
+        mixed = mixed.plus(weightB.weight.multiply(multiplyB));
         return new StatRatingsWeights(mixed);
+    }
+
+    public static StatRatingsWeights multiplied(@NotNull StatRatingsWeights weightA, int multiplyA) {
+        return new StatRatingsWeights(weightA.weight.multiply(multiplyA));
     }
 
     private static StatBlock parseReader(BufferedReader reader) throws IOException {

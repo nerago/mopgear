@@ -8,9 +8,11 @@ import au.nerago.mopgear.io.SimOutputReader;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.results.AsWowSimJson;
 import au.nerago.mopgear.results.OutputText;
+import au.nerago.mopgear.util.BigStreamUtil;
 import au.nerago.mopgear.util.Tuple;
 
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +39,9 @@ public class FindMultiSpecSim {
                 .toList();
 
         OutputText.printf("SimulateTasks %d\n", tasks.size());
-        tasks.forEach(SimulateTask::runSimulate);
+
+        BigStreamUtil.countProgress(tasks.size(), Instant.now(), tasks.stream().peek(SimulateTask::runSimulate))
+                .collect(Collectors.toSet());
 
         List<SimulatedResults> results = proposedOptions.stream().map(prop ->
                 new SimulatedResults(

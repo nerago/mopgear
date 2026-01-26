@@ -1,7 +1,6 @@
 package au.nerago.mopgear.domain;
 
 import au.nerago.mopgear.model.AllowedMeta;
-import au.nerago.mopgear.model.GemData;
 import au.nerago.mopgear.model.IItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

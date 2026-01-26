@@ -3,7 +3,6 @@ package au.nerago.mopgear.results;
 import au.nerago.mopgear.ItemMapUtil;
 import au.nerago.mopgear.domain.FullItemSet;
 import au.nerago.mopgear.domain.SolvableItemSet;
-import au.nerago.mopgear.io.SimInputModify;
 
 import java.util.Optional;
 

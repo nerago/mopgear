@@ -4,6 +4,7 @@ import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.util.BigStreamUtil;
 import au.nerago.mopgear.util.Primes;
+import au.nerago.mopgear.util.StreamNeedClose;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -17,7 +18,8 @@ public class SolverIndexed {
     public static Optional<SolvableItemSet> runFullScan(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, long comboCount, Predicate<SolvableItemSet> specialFilter) {
         Stream<Long> dumbStream = generateDumbStream(comboCount).parallel();
         Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
-        return finishToResult(model, specialFilter, partialSets);
+        StreamNeedClose<SolvableItemSet> countedSets = BigStreamUtil.countProgress(comboCount, null, partialSets);
+        return finishToResult(model, specialFilter, countedSets);
     }
 
     public static Optional<SolvableItemSet> runSolverSkipping(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, Instant startTime, long desiredRunSize, BigInteger estimateFullCombos, Predicate<SolvableItemSet> specialFilter) {
@@ -31,18 +33,18 @@ public class SolverIndexed {
         if (fitsLong(estimateFullCombos) && fitsLong(plannedCount) && fitsLong(skipSize)) {
             Stream<Long> dumbStream = generateDumbStream(estimateFullCombos.longValueExact(), skipSize.longValueExact()).parallel();
             Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
-            partialSets = BigStreamUtil.countProgress(plannedCount.doubleValue(), startTime, partialSets);
-            return finishToResult(model, specialFilter, partialSets);
+            StreamNeedClose<SolvableItemSet> countedSets = BigStreamUtil.countProgress(plannedCount.doubleValue(), startTime, partialSets);
+            return finishToResult(model, specialFilter, countedSets);
         } else {
             Stream<BigInteger> dumbStream = generateDumbStream(estimateFullCombos, skipSize).parallel();
             Stream<SolvableItemSet> partialSets = dumbStream.map(index -> makeSet(itemOptions, adjustment, index));
-            partialSets = BigStreamUtil.countProgress(plannedCount.doubleValue(), startTime, partialSets);
-            return finishToResult(model, specialFilter, partialSets);
+            StreamNeedClose<SolvableItemSet> countedSets = BigStreamUtil.countProgress(plannedCount.doubleValue(), startTime, partialSets);
+            return finishToResult(model, specialFilter, countedSets);
         }
     }
 
-    private static Optional<SolvableItemSet> finishToResult(ModelCombined model, Predicate<SolvableItemSet> specialFilter, Stream<SolvableItemSet> partialSets) {
-        Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
+    private static Optional<SolvableItemSet> finishToResult(ModelCombined model, Predicate<SolvableItemSet> specialFilter, StreamNeedClose<SolvableItemSet> partialSets) {
+        StreamNeedClose<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
         if (specialFilter != null)
             finalSets = finalSets.filter(specialFilter);
         return finalSets.max(Comparator.comparingLong(model::calcRating));

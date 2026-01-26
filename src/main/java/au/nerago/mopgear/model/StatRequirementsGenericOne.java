@@ -1,6 +1,7 @@
 package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.util.StreamNeedClose;
 
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
@@ -57,7 +58,7 @@ public class StatRequirementsGenericOne implements StatRequirements {
     }
 
     @Override
-    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream) {
+    public StreamNeedClose<SolvableItemSet> filterSets(StreamNeedClose<SolvableItemSet> stream) {
         if (hasMaximum()) {
             return stream.filter(set -> {
                 int value = set.totalForCaps().get(stat);
@@ -84,7 +85,7 @@ public class StatRequirementsGenericOne implements StatRequirements {
     }
 
     @Override
-    public Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> stream) {
+    public StreamNeedClose<SkinnyItemSet> filterSetsSkinny(StreamNeedClose<SkinnyItemSet> stream) {
         if (hasMaximum()) {
             return stream.filter(set -> {
                 int value = set.totalThree();

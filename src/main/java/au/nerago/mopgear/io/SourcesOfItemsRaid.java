@@ -6,7 +6,6 @@ import au.nerago.mopgear.util.Tuple;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused"})
 public class SourcesOfItemsRaid {

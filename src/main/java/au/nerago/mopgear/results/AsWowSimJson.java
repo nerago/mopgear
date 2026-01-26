@@ -3,19 +3,14 @@ package au.nerago.mopgear.results;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.InputGearParser;
-import au.nerago.mopgear.io.StandardModels;
 import au.nerago.mopgear.io.WowSimDB;
-import au.nerago.mopgear.model.DefaultEnchants;
 import au.nerago.mopgear.model.GemData;
 import au.nerago.mopgear.model.ModelCombined;
-import au.nerago.mopgear.util.Tuple;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.nio.file.Path;
-import java.util.List;
 
 public class AsWowSimJson {
     // only good for reforgelite, not wowsim
@@ -92,9 +87,7 @@ public class AsWowSimJson {
         while (!itemArray.isEmpty()) {
             itemArray.remove(0);
         }
-        map.forEachValue(item -> {
-            itemArray.add(makeItemObject(item));
-        });
+        map.forEachValue(item -> itemArray.add(makeItemObject(item)));
 
         // equipment data, reforgelite friendly
         JsonObject playerData = new JsonObject();

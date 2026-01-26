@@ -3,6 +3,7 @@ package au.nerago.mopgear.domain;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.results.OutputText;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
@@ -35,6 +36,7 @@ public record FullItemSet(StatBlock totalForRating, StatBlock totalForCaps, Equi
         OutputText.printf("set bonus %1.2f\n", (double) model.setBonus().calc(this) / (double) SetBonus.DENOMIATOR);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     public void outputSetDetailedComparing(ModelCombined model, FullItemSet other) {
         OutputText.println("SET RATED " + totalForRating.toStringExtended() + " " + model.calcRating(this));
         OutputText.println("SET CONSTANT " + totalForCaps.toStringExtended());
@@ -44,7 +46,7 @@ public record FullItemSet(StatBlock totalForRating, StatBlock totalForCaps, Equi
             if (a == null ^ z == null) {
                 throw new IllegalStateException("null and non-null");
             } else if (a == null) {
-                // nothing
+                // none
             } else if (a.equalsTyped(z)) {
                 OutputText.println(a.toStringExtended() + " " + model.calcRating(a));
             } else {
@@ -77,7 +79,7 @@ public record FullItemSet(StatBlock totalForRating, StatBlock totalForCaps, Equi
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return totalForRating.toString();
     }
 }

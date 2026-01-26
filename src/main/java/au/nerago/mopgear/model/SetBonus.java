@@ -3,7 +3,6 @@ package au.nerago.mopgear.model;
 import au.nerago.mopgear.domain.*;
 import au.nerago.mopgear.util.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.ToIntFunction;

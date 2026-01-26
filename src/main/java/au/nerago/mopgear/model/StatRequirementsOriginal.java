@@ -2,6 +2,7 @@ package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.ServiceEntry;
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.util.StreamNeedClose;
 
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
@@ -108,7 +109,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
     }
 
     @Override
-    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> setStream) {
+    public StreamNeedClose<SolvableItemSet> filterSets(StreamNeedClose<SolvableItemSet> setStream) {
         final int minHit = hitMin, maxHit = hitMax;
         final int minExp = expertiseMin, maxExp = expertiseMax;
 
@@ -220,7 +221,7 @@ public class StatRequirementsOriginal implements StatRequirements.StatRequiremen
     }
 
     @Override
-    public Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> setStream) {
+    public StreamNeedClose<SkinnyItemSet> filterSetsSkinny(StreamNeedClose<SkinnyItemSet> setStream) {
         final int minHit = hitMin, maxHit = hitMax;
         final int minExp = expertiseMin, maxExp = expertiseMax;
 

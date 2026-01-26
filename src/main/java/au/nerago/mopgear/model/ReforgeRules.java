@@ -1,7 +1,6 @@
 package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.StatType;
-import au.nerago.mopgear.util.ArrayUtil;
 
 import static au.nerago.mopgear.domain.StatType.*;
 

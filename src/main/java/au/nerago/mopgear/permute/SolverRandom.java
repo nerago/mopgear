@@ -5,6 +5,7 @@ import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BestHolder;
 import au.nerago.mopgear.util.BigStreamUtil;
+import au.nerago.mopgear.util.StreamNeedClose;
 
 import java.time.Instant;
 import java.util.Comparator;
@@ -18,22 +19,23 @@ import java.util.stream.Stream;
 public class SolverRandom {
     public static Optional<SolvableItemSet> runSolver(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, Instant startTime, long count, boolean parallel, Predicate<SolvableItemSet> specialFilter) {
         if (parallel) {
-            Stream<SolvableItemSet> finalSets = runSolverPartial(model, items, adjustment, startTime, count);
-            if (specialFilter != null)
-                finalSets = finalSets.filter(specialFilter);
-            return finalSets.max(Comparator.comparingLong(model::calcRating));
+            try (StreamNeedClose<SolvableItemSet> possibleSets = runSolverPartial(model, items, adjustment, startTime, count)) {
+                StreamNeedClose<SolvableItemSet> finalSets = possibleSets;
+                if (specialFilter != null)
+                    finalSets = finalSets.filter(specialFilter);
+                return finalSets.max(Comparator.comparingLong(model::calcRating));
+            }
         } else {
             return runSolverSingleThread(model, items, adjustment, count, specialFilter);
         }
     }
 
-    public static Stream<SolvableItemSet> runSolverPartial(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
+    public static StreamNeedClose<SolvableItemSet> runSolverPartial(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
         Stream<Long> dumbStream = generateDumbStream(count);
         Stream<SolvableItemSet> setStream = dumbStream.parallel()
                                               .map(x -> makeSet(items, adjustment));
-        if (startTime != null)
-            setStream = BigStreamUtil.countProgress(count, startTime, setStream);
-        return model.filterSets(setStream, true);
+        StreamNeedClose<SolvableItemSet> countedStream = BigStreamUtil.countProgress(count, startTime, setStream);
+        return model.filterSets(countedStream, true);
     }
 
     public static Optional<SolvableItemSet> runSolverSingleThread(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, long count, Predicate<SolvableItemSet> specialFilter) {

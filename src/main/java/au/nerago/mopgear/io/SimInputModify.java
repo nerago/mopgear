@@ -3,7 +3,6 @@ package au.nerago.mopgear.io;
 import au.nerago.mopgear.domain.EquipMap;
 import au.nerago.mopgear.domain.SpecType;
 import au.nerago.mopgear.domain.StatType;
-import au.nerago.mopgear.results.AsWowSimJson;
 import com.google.gson.*;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
@@ -68,7 +67,8 @@ public class SimInputModify {
 
     private static void changeIterations(JsonObject root) {
         JsonObject opts = root.getAsJsonObject("simOptions");
-        opts.addProperty("iterations", 500);
+//        opts.addProperty("iterations", 500);
+//        opts.addProperty("iterations", 1000000);
     }
 
     private static void modifyJsonBonusStat(JsonObject root, StatType statType, int add) {
@@ -84,8 +84,8 @@ public class SimInputModify {
         JsonArray itemArray = player.getAsJsonObject("equipment").getAsJsonArray("items");
         while (!itemArray.isEmpty())
             itemArray.remove(0);
-        map.forEachValue(item -> {
-            itemArray.add(makeItemObject(item));
-        });
+        map.forEachValue(item ->
+            itemArray.add(makeItemObject(item))
+        );
     }
 }

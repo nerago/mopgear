@@ -5,7 +5,6 @@ import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import static au.nerago.mopgear.domain.StatType.*;

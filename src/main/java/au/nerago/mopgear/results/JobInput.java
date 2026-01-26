@@ -19,11 +19,11 @@ public class JobInput {
     public Instant startTime;
     public StatBlock adjustment;
 
-    public long runSizeAdditionalMultiply;
-    public RunSizeCategory runSizeCategory;
+    public final long runSizeAdditionalMultiply;
+    public final RunSizeCategory runSizeCategory;
     public boolean hackAllow;
     public SolveMethod forceMethod;
-    public boolean phasedAcceptable;
+    public final boolean phasedAcceptable;
     public boolean singleThread;
 
     public FullItemData extraItem;

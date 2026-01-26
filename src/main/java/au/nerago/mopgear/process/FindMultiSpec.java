@@ -3,6 +3,9 @@ package au.nerago.mopgear.process;
 import au.nerago.mopgear.ItemLoadUtil;
 import au.nerago.mopgear.ItemMapUtil;
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.io.InputBagsParser;
+import au.nerago.mopgear.io.InputGearParser;
+import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirementsHitExpertise;
 import au.nerago.mopgear.permute.PossibleIndexed;
@@ -22,6 +25,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static au.nerago.mopgear.ItemLoadUtil.loadItems;
 import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
@@ -34,6 +38,7 @@ public class FindMultiSpec {
     final List<SpecDetails> specs = new ArrayList<>();
     private final Set<Integer> suppressSlotCheck = new HashSet<>();
     private Predicate<ProposedResults> multiSetFilter;
+    private List<EquippedItem> bagsGear;
 
     public FindMultiSpec(long individualRunSizeMultiply) {
         this.individualRunSizeMultiply = individualRunSizeMultiply;
@@ -63,6 +68,7 @@ public class FindMultiSpec {
 
     private @NotNull Map<ItemRef, List<FullItemData>> prepareInitialAndCommons() {
         OutputText.println("PREPARING SPECS");
+        bagsGear = SourcesOfItems.bagItemsArray(SourcesOfItems.ignoredItems);
         specs.forEach(s -> s.prepareStartingGear(specs));
         specs.forEach(s -> s.prepareExtraItems(specs));
 
@@ -81,7 +87,7 @@ public class FindMultiSpec {
         return commonMap;
     }
 
-    private Stream<Map<ItemRef, FullItemData>> makeCommonStream(long targetComboCount, Map<ItemRef, List<FullItemData>> commonMap) {
+    private StreamNeedClose<Map<ItemRef, FullItemData>> makeCommonStream(long targetComboCount, Map<ItemRef, List<FullItemData>> commonMap) {
         // TODO keep track of good indexes and search near
 
         Stream<Map<ItemRef, FullItemData>> commonStream;
@@ -114,15 +120,16 @@ public class FindMultiSpec {
         Stream<Map<ItemRef, FullItemData>> baselineStream = baselineAsCommonOptionsStream(commonMap);
         Stream<Map<ItemRef, FullItemData>> equippedStream = equippedAsCommonOptionsStream(commonMap);
         commonStream = Stream.concat(commonStream, Stream.concat(baselineStream, equippedStream));
-        commonStream = BigStreamUtil.countProgress(estimateRun, Instant.now(), commonStream);
-        return commonStream;
+        return BigStreamUtil.countProgress(estimateRun, Instant.now(), commonStream);
     }
 
-    private @NotNull Stream<ProposedResults> makeCandidateStream(long targetComboCount) {
+    private @NotNull StreamNeedClose<ProposedResults> makeCandidateStream(long targetComboCount) {
         Map<ItemRef, List<FullItemData>> commonMap = prepareInitialAndCommons();
-        Stream<Map<ItemRef, FullItemData>> commonStream = makeCommonStream(targetComboCount, commonMap);
 
-        Stream<ProposedResults> resultStream = commonStream
+        //noinspection resource
+        StreamNeedClose<Map<ItemRef, FullItemData>> commonStream = makeCommonStream(targetComboCount, commonMap);
+
+        StreamNeedClose<ProposedResults> resultStream = commonStream
                 .map(r -> subSolveEach(r, specs))
                 .filter(Objects::nonNull)
                 .filter(s -> checkGood(s.resultJobs, specs))
@@ -136,41 +143,44 @@ public class FindMultiSpec {
     }
 
     public Collection<ProposedResults> solveBestSelection(int targetComboCount, int select) {
-        Stream<ProposedResults> resultStream = makeCandidateStream(targetComboCount);
+        try (StreamNeedClose<ProposedResults> resultStream = makeCandidateStream(targetComboCount)) {
+            OutputText.println("RUNNING");
 
-        OutputText.println("RUNNING");
-        Collection<ProposedResults> collection = resultStream.collect(new TopCollectorN<>(select, s -> multiRating(s.resultJobs, specs)));
-        collection = proposedFinal(collection);
-        specs.forEach(spec -> {
-            OutputText.println("SPEC USED + " + spec.label);
-            spec.reportExtrasUsed();
-        });
-        return collection;
+            Collection<ProposedResults> collection = resultStream.collect(new TopCollectorN<>(select, s -> multiRating(s.resultJobs, specs)));
+            collection = proposedFinal(collection);
+            specs.forEach(spec -> {
+                OutputText.println("SPEC USED + " + spec.label);
+                spec.reportExtrasUsed();
+            });
+            return collection;
+        }
     }
 
     public void solve(long targetComboCount) {
-        Stream<ProposedResults> resultStream = makeCandidateStream(targetComboCount);
+        try (StreamNeedClose<ProposedResults> resultStream = makeCandidateStream(targetComboCount)) {
+            OutputText.println("RUNNING");
 
-        OutputText.println("RUNNING");
-        Optional<ProposedResults> best = resultStream.collect(new TopCollectorReporting<>(
-                s -> multiRating(s.resultJobs, specs),
-                s -> reportBetter(s.resultJobs, specs)));
+            Optional<ProposedResults> best = resultStream.collect(new TopCollectorReporting<>(
+                    s -> multiRating(s.resultJobs, specs),
+                    s -> reportBetter(s.resultJobs, specs)));
 
-        OutputText.println("PREPARING RESULTS");
-        outputResultFinal(best, specs);
+            OutputText.println("PREPARING RESULTS");
+            outputResultFinal(best, specs);
+        }
     }
 
     public void suggestCulls(long targetComboCount) {
-        Stream<ProposedResults> resultStream = makeCandidateStream(targetComboCount);
+        try (StreamNeedClose<ProposedResults> resultStream = makeCandidateStream(targetComboCount)) {
+            OutputText.println("RUNNING");
 
-        OutputText.println("RUNNING");
-        Collection<ProposedResults> bestList = resultStream.collect(new TopCollectorN<>(
-                256,
-                s -> multiRating(s.resultJobs, specs)
-                ));
+            Collection<ProposedResults> bestList = resultStream.collect(new TopCollectorN<>(
+                    256,
+                    s -> multiRating(s.resultJobs, specs)
+            ));
 
-        OutputText.println("PREPARING RESULTS");
-        outputResultForCull(bestList, specs);
+            OutputText.println("PREPARING RESULTS");
+            outputResultForCull(bestList, specs);
+        }
     }
 
     private Stream<Map<ItemRef, FullItemData>> equippedAsCommonOptionsStream(Map<ItemRef, List<FullItemData>> commonMap) {
@@ -324,7 +334,7 @@ public class FindMultiSpec {
     private ProposedResults subSolveEach(Map<ItemRef, FullItemData> commonChoices, List<SpecDetails> specList) {
         List<JobOutput> results = new ArrayList<>();
         for (SpecDetails spec : specList) {
-            JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonChoices, false);
+            JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonChoices);
             if (job.resultSet.isEmpty()) {
                 return null;
             }
@@ -333,10 +343,10 @@ public class FindMultiSpec {
         return new ProposedResults(UUID.randomUUID(), results, commonChoices);
     }
 
-    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap, boolean isFinal) {
+    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap) {
         EquipOptionsMap submitMap = buildJobWithSpecifiedItemsFixed(chosenMap, fullItemMap.shallowClone());
 
-        JobInput job = new JobInput(isFinal ? Final : SubSolveItem, individualRunSizeMultiply, phasedAcceptable);
+        JobInput job = new JobInput(SubSolveItem, individualRunSizeMultiply, phasedAcceptable);
 //        job.printRecorder.outputImmediate = true;
         job.model = model;
         job.setItemOptions(submitMap);
@@ -650,9 +660,9 @@ public class FindMultiSpec {
                 OutputText.printf("-------------- %s --------------\n", spec.label);
 
                 int finalI = i;
-                bestList.forEach(proposed -> {
-                    spec.recordSolutionSeen(proposed.resultJobs.get(finalI).getFinalResultSet().orElseThrow());
-                });
+                bestList.forEach(proposed ->
+                    spec.recordSolutionSeen(proposed.resultJobs.get(finalI).getFinalResultSet().orElseThrow())
+                );
 
                 spec.reportExtrasUsed();
             }
@@ -849,15 +859,27 @@ public class FindMultiSpec {
                     .toArray(FullItemData[]::new);
 
             if (otherCopies.length > 0) {
-                SlotEquip[] slotOptions = otherCopies[0].slot().toSlotEquipOptions();
-                for (SlotEquip slot : slotOptions) {
-                    FullItemData[] existing = itemOptions.get(slot);
-                    itemOptions.put(slot, ArrayUtil.concat(existing, otherCopies));
-                    reportNewSlotOptions(slot);
-                }
+                addToSlot(otherCopies);
                 return true;
+            } else {
+                Optional<FullItemData> baseItem = loadItems(bagsGear, model.enchants(), PrintRecorder.swallow()).stream()
+                        .filter(item -> item.itemId() == itemId)
+                        .findAny();
+                if (baseItem.isPresent()) {
+                    loadAndGenerate(baseItem.get());
+                    return true;
+                }
             }
             return false;
+        }
+
+        private void addToSlot(FullItemData[] otherCopies) {
+            SlotEquip[] slotOptions = otherCopies[0].slot().toSlotEquipOptions();
+            for (SlotEquip slot : slotOptions) {
+                FullItemData[] existing = itemOptions.get(slot);
+                itemOptions.put(slot, ArrayUtil.concatNullSafe(existing, otherCopies));
+                reportNewSlotOptions(slot);
+            }
         }
 
         private void loadAndGenerate(int itemId) {
@@ -865,21 +887,19 @@ public class FindMultiSpec {
             if (extraItem.isUpgradable() && extraItemsUpgradeLevel > 0)
                 extraItem = ItemLoadUtil.loadItemBasic(itemId, extraItemsUpgradeLevel, PrintRecorder.withAutoOutput());
 
-            if (overrideEnchant.containsKey(itemId)) {
-                Tuple.Tuple3<StatBlock, List<GemInfo>, Integer> info = overrideEnchant.get(itemId);
+            loadAndGenerate(extraItem);
+        }
+
+        private void loadAndGenerate(FullItemData extraItem) {
+            if (overrideEnchant.containsKey(extraItem.itemId())) {
+                Tuple.Tuple3<StatBlock, List<GemInfo>, Integer> info = overrideEnchant.get(extraItem.itemId());
                 extraItem = extraItem.changeEnchant(info.a(), info.b(), info.c());
             } else {
                 extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true, false);
             }
 
             List<FullItemData> extraForged = Reforger.reforgeItem(model.reforgeRules(), extraItem);
-
-            SlotEquip[] slotOptions = extraItem.slot().toSlotEquipOptions();
-            for (SlotEquip slot : slotOptions) {
-                FullItemData[] existing = itemOptions.get(slot);
-                itemOptions.put(slot, ArrayUtil.concatNullSafe(existing, extraForged));
-                reportNewSlotOptions(slot);
-            }
+            addToSlot(extraForged.toArray(FullItemData[]::new));
         }
 
         private void reportNewSlotOptions(SlotEquip slot) {

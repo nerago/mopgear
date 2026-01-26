@@ -4,8 +4,6 @@ import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 public class StatRatingsPriorityBreaksMultiple extends StatRatings {
     public static final int STEP = 4;

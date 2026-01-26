@@ -1,6 +1,7 @@
 package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.util.StreamNeedClose;
 
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
@@ -92,7 +93,7 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
     }
 
     @Override
-    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> setStream) {
+    public StreamNeedClose<SolvableItemSet> filterSets(StreamNeedClose<SolvableItemSet> setStream) {
         return setStream.filter(set -> {
             StatBlock stats = set.totalForCaps();
             int hit = stats.hit(), expertise = stats.expertise();
@@ -110,7 +111,7 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
     }
 
     @Override
-    public Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> setStream) {
+    public StreamNeedClose<SkinnyItemSet> filterSetsSkinny(StreamNeedClose<SkinnyItemSet> setStream) {
         return setStream.filter(set -> hitMin <= set.totalOne() && set.totalOne() <= hitMax
                 && expertiseMin <= set.totalTwo() && set.totalTwo() <= expertiseMax);
     }

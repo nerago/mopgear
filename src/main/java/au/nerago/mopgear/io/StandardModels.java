@@ -1,6 +1,5 @@
 package au.nerago.mopgear.io;
 
-import au.nerago.mopgear.domain.SocketType;
 import au.nerago.mopgear.domain.SpecType;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
@@ -9,10 +8,8 @@ import au.nerago.mopgear.model.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.EnumMap;
 
 import static au.nerago.mopgear.domain.StatType.*;
-import static au.nerago.mopgear.domain.StatType.Crit;
 
 public class StandardModels {
     public static ModelCombined modelFor(SpecType spec) {

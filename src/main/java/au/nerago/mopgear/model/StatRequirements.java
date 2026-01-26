@@ -1,6 +1,7 @@
 package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.util.StreamNeedClose;
 
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
@@ -8,11 +9,11 @@ import java.util.stream.Stream;
 public interface StatRequirements {
     boolean filterOneSet(SolvableItemSet set);
 
-    Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream);
+    StreamNeedClose<SolvableItemSet> filterSets(StreamNeedClose<SolvableItemSet> stream);
 
     Stream<SolvableItemSet> filterSetsMax(Stream<SolvableItemSet> stream);
 
-    Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> stream);
+    StreamNeedClose<SkinnyItemSet> filterSetsSkinny(StreamNeedClose<SkinnyItemSet> stream);
 
     Stream<SkinnyItemSet> filterSetsMaxSkinny(Stream<SkinnyItemSet> stream);
 

@@ -1,6 +1,7 @@
 package au.nerago.mopgear.model;
 
 import au.nerago.mopgear.domain.*;
+import au.nerago.mopgear.util.StreamNeedClose;
 
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
@@ -20,7 +21,7 @@ public class StatRequirementsCombined implements StatRequirements {
     }
 
     @Override
-    public Stream<SolvableItemSet> filterSets(Stream<SolvableItemSet> stream) {
+    public StreamNeedClose<SolvableItemSet> filterSets(StreamNeedClose<SolvableItemSet> stream) {
         return b.filterSets(a.filterSets(stream));
     }
 
@@ -30,7 +31,7 @@ public class StatRequirementsCombined implements StatRequirements {
     }
 
     @Override
-    public Stream<SkinnyItemSet> filterSetsSkinny(Stream<SkinnyItemSet> stream) {
+    public StreamNeedClose<SkinnyItemSet> filterSetsSkinny(StreamNeedClose<SkinnyItemSet> stream) {
         return b.filterSetsSkinny(a.filterSetsSkinny(stream));
     }
 

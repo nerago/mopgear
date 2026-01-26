@@ -1,9 +1,7 @@
 package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.model.SetBonus;
 import au.nerago.mopgear.results.OutputText;
-import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -16,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -155,20 +152,14 @@ public class WowSimDB {
     }
 
     private static ArmorType convertArmorType(int armorType) {
-        switch (armorType) {
-            case -1:
-                return ArmorType.NotApplicable;
-            case 1:
-                return ArmorType.Cloth;
-            case 2:
-                return ArmorType.Leather;
-            case 3:
-                return ArmorType.Mail;
-            case 4:
-                return ArmorType.Plate;
-            default:
-                throw new RuntimeException("unexpected armor type " + armorType);
-        }
+        return switch (armorType) {
+            case -1 -> ArmorType.NotApplicable;
+            case 1 -> ArmorType.Cloth;
+            case 2 -> ArmorType.Leather;
+            case 3 -> ArmorType.Mail;
+            case 4 -> ArmorType.Plate;
+            default -> throw new RuntimeException("unexpected armor type " + armorType);
+        };
     }
 
     private static StatBlock convertBlock(JsonArray array) {

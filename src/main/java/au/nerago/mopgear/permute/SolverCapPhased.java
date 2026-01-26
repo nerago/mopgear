@@ -5,7 +5,6 @@ import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirements;
 import au.nerago.mopgear.results.PrintRecorder;
 import au.nerago.mopgear.util.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -45,7 +44,7 @@ public class SolverCapPhased {
     }
 
     public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter, boolean indexed, boolean topOnly, Integer generateComboCount, Integer topCombosFilterCount, Instant startTime) {
-        Stream<SkinnyItemSet> skinnyCombos = makeSkinnyCombos(parallel, indexed, generateComboCount, startTime);
+        StreamNeedClose<SkinnyItemSet> skinnyCombos = makeSkinnyCombos(parallel, indexed, generateComboCount, startTime);
 
         if (topOnly) {
             skinnyCombos = filterBestCapsOnly(skinnyCombos, topCombosFilterCount);
@@ -53,8 +52,8 @@ public class SolverCapPhased {
             printRecorder.println("SKINNY COMBOS ALL");
         }
 
-        Stream<SolvableItemSet> partialSets = skinnyCombos.map(this::makeFromSkinny);
-        Stream<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
+        StreamNeedClose<SolvableItemSet> partialSets = skinnyCombos.map(this::makeFromSkinny);
+        StreamNeedClose<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
         if (specialFilter != null)
             finalSets = finalSets.filter(specialFilter);
         if (parallel)
@@ -62,31 +61,30 @@ public class SolverCapPhased {
         return finalSets.collect(new TopCollector1<>(model::calcRating));
     }
 
-    private Stream<SkinnyItemSet> makeSkinnyCombos(boolean parallel, boolean indexed, Integer generateComboCount, Instant startTime) {
-        Stream<SkinnyItemSet> initialSets;
+    private StreamNeedClose<SkinnyItemSet> makeSkinnyCombos(boolean parallel, boolean indexed, Integer generateComboCount, Instant startTime) {
+        StreamNeedClose<SkinnyItemSet> initialSets;
         if (indexed) {
             BigInteger targetCombos = BigInteger.valueOf(generateComboCount);
-            initialSets = generateSkinnyComboStreamIndexed(parallel, targetCombos);
-            initialSets = BigStreamUtil.countProgress(generateComboCount, startTime, initialSets);
+            Stream<SkinnyItemSet> generatedSets = generateSkinnyComboStreamIndexed(parallel, targetCombos);
+            initialSets = BigStreamUtil.countProgress(generateComboCount, startTime, generatedSets);
         } else {
-            initialSets = generateSkinnyComboStreamFull(parallel);
-            initialSets = BigStreamUtil.countProgress(estimate.doubleValue(), startTime, initialSets);
+            Stream<SkinnyItemSet> generatedSets = generateSkinnyComboStreamFull(parallel);
+            initialSets = BigStreamUtil.countProgress(estimate.doubleValue(), startTime, generatedSets);
         }
 
         return requirements.filterSetsSkinny(initialSets);
     }
 
-    private @NotNull Stream<SkinnyItemSet> filterBestCapsOnly(Stream<SkinnyItemSet> filteredSets, int topCombosFilterCount) {
+    private StreamNeedClose<SkinnyItemSet> filterBestCapsOnly(StreamNeedClose<SkinnyItemSet> filteredSets, int topCombosFilterCount) {
         printRecorder.printf("SKINNY COMBOS BEST %,d\n", topCombosFilterCount);
         ToLongFunction<SkinnyItemSet> ratingFunc = requirements.skinnyRatingMinimiseFunc();
 
         // try a Top Collector (with good merging), re-stream combo
-        filteredSets = filteredSets.collect(new BottomCollectorN<>(topCombosFilterCount, ratingFunc))
-                .parallelStream();
+        Collection<SkinnyItemSet> bottomCollection = filteredSets.collect(new BottomCollectorN<>(topCombosFilterCount, ratingFunc));
 
         // TODO minimise hit only?
         // TODO multiple sets with equal combohit may be lost
-        return filteredSets;
+        return new StreamNeedClose<>(bottomCollection.parallelStream());
     }
 
     private SolvableItemSet makeFromSkinny(SkinnyItemSet skinnySet) {
@@ -153,6 +151,7 @@ public class SolverCapPhased {
         printRecorder.println("generateSkinnyComboStream skip=" + skip + " trying " + estimate.divide(skip));
         Stream<BigInteger> numberStream = generateDumbStream(estimate, skip);
         if (parallel)
+            //noinspection DataFlowIssue
             numberStream = numberStream.parallel();
         return numberStream.map(this::makeSkinnyFromIndex);
     }

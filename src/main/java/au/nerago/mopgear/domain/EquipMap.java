@@ -1,6 +1,5 @@
 package au.nerago.mopgear.domain;
 
-import au.nerago.mopgear.model.IEquipMap;
 import au.nerago.mopgear.util.Tuple;
 
 import java.util.Objects;
