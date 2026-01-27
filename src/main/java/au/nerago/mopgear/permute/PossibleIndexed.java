@@ -2,23 +2,19 @@ package au.nerago.mopgear.permute;
 
 import au.nerago.mopgear.domain.FullItemData;
 import au.nerago.mopgear.domain.ItemRef;
+import au.nerago.mopgear.util.BigStreamUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class PossibleIndexed {
     public static Stream<Map<ItemRef, FullItemData>> runSolverPartial(Map<ItemRef, List<FullItemData>> itemMap, long count, long skip) {
-        Stream<Long> dumbStream = generateDumbStream(count, skip);
+        LongStream dumbStream = BigStreamUtil.generateDumbStream(count, skip);
         return dumbStream.parallel()
-                .map(idx -> makeSet(itemMap, idx));
-    }
-
-    private static Stream<Long> generateDumbStream(long count, long skip) {
-        long start = ThreadLocalRandom.current().nextLong(skip);
-        return Stream.iterate(start, x -> x < count, x -> x + skip);
+                .mapToObj(idx -> makeSet(itemMap, idx));
     }
 
     private static Map<ItemRef, FullItemData> makeSet(Map<ItemRef, List<FullItemData>> items, long mainIndex) {

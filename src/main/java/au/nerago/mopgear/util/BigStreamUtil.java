@@ -2,18 +2,19 @@ package au.nerago.mopgear.util;
 
 import au.nerago.mopgear.domain.SkinnyItem;
 import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
-import java.util.stream.Gatherer;
-import java.util.stream.Stream;
+import java.util.stream.*;
 
 public class BigStreamUtil {
     private static final long TIME_RATE = 5000;
@@ -30,7 +31,7 @@ public class BigStreamUtil {
 
     private static class ProgressTask<T> extends TimerTask {
 //        private final ThreadCounters counters = new ThreadCounters();
-//        private final GathererPeekAndCount<T> gatherCount = new GathererPeekAndCount<>();
+        private final GathererPeekAndCount<T> gatherCount = new GathererPeekAndCount<>();
         private final AtomicLong atomicCount = new AtomicLong();
         private final double percentMultiply;
         private final Instant startTime;
@@ -51,11 +52,19 @@ public class BigStreamUtil {
         public Stream<T> monitorStream(Stream<T> inputStream) {
             // TODO some kinda accumulate op passing state?
 
+            Gatherer.Integrator<Void, T, T> integrator = (_, element, downstream) -> downstream.push(element);
+            Gatherer<T, Void, T> gather2 = Gatherer.of(integrator);
+
+//            Gatherers.fold()
+
             return inputStream
-//                    .peek(_ -> counters.incrementAndGet())
-                      .peek(_ -> atomicCount.incrementAndGet())
-//                    .gather(gatherCount)
+////                    .peek(_ -> counters.incrementAndGet())
+////                      .peek(_ -> atomicCount.incrementAndGet())
+////                    .gather(gatherCount)
+//                    .gather(gather2)
                     .onClose(this::cancel);
+
+//            return inputStream;
         }
 
         private static class GathererPeekAndCount<T> implements Gatherer<T, GathererPeekAndCount.CountState, T>, Gatherer.Integrator.Greedy<GathererPeekAndCount.CountState, T, T> {
@@ -68,11 +77,13 @@ public class BigStreamUtil {
 
             @Override
             public Supplier<CountState> initializer() {
-                return () -> {
-                    CountState counter = new CountState();
-                    stateInstances.add(counter);
-                    return counter;
-                };
+                return this::initState;
+            }
+
+            private @NotNull CountState initState() {
+                CountState counter = new CountState();
+                stateInstances.add(counter);
+                return counter;
             }
 
             @Override
@@ -88,11 +99,13 @@ public class BigStreamUtil {
 
             @Override
             public BinaryOperator<CountState> combiner() {
-                return (a, b) -> {
-                    a.processedCount += b.processedCount;
-                    stateInstances.remove(b);
-                    return a;
-                };
+                return this::combineState;
+            }
+
+            private @NotNull CountState combineState(CountState a, CountState b) {
+                a.processedCount += b.processedCount;
+                stateInstances.remove(b);
+                return a;
             }
 
             @Override
@@ -162,5 +175,17 @@ public class BigStreamUtil {
         } else {
             throw new RuntimeException("unable to determine item combination estimate");
         }
+    }
+
+    public static Stream<BigInteger> generateDumbStream(BigInteger max, BigInteger skip) {
+        long start = ThreadLocalRandom.current().nextLong(0, skip.longValueExact());
+//        return Stream.iterate(BigInteger.valueOf(start), x -> x.compareTo(max) < 0, x -> x.add(skip));
+        return StreamSupport.stream(new SpliteratorIterateBigInteger(BigInteger.valueOf(start), max, skip), true);
+    }
+
+    public static LongStream generateDumbStream(long max, long skip) {
+        long start = ThreadLocalRandom.current().nextLong(0, skip);
+//        return Stream.iterate(start, x -> x < max, x -> x + skip);
+        return StreamSupport.longStream(new SpliteratorIterateLong(start, max, skip), true);
     }
 }

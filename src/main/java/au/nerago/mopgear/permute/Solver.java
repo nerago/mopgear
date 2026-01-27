@@ -93,7 +93,7 @@ public class Solver {
             case PhasedIndexedTop -> {
                 assert phased != null;
                 int targetCombos = Math.toIntExact(PHASED_COMBOS_GENERATE * runSizeMultiply);
-                int topCombos = Math.toIntExact(TOP_HIT_COMBO_FILTER * runSizeMultiply);
+                int topCombos = Math.toIntExact(TOP_HIT_COMBO_FILTER * job.runSizeAdditionalMultiply);
                 job.printf("SOLVE phased top only %d -> %d\n", targetCombos, topCombos);
                 output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, true, true, targetCombos, topCombos, startTime);
             }

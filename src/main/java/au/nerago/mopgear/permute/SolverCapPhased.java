@@ -9,7 +9,6 @@ import au.nerago.mopgear.util.*;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
@@ -149,7 +148,7 @@ public class SolverCapPhased {
             skip = Primes.roundToPrime(estimate.divide(targetCombos));
         }
         printRecorder.println("generateSkinnyComboStream skip=" + skip + " trying " + estimate.divide(skip));
-        Stream<BigInteger> numberStream = generateDumbStream(estimate, skip);
+        Stream<BigInteger> numberStream = BigStreamUtil.generateDumbStream(estimate, skip);
         if (parallel)
             //noinspection DataFlowIssue
             numberStream = numberStream.parallel();
@@ -171,11 +170,6 @@ public class SolverCapPhased {
             initialSets[i] = SkinnyItemSet.single(item);
         }
         return parallel ? ArrayUtil.arrayStream(initialSets) : Arrays.stream(initialSets);
-    }
-
-    private static Stream<BigInteger> generateDumbStream(BigInteger max, BigInteger skip) {
-        long start = ThreadLocalRandom.current().nextLong(skip.longValueExact());
-        return Stream.iterate(BigInteger.valueOf(start), x -> x.compareTo(max) < 0, x -> x.add(skip));
     }
 
     private SkinnyItemSet makeSkinnyFromIndex(BigInteger mainIndex) {

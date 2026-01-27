@@ -65,14 +65,14 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-        paladinMultiSpecSolve();
+//        paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        variableRatingProt(startTime);
 //        runPrebuiltSimFiles();
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -197,11 +197,11 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-//        ModelCombined model = StandardModels.pallyProtDpsModel();
-//        Path file = DataLocation.gearProtDpsFile;
+        ModelCombined model = StandardModels.pallyProtDpsModel();
+        Path file = DataLocation.gearProtDpsFile;
 
-        ModelCombined model = StandardModels.pallyProtMitigationModel();
-        Path file = DataLocation.gearProtDefenceFile;
+//        ModelCombined model = StandardModels.pallyProtMitigationModel();
+//        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -528,22 +528,22 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 24/01/2026
-        map.put(95205, List.of(new ReforgeRecipe(Mastery, Haste))); // Neck Necklace of the Terra-Cotta Vanquisher
+        // 27/01/2026
+        map.put(95205, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Necklace of the Terra-Cotta Vanquisher
         map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
-        map.put(85343, List.of(new ReforgeRecipe(null, null))); // Chest White Tiger Battleplate
+        map.put(85343, List.of(new ReforgeRecipe(Crit, Hit))); // Chest White Tiger Battleplate
         map.put(96182, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Ultimate Protection of the Emperor
-        map.put(95535, List.of(new ReforgeRecipe(Haste, Hit))); // Leg Legplates of the Lightning Throne
-        map.put(94773, List.of(new ReforgeRecipe(Haste, Expertise))); // Shoulder Shoulderguards of Centripetal Destruction
-        map.put(95140, List.of(new ReforgeRecipe(Crit, Expertise))); // Ring Band of the Shado-Pan Assault
-        map.put(87100, List.of(new ReforgeRecipe(Expertise, Haste))); // Hand White Tiger Gauntlets
-        map.put(94519, List.of(new ReforgeRecipe(Crit, Hit))); // Trinket Primordius' Talisman of Rage
-        map.put(87024, List.of(new ReforgeRecipe(null, null))); // Head Nullification Greathelm
+        map.put(95535, List.of(new ReforgeRecipe(null, null))); // Leg Legplates of the Lightning Throne
+        map.put(95140, List.of(new ReforgeRecipe(Haste, Expertise))); // Ring Band of the Shado-Pan Assault
+        map.put(94773, List.of(new ReforgeRecipe(null, null))); // Shoulder Shoulderguards of Centripetal Destruction
+        map.put(87100, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets
+        map.put(94519, List.of(new ReforgeRecipe(Crit, Haste))); // Trinket Primordius' Talisman of Rage
+        map.put(87024, List.of(new ReforgeRecipe(Haste, Expertise))); // Head Nullification Greathelm
+        map.put(95513, List.of(new ReforgeRecipe(Hit, Expertise))); // Ring Band of the Scaled Tyrant
+        map.put(94726, List.of(new ReforgeRecipe(Mastery, Hit))); // Belt Cloudbreaker Greatbelt
         map.put(94820, List.of(new ReforgeRecipe(Crit, Haste))); // Wrist Caustic Spike Bracers
-        map.put(86957, List.of(new ReforgeRecipe(null, null))); // Ring Ring of the Bladed Tempest
         map.put(94942, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Hydra-Scale Bloodcloak
-        map.put(86955, List.of(new ReforgeRecipe(Mastery, Expertise))); // Belt Waistplate of Overwhelming Assault
-        map.put(96376, List.of(new ReforgeRecipe(Expertise, Haste))); // Weapon1H Worldbreaker's Stormscythe
+        map.put(96376, List.of(new ReforgeRecipe(null, null))); // Weapon1H Worldbreaker's Stormscythe
         return map;
     }
 

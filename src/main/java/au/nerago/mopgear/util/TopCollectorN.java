@@ -39,47 +39,57 @@ public class TopCollectorN<T> implements Collector<T, TopCollectorN.State<T>, Co
     }
 
     public static class State<T> {
-        private final int size;
+        private final int maxSize;
         private final ToLongFunction<T> getValue;
         private final TreeSet<T> sortedSet;
         private boolean isFull;
         private double worstValue;
 
-        public State(int size, ToLongFunction<T> getValue) {
-            this.size = size;
+        public State(int maxSize, ToLongFunction<T> getValue) {
+            this.maxSize = maxSize;
             this.getValue = getValue;
             this.sortedSet = new TreeSet<>(Comparator.comparingLong(getValue));
         }
 
         public void add(T add) {
-            double addValue = getValue.applyAsLong(add);
+            if (!isFull) {
+                sortedSet.add(add);
+                if (sortedSet.size() >= maxSize) {
+                    isFull = true;
+                    worstValue = getValue.applyAsLong(sortedSet.getFirst());
+                }
+                System.out.println("TopCollector " + sortedSet.size() + " / " + maxSize);
+                return;
+            }
 
-            if (worstValue == 0.0) {
-                sortedSet.add(add);
-                worstValue = addValue;
-            } else if (!isFull) {
-                sortedSet.add(add);
-                worstValue = getValue.applyAsLong(sortedSet.getFirst());
-                isFull = sortedSet.size() == size;
-            } else if (addValue > worstValue) {
+            double addValue = getValue.applyAsLong(add);
+            if (addValue > worstValue) {
                 sortedSet.add(add);
                 trim();
+                worstValue = getValue.applyAsLong(sortedSet.getFirst());
             }
         }
 
         public State<T> combine(State<T> other) {
             sortedSet.addAll(other.sortedSet);
-            trim();
+
+            int setSize = sortedSet.size();
+            if (setSize >= maxSize) {
+                isFull = true;
+                trim();
+                worstValue = getValue.applyAsLong(sortedSet.getFirst());
+            } else if (setSize > 0) {
+                isFull = false;
+                worstValue = getValue.applyAsLong(sortedSet.getFirst());
+            } else {
+                isFull = false;
+            }
             return this;
         }
 
         private void trim() {
-            if (sortedSet.size() > size) {
-                do {
-                    sortedSet.removeFirst();
-                } while (sortedSet.size() > size);
-                worstValue = getValue.applyAsLong(sortedSet.getFirst());
-                isFull = true;
+            while (sortedSet.size() > maxSize) {
+                sortedSet.removeFirst();
             }
         }
 

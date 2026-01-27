@@ -32,13 +32,13 @@ public class StreamNeedClose<T> implements AutoCloseable {
 
     public <R, A> R collect(Collector<? super T, A, R> collector) {
         R result = stream.collect(collector);
-        stream.close();
+//        stream.close();
         return result;
     }
 
     public Optional<T> max(Comparator<? super T> comparator) {
         Optional<T> result = stream.max(comparator);
-        stream.close();
+//        stream.close();
         return result;
     }
 

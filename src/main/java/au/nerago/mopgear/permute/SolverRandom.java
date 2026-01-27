@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"SameParameterValue"})
@@ -31,9 +32,9 @@ public class SolverRandom {
     }
 
     public static StreamNeedClose<SolvableItemSet> runSolverPartial(ModelCombined model, SolvableEquipOptionsMap items, StatBlock adjustment, Instant startTime, long count) {
-        Stream<Long> dumbStream = generateDumbStream(count);
+        LongStream dumbStream = BigStreamUtil.generateDumbStream(count, 1);
         Stream<SolvableItemSet> setStream = dumbStream.parallel()
-                                              .map(x -> makeSet(items, adjustment));
+                                              .mapToObj(x -> makeSet(items, adjustment));
         StreamNeedClose<SolvableItemSet> countedStream = BigStreamUtil.countProgress(count, startTime, setStream);
         return model.filterSets(countedStream, true);
     }
@@ -65,9 +66,5 @@ public class SolverRandom {
             }
         }
         return SolvableItemSet.manyItems(chosen, adjustment);
-    }
-
-    private static Stream<Long> generateDumbStream(long count) {
-        return Stream.iterate(0L, x -> x < count, x -> x + 1);
     }
 }
