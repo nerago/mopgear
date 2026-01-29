@@ -58,7 +58,7 @@ public class TopCollectorN<T> implements Collector<T, TopCollectorN.State<T>, Co
                     isFull = true;
                     worstValue = getValue.applyAsLong(sortedSet.getFirst());
                 }
-                System.out.println("TopCollector " + sortedSet.size() + " / " + maxSize);
+//                System.out.println("TopCollector " + sortedSet.size() + " / " + maxSize);
                 return;
             }
 

@@ -87,4 +87,24 @@ public class SolverIndexed {
         }
         return SolvableItemSet.manyItems(map, adjustment);
     }
+
+    private static SolvableItemSet makeSet(SolvableEquipOptionsMap itemOptions, StatBlock adjustment, BigNum mainIndex) {
+        SolvableEquipMap map = SolvableEquipMap.empty();
+        for (SlotEquip slot : SlotEquip.values()) {
+            SolvableItem[] list = itemOptions.get(slot);
+            if (list != null) {
+                int size = list.length;
+
+                // TODO could cache sizes?
+                BigNum[] divRem = mainIndex.divideAndRemainder(BigNum.valueOf(size));
+
+                int thisIndex = divRem[1].intValueExact();
+                mainIndex = divRem[0];
+
+                SolvableItem choice = list[thisIndex];
+                map.put(slot, choice);
+            }
+        }
+        return SolvableItemSet.manyItems(map, adjustment);
+    }
 }

@@ -65,14 +65,14 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-//        paladinMultiSpecSolve();
+        TaskMulti.paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        variableRatingProt(startTime);
 //        runPrebuiltSimFiles();
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -220,8 +220,7 @@ public class Main {
 //        reforgeProcessPlus(items, model, startTime, null,85340, 2, true, EnchantMode.BothDefaultAndAlternate, null, false);
 //        reforgeProcessPlus(items, model, startTime, null, 86219, false, true, StatBlock.of(Expertise, 170, Primary, -170));
 //        reforgeProcessPlusPlus(items, model, startTime, 85320, 85323, StatBlock.of(Expertise, 320, Primary, -320));
-//          reforgeProcessPlusPlus(items, model, startTime, 95807, 95798, 0, false, null, true);
-//        reforgeProcessPlusPlus(items, model, startTime, 87071, 86681, 2, false, null);
+//          reforgeProcessPlusPlus(items, model, startTime, 87063, 95178, 2, false, null, true);
 
         // adding yang-xi for dps prot
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{
@@ -241,7 +240,6 @@ public class Main {
 //                2, true);
 
 
-//        reforgeProcessPlusPlus(items, model, startTime, 87110, 87100, false, null);
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 //        reforgeProcessPlusMany(items, model, startTime, bagItemsArray(ignoredItems));
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
@@ -315,8 +313,9 @@ public class Main {
                                 89934, // soul bracer
                         94820, // caustic spike bracers
 
-                        // from other processes
-                        86387, // sha weapon
+//                        87063, // vial of dragon's blood
+                        95178, // Lootraptor's Amulet
+                        96468, // talonrender chest
 
                         }, 2, false, null);
 
@@ -383,7 +382,7 @@ public class Main {
 
 //        Difficulty difficulty = Difficulty.Heroic;
 //        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-//                pallyPhase3Valor(),
+////                pallyPhase3Valor(),
 //                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
 //                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
 //                strengthPlateThroneNormal(difficulty),
@@ -391,7 +390,7 @@ public class Main {
 //                strengthDpsTrinketsThroneNormal(difficulty),
 //        });
 //        upgradeShit = minusRadenLoot(upgradeShit);
-//        findUpgrade(items, upgradeShit, model, true, null, 2, 16);
+//        findUpgrade(items, upgradeShit, model, true, null, 2, 60);
     }
 
     private void variableRatingProt(Instant startTime) {

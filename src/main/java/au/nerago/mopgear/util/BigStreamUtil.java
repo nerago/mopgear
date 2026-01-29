@@ -31,7 +31,7 @@ public class BigStreamUtil {
 
     private static class ProgressTask<T> extends TimerTask {
 //        private final ThreadCounters counters = new ThreadCounters();
-        private final GathererPeekAndCount<T> gatherCount = new GathererPeekAndCount<>();
+//        private final GathererPeekAndCount<T> gatherCount = new GathererPeekAndCount<>();
         private final AtomicLong atomicCount = new AtomicLong();
         private final double percentMultiply;
         private final Instant startTime;
@@ -59,7 +59,7 @@ public class BigStreamUtil {
 
             return inputStream
 ////                    .peek(_ -> counters.incrementAndGet())
-////                      .peek(_ -> atomicCount.incrementAndGet())
+                      .peek(_ -> atomicCount.incrementAndGet())
 ////                    .gather(gatherCount)
 //                    .gather(gather2)
                     .onClose(this::cancel);
