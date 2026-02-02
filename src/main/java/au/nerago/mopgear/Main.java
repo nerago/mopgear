@@ -6,6 +6,7 @@ import au.nerago.mopgear.model.*;
 import au.nerago.mopgear.process.FindUpgrades;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.results.PrintRecorder;
+import au.nerago.mopgear.results.UpgradeResultItem;
 import au.nerago.mopgear.util.ArrayUtil;
 
 import java.io.IOException;
@@ -65,14 +66,17 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-        TaskMulti.paladinMultiSpecSolve();
+//        TaskMulti.paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        variableRatingProt(startTime);
 //        runPrebuiltSimFiles();
 
+        allUpgradesProt(startTime);
+
 //        reforgeRet(startTime);
 //            reforgeProt(startTime);
+
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
 //                    reforgeBear(startTime);
@@ -197,11 +201,11 @@ public class Main {
     }
 
     private void reforgeProt(Instant startTime) {
-        ModelCombined model = StandardModels.pallyProtDpsModel();
-        Path file = DataLocation.gearProtDpsFile;
+//        ModelCombined model = StandardModels.pallyProtDpsModel();
+//        Path file = DataLocation.gearProtDpsFile;
 
-//        ModelCombined model = StandardModels.pallyProtMitigationModel();
-//        Path file = DataLocation.gearProtDefenceFile;
+        ModelCombined model = StandardModels.pallyProtMitigationModel();
+        Path file = DataLocation.gearProtDefenceFile;
 
 //        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
         Map<Integer, List<ReforgeRecipe>> commonItems = null;
@@ -245,79 +249,79 @@ public class Main {
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
 
-                reforgeProcessPlusMany(items, model, startTime, new int[]{
-                                86979, // heroic impaling treads
-                                86957, // heroic bladed tempest
-                                85343, // normal ret chest
-
-                                87015, // heroic clawfeet
-                                86979, // heroic impaling treads
-                                87071, // yang-xi heroic
-                                87145, // defiled earth
-                                85340, // normal ret legs
-                                87101, // heroic ret head
-                                86946, // ruby signet heroic
-                                94726, // cloudbreaker belt
-
-                                87026, // heroic peacock cloak
-                                86955, // heroic overwhelm assault belt
-                                95535, // normal lightning legs
-
-                                87050, // steelskin heroic
-                                95768, // greatshield gloaming celestial
-                                95652, // Puncture-Proof Greathelm head
-                                95687, // celestial beakbreaker cloak
-
-                                95142, // striker's battletags
-                                95205, // terra-cotta neck
-                                87036, // soulgrasp heroic
-
-                        95513, // scaled tyrant normal
-
-                        86979, // heroic impaling treads
-                        87024, // null greathelm
-
-                        94726, // cloudbreaker belt
-                        86955, // heroic overwhelm assault belt
-
-                        87026, // heroic peacock cloak
-                        86325, // daybreak
-
-                        95535, // normal lightning legs
-
-                                85340, // ret tier14 legs
-                                87101, // ret tier14 head
-                                85339, // ret tier14 shoulder
-                                85343, // ret tier14 chest
-                                87100, // ret tier14 hands
-
-                                95914, // ret tier15 shoulder celestial
-                                95910, // ret tier15 chest celestial
-                                95911, // ret tier15 gloves celestial
-
-                        95291, // prot tier15 hand normal
-                        95920, // prot tier15 chest celestial (don't have yet)
-                        95292, // prot tier15 head normal
-                        96667, // prot tier15 leg heroic
-                        95924, // prot tier15 shoulder celestial
-
-                        95142, // striker's battletags
-                        95205, // terra-cotta neck
-
-                        96182, // ultimate prot of the emperor thunder
-
-                                94773, // centripetal shoulders normal
-                                95140, // shado assault band
-
-                                87145, // defiled earth
-                                89934, // soul bracer
-                        94820, // caustic spike bracers
-
-//                        87063, // vial of dragon's blood
-                        95178, // Lootraptor's Amulet
-                        96468, // talonrender chest
-
-                        }, 2, false, null);
+//                reforgeProcessPlusMany(items, model, startTime, new int[]{
+//                                86979, // heroic impaling treads
+//                                86957, // heroic bladed tempest
+//                                85343, // normal ret chest
+//
+//                                87015, // heroic clawfeet
+//                                86979, // heroic impaling treads
+//                                87071, // yang-xi heroic
+//                                87145, // defiled earth
+//                                85340, // normal ret legs
+//                                87101, // heroic ret head
+//                                86946, // ruby signet heroic
+//                                94726, // cloudbreaker belt
+//
+//                                87026, // heroic peacock cloak
+//                                86955, // heroic overwhelm assault belt
+//                                95535, // normal lightning legs
+//
+//                                87050, // steelskin heroic
+//                                95768, // greatshield gloaming celestial
+//                                95652, // Puncture-Proof Greathelm head
+//                                95687, // celestial beakbreaker cloak
+//
+//                                95142, // striker's battletags
+//                                95205, // terra-cotta neck
+//                                87036, // soulgrasp heroic
+//
+//                        95513, // scaled tyrant normal
+//
+//                        86979, // heroic impaling treads
+//                        87024, // null greathelm
+//
+//                        94726, // cloudbreaker belt
+//                        86955, // heroic overwhelm assault belt
+//
+//                        87026, // heroic peacock cloak
+//                        86325, // daybreak
+//
+//                        95535, // normal lightning legs
+//
+//                                85340, // ret tier14 legs
+//                                87101, // ret tier14 head
+//                                85339, // ret tier14 shoulder
+//                                85343, // ret tier14 chest
+//                                87100, // ret tier14 hands
+//
+//                                95914, // ret tier15 shoulder celestial
+//                                95910, // ret tier15 chest celestial
+//                                95911, // ret tier15 gloves celestial
+//
+//                        95291, // prot tier15 hand normal
+//                        95920, // prot tier15 chest celestial (don't have yet)
+//                        95292, // prot tier15 head normal
+//                        96667, // prot tier15 leg heroic
+//                        95924, // prot tier15 shoulder celestial
+//
+//                        95142, // striker's battletags
+//                        95205, // terra-cotta neck
+//
+//                        96182, // ultimate prot of the emperor thunder
+//
+//                                94773, // centripetal shoulders normal
+//                                95140, // shado assault band
+//
+//                                87145, // defiled earth
+//                                89934, // soul bracer
+//                        94820, // caustic spike bracers
+//
+////                        87063, // vial of dragon's blood
+//                        95178, // Lootraptor's Amulet
+//                        96468, // talonrender chest
+//
+//                        }, 2, false, null);
 
 
 
@@ -380,17 +384,53 @@ public class Main {
 //        findUpgrade(items, SourcesOfItems.strengthPlateCraftedT3(), model, true, null, 0, 8);
 //        findUpgrade(items, SourcesOfItems.strengthPlateThroneNormalBoss(Difficulty.Heroic, 701), model, true, null, 2, 8);
 
-//        Difficulty difficulty = Difficulty.Heroic;
-//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-////                pallyPhase3Valor(),
+        Difficulty difficulty = Difficulty.Heroic;
+        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+                pallyPhase3Valor(),
 //                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
 //                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
 //                strengthPlateThroneNormal(difficulty),
 //                tankTrinketsThroneNormal(difficulty),
 //                strengthDpsTrinketsThroneNormal(difficulty),
-//        });
-//        upgradeShit = minusRadenLoot(upgradeShit);
-//        findUpgrade(items, upgradeShit, model, true, null, 2, 60);
+        });
+        upgradeShit = minusRadenLoot(upgradeShit);
+        findUpgrade(items, upgradeShit, model, true, null, 2, 25);
+    }
+
+    private void allUpgradesProt(Instant startTime) {
+        ModelCombined modelMitigation = StandardModels.pallyProtMitigationModel();
+        ModelCombined modelDps = StandardModels.pallyProtDpsModel();
+
+        EquipOptionsMap itemsMitigation = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, modelMitigation, null, PrintRecorder.swallow());
+        EquipOptionsMap itemsDps = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, modelDps, null, PrintRecorder.swallow());
+
+        CostedItem[] upgradeNormal = throneProtLootMinusRaden(Difficulty.Normal);
+        CostedItem[] upgradeHeroic = throneProtLootMinusRaden(Difficulty.Heroic);
+
+        int multiply = 25; // 25
+
+        OutputText.println("[[[[[[[[[[[[[[[[[[[[ PALLY PROT DPS normal UPGRADES ]]]]]]]]]]]]]]]]]]]]");
+        List<UpgradeResultItem> outNormalDps = findUpgrade(itemsDps, upgradeNormal, modelDps, false, null, 2, multiply);
+
+        OutputText.switchToNewFile();
+        OutputText.println("[[[[[[[[[[[[[[[[[[[[ PALLY PROT DPS heroic UPGRADES ]]]]]]]]]]]]]]]]]]]]");
+        List<UpgradeResultItem> outHeroicDps = findUpgrade(itemsDps, upgradeHeroic, modelDps, false, null, 2, multiply);
+
+        OutputText.switchToNewFile();
+        OutputText.println("[[[[[[[[[[[[[[[[[[[[ PALLY PROT MITIGATION normal UPGRADES ]]]]]]]]]]]]]]]]]]]]");
+        List<UpgradeResultItem> outNormalMitigation = findUpgrade(itemsMitigation, upgradeNormal, modelMitigation, false, null, 2, multiply);
+
+        OutputText.switchToNewFile();
+        OutputText.println("[[[[[[[[[[[[[[[[[[[[ PALLY PROT MITIGATION heroic UPGRADES ]]]]]]]]]]]]]]]]]]]]");
+        List<UpgradeResultItem> outHeroicMitigation = findUpgrade(itemsMitigation, upgradeHeroic, modelMitigation, false, null, 2, multiply);
+
+        OutputText.switchToNewFile();
+        LinkedHashMap<String, List<UpgradeResultItem>> outputs = new LinkedHashMap<>();
+        outputs.put("NORMAL DPS", outNormalDps);
+        outputs.put("HEROIC DPS", outHeroicDps);
+        outputs.put("NORMAL MITIGATION", outNormalMitigation);
+        outputs.put("HEROIC MITIGATION", outHeroicMitigation);
+        FindUpgrades.reportMultipleRunsByBoss(outputs);
     }
 
     private void variableRatingProt(Instant startTime) {

@@ -13,16 +13,29 @@ import java.time.LocalDateTime;
 public class OutputText {
     private static PrintWriter writer;
 
-    private static Writer currentWriter() throws IOException {
+    private static synchronized Writer currentWriter() throws IOException {
         if (writer == null) {
-            String filename = LocalDateTime.now().toString().replace(':', '-') + ".txt";
-            Path path = DataLocation.resultsDir.resolve(filename);
-            writer = new PrintWriter(Files.newBufferedWriter(path), true);
+            writer = openNewFile();
         }
         return writer;
     }
 
-    public static void finish() {
+    private static PrintWriter openNewFile() throws IOException {
+        String filename = LocalDateTime.now().toString().replace(':', '-') + ".txt";
+        Path path = DataLocation.resultsDir.resolve(filename);
+        return new PrintWriter(Files.newBufferedWriter(path), true);
+    }
+
+    public static synchronized void switchToNewFile() {
+        try {
+            finish();
+            writer = openNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static synchronized void finish() {
         writer.flush();
         writer.close();
     }

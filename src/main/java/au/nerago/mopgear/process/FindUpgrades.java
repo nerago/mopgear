@@ -11,6 +11,7 @@ import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.RankedGroupsCollection;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,11 +46,11 @@ public class FindUpgrades {
         runMain(baseItems, extraItemList, adjustment);
     }
 
-    public void run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment, int upgradeLevel) {
+    public List<UpgradeResultItem> run(EquipOptionsMap baseItems, CostedItem[] extraItemArray, StatBlock adjustment, int upgradeLevel) {
         List<CostedItemData> extraItemList = Arrays.stream(extraItemArray)
                 .map(ci -> new CostedItemData(ItemLoadUtil.loadItemBasic(ci.itemId(), upgradeLevel, printer), ci.cost()))
                 .toList();
-        runMain(baseItems, extraItemList, adjustment);
+        return runMain(baseItems, extraItemList, adjustment);
     }
 
     public void runMaxedItems(EquipOptionsMap baseItems, List<EquippedItem> extraItems, StatBlock adjustment) {
@@ -69,7 +70,7 @@ public class FindUpgrades {
         runMain(baseItems, extraItemList, adjustment);
     }
 
-    public void runMain(EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment) {
+    public List<UpgradeResultItem> runMain(EquipOptionsMap baseItems, List<CostedItemData> extraItemList, StatBlock adjustment) {
         OutputText.println("FINDING BASELINE");
         double baseRating = findBase(baseItems, adjustment);
 
@@ -86,6 +87,8 @@ public class FindUpgrades {
                 .toList();
 
         reportResults(jobList);
+
+        return jobList;
     }
 
     private List<CostedItemData> costsToBossIds(List<CostedItemData> extraItemList) {
@@ -170,14 +173,38 @@ public class FindUpgrades {
         bestCollection.forEach((item, factor) -> reportItem(item));
     }
 
-    private void reportByCost(List<UpgradeResultItem> jobList) {
-        Map<Integer, RankedGroupsCollection<UpgradeResultItem>> grouped = jobList.stream().collect(
+    private static @NotNull Map<Integer, RankedGroupsCollection<UpgradeResultItem>> groupForCost(List<UpgradeResultItem> jobList) {
+        return jobList.stream().collect(
                 Collectors.groupingBy(UpgradeResultItem::cost,
                         RankedGroupsCollection.collector(UpgradeResultItem::factor)));
+    }
+
+    private void reportByCost(List<UpgradeResultItem> jobList) {
+        Map<Integer, RankedGroupsCollection<UpgradeResultItem>> grouped = groupForCost(jobList);
         for (Integer cost : grouped.keySet().stream().sorted(Comparator.naturalOrder()).toList()) {
-            RankedGroupsCollection<UpgradeResultItem> best = grouped.get(cost);
             OutputText.printf("COST %d %s\n", cost, BossLookup.bossNameForBossId(cost));
-            best.forEach((item, factor) -> reportItem(item));
+            RankedGroupsCollection<UpgradeResultItem> best = grouped.get(cost);
+            best.forEachValue(FindUpgrades::reportItem);
+            OutputText.println();
+        }
+    }
+
+    public static void reportMultipleRunsByBoss(LinkedHashMap<String, List<UpgradeResultItem>> outputs) {
+        Map<String, Map<Integer, RankedGroupsCollection<UpgradeResultItem>>> groupedByRunTypeThenBoss =
+                outputs.entrySet()
+                       .stream()
+                       .collect(Collectors.toMap(Map.Entry::getKey, e -> groupForCost(e.getValue())
+        ));
+        Map<Integer, RankedGroupsCollection<UpgradeResultItem>> example = groupedByRunTypeThenBoss.get(outputs.firstEntry().getKey());
+        for (Integer cost : example.keySet().stream().sorted().toList()) {
+            OutputText.printf("<<<< BOSS %d %s >>>>\n", cost, BossLookup.bossNameForBossId(cost));
+            for (String runType : outputs.keySet()) {
+                OutputText.printf("@ %s \n", runType);
+                RankedGroupsCollection<UpgradeResultItem> upgrades = groupedByRunTypeThenBoss.get(runType).get(cost);
+                upgrades.forEachValue(FindUpgrades::reportItem);
+                OutputText.println();
+            }
+            OutputText.println();
             OutputText.println();
         }
     }

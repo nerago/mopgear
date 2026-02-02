@@ -32,8 +32,8 @@ import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 public class Tasks {
     public static final long BILLION = 1000 * 1000 * 1000;
 
-    public static void findUpgrade(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, int upgradeLevel, long multiply) {
-        new FindUpgrades(model, allowHacks).setRunSizeMultiply(multiply).run(baseItems, extraItems, adjustment, upgradeLevel);
+    public static List<UpgradeResultItem> findUpgrade(EquipOptionsMap baseItems, CostedItem[] extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, int upgradeLevel, long multiply) {
+        return new FindUpgrades(model, allowHacks).setRunSizeMultiply(multiply).run(baseItems, extraItems, adjustment, upgradeLevel);
     }
 
     public static void findUpgrade(EquipOptionsMap baseItems, List<EquippedItem> extraItems, ModelCombined model, boolean allowHacks, StatBlock adjustment, long multiply) {

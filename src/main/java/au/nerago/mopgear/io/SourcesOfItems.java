@@ -838,4 +838,14 @@ public class SourcesOfItems {
         Stream<CostedItem> filtered = itemsWithBossId.filter(ci -> ci.cost() == bossId);
         return filtered.toArray(CostedItem[]::new);
     }
+
+    public static CostedItem @NotNull [] throneProtLootMinusRaden(Difficulty difficulty) {
+        return minusRadenLoot(ArrayUtil.concat(new CostedItem[][]{
+                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
+                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
+                strengthPlateThroneNormal(difficulty),
+                tankTrinketsThroneNormal(difficulty),
+                strengthDpsTrinketsThroneNormal(difficulty),
+        }));
+    }
 }
