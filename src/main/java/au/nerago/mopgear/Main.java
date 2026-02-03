@@ -407,7 +407,7 @@ public class Main {
         CostedItem[] upgradeNormal = throneProtLootMinusRaden(Difficulty.Normal);
         CostedItem[] upgradeHeroic = throneProtLootMinusRaden(Difficulty.Heroic);
 
-        int multiply = 25; // 25
+        int multiply = 75; // 25
 
         OutputText.println("[[[[[[[[[[[[[[[[[[[[ PALLY PROT DPS normal UPGRADES ]]]]]]]]]]]]]]]]]]]]");
         List<UpgradeResultItem> outNormalDps = findUpgrade(itemsDps, upgradeNormal, modelDps, false, null, 2, multiply);
