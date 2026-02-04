@@ -90,7 +90,7 @@ public class ItemMapUtil {
             return oldItem;
         }
 
-        FullItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL, PrintRecorder.withAutoOutput());
+        FullItemData loaded = ItemLoadUtil.loadItemBasic(oldItem.itemId(), ItemLevel.MAX_UPGRADE_LEVEL, oldItem.randomSuffix, PrintRecorder.withAutoOutput());
         loaded = Reforger.presetReforge(loaded, oldItem.reforge);
         return loaded.changeEnchant(oldItem.statEnchant, oldItem.gemChoice, oldItem.enchantChoice);
     }

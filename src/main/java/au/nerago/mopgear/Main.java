@@ -55,7 +55,7 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
-//        generateRatingDataFromSims();
+        generateRatingDataFromSims();
 
 //        WowSimDB.discoverSetBonuses();
 //        Tasks.dumpTier2Gear();
@@ -72,7 +72,7 @@ public class Main {
 //        variableRatingProt(startTime);
 //        runPrebuiltSimFiles();
 
-        allUpgradesProt(startTime);
+//        allUpgradesProt(startTime);
 
 //        reforgeRet(startTime);
 //            reforgeProt(startTime);
@@ -404,8 +404,11 @@ public class Main {
         EquipOptionsMap itemsMitigation = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, modelMitigation, null, PrintRecorder.swallow());
         EquipOptionsMap itemsDps = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, modelDps, null, PrintRecorder.swallow());
 
-        CostedItem[] upgradeNormal = throneProtLootMinusRaden(Difficulty.Normal);
-        CostedItem[] upgradeHeroic = throneProtLootMinusRaden(Difficulty.Heroic);
+//        CostedItem[] upgradeNormal = throneProtLootMinusRaden(Difficulty.Normal);
+//        CostedItem[] upgradeHeroic = throneProtLootMinusRaden(Difficulty.Heroic);
+
+        CostedItem[] upgradeNormal = new CostedItem[0];
+        CostedItem[] upgradeHeroic = new CostedItem[] {new CostedItem(96476, 0)};
 
         int multiply = 75; // 25
 

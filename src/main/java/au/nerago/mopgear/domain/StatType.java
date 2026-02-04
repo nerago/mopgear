@@ -10,7 +10,7 @@ public enum StatType {
     Expertise(8),
     Dodge(9),
     Parry(10),
-    Spirit(11);
+    Spirit(4);
 
     public final int simIndex;
 

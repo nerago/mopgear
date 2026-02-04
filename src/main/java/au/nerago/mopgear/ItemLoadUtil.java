@@ -20,6 +20,7 @@ import static au.nerago.mopgear.domain.SocketType.*;
 @SuppressWarnings("unused")
 public class ItemLoadUtil {
     private static final Set<SlotItem> expectedEnchant = buildExpectedEnchant();
+    public static final int RANDOM_SUFFIX_CRIT = -336;
 
     private static Set<SlotItem> buildExpectedEnchant() {
         EnumSet<SlotItem> set = EnumSet.noneOf(SlotItem.class);
@@ -100,7 +101,7 @@ public class ItemLoadUtil {
 
     public static FullItemData loadItem(EquippedItem equippedItem, DefaultEnchants enchants, PrintRecorder printer) {
         int id = equippedItem.itemId(), upgrade = equippedItem.upgradeStep();
-        FullItemData item = loadItemBasic(id, upgrade, printer);
+        FullItemData item = loadItemBasic(id, upgrade, equippedItem.randomSuffix(), printer);
 
         int[] equippedGems = equippedItem.gems();
         @NotNull SocketType[] socketSlots = item.shared.socketSlots();
@@ -117,10 +118,6 @@ public class ItemLoadUtil {
 
             Tuple.Tuple2<StatBlock, List<GemInfo>> gemInfo = GemData.process(equippedGems, equippedItem.enchant(), socketSlots, item.shared.socketBonus(), item.shared.name(), possibleBlacksmith);
             item = item.changeEnchant(gemInfo.a(), gemInfo.b(), equippedItem.enchant());
-        }
-
-        if (id == 94820 && equippedItem.randomSuffix() == -336) {
-            item = item.changeStatsBase(item.statBase.plus(StatBlock.of(StatType.Crit, 907))).withRandomSuffix(equippedItem.randomSuffix());
         }
 
         if (expectedEnchant.contains(item.slot())) {
@@ -174,6 +171,10 @@ public class ItemLoadUtil {
     }
 
     public static FullItemData loadItemBasic(int itemId, int upgradeLevel, PrintRecorder print) {
+        return loadItemBasic(itemId, upgradeLevel, null, print);
+    }
+
+    public static FullItemData loadItemBasic(int itemId, int upgradeLevel, Integer randomSuffix, PrintRecorder print) {
         ItemCache itemCache = ItemCache.instance;
         FullItemData item = itemCache.get(itemId, upgradeLevel);
         if (item == null) {
@@ -209,6 +210,23 @@ public class ItemLoadUtil {
         if (item.slot() == SlotItem.Trinket) {
             item = Trinkets.updateTrinket(item);
         }
+
+
+        /*
+        LFR (ilvl 502) = 712
+        Normal (ilvl522) = 858
+        Normal Thunderforged (ilvl 528) = 907
+        Heroic (ilvl 535) = 968
+        Heroic Thunderforged (ilvl 541) = 1019 (guess based on powers)
+         */
+        if (itemId == 94820 && randomSuffix != null && randomSuffix == RANDOM_SUFFIX_CRIT) {
+            item = item.changeStatsBase(item.statBase.plus(StatBlock.of(StatType.Crit, 907))).withRandomSuffix(randomSuffix);
+        } else if (itemId == 96476) { // Caustic Spike Bracers heroic
+            item = item.changeStatsBase(item.statBase.plus(StatBlock.of(StatType.Crit, 1019))).withRandomSuffix(RANDOM_SUFFIX_CRIT);
+        } else if (randomSuffix != null) {
+            throw new RuntimeException("unknown random suffix");
+        }
+
         return item;
     }
 
