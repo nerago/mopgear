@@ -45,7 +45,7 @@ public class ServiceEntry {
                 Tasks.reforgeProcess(items, model, null);
             }
             case EXTRA_ITEMS -> {
-                Tasks.reforgeProcessPlusMany(items, model, null, params.extraItems, params.upgradeLevel, false, null);
+                Tasks.reforgeProcessPlusMany(items, model, null, params.extraItems, params.upgradeLevel, false, null, false, null);
             }
             case EXTRA_BAGS -> {
                 Path bagsFile = Path.of(params.bagFile);

@@ -29,7 +29,5 @@ public class JobOutput {
 
     public Optional<FullItemSet> getFinalResultSet() {
         return resultSet.map(set -> FullItemSet.ofSolvable(set, ItemMapUtil.mapperToFullItems(input.fullItemOptions)));
-
-
     }
 }

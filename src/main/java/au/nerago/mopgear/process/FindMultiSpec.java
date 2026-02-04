@@ -3,11 +3,10 @@ package au.nerago.mopgear.process;
 import au.nerago.mopgear.ItemLoadUtil;
 import au.nerago.mopgear.ItemMapUtil;
 import au.nerago.mopgear.domain.*;
-import au.nerago.mopgear.io.InputBagsParser;
-import au.nerago.mopgear.io.InputGearParser;
 import au.nerago.mopgear.io.SourcesOfItems;
 import au.nerago.mopgear.model.ModelCombined;
 import au.nerago.mopgear.model.StatRequirementsHitExpertise;
+import au.nerago.mopgear.permute.BasicPermute;
 import au.nerago.mopgear.permute.PossibleIndexed;
 import au.nerago.mopgear.permute.PossibleRandom;
 import au.nerago.mopgear.permute.Solver;
@@ -56,308 +55,287 @@ public class FindMultiSpec {
         this.multiSetFilter = multiSetFilter;
     }
 
-    public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+    public void addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
         SpecDetails spec = new SpecDetails(label, gearFile, model, ratingTargetPercent, phasedAcceptable, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
         specs.add(spec);
-        return spec;
     }
 
     public void suppressSlotCheck(int id) {
         suppressSlotCheck.add(id);
     }
 
-    private @NotNull Map<ItemRef, List<FullItemData>> prepareInitialAndCommons() {
-        OutputText.println("PREPARING SPECS");
-        bagsGear = SourcesOfItems.bagItemsArray(SourcesOfItems.ignoredItems);
-        specs.forEach(s -> s.prepareStartingGear(specs));
-        specs.forEach(s -> s.prepareExtraItems(specs));
-
-        validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
-        OutputText.println();
-
-        OutputText.println("PREPARING BASELINE SPEC RUNS");
-        specs.stream().parallel().forEach(this::baselineOptimal);
-        OutputText.println();
-
-        specs.forEach(s -> s.prepareRatingMultiplier(specs));
-
-        OutputText.println("PREPARING COMMON ITEMS");
-        Map<ItemRef, List<FullItemData>> commonMap = commonInMultiSet(specs);
-        OutputText.println();
-        return commonMap;
-    }
-
-    private StreamNeedClose<Map<ItemRef, FullItemData>> makeCommonStream(long targetComboCount, Map<ItemRef, List<FullItemData>> commonMap) {
-        // TODO keep track of good indexes and search near
-
-        Stream<Map<ItemRef, FullItemData>> commonStream;
-        long estimateRun;
-        BigInteger commonCombosBig = BigStreamUtil.estimateSets(commonMap);
-
-        if (BigStreamUtil.fitsMaxLong(commonCombosBig)) {
-            long commonCombos = commonCombosBig.longValueExact();
-            long skip;
-            if (commonCombos < targetComboCount * 2) {
-                skip = 1;
-            } else {
-                skip = Primes.roundToPrimeInt(commonCombos / targetComboCount * 2);
-            }
-
-            OutputText.println("COMMON COMBOS " + commonCombos + " SKIP SIZE " + skip);
-
-            long indexedOutputSize = commonCombos / skip;
-            Stream<Map<ItemRef, FullItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
-            Stream<Map<ItemRef, FullItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize / 2);
-            commonStream = Stream.concat(commonStream1, commonStream2);
-            estimateRun = indexedOutputSize * 3 / 2;
-        } else {
-            OutputText.println("COMMON COMBOS RANDOM " + targetComboCount);
-            OutputText.println("COMMON COMBOS SHOULD BE LOWER TIMES " + commonCombosBig.divide(BigInteger.valueOf(Long.MAX_VALUE / 2)));
-            commonStream = PossibleRandom.runSolverPartial(commonMap, targetComboCount);
-            estimateRun = targetComboCount;
-        }
-
-        Stream<Map<ItemRef, FullItemData>> baselineStream = baselineAsCommonOptionsStream(commonMap);
-        Stream<Map<ItemRef, FullItemData>> equippedStream = equippedAsCommonOptionsStream(commonMap);
-        commonStream = Stream.concat(commonStream, Stream.concat(baselineStream, equippedStream));
-        return BigStreamUtil.countProgress(estimateRun, Instant.now(), commonStream);
-    }
-
-    private @NotNull StreamNeedClose<ProposedResults> makeCandidateStream(long targetComboCount) {
-        Map<ItemRef, List<FullItemData>> commonMap = prepareInitialAndCommons();
-
-        //noinspection resource
-        StreamNeedClose<Map<ItemRef, FullItemData>> commonStream = makeCommonStream(targetComboCount, commonMap);
-
-        StreamNeedClose<ProposedResults> resultStream = commonStream
-                .map(r -> subSolveEach(r, specs))
-                .filter(Objects::nonNull)
-                .filter(s -> checkGood(s.resultJobs, specs))
-                .unordered()
-                .parallel();
-
-        if (multiSetFilter != null) {
-            resultStream = resultStream.filter(multiSetFilter);
-        }
-        return resultStream;
-    }
-
     public Collection<ProposedResults> solveBestSelection(int targetComboCount, int select) {
-        try (StreamNeedClose<ProposedResults> resultStream = makeCandidateStream(targetComboCount)) {
-            OutputText.println("RUNNING");
-
-            Collection<ProposedResults> collection = resultStream.collect(new TopCollectorN<>(select, s -> multiRating(s.resultJobs, specs)));
-            collection = proposedFinal(collection);
-            specs.forEach(spec -> {
-                OutputText.println("SPEC USED + " + spec.label);
-                spec.reportExtrasUsed();
-            });
-            return collection;
-        }
+        return new BestSelection().solveBestSelection(targetComboCount, select);
     }
 
     public void solve(long targetComboCount) {
-        try (StreamNeedClose<ProposedResults> resultStream = makeCandidateStream(targetComboCount)) {
-            OutputText.println("RUNNING");
-
-            Optional<ProposedResults> best = resultStream.collect(new TopCollectorReporting<>(
-                    s -> multiRating(s.resultJobs, specs),
-                    s -> reportBetter(s.resultJobs, specs)));
-
-            OutputText.println("PREPARING RESULTS");
-            outputResultFinal(best, specs);
-        }
+        new BestSingle().solve(targetComboCount);
     }
 
     public void suggestCulls(long targetComboCount) {
-        try (StreamNeedClose<ProposedResults> resultStream = makeCandidateStream(targetComboCount)) {
-            OutputText.println("RUNNING");
-
-            Collection<ProposedResults> bestList = resultStream.collect(new TopCollectorN<>(
-                    256,
-                    s -> multiRating(s.resultJobs, specs)
-            ));
-
-            OutputText.println("PREPARING RESULTS");
-            outputResultForCull(bestList, specs);
-        }
+        new Culling().suggestCulls(targetComboCount);
     }
 
-    private Stream<Map<ItemRef, FullItemData>> equippedAsCommonOptionsStream(Map<ItemRef, List<FullItemData>> commonMap) {
-        Random rand = new Random();
-        Set<Map<ItemRef, FullItemData>> result = new HashSet<>();
-        for (SpecDetails spec : specs) {
-            for (int attempt = 0; attempt < 50; ++attempt) {
-                HashMap<ItemRef, FullItemData> possible = new HashMap<>();
-                spec.equippedGear.forEachValue(item -> possible.put(item.ref(), item));
-                commonMap.forEach((ref, itemList) -> {
-                    if (!possible.containsKey(ref)) {
-                        FullItemData choice = ArrayUtil.rand(itemList, rand);
-                        possible.put(ref, choice);
-                    }
-                });
-                result.add(possible);
-            }
-        }
-        return result.stream();
-    }
+    private class Prepare {
+        private @NotNull Map<ItemRef, List<FullItemData>> prepareInitialAndCommons() {
+            OutputText.println("PREPARING SPECS");
+            bagsGear = SourcesOfItems.bagItemsArray(SourcesOfItems.ignoredItems);
+            specs.forEach(s -> s.prepareStartingGear(specs));
+            specs.forEach(s -> s.prepareExtraItems(specs));
 
-    private Stream<Map<ItemRef, FullItemData>> baselineAsCommonOptionsStream(Map<ItemRef, List<FullItemData>> commonMap) {
-        Random rand = new Random();
-        Set<Map<ItemRef, FullItemData>> result = new HashSet<>();
-        for (SpecDetails spec : specs) {
-            EquipMap baseSet = spec.optimalBaselineSet.items();
-            for (int attempt = 0; attempt < 50; ++attempt) {
-                HashMap<ItemRef, FullItemData> possible = new HashMap<>();
-                baseSet.forEachValue(item -> possible.put(item.ref(), item));
-                commonMap.forEach((ref, itemList) -> {
-                    if (!possible.containsKey(ref)) {
-                        FullItemData choice = ArrayUtil.rand(itemList, rand);
-                        possible.put(ref, choice);
-                    }
-                });
-                result.add(possible);
-            }
-        }
-        return result.stream();
-    }
+            validateMultiSetAlignItemSlots(specs.stream().map(s -> s.itemOptions).toList());
+            OutputText.println();
 
-    private Map<ItemRef, List<FullItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
-        Map<ItemRef, List<FullItemData>> commonOptions = new HashMap<>();
-        Map<ItemRef, Set<String>> seenIn = new HashMap<>();
-        
-        // initially group items by id/upgrade, filtering common forges for each
-        for (SpecDetails spec : mapArray) {
-            spec.itemOptions.itemStream()
-               .collect(Collectors.groupingBy(FullItemData::ref))
-               .forEach((ref, forges) -> {
-                    seenIn.computeIfAbsent(ref, r -> new HashSet<>()).add(spec.label);
-                    commonOptions.compute(ref, (r, prior) -> commonForges(prior, forges));
-               });
+            OutputText.println("PREPARING BASELINE SPEC RUNS");
+            specs.stream().parallel().forEach(this::baselineOptimal);
+            OutputText.println();
+
+            specs.forEach(s -> s.prepareRatingMultiplier(specs));
+
+            OutputText.println("PREPARING COMMON ITEMS");
+            Map<ItemRef, List<FullItemData>> commonMap = commonInMultiSet(specs);
+            OutputText.println();
+            return commonMap;
         }
 
-        // apply fixed forges run setting. should the input be ref or id based?
-        for (Map.Entry<Integer, ReforgeRecipe> entry : fixedForge.entrySet()) {
-            int id = entry.getKey();
-            for (ItemRef ref : commonOptions.keySet().stream().filter(t -> t.itemId() == id).toList()) {
-                List<FullItemData> forgeList = commonOptions.get(ref);
-                forgeList = onlyMatchingForge(forgeList, entry.getValue());
-                commonOptions.put(ref, forgeList);
-                OutputText.println("FIXED " + forgeList.getFirst().fullName());
-            }
-        }
+        private StreamNeedClose<Map<ItemRef, FullItemData>> makeCommonStream(long targetComboCount, Map<ItemRef, List<FullItemData>> commonMap) {
+            // TODO keep track of good indexes and search near
 
-        // remove anything that only appears in one set
-        for (Map.Entry<ItemRef, Set<String>> seenEntry : seenIn.entrySet()) {
-            ItemRef ref = seenEntry.getKey();
-            if (seenEntry.getValue().size() <= 1 && !fixedForge.containsKey(ref.itemId())) {
-                commonOptions.remove(ref);
-            }
-        }
+            Stream<Map<ItemRef, FullItemData>> commonStream;
+            long estimateRun;
+            BigInteger commonCombosBig = BigStreamUtil.estimateSets(commonMap);
 
-        // validate and output results
-        for (Map.Entry<ItemRef, List<FullItemData>> entry : commonOptions.entrySet()) {
-            ItemRef ref = entry.getKey();
-            List<FullItemData> lst = entry.getValue();
+            if (BigStreamUtil.fitsMaxLong(commonCombosBig)) {
+                long commonCombos = commonCombosBig.longValueExact();
+                long skip;
+                if (commonCombos < targetComboCount * 2) {
+                    skip = 1;
+                } else {
+                    skip = Primes.roundToPrimeInt(commonCombos / targetComboCount * 2);
+                }
 
-            // check for empty lists
-            if (lst.isEmpty()) {
-                Optional<FullItemData> any = mapArray.stream().flatMap(x -> x.itemOptions.itemStream())
-                        .filter(item -> ref.equalsTyped(item.ref())).findFirst();
-                throw new IllegalArgumentException("No common forge for " + ref + " " + any);
+                OutputText.println("COMMON COMBOS " + commonCombos + " SKIP SIZE " + skip);
+
+                long indexedOutputSize = commonCombos / skip;
+                Stream<Map<ItemRef, FullItemData>> commonStream1 = PossibleIndexed.runSolverPartial(commonMap, commonCombos, skip);
+                Stream<Map<ItemRef, FullItemData>> commonStream2 = PossibleRandom.runSolverPartial(commonMap, indexedOutputSize / 2);
+                commonStream = Stream.concat(commonStream1, commonStream2);
+                estimateRun = indexedOutputSize * 3 / 2;
+            } else {
+                OutputText.println("COMMON COMBOS RANDOM " + targetComboCount);
+                OutputText.println("COMMON COMBOS SHOULD BE LOWER TIMES " + commonCombosBig.divide(BigInteger.valueOf(Long.MAX_VALUE / 2)));
+                commonStream = PossibleRandom.runSolverPartial(commonMap, targetComboCount);
+                estimateRun = targetComboCount;
             }
 
-            // print common item
-            FullItemData item = lst.getFirst();
-            Set<String> specs = seenIn.get(ref);
-            OutputText.println("COMMON " + item.itemId() + " " + item.fullName() + " " + item.shared.ref().itemLevel() + " " + String.join(" ", specs));
+            Stream<Map<ItemRef, FullItemData>> baselineStream = baselineAsCommonOptionsStream(commonMap);
+            Stream<Map<ItemRef, FullItemData>> equippedStream = equippedAsCommonOptionsStream(commonMap);
+            commonStream = Stream.concat(commonStream, Stream.concat(baselineStream, equippedStream));
+            return BigStreamUtil.countProgress(estimateRun, Instant.now(), commonStream);
         }
 
-        return commonOptions;
-    }
+        private @NotNull StreamNeedClose<ProposedResults> makeCandidateStream(long targetComboCount) {
+            Map<ItemRef, List<FullItemData>> commonMap = prepareInitialAndCommons();
 
-    private void baselineOptimal(SpecDetails spec) {
-        JobInput job = new JobInput(Medium, individualRunSizeMultiply, spec.phasedAcceptable);
-        job.model = spec.model;
-        job.setItemOptions(spec.itemOptions);
-        job.hackAllow = hackAllow;
+            //noinspection resource
+            StreamNeedClose<Map<ItemRef, FullItemData>> commonStream = makeCommonStream(targetComboCount, commonMap);
+
+            StreamNeedClose<ProposedResults> resultStream = commonStream
+                    .map(r -> subSolveEach(r, specs))
+                    .filter(Objects::nonNull)
+                    .filter(s -> checkGood(s.resultJobs, specs))
+                    .unordered()
+                    .parallel();
+
+            if (multiSetFilter != null) {
+                resultStream = resultStream.filter(multiSetFilter);
+            }
+            return resultStream;
+        }
+
+        private Stream<Map<ItemRef, FullItemData>> equippedAsCommonOptionsStream(Map<ItemRef, List<FullItemData>> commonMap) {
+            Random rand = new Random();
+            Set<Map<ItemRef, FullItemData>> result = new HashSet<>();
+            for (SpecDetails spec : specs) {
+                for (int attempt = 0; attempt < 50; ++attempt) {
+                    HashMap<ItemRef, FullItemData> possible = new HashMap<>();
+                    spec.equippedGear.forEachValue(item -> possible.put(item.ref(), item));
+                    commonMap.forEach((ref, itemList) -> {
+                        if (!possible.containsKey(ref)) {
+                            FullItemData choice = ArrayUtil.rand(itemList, rand);
+                            possible.put(ref, choice);
+                        }
+                    });
+                    result.add(possible);
+                }
+            }
+            return result.stream();
+        }
+
+        private Stream<Map<ItemRef, FullItemData>> baselineAsCommonOptionsStream(Map<ItemRef, List<FullItemData>> commonMap) {
+            Random rand = new Random();
+            Set<Map<ItemRef, FullItemData>> result = new HashSet<>();
+            for (SpecDetails spec : specs) {
+                EquipMap baseSet = spec.optimalBaselineSet.items();
+                for (int attempt = 0; attempt < 50; ++attempt) {
+                    HashMap<ItemRef, FullItemData> possible = new HashMap<>();
+                    baseSet.forEachValue(item -> possible.put(item.ref(), item));
+                    commonMap.forEach((ref, itemList) -> {
+                        if (!possible.containsKey(ref)) {
+                            FullItemData choice = ArrayUtil.rand(itemList, rand);
+                            possible.put(ref, choice);
+                        }
+                    });
+                    result.add(possible);
+                }
+            }
+            return result.stream();
+        }
+
+        private Map<ItemRef, List<FullItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
+            Map<ItemRef, List<FullItemData>> commonOptions = new HashMap<>();
+            Map<ItemRef, Set<String>> seenIn = new HashMap<>();
+
+            // initially group items by id/upgrade, filtering common forges for each
+            for (SpecDetails spec : mapArray) {
+                spec.itemOptions.itemStream()
+                        .collect(Collectors.groupingBy(FullItemData::ref))
+                        .forEach((ref, forges) -> {
+                            seenIn.computeIfAbsent(ref, r -> new HashSet<>()).add(spec.label);
+                            commonOptions.compute(ref, (r, prior) -> commonForges(prior, forges));
+                        });
+            }
+
+            // apply fixed forges run setting. should the input be ref or id based?
+            for (Map.Entry<Integer, ReforgeRecipe> entry : fixedForge.entrySet()) {
+                int id = entry.getKey();
+                for (ItemRef ref : commonOptions.keySet().stream().filter(t -> t.itemId() == id).toList()) {
+                    List<FullItemData> forgeList = commonOptions.get(ref);
+                    forgeList = onlyMatchingForge(forgeList, entry.getValue());
+                    commonOptions.put(ref, forgeList);
+                    OutputText.println("FIXED " + forgeList.getFirst().fullName());
+                }
+            }
+
+            // remove anything that only appears in one set
+            for (Map.Entry<ItemRef, Set<String>> seenEntry : seenIn.entrySet()) {
+                ItemRef ref = seenEntry.getKey();
+                if (seenEntry.getValue().size() <= 1 && !fixedForge.containsKey(ref.itemId())) {
+                    commonOptions.remove(ref);
+                }
+            }
+
+            // validate and output results
+            for (Map.Entry<ItemRef, List<FullItemData>> entry : commonOptions.entrySet()) {
+                ItemRef ref = entry.getKey();
+                List<FullItemData> lst = entry.getValue();
+
+                // check for empty lists
+                if (lst.isEmpty()) {
+                    Optional<FullItemData> any = mapArray.stream().flatMap(x -> x.itemOptions.itemStream())
+                            .filter(item -> ref.equalsTyped(item.ref())).findFirst();
+                    throw new IllegalArgumentException("No common forge for " + ref + " " + any);
+                }
+
+                // print common item
+                FullItemData item = lst.getFirst();
+                Set<String> specs = seenIn.get(ref);
+                OutputText.println("COMMON " + item.itemId() + " " + item.fullName() + " " + item.shared.ref().itemLevel() + " " + String.join(" ", specs));
+            }
+
+            return commonOptions;
+        }
+
+        private void baselineOptimal(SpecDetails spec) {
+            JobInput job = new JobInput(Medium, individualRunSizeMultiply, spec.phasedAcceptable);
+            job.model = spec.model;
+            job.setItemOptions(spec.itemOptions);
+            job.hackAllow = hackAllow;
 //        job.startTime = Instant.now();
-        JobOutput output = Solver.runJob(job);
+            JobOutput output = Solver.runJob(job);
 
-        FullItemSet set = output.getFinalResultSet().orElseThrow();
-        spec.optimalRating = output.resultRating;
-        spec.optimalBaselineSet = set;
-        synchronized (OutputText.class) {
-            OutputText.println("SET " + spec.label);
-            job.printRecorder.outputNow();
-            set.outputSet(spec.model);
-        }
-        spec.recordSolutionSeen(set);
-    }
-
-    private static List<FullItemData> commonForges(List<FullItemData> prior, List<FullItemData> forges) {
-        if (prior == null) {
-            return forges;
-        }
-
-        ArrayList<FullItemData> commonForges = new ArrayList<>();
-        for (FullItemData a : prior) {
-            for (FullItemData b : forges) {
-                if (FullItemData.isIdenticalItem(a, b)) {
-                    commonForges.add(a);
-                }
+            FullItemSet set = output.getFinalResultSet().orElseThrow();
+            spec.optimalRating = output.resultRating;
+            spec.optimalBaselineSet = set;
+            synchronized (OutputText.class) {
+                OutputText.println("SET " + spec.label);
+                job.printRecorder.outputNow();
+                set.outputSet(spec.model);
             }
+            spec.recordSolutionSeen(set);
         }
-        return commonForges;
-    }
 
-    private void filterCommonActuallyUsed(Map<ItemRef, FullItemData> common, List<JobOutput> resultJobs) {
-        common.entrySet().removeIf(entry -> {
-                    ItemRef ref = entry.getKey();
-                    long count = resultJobs.stream()
-                            .flatMap(job -> job.resultSet.orElseThrow().items().itemStream())
-                            .filter(item -> item.isSameItem(ref))
-                            .count();
-                    if (count < 2 && fixedForge.containsKey(ref.itemId())) {
-                        OutputText.println("WOULD REMOVE COMMON BUT HAS fixedForge " + entry.getValue());
-                        return false;
-                    } else if (count < 2) {
-                        OutputText.println("REMOVING COMMON " + entry.getValue());
-                        return true;
-                    } else {
-                        return false;
+        private static List<FullItemData> commonForges(List<FullItemData> prior, List<FullItemData> forges) {
+            if (prior == null) {
+                return forges;
+            }
+
+            ArrayList<FullItemData> commonForges = new ArrayList<>();
+            for (FullItemData a : prior) {
+                for (FullItemData b : forges) {
+                    if (FullItemData.isIdenticalItem(a, b)) {
+                        commonForges.add(a);
                     }
                 }
-        );
-    }
-
-    private ProposedResults subSolveEach(Map<ItemRef, FullItemData> commonChoices, List<SpecDetails> specList) {
-        List<JobOutput> results = new ArrayList<>();
-        for (SpecDetails spec : specList) {
-            JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonChoices);
-            if (job.resultSet.isEmpty()) {
-                return null;
             }
-            results.add(job);
+            return commonForges;
         }
-        return new ProposedResults(UUID.randomUUID(), results, commonChoices);
-    }
 
-    private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap) {
-        EquipOptionsMap submitMap = buildJobWithSpecifiedItemsFixed(chosenMap, fullItemMap.shallowClone());
+        private ProposedResults subSolveEach(Map<ItemRef, FullItemData> commonChoices, List<SpecDetails> specList) {
+            List<JobOutput> results = new ArrayList<>();
+            for (SpecDetails spec : specList) {
+                JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonChoices);
+                if (job.resultSet.isEmpty()) {
+                    return null;
+                }
+                results.add(job);
+            }
+            return new ProposedResults(UUID.randomUUID(), results, commonChoices);
+        }
 
-        JobInput job = new JobInput(SubSolveItem, individualRunSizeMultiply, phasedAcceptable);
+        private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap) {
+            EquipOptionsMap submitMap = buildJobWithSpecifiedItemsFixed(chosenMap, fullItemMap.shallowClone());
+
+            JobInput job = new JobInput(SubSolveItem, individualRunSizeMultiply, phasedAcceptable);
 //        job.printRecorder.outputImmediate = true;
-        job.model = model;
-        job.setItemOptions(submitMap);
-        job.hackAllow = hackAllow;
+            job.model = model;
+            job.setItemOptions(submitMap);
+            job.hackAllow = hackAllow;
 //        job.singleThread = true;
-        return Solver.runJob(job);
-    }
+            return Solver.runJob(job);
+        }
 
-    static EquipOptionsMap buildJobWithSpecifiedItemsFixed(Map<ItemRef, FullItemData> chosenMap, EquipOptionsMap submitMap) {
-        submitMap.mapSlots(options -> options != null ? makeSlotFixed(chosenMap, options) : null);
-        return submitMap;
+        private void validateMultiSetAlignItemSlots(List<EquipOptionsMap> mapsParam) {
+            Map<Integer, SlotEquip> seen = new HashMap<>();
+            for (EquipOptionsMap map : mapsParam) {
+                map.forEachPair((slot, array) -> {
+                    for (FullItemData item : array) {
+                        int itemId = item.itemId();
+                        SlotEquip val = seen.get(itemId);
+                        if (val == null) {
+                            seen.put(itemId, slot);
+                        } else if (val != slot && !suppressSlotCheck.contains(itemId)) {
+                            throw new IllegalArgumentException("duplicate in non matching slot " + item.toStringExtended());
+                        }
+                    }
+                });
+            }
+        }
+
+        private static List<FullItemData> onlyMatchingForge(List<FullItemData> forgeList, ReforgeRecipe recipe) {
+            if (recipe == null || recipe.isEmpty()) {
+                for (FullItemData item : forgeList) {
+                    if (item.reforge.isEmpty())
+                        return List.of(item);
+                }
+            } else {
+                for (FullItemData item : forgeList) {
+                    if (recipe.equalsTyped(item.reforge))
+                        return List.of(item);
+                }
+            }
+            throw new IllegalArgumentException("specified forge not found " + forgeList.getFirst() + " " + recipe);
+        }
     }
 
     private static FullItemData[] makeSlotFixed(Map<ItemRef, FullItemData> chosenMap, FullItemData[] options) {
@@ -381,64 +359,29 @@ public class FindMultiSpec {
         return list.toArray(FullItemData[]::new);
     }
 
-    private FullItemData[] makeSlotFixedOrAddAlternateEnchants(Map<ItemRef, FullItemData> chosenMap, FullItemData[] options, ModelCombined model, List<FullItemSet> allResultSets) {
-        HashSet<FullItemData> result = new HashSet<>();
-
-        for (FullItemData item : options) {
-            ItemRef ref = item.ref();
-
-            FullItemData chosenVersion = chosenMap.get(ref);
-            if (chosenVersion != null) {
-                // common/fixed just add that version
-                result.add(chosenVersion);
-                continue;
-            }
-
-            Optional<FullItemData> fromOtherSet = allResultSets.stream().flatMap(s -> s.items().entryStream().map(Tuple.Tuple2::b)).filter(it -> it.ref().equalsTyped(ref)).findAny();
-            if (fromOtherSet.isPresent()) {
-                result.add(fromOtherSet.get());
-                continue;
-            }
-
-            // not a common/fixed item
-            List<StatBlock> alternateEnchants = model.enchants().alternateEnchant(item.slot());
-            List<GemInfo> alternateGems = model.gemChoice().alternateGems();
-            result.addAll(ItemLoadUtil.duplicateAlternateEnchantsAndGems(item, alternateEnchants, alternateGems));
-        }
-
-        return result.toArray(FullItemData[]::new);
+    static EquipOptionsMap buildJobWithSpecifiedItemsFixed(Map<ItemRef, FullItemData> chosenMap, EquipOptionsMap submitMap) {
+        submitMap.mapSlots(options -> options != null ? makeSlotFixed(chosenMap, options) : null);
+        return submitMap;
     }
 
-    private void validateMultiSetAlignItemSlots(List<EquipOptionsMap> mapsParam) {
-        Map<Integer, SlotEquip> seen = new HashMap<>();
-        for (EquipOptionsMap map : mapsParam) {
-            map.forEachPair((slot, array) -> {
-                for (FullItemData item : array) {
-                    int itemId = item.itemId();
-                    SlotEquip val = seen.get(itemId);
-                    if (val == null) {
-                        seen.put(itemId, slot);
-                    } else if (val != slot && !suppressSlotCheck.contains(itemId)) {
-                        throw new IllegalArgumentException("duplicate in non matching slot " + item.toStringExtended());
+    private void filterCommonActuallyUsed(Map<ItemRef, FullItemData> common, List<JobOutput> resultJobs) {
+        common.entrySet().removeIf(entry -> {
+                    ItemRef ref = entry.getKey();
+                    long count = resultJobs.stream()
+                            .flatMap(job -> job.resultSet.orElseThrow().items().itemStream())
+                            .filter(item -> item.isSameItem(ref))
+                            .count();
+                    if (count < 2 && fixedForge.containsKey(ref.itemId())) {
+                        OutputText.println("WOULD REMOVE COMMON BUT HAS fixedForge " + entry.getValue());
+                        return false;
+                    } else if (count < 2) {
+                        OutputText.println("REMOVING COMMON " + entry.getValue());
+                        return true;
+                    } else {
+                        return false;
                     }
                 }
-            });
-        }
-    }
-
-    public static List<FullItemData> onlyMatchingForge(List<FullItemData> forgeList, ReforgeRecipe recipe) {
-        if (recipe == null || recipe.isEmpty()) {
-            for (FullItemData item : forgeList) {
-                if (item.reforge.isEmpty())
-                    return List.of(item);
-            }
-        } else {
-            for (FullItemData item : forgeList) {
-                if (recipe.equalsTyped(item.reforge))
-                    return List.of(item);
-            }
-        }
-        throw new IllegalArgumentException("specified forge not found " + forgeList.getFirst() + " " + recipe);
+        );
     }
 
     private boolean checkGood(List<JobOutput> resultJobs, List<SpecDetails> specList) {
@@ -470,111 +413,32 @@ public class FindMultiSpec {
         return total;
     }
 
-    private void reportBetter(List<JobOutput> resultJobs, List<SpecDetails> specList) {
-        long rating = multiRating(resultJobs, specList);
-        synchronized (OutputText.class) {
-            OutputText.printf("^^^^^^^^^ %s ^^^^^^^ %d ^^^^^^^^^\n", LocalDateTime.now(), rating);
-            for (int i = 0; i < resultJobs.size(); ++i) {
-                JobOutput job = resultJobs.get(i);
-                FullItemSet set = job.getFinalResultSet().orElseThrow();
-                SpecDetails spec = specList.get(i);
-                OutputText.printf("-------------- %s -------------- %s\n", spec.label, "<HACK>".repeat(job.hackCount));
-                job.input.printRecorder.outputNow();
-                set.outputSetDetailed(spec.model);
-                OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", job.resultRating / spec.optimalRating * 100.0);
-                spec.recordSolutionSeen(set);
-            }
-            OutputText.println("#######################################");
-        }
-    }
+    private FullItemData[] makeSlotFixedOrAddAlternateEnchants(Map<ItemRef, FullItemData> chosenMap, FullItemData[] options, ModelCombined model, List<FullItemSet> allResultSets) {
+        HashSet<FullItemData> result = new HashSet<>();
 
-    private void outputResultFinal(Optional<ProposedResults> bestSets, List<SpecDetails> specList) {
-        if (bestSets.isPresent()) {
-            List<JobOutput> resultJobs = bestSets.get().resultJobs;
-            List<FullItemSet> allResultSets = resultJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
+        for (FullItemData item : options) {
+            ItemRef ref = item.ref();
 
-            outputResultSetHeader(bestSets.get().resultId, specList, resultJobs);
-
-            Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(bestSets.get().chosenMap, resultJobs);
-            outputCommonForPasteAndReuse(commonFinal);
-
-            for (int i = 0; i < resultJobs.size(); ++i) {
-                SpecDetails spec = specList.get(i);
-                OutputText.printf("-------------- %s --------------\n", spec.label);
-
-                JobOutput draftJob = resultJobs.get(i);
-                FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
-                double draftSpecRating = draftJobOutput(spec, draftJob);
-
-                EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-                JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
-                double revisedSpecRating = processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
-
-                EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
-                JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
-                double reenchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
-
-                double specRating = Math.max(draftSpecRating, Math.max(revisedSpecRating, reenchantSpecRating));
-                OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
-
-                spec.reportExtrasUsed();
-            }
-        } else {
-            OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
-        }
-    }
-
-    private Collection<ProposedResults> proposedFinal(Collection<ProposedResults> collection) {
-        Collection<ProposedResults> finalCollection = new ArrayList<>();
-        for (ProposedResults proposed : collection) {
-            List<JobOutput> specJobs = proposed.resultJobs;
-            List<FullItemSet> resultSets = specJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
-            outputResultSetHeader(proposed.resultId, specs, specJobs);
-
-            finalCollection.add(proposed);
-
-            Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(proposed.chosenMap, specJobs);
-            outputCommonForPasteAndReuse(commonFinal);
-
-            for (int i = 0; i < specJobs.size(); ++i) {
-                SpecDetails spec = specs.get(i);
-                OutputText.printf("-------------- %s --------------\n", spec.label);
-
-                JobOutput draftJob = specJobs.get(i);
-                FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
-                double draftSpecRating = draftJobOutput(spec, draftJob);
-
-                EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-                JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
-                if (revisedJob.resultSet.isPresent()) {
-                    EquipMap revisedItems = revisedJob.getFinalResultSet().orElseThrow().items();
-                    if (!draftSet.items().equalsTyped(revisedItems)) {
-                        processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
-                        finalCollection.add(proposed.derive(i, revisedJob));
-                    } else {
-                        OutputText.println("REVISED unchanged");
-                    }
-                } else {
-                    OutputText.println("REVISED missing");
-                }
-
-                EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, resultSets);
-                JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
-                if (reenchantJob.resultSet.isPresent()) {
-                    EquipMap reenchantItems = reenchantJob.getFinalResultSet().orElseThrow().items();
-                    if (!draftSet.items().equalsTyped(reenchantItems) && !reenchantItems.equalsTyped(reenchantItems)) {
-                        processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
-                        finalCollection.add(proposed.derive(i, reenchantJob));
-                    } else {
-                        OutputText.println("RE-ENCHANT unchanged");
-                    }
-                } else {
-                    OutputText.println("RE-ENCHANT missing");
-                }
+            FullItemData chosenVersion = chosenMap.get(ref);
+            if (chosenVersion != null) {
+                // common/fixed just add that version
+                result.add(chosenVersion);
+                continue;
             }
 
+            Optional<FullItemData> fromOtherSet = allResultSets.stream().flatMap(s -> s.items().entryStream().map(Tuple.Tuple2::b)).filter(it -> it.ref().equalsTyped(ref)).findAny();
+            if (fromOtherSet.isPresent()) {
+                result.add(fromOtherSet.get());
+                continue;
+            }
+
+            // not a common/fixed item
+            List<StatBlock> alternateEnchants = model.enchants().alternateEnchant(item.slot());
+            List<GemInfo> alternateGems = model.gemChoice().alternateGems();
+            result.addAll(ItemLoadUtil.duplicateAlternateEnchantsAndGems(item, alternateEnchants, alternateGems));
         }
-        return finalCollection;
+
+        return result.toArray(FullItemData[]::new);
     }
 
     private EquipOptionsMap makeReenchantOptions(EquipOptionsMap itemOptions, ModelCombined model, Map<ItemRef, FullItemData> commonFinal, List<FullItemSet> allResultSets) {
@@ -649,22 +513,222 @@ public class FindMultiSpec {
         return draftSpecRating;
     }
 
-    private void outputResultForCull(Collection<ProposedResults> bestList, List<SpecDetails> specList) {
-        if (bestList.isEmpty())  {
-            OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
-        } else {
-            OutputText.println("@@@@@@@@@ CULLING SET(s) @@@@@@@@@");
+    private class BestSingle {
+        public void solve(long targetComboCount) {
+            try (StreamNeedClose<ProposedResults> resultStream = new Prepare().makeCandidateStream(targetComboCount)) {
+                OutputText.println("RUNNING");
 
-            for (int i = 0; i < specList.size(); i++) {
-                SpecDetails spec = specList.get(i);
+                Optional<ProposedResults> best = resultStream.collect(new TopCollectorReporting<>(
+                        s -> multiRating(s.resultJobs, specs),
+                        s -> reportBetter(s.resultJobs, specs)));
+
+                OutputText.println("PREPARING RESULTS");
+                outputResultFinal(best, specs);
+            }
+        }
+
+        private void reportBetter(List<JobOutput> resultJobs, List<SpecDetails> specList) {
+            long rating = multiRating(resultJobs, specList);
+            synchronized (OutputText.class) {
+                OutputText.printf("^^^^^^^^^ %s ^^^^^^^ %d ^^^^^^^^^\n", LocalDateTime.now(), rating);
+                for (int i = 0; i < resultJobs.size(); ++i) {
+                    JobOutput job = resultJobs.get(i);
+                    FullItemSet set = job.getFinalResultSet().orElseThrow();
+                    SpecDetails spec = specList.get(i);
+                    OutputText.printf("-------------- %s -------------- %s\n", spec.label, "<HACK>".repeat(job.hackCount));
+                    job.input.printRecorder.outputNow();
+                    set.outputSetDetailed(spec.model);
+                    OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", job.resultRating / spec.optimalRating * 100.0);
+                    spec.recordSolutionSeen(set);
+                }
+                OutputText.println("#######################################");
+            }
+        }
+
+        private void outputResultFinal(Optional<ProposedResults> bestSets, List<SpecDetails> specList) {
+            if (bestSets.isPresent()) {
+                List<JobOutput> resultJobs = bestSets.get().resultJobs;
+                List<FullItemSet> allResultSets = resultJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
+
+                outputResultSetHeader(bestSets.get().resultId, specList, resultJobs);
+
+                Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(bestSets.get().chosenMap, resultJobs);
+                outputCommonForPasteAndReuse(commonFinal);
+
+                for (int i = 0; i < resultJobs.size(); ++i) {
+                    SpecDetails spec = specList.get(i);
+                    OutputText.printf("-------------- %s --------------\n", spec.label);
+
+                    JobOutput draftJob = resultJobs.get(i);
+                    FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
+                    double draftSpecRating = draftJobOutput(spec, draftJob);
+
+                    EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
+                    JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
+                    double revisedSpecRating = processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
+
+                    EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
+                    JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
+                    double reenchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
+
+                    double specRating = Math.max(draftSpecRating, Math.max(revisedSpecRating, reenchantSpecRating));
+                    OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
+
+                    spec.reportExtrasUsed();
+                }
+            } else {
+                OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
+            }
+        }
+    }
+
+    private class BestSelection {
+        public Collection<ProposedResults> solveBestSelection(int targetComboCount, int select) {
+            try (StreamNeedClose<ProposedResults> resultStream = new Prepare().makeCandidateStream(targetComboCount)) {
+                OutputText.println("RUNNING");
+
+                Collection<ProposedResults> collection = resultStream.collect(new TopCollectorN<>(select, s -> multiRating(s.resultJobs, specs)));
+                collection = proposedFinal(collection);
+                specs.forEach(spec -> {
+                    OutputText.println("SPEC USED + " + spec.label);
+                    spec.reportExtrasUsed();
+                });
+                return collection;
+            }
+        }
+
+        private Collection<ProposedResults> proposedFinal(Collection<ProposedResults> collection) {
+            Collection<ProposedResults> finalCollection = new HashSet<>();
+            for (ProposedResults proposed : collection) {
+                proposedCheckRevised(proposed, finalCollection);
+            }
+            return finalCollection;
+        }
+
+        private void proposedCheckRevised(ProposedResults proposed, Collection<ProposedResults> finalCollection) {
+            List<JobOutput> specJobs = proposed.resultJobs;
+            List<FullItemSet> resultSets = specJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
+            outputResultSetHeader(proposed.resultId, specs, specJobs);
+
+            finalCollection.add(proposed);
+
+            Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(proposed.chosenMap, specJobs);
+            outputCommonForPasteAndReuse(commonFinal);
+
+            List<List<JobOutput>> outputOptions = new ArrayList<>();
+
+            for (int i = 0; i < specJobs.size(); ++i) {
+                SpecDetails spec = specs.get(i);
                 OutputText.printf("-------------- %s --------------\n", spec.label);
+                JobOutput draftJob = specJobs.get(i);
 
-                int finalI = i;
-                bestList.forEach(proposed ->
-                    spec.recordSolutionSeen(proposed.resultJobs.get(finalI).getFinalResultSet().orElseThrow())
-                );
+                outputOptions.add(buildDerivedFinalOptions(draftJob, spec, commonFinal, resultSets));
+            }
 
-                spec.reportExtrasUsed();
+            BasicPermute.process(outputOptions)
+                    .map(choices -> new ProposedResults(UUID.randomUUID(), choices, commonFinal))
+                    .peek(prop -> OutputText.printf(">&>&>& " + prop.resultId))
+                    .forEach(finalCollection::add);
+        }
+
+        private List<JobOutput> buildDerivedFinalOptions(JobOutput draftJob, SpecDetails spec, Map<ItemRef, FullItemData> commonFinal, List<FullItemSet> resultSets) {
+            List<JobOutput> outputOptions = new ArrayList<>();
+            FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
+            double draftSpecRating = draftJobOutput(spec, draftJob);
+            spec.recordSolutionSeen(draftSet);
+            outputOptions.add(draftJob);
+
+            EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
+            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
+            if (revisedJob.resultSet.isPresent()) {
+                EquipMap revisedItems = revisedJob.getFinalResultSet().orElseThrow().items();
+                if (!draftSet.items().equalsTyped(revisedItems)) {
+                    processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
+                    outputOptions.add(revisedJob);
+                } else {
+                    OutputText.println("REVISED unchanged");
+                }
+            } else {
+                OutputText.println("REVISED missing");
+            }
+
+            EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, resultSets);
+            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
+            if (reenchantJob.resultSet.isPresent()) {
+                EquipMap reenchantItems = reenchantJob.getFinalResultSet().orElseThrow().items();
+                if (!draftSet.items().equalsTyped(reenchantItems) && !reenchantItems.equalsTyped(reenchantItems)) {
+                    processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
+                    outputOptions.add(reenchantJob);
+                } else {
+                    OutputText.println("RE-ENCHANT unchanged");
+                }
+            } else {
+                OutputText.println("RE-ENCHANT missing");
+            }
+
+            return outputOptions;
+        }
+    }
+
+    private class Culling {
+        public void suggestCulls(long targetComboCount) {
+            try (StreamNeedClose<ProposedResults> resultStream = new Prepare().makeCandidateStream(targetComboCount)) {
+                OutputText.println("RUNNING");
+
+                Collection<ProposedResults> bestList = resultStream.collect(new TopCollectorN<>(
+                        256,
+                        s -> multiRating(s.resultJobs, specs)
+                ));
+
+                OutputText.println("PREPARING RESULTS");
+                outputResultForCull(bestList, specs);
+            }
+        }
+
+        private void outputResultForCull(Collection<ProposedResults> bestList, List<SpecDetails> specList) {
+            if (bestList.isEmpty()) {
+                OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
+            } else {
+                OutputText.println("@@@@@@@@@ CULLING SET(s) @@@@@@@@@");
+
+                bestList.forEach(this::processOptions);
+
+                for (SpecDetails spec : specList) {
+                    OutputText.printf("-------------- %s --------------\n", spec.label);
+                    spec.reportExtrasUsed();
+                }
+            }
+        }
+
+        private void processOptions(ProposedResults proposed) {
+            List<FullItemSet> allResultSets = proposed.resultJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
+            filterCommonActuallyUsed(proposed.chosenMap, proposed.resultJobs);
+            Map<ItemRef, FullItemData> commonFinal = proposed.chosenMap;
+            for (int i = 0; i < specs.size(); ++i) {
+                processSpec(specs.get(i), proposed.resultJobs.get(i), commonFinal, allResultSets);
+            }
+        }
+
+        private void processSpec(SpecDetails spec, JobOutput draftJob, Map<ItemRef, FullItemData> commonFinal, List<FullItemSet> allResultSets) {
+            FullItemSet draftSet = draftJob.getFinalResultSet().orElseThrow();
+            spec.recordSolutionSeen(draftSet);
+
+            EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
+            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
+            if (revisedJob.resultSet.isPresent()) {
+                FullItemSet revisedSet = revisedJob.getFinalResultSet().orElseThrow();
+                if (!draftSet.items().equalsTyped(revisedSet.items())) {
+                    spec.recordSolutionSeen(revisedSet);
+                }
+            }
+
+            EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
+            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
+            if (reenchantJob.resultSet.isPresent()) {
+                FullItemSet reenchantSet = reenchantJob.getFinalResultSet().orElseThrow();
+                if (!draftSet.items().equalsTyped(reenchantSet.items())) {
+                    spec.recordSolutionSeen(reenchantSet);
+                }
             }
         }
     }
@@ -686,10 +750,10 @@ public class FindMultiSpec {
         SpecDetailsInterface addRemoveItem(int id);
     }
 
-    public class SpecDetails implements SpecDetailsInterface {
-        public final String label;
+    protected class SpecDetails implements SpecDetailsInterface {
+        final String label;
         final Path gearFile;
-        public final ModelCombined model;
+        final ModelCombined model;
         final double ratingTargetPercent;
         int ratingMultiply;
         final boolean phasedAcceptable;
@@ -766,43 +830,7 @@ public class FindMultiSpec {
                 itemOptions = ItemMapUtil.upgradeAllTo2(itemOptions);
 
             remapDuplicates();
-//            replaceGems();
         }
-
-//        private void replaceGems() {
-//            if (this.model.spec() == SpecType.PaladinRet) {
-//                EquipOptionsMap result = EquipOptionsMap.empty();
-//                itemOptions.forEachPair((slot, itemArray) ->
-//                        result.put(slot, ArrayUtil.concat(itemArray, ArrayUtil.mapAsNew(itemArray, this::replaceGems, FullItemData[]::new))));
-//                itemOptions = result;
-//            } else {
-//                itemOptions = ItemMapUtil.mapReplaceAll(itemOptions, this::replaceGems);
-//            }
-//        }
-
-//        private FullItemData replaceGems(FullItemData item) {
-//            if (item.slot() == SlotItem.Trinket)
-//                return item;
-//
-//            Integer changedEnchantChoice = item.enchantChoice;
-////            if (changedEnchantChoice == 4421)
-//            if (item.slot() == SlotItem.Back)
-//                changedEnchantChoice = 4424;
-//
-//            StatBlock checkGem = StatBlock.of(Haste, 160, Hit, 160);
-//            StatBlock replaceGem = StatBlock.of(Haste, 160, Stam, 120);
-//            List<StatBlock> changedGems = item.gemChoice != null
-//                    ? item.gemChoice.stream().map(gem -> gem.equalsStats(checkGem) ? replaceGem : gem).toList()
-//                    : null;
-//
-//            StatBlock changedEnchantValue = GemData.process(changedGems, item.enchantChoice, item.shared.socketSlots(), item.shared.socketBonus(), item.shared.name(), item.slot().possibleBlacksmith());
-//            if (!changedEnchantValue.equalsStats(item.statEnchant)) {
-//                item = item.changeEnchant(changedEnchantValue, changedGems, changedEnchantChoice);
-//                OutputText.println("CHANGED ENCHANTS " + item);
-//            }
-//
-//            return item;
-//        }
 
         public void prepareExtraItems(List<SpecDetails> allSpecs) {
             for (int itemId : extraItems) {
@@ -945,13 +973,13 @@ public class FindMultiSpec {
                             }
                     ))
                     .forEach(itemId -> {
-                AtomicInteger countSeenAtom = itemsSeenInSolutions.get(itemId);
-                int countSeen = countSeenAtom != null ? countSeenAtom.intValue() : 0;
-                if (countSeen == 0)
-                    OutputText.printf("%d 0 NONE\n", itemId);
-                else
-                    OutputText.printf("%d %d\n", itemId, countSeen);
-            });
+                        AtomicInteger countSeenAtom = itemsSeenInSolutions.get(itemId);
+                        int countSeen = countSeenAtom != null ? countSeenAtom.intValue() : 0;
+                        if (countSeen == 0)
+                            OutputText.printf("%d 0 NONE\n", itemId);
+                        else
+                            OutputText.printf("%d %d\n", itemId, countSeen);
+                    });
         }
     }
 
@@ -960,6 +988,17 @@ public class FindMultiSpec {
             ArrayList<JobOutput> list = new ArrayList<>(resultJobs);
             list.set(index, revisedJob);
             return new ProposedResults(UUID.randomUUID(), list, chosenMap);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof ProposedResults that)) return false;
+            return Objects.equals(resultJobs, that.resultJobs) && Objects.equals(chosenMap, that.chosenMap);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(resultJobs, chosenMap);
         }
     }
 }

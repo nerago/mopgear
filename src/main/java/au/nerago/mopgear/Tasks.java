@@ -315,15 +315,17 @@ public class Tasks {
         }
     }
 
-    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, int[] extraItems, int upgradeLevel, boolean alternateEnchants, Predicate<SolvableItemSet> specialFilter) {
+    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, int[] extraItems, int upgradeLevel, boolean alternateEnchants, Predicate<SolvableItemSet> specialFilter, boolean phasedAcceptable, Map<Integer, List<ReforgeRecipe>> commonFixedItems) {
         CostedItem[] extraItemsCost = Arrays.stream(extraItems).mapToObj(id -> new CostedItem(id, -1)).toArray(CostedItem[]::new);
-        reforgeProcessPlusMany(items, model, startTime, extraItemsCost, upgradeLevel, alternateEnchants, specialFilter);
+        reforgeProcessPlusMany(items, model, startTime, extraItemsCost, upgradeLevel, alternateEnchants, specialFilter, phasedAcceptable, commonFixedItems);
     }
 
-    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel, boolean alternateEnchants, Predicate<SolvableItemSet> specialFilter) {
+    public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, CostedItem[] extraItems, int upgradeLevel, boolean alternateEnchants, Predicate<SolvableItemSet> specialFilter, boolean phasedAcceptable, Map<Integer, List<ReforgeRecipe>> commonFixedItems) {
         for (CostedItem entry : Arrays.stream(extraItems).distinct().toList()) {
             int extraItemId = entry.itemId();
             if (SourcesOfItems.ignoredItems.contains(extraItemId)) continue;
+            List<ReforgeRecipe> reforgeRecipe = commonFixedItems != null ? commonFixedItems.get(extraItemId) : null;
+
             FullItemData extraItem = ItemLoadUtil.loadItemBasic(extraItemId, upgradeLevel, PrintRecorder.withAutoOutput());
             for (SlotEquip slot : extraItem.slot().toSlotEquipOptions()) {
                 FullItemData[] existing = items.get(slot);
@@ -331,6 +333,10 @@ public class Tasks {
                     OutputText.println("SKIP SLOT NOT NEEDED " + extraItem);
                 } else if (ArrayUtil.anyMatch(existing, item -> item.ref().equalsTyped(extraItem.ref()))) {
                     OutputText.println("SKIP DUP " + extraItem);
+                } else if (reforgeRecipe != null) {
+                    for (ReforgeRecipe reforge : reforgeRecipe) {
+                        addExtra(items, model, extraItemId, upgradeLevel, slot, EnchantMode.BothDefaultAndAlternate, reforge, false, true);
+                    }
                 } else {
                     addExtra(items, model, extraItemId, upgradeLevel, slot, EnchantMode.BothDefaultAndAlternate, null, false, true);
                 }
@@ -343,7 +349,7 @@ public class Tasks {
 //        items.put(SlotEquip.Leg, Arrays.stream(items.get(SlotEquip.Leg)).filter(x -> x.itemId() == 87071).toList());
 
 //        JobInput job = new JobInput(Final, 4, false);
-        JobInput job = new JobInput(Final, 20, false);
+        JobInput job = new JobInput(Final, 20, phasedAcceptable);
         job.model = model;
         job.setItemOptions(items);
         job.startTime = startTime;

@@ -55,7 +55,7 @@ public class Main {
     }
 
     private void launchpad(Instant startTime) {
-        generateRatingDataFromSims();
+//        generateRatingDataFromSims();
 
 //        WowSimDB.discoverSetBonuses();
 //        Tasks.dumpTier2Gear();
@@ -66,7 +66,7 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-//        TaskMulti.paladinMultiSpecSolve();
+        TaskMulti.paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        variableRatingProt(startTime);
@@ -166,7 +166,7 @@ public class Main {
                         89934, // soul bracer
                         94820, // caustic spike bracers
         }, 2, false,
-                null);
+                null, false, commonItems);
 //                set -> countSet.applyAsInt(set.items()) >= 4);
 
 //            reforgeProcessRetFixed(model, startTime, true);
@@ -207,8 +207,8 @@ public class Main {
         ModelCombined model = StandardModels.pallyProtMitigationModel();
         Path file = DataLocation.gearProtDefenceFile;
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, PrintRecorder.withAutoOutput());
 
@@ -247,6 +247,24 @@ public class Main {
 //        reforgeProcessPlusMany(items, model, startTime, strengthPlateCurrentItemsRet(model));
 //        reforgeProcessPlusMany(items, model, startTime, bagItemsArray(ignoredItems));
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
+
+
+        reforgeProcessPlusMany(items, model, startTime, new int[]{
+                87026, // heroic peacock cloak
+
+                86979, // heroic impaling treads
+                87015, // heroic clawfeet
+
+                95142, // striker's battletags
+                95205, // terra-cotta neck
+                87036, // soulgrasp heroic
+
+//                86957, // heroic bladed tempest ring
+//                95140, // shado assault band
+//                86946, // ruby signet heroic
+//                95513, // scaled tyrant normal
+
+                }, 2, false, null, false, commonItems);
 
 
 //                reforgeProcessPlusMany(items, model, startTime, new int[]{
@@ -321,6 +339,8 @@ public class Main {
 //                        95178, // Lootraptor's Amulet
 //                        96468, // talonrender chest
 //
+//                        95976, // celestial belt zand bucklebreaker
+//
 //                        }, 2, false, null);
 
 
@@ -384,17 +404,17 @@ public class Main {
 //        findUpgrade(items, SourcesOfItems.strengthPlateCraftedT3(), model, true, null, 0, 8);
 //        findUpgrade(items, SourcesOfItems.strengthPlateThroneNormalBoss(Difficulty.Heroic, 701), model, true, null, 2, 8);
 
-        Difficulty difficulty = Difficulty.Heroic;
-        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
-                pallyPhase3Valor(),
+//        Difficulty difficulty = Difficulty.Heroic;
+//        CostedItem[] upgradeShit = ArrayUtil.concat(new CostedItem[][]{
+///                pallyPhase3Valor(),
 //                throneClassGearSetHeroic(SpecType.PaladinProtMitigation, difficulty),
 //                throneClassGearSetHeroic(SpecType.PaladinRet, difficulty),
 //                strengthPlateThroneNormal(difficulty),
 //                tankTrinketsThroneNormal(difficulty),
 //                strengthDpsTrinketsThroneNormal(difficulty),
-        });
-        upgradeShit = minusRadenLoot(upgradeShit);
-        findUpgrade(items, upgradeShit, model, true, null, 2, 25);
+//        });
+//        upgradeShit = minusRadenLoot(upgradeShit);
+//        findUpgrade(items, upgradeShit, model, true, null, 2, 25);
     }
 
     private void allUpgradesProt(Instant startTime) {
@@ -570,22 +590,22 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 27/01/2026
-        map.put(95205, List.of(new ReforgeRecipe(Hit, Expertise))); // Neck Necklace of the Terra-Cotta Vanquisher
-        map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
-        map.put(85343, List.of(new ReforgeRecipe(Crit, Hit))); // Chest White Tiger Battleplate
+        // 30/01/2026
+        map.put(95205, List.of(new ReforgeRecipe(Hit, Haste))); // Neck Necklace of the Terra-Cotta Vanquisher
+        map.put(86979, List.of(new ReforgeRecipe(Hit, Expertise))); // Foot Impaling Treads
         map.put(96182, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Ultimate Protection of the Emperor
         map.put(95535, List.of(new ReforgeRecipe(null, null))); // Leg Legplates of the Lightning Throne
-        map.put(95140, List.of(new ReforgeRecipe(Haste, Expertise))); // Ring Band of the Shado-Pan Assault
-        map.put(94773, List.of(new ReforgeRecipe(null, null))); // Shoulder Shoulderguards of Centripetal Destruction
-        map.put(87100, List.of(new ReforgeRecipe(Crit, Haste))); // Hand White Tiger Gauntlets
-        map.put(94519, List.of(new ReforgeRecipe(Crit, Haste))); // Trinket Primordius' Talisman of Rage
+        map.put(94526, List.of(new ReforgeRecipe(null, null))); // Trinket Spark of Zandalar
+        map.put(95140, List.of(new ReforgeRecipe(Crit, Hit))); // Ring Band of the Shado-Pan Assault
+        map.put(87100, List.of(new ReforgeRecipe(Expertise, Haste))); // Hand White Tiger Gauntlets
+        map.put(94519, List.of(new ReforgeRecipe(null, null))); // Trinket Primordius' Talisman of Rage
         map.put(87024, List.of(new ReforgeRecipe(Haste, Expertise))); // Head Nullification Greathelm
-        map.put(95513, List.of(new ReforgeRecipe(Hit, Expertise))); // Ring Band of the Scaled Tyrant
-        map.put(94726, List.of(new ReforgeRecipe(Mastery, Hit))); // Belt Cloudbreaker Greatbelt
-        map.put(94820, List.of(new ReforgeRecipe(Crit, Haste))); // Wrist Caustic Spike Bracers
+        map.put(96468, List.of(new ReforgeRecipe(Hit, Haste))); // Chest Talonrender Chestplate
+        map.put(95513, List.of(new ReforgeRecipe(null, null))); // Ring Band of the Scaled Tyrant
+        map.put(94726, List.of(new ReforgeRecipe(null, null))); // Belt Cloudbreaker Greatbelt
+        map.put(94820, List.of(new ReforgeRecipe(null, null))); // Wrist Caustic Spike Bracers
         map.put(94942, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Hydra-Scale Bloodcloak
-        map.put(96376, List.of(new ReforgeRecipe(null, null))); // Weapon1H Worldbreaker's Stormscythe
+        map.put(96376, List.of(new ReforgeRecipe(Hit, Haste))); // Weapon1H Worldbreaker's Stormscythe
         return map;
     }
 

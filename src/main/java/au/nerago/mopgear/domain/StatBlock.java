@@ -1,11 +1,36 @@
 package au.nerago.mopgear.domain;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public record StatBlock(int primary, int stam, int mastery, int crit, int hit, int haste,
-                        int expertise, int dodge, int parry, int spirit) {
+import java.util.Arrays;
 
-    public static StatBlock add(StatBlock a, StatBlock b) {
+@SuppressWarnings("ClassCanBeRecord")
+public final class StatBlock {
+    public final static StatBlock empty = new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static final int VALUES_SIZE = 10;
+    private final int @NotNull [] values;
+
+    private StatBlock(int @NotNull [] values) {
+        this.values = values;
+    }
+
+    public StatBlock(int primary, int stam, int mastery, int crit, int hit, int haste,
+                     int expertise, int dodge, int parry, int spirit) {
+        values = new int[VALUES_SIZE];
+        values[StatType.Primary.ordinal()] = primary;
+        values[StatType.Stam.ordinal()] = stam;
+        values[StatType.Mastery.ordinal()] = mastery;
+        values[StatType.Crit.ordinal()] = crit;
+        values[StatType.Hit.ordinal()] = hit;
+        values[StatType.Haste.ordinal()] = haste;
+        values[StatType.Expertise.ordinal()] = expertise;
+        values[StatType.Dodge.ordinal()] = dodge;
+        values[StatType.Parry.ordinal()] = parry;
+        values[StatType.Spirit.ordinal()] = spirit;
+    }
+
+    public static StatBlock add(@Nullable StatBlock a, @Nullable StatBlock b) {
         if (a != null && b != null)
             return a.plus(b);
         else if (a != null)
@@ -14,369 +39,145 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
             return b;
     }
 
-    public StatBlock plus(StatBlock other) {
-        return new StatBlock(
-                primary + other.primary,
-                stam + other.stam,
-                mastery + other.mastery,
-                crit + other.crit,
-                hit + other.hit,
-                haste + other.haste,
-                expertise + other.expertise,
-                dodge + other.dodge,
-                parry + other.parry,
-                spirit + other.spirit);
+    private static int[] addValues(int[] a, int[] b) {
+        int[] result = new int[VALUES_SIZE];
+        for (int i = 0; i < VALUES_SIZE; ++i)
+            result[i] = a[i] + b[i];
+        return result;
     }
 
-    public StatBlock plus(StatBlock first, StatBlock second) {
-        return new StatBlock(
-                primary + first.primary + second.primary,
-                stam + first.stam + second.stam,
-                mastery + first.mastery + second.mastery,
-                crit + first.crit + second.crit,
-                hit + first.hit + second.hit,
-                haste + first.haste + second.haste,
-                expertise + first.expertise + second.expertise,
-                dodge + first.dodge + second.dodge,
-                parry + first.parry + second.parry,
-                spirit + first.spirit + second.spirit);
+    private static int[] addValues(int[] a, int[] b, int[] c) {
+        int[] result = new int[VALUES_SIZE];
+        for (int i = 0; i < VALUES_SIZE; ++i)
+            result[i] = a[i] + b[i] + c[i];
+        return result;
+    }
+
+    public StatBlock plus(@NotNull StatBlock other) {
+        return new StatBlock(addValues(this.values, other.values));
+    }
+
+    public StatBlock plus(@NotNull StatBlock first, @NotNull StatBlock second) {
+        return new StatBlock(addValues(this.values, first.values, second.values));
     }
 
     public StatBlock multiply(int multiply) {
-        return new StatBlock(
-                primary * multiply,
-                stam * multiply,
-                mastery * multiply,
-                crit * multiply,
-                hit * multiply,
-                haste * multiply,
-                expertise * multiply,
-                dodge * multiply,
-                parry * multiply,
-                spirit * multiply);
+        int[] result = new int[VALUES_SIZE];
+        for (int i = 0; i < VALUES_SIZE; ++i)
+            result[i] = this.values[i] * multiply;
+        return new StatBlock(result);
     }
 
-    public static StatBlock sumForRating(EquipMap items) {
-        int primary = 0;
-        int stam = 0;
-        int mastery = 0;
-        int crit = 0;
-        int hit = 0;
-        int haste = 0;
-        int expertise = 0;
-        int dodge = 0;
-        int parry = 0;
-        int spirit = 0;
+    @SuppressWarnings("UnnecessaryLocalVariable")
+    public static StatBlock sumForRating(@NotNull EquipMap items) {
+        int[] result = new int[VALUES_SIZE];
         for (SlotEquip slot : SlotEquip.values()) {
             FullItemData item = items.get(slot);
             if (item != null) {
-                StatBlock base = item.statBase;
-                primary += base.primary;
-                stam += base.stam;
-                mastery += base.mastery;
-                crit += base.crit;
-                hit += base.hit;
-                haste += base.haste;
-                expertise += base.expertise;
-                dodge += base.dodge;
-                parry += base.parry;
-                spirit += base.spirit;
+                int[] base = item.statBase.values;
+                for (int i = 0; i < VALUES_SIZE; ++i)
+                    result[i] += base[i];
 
-                StatBlock enchant = item.statEnchant;
-                primary += enchant.primary;
-                stam += enchant.stam;
-                mastery += enchant.mastery;
-                crit += enchant.crit;
-                hit += enchant.hit;
-                haste += enchant.haste;
-                expertise += enchant.expertise;
-                dodge += enchant.dodge;
-                parry += enchant.parry;
-                spirit += enchant.spirit;
+                int[] enchant = item.statEnchant.values;
+                for (int i = 0; i < VALUES_SIZE; ++i)
+                    result[i] += enchant[i];
             }
         }
-        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        return new StatBlock(result);
     }
 
-    public static StatBlock sumForCaps(EquipMap items) {
-        int primary = 0;
-        int stam = 0;
-        int mastery = 0;
-        int crit = 0;
-        int hit = 0;
-        int haste = 0;
-        int expertise = 0;
-        int dodge = 0;
-        int parry = 0;
-        int spirit = 0;
+    @SuppressWarnings("UnnecessaryLocalVariable")
+    public static StatBlock sumForCaps(@NotNull EquipMap items) {
+        int[] result = new int[VALUES_SIZE];
         for (SlotEquip slot : SlotEquip.values()) {
             FullItemData item = items.get(slot);
             if (item != null) {
-                StatBlock base = item.statBase;
-                primary += base.primary;
-                stam += base.stam;
-                mastery += base.mastery;
-                crit += base.crit;
-                hit += base.hit;
-                haste += base.haste;
-                expertise += base.expertise;
-                dodge += base.dodge;
-                parry += base.parry;
-                spirit += base.spirit;
+                int[] base = item.statBase.values;
+                for (int i = 0; i < VALUES_SIZE; ++i)
+                    result[i] += base[i];
 
                 if (item.slot().addEnchantToCap) {
-                    StatBlock enchant = item.statEnchant;
-                    primary += enchant.primary;
-                    stam += enchant.stam;
-                    mastery += enchant.mastery;
-                    crit += enchant.crit;
-                    hit += enchant.hit;
-                    haste += enchant.haste;
-                    expertise += enchant.expertise;
-                    dodge += enchant.dodge;
-                    parry += enchant.parry;
-                    spirit += enchant.spirit;
+                    int[] enchant = item.statEnchant.values;
+                    for (int i = 0; i < VALUES_SIZE; ++i)
+                        result[i] += enchant[i];
                 }
             }
         }
-        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        return new StatBlock(result);
     }
 
-    public static StatBlock sumForRating(SolvableEquipMap items) {
-        int primary = 0;
-        int stam = 0;
-        int mastery = 0;
-        int crit = 0;
-        int hit = 0;
-        int haste = 0;
-        int expertise = 0;
-        int dodge = 0;
-        int parry = 0;
-        int spirit = 0;
+    public static StatBlock sumForRating(@NotNull SolvableEquipMap items) {
+        int[] result = new int[VALUES_SIZE];
         for (SlotEquip slot : SlotEquip.values()) {
             SolvableItem item = items.get(slot);
             if (item != null) {
-                StatBlock base = item.totalRated();
-                primary += base.primary;
-                stam += base.stam;
-                mastery += base.mastery;
-                crit += base.crit;
-                hit += base.hit;
-                haste += base.haste;
-                expertise += base.expertise;
-                dodge += base.dodge;
-                parry += base.parry;
-                spirit += base.spirit;
+                int[] base = item.totalRated().values;
+                for (int i = 0; i < VALUES_SIZE; ++i)
+                    result[i] += base[i];
             }
         }
-        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        return new StatBlock(result);
     }
 
-    public static StatBlock sumForCaps(SolvableEquipMap items) {
-        int primary = 0;
-        int stam = 0;
-        int mastery = 0;
-        int crit = 0;
-        int hit = 0;
-        int haste = 0;
-        int expertise = 0;
-        int dodge = 0;
-        int parry = 0;
-        int spirit = 0;
+    public static StatBlock sumForCaps(@NotNull SolvableEquipMap items) {
+        int[] result = new int[VALUES_SIZE];
         for (SlotEquip slot : SlotEquip.values()) {
             SolvableItem item = items.get(slot);
             if (item != null) {
-                StatBlock base = item.totalCap();
-                primary += base.primary;
-                stam += base.stam;
-                mastery += base.mastery;
-                crit += base.crit;
-                hit += base.hit;
-                haste += base.haste;
-                expertise += base.expertise;
-                dodge += base.dodge;
-                parry += base.parry;
-                spirit += base.spirit;
+                int[] base = item.totalCap().values;
+                for (int i = 0; i < VALUES_SIZE; ++i)
+                    result[i] += base[i];
             }
         }
-        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        return new StatBlock(result);
     }
 
-    public int get(StatType stat) {
-        switch (stat) {
-            case Primary -> {
-                return primary;
-            }
-            case Stam -> {
-                return stam;
-            }
-            case Mastery -> {
-                return mastery;
-            }
-            case Crit -> {
-                return crit;
-            }
-            case Hit -> {
-                return hit;
-            }
-            case Haste -> {
-                return haste;
-            }
-            case Expertise -> {
-                return expertise;
-            }
-            case Dodge -> {
-                return dodge;
-            }
-            case Parry -> {
-                return parry;
-            }
-            case Spirit -> {
-                return spirit;
-            }
-            default -> throw new IllegalArgumentException();
-        }
+    public int get(@NotNull StatType stat) {
+        return values[stat.ordinal()];
     }
 
     public static StatBlock of(StatType stat, int value) {
-        int primary = 0;
-        int stam = 0;
-        int mastery = 0;
-        int crit = 0;
-        int hit = 0;
-        int haste = 0;
-        int expertise = 0;
-        int dodge = 0;
-        int parry = 0;
-        int spirit = 0;
-        switch (stat) {
-            case Primary -> primary = value;
-            case Stam -> stam = value;
-            case Mastery -> mastery = value;
-            case Crit -> crit = value;
-            case Hit -> hit = value;
-            case Haste -> haste = value;
-            case Expertise -> expertise = value;
-            case Dodge -> dodge = value;
-            case Parry -> parry = value;
-            case Spirit -> spirit = value;
-            default -> throw new IllegalArgumentException();
-        }
-        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        int[] result = new int[VALUES_SIZE];
+        result[stat.ordinal()] = value;
+        return new StatBlock(result);
     }
 
     public static StatBlock of(StatType a_stat, int a_value, StatType b_stat, int b_value) {
-        int primary = 0;
-        int stam = 0;
-        int mastery = 0;
-        int crit = 0;
-        int hit = 0;
-        int haste = 0;
-        int expertise = 0;
-        int dodge = 0;
-        int parry = 0;
-        int spirit = 0;
+        int[] result = new int[VALUES_SIZE];
         if (a_stat == b_stat)
             throw new IllegalArgumentException();
-        switch (a_stat) {
-            case Primary -> primary = a_value;
-            case Stam -> stam = a_value;
-            case Mastery -> mastery = a_value;
-            case Crit -> crit = a_value;
-            case Hit -> hit = a_value;
-            case Haste -> haste = a_value;
-            case Expertise -> expertise = a_value;
-            case Dodge -> dodge = a_value;
-            case Parry -> parry = a_value;
-            case Spirit -> spirit = a_value;
-            default -> throw new IllegalArgumentException();
-        }
-        switch (b_stat) {
-            case Primary -> primary = b_value;
-            case Stam -> stam = b_value;
-            case Mastery -> mastery = b_value;
-            case Crit -> crit = b_value;
-            case Hit -> hit = b_value;
-            case Haste -> haste = b_value;
-            case Expertise -> expertise = b_value;
-            case Dodge -> dodge = b_value;
-            case Parry -> parry = b_value;
-            case Spirit -> spirit = b_value;
-            default -> throw new IllegalArgumentException();
-        }
-        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        result[a_stat.ordinal()] = a_value;
+        result[b_stat.ordinal()] = b_value;
+        return new StatBlock(result);
     }
 
     public StatBlock withChange(StatType stat, int value) {
-        int primary = this.primary;
-        int stam = this.stam;
-        int mastery = this.mastery;
-        int crit = this.crit;
-        int hit = this.hit;
-        int haste = this.haste;
-        int expertise = this.expertise;
-        int dodge = this.dodge;
-        int parry = this.parry;
-        int spirit = this.spirit;
-        switch (stat) {
-            case Primary -> primary = value;
-            case Stam -> stam = value;
-            case Mastery -> mastery = value;
-            case Crit -> crit = value;
-            case Hit -> hit = value;
-            case Haste -> haste = value;
-            case Expertise -> expertise = value;
-            case Dodge -> dodge = value;
-            case Parry -> parry = value;
-            case Spirit -> spirit = value;
-            default -> throw new IllegalArgumentException();
-        }
-        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        int[] result = Arrays.copyOf(values, VALUES_SIZE);
+        result[stat.ordinal()] = value;
+        return new StatBlock(result);
     }
 
     public StatBlock withChange(StatType a_stat, int a_value, StatType b_stat, int b_value) {
-        int primary = this.primary;
-        int stam = this.stam;
-        int mastery = this.mastery;
-        int crit = this.crit;
-        int hit = this.hit;
-        int haste = this.haste;
-        int expertise = this.expertise;
-        int dodge = this.dodge;
-        int parry = this.parry;
-        int spirit = this.spirit;
+        int[] result = Arrays.copyOf(values, VALUES_SIZE);
         if (a_stat == b_stat)
             throw new IllegalArgumentException();
-        switch (a_stat) {
-            case Primary -> primary = a_value;
-            case Stam -> stam = a_value;
-            case Mastery -> mastery = a_value;
-            case Crit -> crit = a_value;
-            case Hit -> hit = a_value;
-            case Haste -> haste = a_value;
-            case Expertise -> expertise = a_value;
-            case Dodge -> dodge = a_value;
-            case Parry -> parry = a_value;
-            case Spirit -> spirit = a_value;
-            default -> throw new IllegalArgumentException();
-        }
-        switch (b_stat) {
-            case Primary -> primary = b_value;
-            case Stam -> stam = b_value;
-            case Mastery -> mastery = b_value;
-            case Crit -> crit = b_value;
-            case Hit -> hit = b_value;
-            case Haste -> haste = b_value;
-            case Expertise -> expertise = b_value;
-            case Dodge -> dodge = b_value;
-            case Parry -> parry = b_value;
-            case Spirit -> spirit = b_value;
-            default -> throw new IllegalArgumentException();
-        }
-        return new StatBlock(primary, stam, mastery, crit, hit, haste, expertise, dodge, parry, spirit);
+        result[a_stat.ordinal()] = a_value;
+        result[b_stat.ordinal()] = b_value;
+        return new StatBlock(result);
     }
 
     public void append(StringBuilder sb, boolean extended) {
+        int primary = values[StatType.Primary.ordinal()];
+        int stam = values[StatType.Stam.ordinal()];
+        int mastery = values[StatType.Mastery.ordinal()];
+        int crit = values[StatType.Crit.ordinal()];
+        int hit = values[StatType.Hit.ordinal()];
+        int haste = values[StatType.Haste.ordinal()];
+        int expertise = values[StatType.Expertise.ordinal()];
+        int dodge = values[StatType.Dodge.ordinal()];
+        int parry = values[StatType.Parry.ordinal()];
+        int spirit = values[StatType.Spirit.ordinal()];
+
         if (primary != 0)
             sb.append("primary=").append(primary).append(' ');
         if (stam != 0)
@@ -401,41 +202,30 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
             sb.append("combohit=").append(hit + expertise + spirit).append(' ');
     }
 
-    public final static StatBlock empty = new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
     public boolean isEmpty() {
-        return primary == 0 && stam == 0 && mastery == 0 && crit == 0 && hit == 0 && haste == 0 &&
-                expertise == 0 && dodge == 0 && parry == 0 && spirit == 0;
+        for (int i = 0; i < VALUES_SIZE; ++i) {
+            if (values[i] != 0)
+                return false;
+        }
+        return true;
     }
 
     public boolean hasSingleStat() {
         int count = 0;
-        if (primary != 0)
-            count++;
-        if (stam != 0)
-            count++;
-        if (mastery != 0)
-            count++;
-        if (crit != 0)
-            count++;
-        if (hit != 0)
-            count++;
-        if (haste != 0)
-            count++;
-        if (expertise != 0)
-            count++;
-        if (dodge != 0)
-            count++;
-        if (parry != 0)
-            count++;
-        if (spirit != 0)
-            count++;
+        for (int i = 0; i < VALUES_SIZE; ++i) {
+            if (values[i] != 0) {
+                count++;
+            }
+        }
         return count == 1;
     }
 
     public boolean equalsStats(StatBlock stats) {
-        return primary == stats.primary && stam == stats.stam && mastery == stats.mastery && crit == stats.crit && hit == stats.hit &&
-                haste == stats.haste && expertise == stats.expertise && dodge == stats.dodge && parry == stats.parry && spirit == stats.spirit;
+        for (int i = 0; i < VALUES_SIZE; ++i) {
+            if (values[i] != stats.values[i])
+                return false;
+        }
+        return true;
     }
 
     @Override
@@ -461,4 +251,50 @@ public record StatBlock(int primary, int stam, int mastery, int crit, int hit, i
         builder.append('}');
         return builder.toString();
     }
+
+    public int primary() {
+        return values[StatType.Primary.ordinal()];
+    }
+
+    public int stam() {
+        return values[StatType.Stam.ordinal()];
+    }
+
+    public int mastery() {
+        return values[StatType.Mastery.ordinal()];
+    }
+
+    public int crit() {
+        return values[StatType.Crit.ordinal()];
+    }
+
+    public int hit() {
+        return values[StatType.Hit.ordinal()];
+    }
+
+    public int haste() {
+        return values[StatType.Haste.ordinal()];
+    }
+
+    public int expertise() {
+        return values[StatType.Expertise.ordinal()];
+    }
+
+    public int dodge() {
+        return values[StatType.Dodge.ordinal()];
+    }
+
+    public int parry() {
+        return values[StatType.Parry.ordinal()];
+    }
+
+    public int spirit() {
+        return values[StatType.Spirit.ordinal()];
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(values);
+    }
+
 }
