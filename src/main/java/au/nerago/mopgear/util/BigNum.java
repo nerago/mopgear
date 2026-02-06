@@ -1,7 +1,5 @@
 package au.nerago.mopgear.util;
 
-import java.math.BigInteger;
-
 public class BigNum implements Comparable<BigNum> {
     public static final BigNum ONE = new BigNum(0, 1);
     public static final BigNum TWO = new BigNum(0, 2);

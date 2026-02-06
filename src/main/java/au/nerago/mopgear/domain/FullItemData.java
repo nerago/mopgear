@@ -180,6 +180,14 @@ public final class FullItemData implements IItem {
                 statBase.equalsStats(other.statBase) && statEnchant.equalsStats(other.statEnchant);
     }
 
+    public static boolean equalsNullSafe(FullItemData a, FullItemData b) {
+        if (a != null && b != null) {
+            return a.equalsTyped(b);
+        } else {
+            return a == b;
+        }
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(shared, reforge, statBase, statEnchant);

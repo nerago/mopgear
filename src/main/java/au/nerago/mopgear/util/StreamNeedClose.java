@@ -2,6 +2,7 @@ package au.nerago.mopgear.util;
 
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
@@ -42,8 +43,14 @@ public class StreamNeedClose<T> implements AutoCloseable {
         return result;
     }
 
+    public void forEach(Consumer<? super T> action) {
+        stream.forEach(action);
+//        stream.close();
+    }
+
     @Override
     public void close() {
         stream.close();
     }
+
 }

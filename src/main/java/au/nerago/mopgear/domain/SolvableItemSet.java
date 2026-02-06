@@ -1,5 +1,7 @@
 package au.nerago.mopgear.domain;
 
+import org.jetbrains.annotations.NotNull;
+
 public record SolvableItemSet(StatBlock totalForRating, StatBlock totalForCaps, SolvableEquipMap items) {
     public static SolvableItemSet manyItems(SolvableEquipMap items, StatBlock adjustment) {
         // trust caller is creating unique maps
@@ -46,7 +48,7 @@ public record SolvableItemSet(StatBlock totalForRating, StatBlock totalForCaps, 
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return totalForRating.toString();
     }
 }

@@ -69,6 +69,15 @@ public final class StatBlock {
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
+    public static long multiplyForTotalSum(StatBlock a, StatBlock b) {
+        int[] v = a.values, w = b.values;
+        long total = 0;
+        for (int i = 0; i < VALUES_SIZE; ++i)
+            total += Math.multiplyFull(v[i], w[i]);
+        return total;
+    }
+
+    @SuppressWarnings("UnnecessaryLocalVariable")
     public static StatBlock sumForRating(@NotNull EquipMap items) {
         int[] result = new int[VALUES_SIZE];
         for (SlotEquip slot : SlotEquip.values()) {
@@ -260,41 +269,41 @@ public final class StatBlock {
         return values[StatType.Stam.ordinal()];
     }
 
-    public int mastery() {
-        return values[StatType.Mastery.ordinal()];
-    }
-
-    public int crit() {
-        return values[StatType.Crit.ordinal()];
-    }
-
     public int hit() {
         return values[StatType.Hit.ordinal()];
-    }
-
-    public int haste() {
-        return values[StatType.Haste.ordinal()];
     }
 
     public int expertise() {
         return values[StatType.Expertise.ordinal()];
     }
 
-    public int dodge() {
-        return values[StatType.Dodge.ordinal()];
-    }
-
-    public int parry() {
-        return values[StatType.Parry.ordinal()];
-    }
-
     public int spirit() {
         return values[StatType.Spirit.ordinal()];
     }
+
+//    public int mastery() {
+//        return values[StatType.Mastery.ordinal()];
+//    }
+//
+//    public int crit() {
+//        return values[StatType.Crit.ordinal()];
+//    }
+//
+//    public int haste() {
+//        return values[StatType.Haste.ordinal()];
+//    }
+//
+//    public int dodge() {
+//        return values[StatType.Dodge.ordinal()];
+//    }
+//
+//    public int parry() {
+//        return values[StatType.Parry.ordinal()];
+//    }
+
 
     @Override
     public int hashCode() {
         return Arrays.hashCode(values);
     }
-
 }

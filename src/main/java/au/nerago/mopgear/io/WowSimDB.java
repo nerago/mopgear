@@ -319,6 +319,7 @@ public class WowSimDB {
             return defaultValue;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static int getFirstIntInArray(JsonObject object, String key, int defaultValue) {
         JsonElement entry = object.get(key);
         if (entry != null) {
@@ -330,6 +331,7 @@ public class WowSimDB {
         return defaultValue;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static String getStringOrDefault(JsonObject object, String key, String defaultValue) {
         JsonElement entry = object.get(key);
         if (entry != null)

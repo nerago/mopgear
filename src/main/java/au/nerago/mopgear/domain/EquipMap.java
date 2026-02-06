@@ -265,7 +265,24 @@ public final class EquipMap /*implements IEquipMap */ {
     }
 
     public boolean equalsTyped(EquipMap o) {
-        return Objects.equals(head, o.head) && Objects.equals(neck, o.neck) && Objects.equals(shoulder, o.shoulder) && Objects.equals(back, o.back) && Objects.equals(chest, o.chest) && Objects.equals(wrist, o.wrist) && Objects.equals(hand, o.hand) && Objects.equals(belt, o.belt) && Objects.equals(leg, o.leg) && Objects.equals(foot, o.foot) && Objects.equals(ring1, o.ring1) && Objects.equals(ring2, o.ring2) && Objects.equals(trinket1, o.trinket1) && Objects.equals(trinket2, o.trinket2) && Objects.equals(weapon, o.weapon) && Objects.equals(offhand, o.offhand);
+        return FullItemData.equalsNullSafe(head, o.head) && FullItemData.equalsNullSafe(neck, o.neck) && FullItemData.equalsNullSafe(shoulder, o.shoulder)
+                && FullItemData.equalsNullSafe(back, o.back) && FullItemData.equalsNullSafe(chest, o.chest) && FullItemData.equalsNullSafe(wrist, o.wrist)
+                && FullItemData.equalsNullSafe(hand, o.hand) && FullItemData.equalsNullSafe(belt, o.belt) && FullItemData.equalsNullSafe(leg, o.leg) && FullItemData.equalsNullSafe(foot, o.foot)
+                && FullItemData.equalsNullSafe(ring1, o.ring1) && FullItemData.equalsNullSafe(ring2, o.ring2)
+                && FullItemData.equalsNullSafe(trinket1, o.trinket1) && FullItemData.equalsNullSafe(trinket2, o.trinket2)
+                && FullItemData.equalsNullSafe(weapon, o.weapon) && FullItemData.equalsNullSafe(offhand, o.offhand);
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean equalsTypedSwappable(EquipMap o) {
+        return FullItemData.equalsNullSafe(head, o.head) && FullItemData.equalsNullSafe(neck, o.neck) && FullItemData.equalsNullSafe(shoulder, o.shoulder)
+                && FullItemData.equalsNullSafe(back, o.back) && FullItemData.equalsNullSafe(chest, o.chest) && FullItemData.equalsNullSafe(wrist, o.wrist)
+                && FullItemData.equalsNullSafe(hand, o.hand) && FullItemData.equalsNullSafe(belt, o.belt) && FullItemData.equalsNullSafe(leg, o.leg) && FullItemData.equalsNullSafe(foot, o.foot)
+                && ((FullItemData.equalsNullSafe(ring1, o.ring1) && FullItemData.equalsNullSafe(ring2, o.ring2))
+                    || (FullItemData.equalsNullSafe(ring1, o.ring2) && FullItemData.equalsNullSafe(ring2, o.ring1)))
+                && ((FullItemData.equalsNullSafe(trinket1, o.trinket1) && FullItemData.equalsNullSafe(trinket2, o.trinket2))
+                    || (FullItemData.equalsNullSafe(trinket1, o.trinket2) && FullItemData.equalsNullSafe(trinket2, o.trinket1)))
+                && FullItemData.equalsNullSafe(weapon, o.weapon) && FullItemData.equalsNullSafe(offhand, o.offhand);
     }
 
     @Override
@@ -274,7 +291,7 @@ public final class EquipMap /*implements IEquipMap */ {
     }
 
     public Stream<Tuple.Tuple2<SlotEquip, FullItemData>> entryStream() {
-        return StreamSupport.stream(new ItemsSpliterator(), true);
+        return StreamSupport.stream(new ItemsSpliterator(), false);
     }
 
     private class ItemsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, FullItemData>> {

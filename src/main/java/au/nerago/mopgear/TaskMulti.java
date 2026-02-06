@@ -1,6 +1,7 @@
 package au.nerago.mopgear;
 
 import au.nerago.mopgear.domain.ReforgeRecipe;
+import au.nerago.mopgear.domain.SlotEquip;
 import au.nerago.mopgear.io.DataLocation;
 import au.nerago.mopgear.io.StandardModels;
 import au.nerago.mopgear.process.FindMultiSpec;
@@ -33,7 +34,7 @@ public class TaskMulti {
                 0.02,
                 false,
                 new int[]{
-                        87026, // heroic peacock cloak
+//                        87026, // heroic peacock cloak
                         94942, // hydra bloodcloak
 
                         95140, // shado assault band
@@ -42,21 +43,22 @@ public class TaskMulti {
 
                         87015, // heroic clawfeet
                         86979, // heroic impaling treads
-                        87024, // null greathelm
+//                        87024, // null greathelm
                         86955, // heroic overwhelm assault belt
                         94726, // cloudbreaker belt
 
                         95535, // normal lightning legs
                         94773, // centripetal shoulders normal
                         96468, // talonrender chest heroic
+                        96533, // rein-binders fists heroic
 
-                        85340, // ret tier14 legs
+//                        85340, // ret tier14 legs
 //                        87101, // ret tier14 head [would need to regem, AVOID]
-                        85339, // ret tier14 shoulder
-                        85343, // ret tier14 chest
+//                        85339, // ret tier14 shoulder
+//                        85343, // ret tier14 chest
                         87100, // ret tier14 hands
 
-                        95910, // ret tier15 chest celestial
+//                        95910, // ret tier15 chest celestial
                         95911, // ret tier15 gloves celestial
 //                        95912, // ret tier15 celestial (don't have yet)
 //                        95913, // ret tier15 celestial (don't have yet)
@@ -65,13 +67,13 @@ public class TaskMulti {
                         95142, // striker's battletags
                         95205, // terra-cotta neck
 
-                        87145, // defiled earth
-                        89934, // soul bracer
+//                        87145, // defiled earth
+//                        89934, // soul bracer
                         94820, // caustic spike bracers
                 },
                 extraUpgrade,
                 preUpgrade
-        )
+        ).addFixedSlot(SlotEquip.Ring2, 95513)
         ;
 
         multi.addSpec(
@@ -83,7 +85,7 @@ public class TaskMulti {
                         new int[]{
                                 86957, // heroic bladed tempest ring
                                 95140, // shado assault band
-                                86946, // ruby signet heroic
+//                                86946, // ruby signet heroic
                                 95513, // scaled tyrant normal
 
                                 87015, // heroic clawfeet
@@ -97,24 +99,25 @@ public class TaskMulti {
                                 95535, // normal lightning legs
                                 94773, // centripetal shoulders normal
                                 96468, // talonrender chest heroic
+                                96533, // rein-binders fists heroic
 
-                                85340, // ret tier14 legs
+//                                85340, // ret tier14 legs
 //                                87101, // ret tier14 head (has tank gem currently)
-                                85339, // ret tier14 shoulder
-                                85343, // ret tier14 chest
-                                87100, // ret tier14 hands
+//                                85339, // ret tier14 shoulder
+//                                85343, // ret tier14 chest
+//                                87100, // ret tier14 hands
 
-                                95910, // ret tier15 chest celestial
+//                                95910, // ret tier15 chest celestial
                                 95911, // ret tier15 gloves celestial
 //                                95912, // ret tier15 celestial (don't have yet) Lightning Emperor's Helmet
 //                                95913, // ret tier15 celestial (don't have yet)
-                                95914, // ret tier15 shoulder celestial
+//                                95914, // ret tier15 shoulder celestial
 
-                                95291, // prot tier15 hand normal
-                                95920, // prot tier15 chest celestial
-                                95292, // prot tier15 head normal
-                                96667, // prot tier15 leg heroic
-                                95924, // prot tier15 shoulder celestial
+//                                95291, // prot tier15 hand normal
+//                                95920, // prot tier15 chest celestial
+//                                95292, // prot tier15 head normal
+//                                96667, // prot tier15 leg heroic
+                                96668, // prot tier15 shoulder heroic
 
                                 95142, // striker's battletags
                                 95205, // terra-cotta neck
@@ -122,7 +125,7 @@ public class TaskMulti {
 
                                 96182, // ultimate prot of the emperor thunder
 
-                                87145, // defiled earth
+//                                87145, // defiled earth
                                 89934, // soul bracer
                                 94820, // caustic spike bracers
 
@@ -131,6 +134,7 @@ public class TaskMulti {
                         extraUpgrade,
                         preUpgrade)
 //                .setWorstCommonPenalty(98)
+                .addFixedSlot(SlotEquip.Ring2, 95513)
         ;
 
         multi.addSpec(
@@ -143,38 +147,39 @@ public class TaskMulti {
                                 86979, // heroic impaling treads
 
                                 86957, // heroic bladed tempest ring
-                                86946, // ruby signet heroic
+//                                86946, // ruby signet heroic
                                 95140, // shado assault band
                                 95513, // scaled tyrant normal
 
                                 94726, // cloudbreaker belt
                                 86955, // heroic overwhelm assault belt
 
-                                87026, // heroic peacock cloak
-                                86325, // daybreak
+//                                87026, // heroic peacock cloak
+//                                86325, // daybreak
                                 94942, // hydra bloodcloak
 
                                 95535, // normal lightning legs
-                                94773, // centripetal shoulders normal
+//                                94773, // centripetal shoulders normal
                                 96468, // talonrender chest heroic
+                                96533, // rein-binders fists heroic
 
-                                87101, // ret tier14 head
-                                87100, // ret tier14 hands
+//                                87101, // ret tier14 head
+//                                87100, // ret tier14 hands
 
                                 95291, // prot tier15 hand normal
                                 95920, // prot tier15 chest celestial
                                 95292, // prot tier15 head normal
                                 96667, // prot tier15 leg heroic
-                                95924, // prot tier15 shoulder celestial
+                                96668, // prot tier15 shoulder heroic
 
                                 95142, // striker's battletags
-                                95205, // terra-cotta neck
+//                                95205, // terra-cotta neck
                                 95178, // lootraptor amulet
 
                                 96182, // ultimate prot of the emperor thunder
 
-                                87145, // defiled earth
-                                89934, // soul bracer
+//                                87145, // defiled earth
+//                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 96376, // worldbreaker weapon
@@ -182,6 +187,7 @@ public class TaskMulti {
                         extraUpgrade,
                         preUpgrade)
 //                .setWorstCommonPenalty(98)
+                .addFixedSlot(SlotEquip.Ring2, 95513)
         ;
 
 //        multi.multiSetFilter(proposedResults -> {
@@ -194,14 +200,14 @@ public class TaskMulti {
 //        });
 
 //        multi.suppressSlotCheck(95513);
-        multi.suppressSlotCheck(86946); // Vizier's Ruby Signet
-        multi.suppressSlotCheck(86957); // Ring of the Bladed Tempest
-        multi.suppressSlotCheck(95140); // Band of the Shado-Pan Assault
+//        multi.suppressSlotCheck(86946); // Vizier's Ruby Signet
+//        multi.suppressSlotCheck(86957); // Ring of the Bladed Tempest
+//        multi.suppressSlotCheck(95140); // Band of the Shado-Pan Assault
 
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(1000);
-        multi.suggestCulls(60000);
+//        multi.suggestCulls(10000, 64);
 //        multi.solve(10000);
 //        multi.solve(50000);
 //        multi.solve(120000);
@@ -211,7 +217,7 @@ public class TaskMulti {
 //        multi.solve(4000000);
 
 //        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(2000, 10);
-//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(400000, 16);
-//        new FindMultiSpecSim(multi).process(select);
+        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(250000, 16);
+        new FindMultiSpecSim(multi).process(select);
     }
 }

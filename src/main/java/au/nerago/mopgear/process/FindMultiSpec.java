@@ -55,9 +55,10 @@ public class FindMultiSpec {
         this.multiSetFilter = multiSetFilter;
     }
 
-    public void addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+    public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
         SpecDetails spec = new SpecDetails(label, gearFile, model, ratingTargetPercent, phasedAcceptable, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
         specs.add(spec);
+        return spec;
     }
 
     public void suppressSlotCheck(int id) {
@@ -72,8 +73,8 @@ public class FindMultiSpec {
         new BestSingle().solve(targetComboCount);
     }
 
-    public void suggestCulls(long targetComboCount) {
-        new Culling().suggestCulls(targetComboCount);
+    public void suggestCulls(long targetComboCount, int cullCount) {
+        new Culling().suggestCulls(targetComboCount, cullCount);
     }
 
     private class Prepare {
@@ -364,7 +365,7 @@ public class FindMultiSpec {
         return submitMap;
     }
 
-    private void filterCommonActuallyUsed(Map<ItemRef, FullItemData> common, List<JobOutput> resultJobs) {
+    private void filterCommonActuallyUsed(Map<ItemRef, FullItemData> common, List<JobOutput> resultJobs, PrintRecorder print) {
         common.entrySet().removeIf(entry -> {
                     ItemRef ref = entry.getKey();
                     long count = resultJobs.stream()
@@ -372,10 +373,10 @@ public class FindMultiSpec {
                             .filter(item -> item.isSameItem(ref))
                             .count();
                     if (count < 2 && fixedForge.containsKey(ref.itemId())) {
-                        OutputText.println("WOULD REMOVE COMMON BUT HAS fixedForge " + entry.getValue());
+                        print.println("WOULD REMOVE COMMON BUT HAS fixedForge " + entry.getValue());
                         return false;
                     } else if (count < 2) {
-                        OutputText.println("REMOVING COMMON " + entry.getValue());
+                        print.println("REMOVING COMMON " + entry.getValue());
                         return true;
                     } else {
                         return false;
@@ -465,7 +466,7 @@ public class FindMultiSpec {
 
     private @NotNull Map<ItemRef, FullItemData> filterAndListFinalCommon(Map<ItemRef, FullItemData> chosenMap, List<JobOutput> resultJobs) {
         OutputText.println("%%%%%%%%%%%%%%%%%%% COMMON-FORGE %%%%%%%%%%%%%%%%%%%");
-        filterCommonActuallyUsed(chosenMap, resultJobs);
+        filterCommonActuallyUsed(chosenMap, resultJobs, PrintRecorder.withAutoOutput());
         chosenMap.values().forEach(item -> OutputText.println(item.toString()));
         return chosenMap;
     }
@@ -492,8 +493,8 @@ public class FindMultiSpec {
         return revisedSpecRating;
     }
 
-    private @NotNull JobOutput solveRevisedSet(EquipOptionsMap submitMap, SpecDetails spec, boolean phasedAcceptable) {
-        JobInput job = new JobInput(Final, individualRunSizeMultiply, phasedAcceptable);
+    private @NotNull JobOutput solveRevisedSet(EquipOptionsMap submitMap, SpecDetails spec, boolean phasedAcceptable, JobInput.RunSizeCategory runSizeCategory) {
+        JobInput job = new JobInput(runSizeCategory, individualRunSizeMultiply, phasedAcceptable);
         if (phasedAcceptable)
             job.model = spec.model.withChangedRequirements(StatRequirementsHitExpertise.protFlexibleParryNarrowHit());
         else
@@ -564,11 +565,11 @@ public class FindMultiSpec {
                     double draftSpecRating = draftJobOutput(spec, draftJob);
 
                     EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-                    JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
+                    JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, Final);
                     double revisedSpecRating = processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
 
                     EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
-                    JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
+                    JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, Final);
                     double reenchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
 
                     double specRating = Math.max(draftSpecRating, Math.max(revisedSpecRating, reenchantSpecRating));
@@ -610,6 +611,7 @@ public class FindMultiSpec {
             List<FullItemSet> resultSets = specJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
             outputResultSetHeader(proposed.resultId, specs, specJobs);
 
+            OutputText.println(">>>&&& " + proposed.resultId);
             finalCollection.add(proposed);
 
             Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(proposed.chosenMap, specJobs);
@@ -627,7 +629,7 @@ public class FindMultiSpec {
 
             BasicPermute.process(outputOptions)
                     .map(choices -> new ProposedResults(UUID.randomUUID(), choices, commonFinal))
-                    .peek(prop -> OutputText.printf(">&>&>& " + prop.resultId))
+                    .peek(prop -> OutputText.println(">&>&>& " + prop.resultId))
                     .forEach(finalCollection::add);
         }
 
@@ -639,10 +641,10 @@ public class FindMultiSpec {
             outputOptions.add(draftJob);
 
             EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
+            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, Final);
             if (revisedJob.resultSet.isPresent()) {
                 EquipMap revisedItems = revisedJob.getFinalResultSet().orElseThrow().items();
-                if (!draftSet.items().equalsTyped(revisedItems)) {
+                if (!draftSet.items().equalsTypedSwappable(revisedItems)) {
                     processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
                     outputOptions.add(revisedJob);
                 } else {
@@ -653,10 +655,10 @@ public class FindMultiSpec {
             }
 
             EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, resultSets);
-            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
+            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, Final);
             if (reenchantJob.resultSet.isPresent()) {
                 EquipMap reenchantItems = reenchantJob.getFinalResultSet().orElseThrow().items();
-                if (!draftSet.items().equalsTyped(reenchantItems) && !reenchantItems.equalsTyped(reenchantItems)) {
+                if (!draftSet.items().equalsTypedSwappable(reenchantItems) && !reenchantItems.equalsTypedSwappable(reenchantItems)) {
                     processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
                     outputOptions.add(reenchantJob);
                 } else {
@@ -671,28 +673,30 @@ public class FindMultiSpec {
     }
 
     private class Culling {
-        public void suggestCulls(long targetComboCount) {
+        public void suggestCulls(long targetComboCount, int cullCount) {
+            Collection<ProposedResults> bestList;
             try (StreamNeedClose<ProposedResults> resultStream = new Prepare().makeCandidateStream(targetComboCount)) {
                 OutputText.println("RUNNING");
-
-                Collection<ProposedResults> bestList = resultStream.collect(new TopCollectorN<>(
-                        256,
+                bestList = resultStream.collect(new TopCollectorN<>(
+                        cullCount,
                         s -> multiRating(s.resultJobs, specs)
                 ));
-
-                OutputText.println("PREPARING RESULTS");
-                outputResultForCull(bestList, specs);
             }
+
+            outputResultForCull(bestList, specs, cullCount);
         }
 
-        private void outputResultForCull(Collection<ProposedResults> bestList, List<SpecDetails> specList) {
+        private void outputResultForCull(Collection<ProposedResults> bestList, List<SpecDetails> specList, long cullCount) {
             if (bestList.isEmpty()) {
                 OutputText.println("@@@@@@@@@ NO BEST SET FOUND @@@@@@@@@");
             } else {
-                OutputText.println("@@@@@@@@@ CULLING SET(s) @@@@@@@@@");
+                OutputText.println("@@@@@@@@@ MAKING DERIVED SETS @@@@@@@@@");
+                var bestStream = bestList.stream().parallel();
+                try (var countedStream = BigStreamUtil.countProgress(cullCount, Instant.now(), bestStream)) {
+                    countedStream.forEach(this::processOptions);
+                }
 
-                bestList.forEach(this::processOptions);
-
+                OutputText.println("@@@@@@@@@ PREPARING RESULTS @@@@@@@@@");
                 for (SpecDetails spec : specList) {
                     OutputText.printf("-------------- %s --------------\n", spec.label);
                     spec.reportExtrasUsed();
@@ -702,7 +706,7 @@ public class FindMultiSpec {
 
         private void processOptions(ProposedResults proposed) {
             List<FullItemSet> allResultSets = proposed.resultJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
-            filterCommonActuallyUsed(proposed.chosenMap, proposed.resultJobs);
+            filterCommonActuallyUsed(proposed.chosenMap, proposed.resultJobs, PrintRecorder.swallow());
             Map<ItemRef, FullItemData> commonFinal = proposed.chosenMap;
             for (int i = 0; i < specs.size(); ++i) {
                 processSpec(specs.get(i), proposed.resultJobs.get(i), commonFinal, allResultSets);
@@ -714,19 +718,19 @@ public class FindMultiSpec {
             spec.recordSolutionSeen(draftSet);
 
             EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable);
+            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, SubSolveItem);
             if (revisedJob.resultSet.isPresent()) {
                 FullItemSet revisedSet = revisedJob.getFinalResultSet().orElseThrow();
-                if (!draftSet.items().equalsTyped(revisedSet.items())) {
+                if (!draftSet.items().equalsTypedSwappable(revisedSet.items())) {
                     spec.recordSolutionSeen(revisedSet);
                 }
             }
 
             EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
-            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true);
+            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, SubSolveItem);
             if (reenchantJob.resultSet.isPresent()) {
                 FullItemSet reenchantSet = reenchantJob.getFinalResultSet().orElseThrow();
-                if (!draftSet.items().equalsTyped(reenchantSet.items())) {
+                if (!draftSet.items().equalsTypedSwappable(reenchantSet.items())) {
                     spec.recordSolutionSeen(reenchantSet);
                 }
             }
@@ -748,6 +752,8 @@ public class FindMultiSpec {
         SpecDetailsInterface setWorstCommonPenalty(double penalty);
 
         SpecDetailsInterface addRemoveItem(int id);
+
+        void addFixedSlot(SlotEquip slot, int itemId);
     }
 
     protected class SpecDetails implements SpecDetailsInterface {
@@ -767,6 +773,7 @@ public class FindMultiSpec {
         double optimalRating;
         FullItemSet optimalBaselineSet;
         EquipMap equippedGear;
+        EnumMap<SlotEquip, Integer> fixedSlots;
         EquipOptionsMap itemOptions;
         final Map<Integer, AtomicInteger> itemsSeenInSolutions = new HashMap<>();
 
@@ -812,6 +819,13 @@ public class FindMultiSpec {
         }
 
         @Override
+        public void addFixedSlot(SlotEquip slot, int itemId) {
+            if (fixedSlots == null)
+                fixedSlots = new EnumMap<>(SlotEquip.class);
+            fixedSlots.put(slot, itemId);
+        }
+
+        @Override
         public double getWorstCommonPenalty() {
             return worstCommonPenalty;
         }
@@ -823,6 +837,7 @@ public class FindMultiSpec {
         }
 
         public void prepareStartingGear(List<SpecDetails> allSpecs) {
+            OutputText.println(label);
             itemOptions = ItemLoadUtil.readAndLoad(gearFile, model, null, PrintRecorder.withAutoOutput());
             equippedGear = ItemLoadUtil.readAndLoadExistingForge(gearFile, model.enchants());
 
@@ -905,7 +920,15 @@ public class FindMultiSpec {
             SlotEquip[] slotOptions = otherCopies[0].slot().toSlotEquipOptions();
             for (SlotEquip slot : slotOptions) {
                 FullItemData[] existing = itemOptions.get(slot);
-                itemOptions.put(slot, ArrayUtil.concatNullSafe(existing, otherCopies));
+                FullItemData[] changed = ArrayUtil.concatNullSafe(existing, otherCopies);
+
+                if (fixedSlots != null && fixedSlots.get(slot) != null) {
+                    // WARN don't go through here in main path, only if extra items of interest, could get inconsistent behaviour
+                    int fixedItemId = fixedSlots.get(slot);
+                    changed = Arrays.stream(changed).filter(it -> it.itemId() == fixedItemId).toArray(FullItemData[]::new);
+                }
+
+                itemOptions.put(slot, changed);
                 reportNewSlotOptions(slot);
             }
         }

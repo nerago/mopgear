@@ -1,12 +1,7 @@
 package au.nerago.mopgear.permute;
 
-import au.nerago.mopgear.process.FindMultiSpec;
-import au.nerago.mopgear.results.JobOutput;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class BasicPermute {

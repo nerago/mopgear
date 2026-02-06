@@ -95,18 +95,7 @@ public class StatRatingsWeights extends StatRatings {
 
     @Override
     public long calcRating(StatBlock value) {
-        long total = 0;
-        total += (long) value.primary() * (long) weight.primary();
-        total += (long) value.stam() * (long) weight.stam();
-        total += (long) value.mastery() * (long) weight.mastery();
-        total += (long) value.crit() * (long) weight.crit();
-        total += (long) value.parry() * (long) weight.parry();
-        total += (long) value.haste() * (long) weight.haste();
-        total += (long) value.dodge() * (long) weight.dodge();
-        total += (long) value.hit() * (long) weight.hit();
-        total += (long) value.expertise() * (long) weight.expertise();
-        total += (long) value.spirit() * (long) weight.spirit();
-        return total;
+        return StatBlock.multiplyForTotalSum(value, weight);
     }
 
     @Override
