@@ -23,8 +23,8 @@ public record SolvableItem(int itemId, int itemLevel, int itemLevelBase, int dup
         return reforge;
     }
 
-    public boolean isIdenticalItem(SolvableItem other) {
-        return itemId == other.itemId && itemLevel == other.itemLevel && itemLevelBase == other.itemLevelBase && duplicateNum == other.duplicateNum && slot == other.slot && Objects.equals(reforge, other.reforge) && Objects.equals(totalRated, other.totalRated) && Objects.equals(totalCap, other.totalCap);
+    public boolean isIdenticalItem(@NotNull SolvableItem other) {
+        return itemId == other.itemId && itemLevel == other.itemLevel && itemLevelBase == other.itemLevelBase && duplicateNum == other.duplicateNum && slot == other.slot && reforge.equalsTyped(other.reforge) && totalRated.equalsStats(other.totalRated) && totalCap.equalsStats(other.totalCap);
     }
 
     @Override
@@ -32,6 +32,14 @@ public record SolvableItem(int itemId, int itemLevel, int itemLevelBase, int dup
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         return isIdenticalItem((SolvableItem) o);
+    }
+
+    public static boolean equalsNullSafe(SolvableItem a, SolvableItem b) {
+        if (a != null && b != null) {
+            return a.isIdenticalItem(b);
+        } else {
+            return a == b;
+        }
     }
 
     @Override

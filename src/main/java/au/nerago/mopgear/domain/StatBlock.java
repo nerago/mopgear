@@ -18,16 +18,16 @@ public final class StatBlock {
     public StatBlock(int primary, int stam, int mastery, int crit, int hit, int haste,
                      int expertise, int dodge, int parry, int spirit) {
         values = new int[VALUES_SIZE];
-        values[StatType.Primary.ordinal()] = primary;
-        values[StatType.Stam.ordinal()] = stam;
-        values[StatType.Mastery.ordinal()] = mastery;
-        values[StatType.Crit.ordinal()] = crit;
-        values[StatType.Hit.ordinal()] = hit;
-        values[StatType.Haste.ordinal()] = haste;
-        values[StatType.Expertise.ordinal()] = expertise;
-        values[StatType.Dodge.ordinal()] = dodge;
-        values[StatType.Parry.ordinal()] = parry;
-        values[StatType.Spirit.ordinal()] = spirit;
+        values[StatType.Primary_Ordinal] = primary;
+        values[StatType.Stam_Ordinal] = stam;
+        values[StatType.Mastery_Ordinal] = mastery;
+        values[StatType.Crit_Ordinal] = crit;
+        values[StatType.Hit_Ordinal] = hit;
+        values[StatType.Haste_Ordinal] = haste;
+        values[StatType.Expertise_Ordinal] = expertise;
+        values[StatType.Dodge_Ordinal] = dodge;
+        values[StatType.Parry_Ordinal] = parry;
+        values[StatType.Spirit_Ordinal] = spirit;
     }
 
     public static StatBlock add(@Nullable StatBlock a, @Nullable StatBlock b) {
@@ -176,16 +176,16 @@ public final class StatBlock {
     }
 
     public void append(StringBuilder sb, boolean extended) {
-        int primary = values[StatType.Primary.ordinal()];
-        int stam = values[StatType.Stam.ordinal()];
-        int mastery = values[StatType.Mastery.ordinal()];
-        int crit = values[StatType.Crit.ordinal()];
-        int hit = values[StatType.Hit.ordinal()];
-        int haste = values[StatType.Haste.ordinal()];
-        int expertise = values[StatType.Expertise.ordinal()];
-        int dodge = values[StatType.Dodge.ordinal()];
-        int parry = values[StatType.Parry.ordinal()];
-        int spirit = values[StatType.Spirit.ordinal()];
+        int primary = values[StatType.Primary_Ordinal];
+        int stam = values[StatType.Stam_Ordinal];
+        int mastery = values[StatType.Mastery_Ordinal];
+        int crit = values[StatType.Crit_Ordinal];
+        int hit = values[StatType.Hit_Ordinal];
+        int haste = values[StatType.Haste_Ordinal];
+        int expertise = values[StatType.Expertise_Ordinal];
+        int dodge = values[StatType.Dodge_Ordinal];
+        int parry = values[StatType.Parry_Ordinal];
+        int spirit = values[StatType.Spirit_Ordinal];
 
         if (primary != 0)
             sb.append("primary=").append(primary).append(' ');
@@ -262,45 +262,44 @@ public final class StatBlock {
     }
 
     public int primary() {
-        return values[StatType.Primary.ordinal()];
+        return values[StatType.Primary_Ordinal];
     }
 
     public int stam() {
-        return values[StatType.Stam.ordinal()];
+        return values[StatType.Stam_Ordinal];
     }
 
     public int hit() {
-        return values[StatType.Hit.ordinal()];
+        return values[StatType.Hit_Ordinal];
     }
 
     public int expertise() {
-        return values[StatType.Expertise.ordinal()];
+        return values[StatType.Expertise_Ordinal];
     }
 
     public int spirit() {
-        return values[StatType.Spirit.ordinal()];
+        return values[StatType.Spirit_Ordinal];
     }
 
-//    public int mastery() {
-//        return values[StatType.Mastery.ordinal()];
-//    }
-//
-//    public int crit() {
-//        return values[StatType.Crit.ordinal()];
-//    }
-//
-//    public int haste() {
-//        return values[StatType.Haste.ordinal()];
-//    }
-//
-//    public int dodge() {
-//        return values[StatType.Dodge.ordinal()];
-//    }
-//
-//    public int parry() {
-//        return values[StatType.Parry.ordinal()];
-//    }
+    public int mastery() {
+        return values[StatType.Mastery_Ordinal];
+    }
 
+    public int crit() {
+        return values[StatType.Crit_Ordinal];
+    }
+
+    public int haste() {
+        return values[StatType.Haste_Ordinal];
+    }
+
+    public int dodge() {
+        return values[StatType.Dodge_Ordinal];
+    }
+
+    public int parry() {
+        return values[StatType.Parry_Ordinal];
+    }
 
     @Override
     public int hashCode() {

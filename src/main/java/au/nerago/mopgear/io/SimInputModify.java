@@ -78,6 +78,7 @@ public class SimInputModify {
         stats.set(statType.simIndex, new JsonPrimitive(add));
     }
 
+    @SuppressWarnings("deprecation")
     private static void modifyJsonItems(JsonObject root, EquipMap map) {
         JsonObject party = root.getAsJsonObject("raid").getAsJsonArray("parties").get(0).getAsJsonObject();
         JsonObject player = party.getAsJsonArray("players").get(0).getAsJsonObject();

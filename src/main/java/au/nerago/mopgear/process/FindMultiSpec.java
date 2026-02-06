@@ -77,6 +77,7 @@ public class FindMultiSpec {
         new Culling().suggestCulls(targetComboCount, cullCount);
     }
 
+    @SuppressWarnings("deprecation")
     private class Prepare {
         private @NotNull Map<ItemRef, List<FullItemData>> prepareInitialAndCommons() {
             OutputText.println("PREPARING SPECS");

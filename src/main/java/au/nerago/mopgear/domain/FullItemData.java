@@ -175,7 +175,7 @@ public final class FullItemData implements IItem {
         return equalsTyped(itemData);
     }
 
-    public boolean equalsTyped(FullItemData other) {
+    public boolean equalsTyped(@NotNull FullItemData other) {
         return shared.equalsTyped(other.shared) && Objects.equals(reforge, other.reforge) &&
                 statBase.equalsStats(other.statBase) && statEnchant.equalsStats(other.statEnchant);
     }

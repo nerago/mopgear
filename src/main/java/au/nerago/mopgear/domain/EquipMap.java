@@ -2,7 +2,7 @@ package au.nerago.mopgear.domain;
 
 import au.nerago.mopgear.util.Tuple;
 
-import java.util.Objects;
+import java.util.Arrays;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -10,24 +10,12 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static au.nerago.mopgear.domain.SlotEquip.*;
+
 @SuppressWarnings("unused")
-public final class EquipMap /*implements IEquipMap */ {
-    private FullItemData head;
-    private FullItemData neck;
-    private FullItemData shoulder;
-    private FullItemData back;
-    private FullItemData chest;
-    private FullItemData wrist;
-    private FullItemData hand;
-    private FullItemData belt;
-    private FullItemData leg;
-    private FullItemData foot;
-    private FullItemData ring1;
-    private FullItemData ring2;
-    private FullItemData trinket1;
-    private FullItemData trinket2;
-    private FullItemData weapon;
-    private FullItemData offhand;
+public final class EquipMap {
+    private static final int SLOT_COUNT = 16;
+    final FullItemData[] array = new FullItemData[SLOT_COUNT];
 
     public static EquipMap empty() {
         return new EquipMap();
@@ -35,7 +23,7 @@ public final class EquipMap /*implements IEquipMap */ {
 
     public static EquipMap single(SlotEquip slot, FullItemData item) {
         EquipMap map = new EquipMap();
-        map.put(slot, item);
+        map.array[slot.ordinal()] = item;
         return map;
     }
 
@@ -43,105 +31,24 @@ public final class EquipMap /*implements IEquipMap */ {
     }
 
     private EquipMap(EquipMap other) {
-        this.head = other.head;
-        this.neck = other.neck;
-        this.shoulder = other.shoulder;
-        this.back = other.back;
-        this.chest = other.chest;
-        this.wrist = other.wrist;
-        this.hand = other.hand;
-        this.belt = other.belt;
-        this.leg = other.leg;
-        this.foot = other.foot;
-        this.ring1 = other.ring1;
-        this.ring2 = other.ring2;
-        this.trinket1 = other.trinket1;
-        this.trinket2 = other.trinket2;
-        this.weapon = other.weapon;
-        this.offhand = other.offhand;
+        System.arraycopy(other.array, 0, this.array, 0, SLOT_COUNT);
     }
 
     public EquipMap(SolvableEquipMap other, Function<SolvableItem, FullItemData> itemConverter) {
-        this.head = itemConverter.apply(other.head);
-        this.neck = itemConverter.apply(other.neck);
-        this.shoulder = itemConverter.apply(other.shoulder);
-        this.back = itemConverter.apply(other.back);
-        this.chest = itemConverter.apply(other.chest);
-        this.wrist = itemConverter.apply(other.wrist);
-        this.hand = itemConverter.apply(other.hand);
-        this.belt = itemConverter.apply(other.belt);
-        this.leg = itemConverter.apply(other.leg);
-        this.foot = itemConverter.apply(other.foot);
-        this.ring1 = itemConverter.apply(other.ring1);
-        this.ring2 = itemConverter.apply(other.ring2);
-        this.trinket1 = itemConverter.apply(other.trinket1);
-        this.trinket2 = itemConverter.apply(other.trinket2);
-        this.weapon = itemConverter.apply(other.weapon);
-        this.offhand = itemConverter.apply(other.offhand);
+        for (int i = 0; i < SLOT_COUNT; ++i)
+            this.array[i] = itemConverter.apply(other.array[i]);
     }
 
     public FullItemData get(SlotEquip slot) {
-        return switch (slot) {
-            case Head -> head;
-            case Neck -> neck;
-            case Shoulder -> shoulder;
-            case Back -> back;
-            case Chest -> chest;
-            case Wrist -> wrist;
-            case Hand -> hand;
-            case Belt -> belt;
-            case Leg -> leg;
-            case Foot -> foot;
-            case Ring1 -> ring1;
-            case Ring2 -> ring2;
-            case Trinket1 -> trinket1;
-            case Trinket2 -> trinket2;
-            case Weapon -> weapon;
-            case Offhand -> offhand;
-        };
+        return array[slot.ordinal()];
     }
 
     public boolean has(SlotEquip slot) {
-        return switch (slot) {
-            case Head -> head != null;
-            case Neck -> neck != null;
-            case Shoulder -> shoulder != null;
-            case Back -> back != null;
-            case Chest -> chest != null;
-            case Wrist -> wrist != null;
-            case Hand -> hand != null;
-            case Belt -> belt != null;
-            case Leg -> leg != null;
-            case Foot -> foot != null;
-            case Ring1 -> ring1 != null;
-            case Ring2 -> ring2 != null;
-            case Trinket1 -> trinket1 != null;
-            case Trinket2 -> trinket2 != null;
-            case Weapon -> weapon != null;
-            case Offhand -> offhand != null;
-        };
+        return array[slot.ordinal()] != null;
     }
 
     public void put(SlotEquip slot, FullItemData value) {
-        switch (slot) {
-            case Head -> head = value;
-            case Neck -> neck = value;
-            case Shoulder -> shoulder = value;
-            case Back -> back = value;
-            case Chest -> chest = value;
-            case Wrist -> wrist = value;
-            case Hand -> hand = value;
-            case Belt -> belt = value;
-            case Leg -> leg = value;
-            case Foot -> foot = value;
-            case Ring1 -> ring1 = value;
-            case Ring2 -> ring2 = value;
-            case Trinket1 -> trinket1 = value;
-            case Trinket2 -> trinket2 = value;
-            case Weapon -> weapon = value;
-            case Offhand -> offhand = value;
-            default -> throw new IllegalArgumentException();
-        }
+        array[slot.ordinal()] = value;
     }
 
     @Deprecated(since = "avoid extra allocation")
@@ -151,110 +58,92 @@ public final class EquipMap /*implements IEquipMap */ {
 
     public EquipMap copyWithReplace(SlotEquip slot, FullItemData replace) {
         EquipMap other = new EquipMap(this);
-        other.put(slot, replace);
+        other.array[slot.ordinal()] = replace;
         return other;
     }
 
+    @Deprecated
     public void forEachValue(Consumer<FullItemData> func) {
-        if (head != null) func.accept(head);
-        if (neck != null) func.accept(neck);
-        if (shoulder != null) func.accept(shoulder);
-        if (back != null) func.accept(back);
-        if (chest != null) func.accept(chest);
-        if (wrist != null) func.accept(wrist);
-        if (hand != null) func.accept(hand);
-        if (belt != null) func.accept(belt);
-        if (leg != null) func.accept(leg);
-        if (foot != null) func.accept(foot);
-        if (ring1 != null) func.accept(ring1);
-        if (ring2 != null) func.accept(ring2);
-        if (trinket1 != null) func.accept(trinket1);
-        if (trinket2 != null) func.accept(trinket2);
-        if (weapon != null) func.accept(weapon);
-        if (offhand != null) func.accept(offhand);
+        for (FullItemData item : array) {
+            if (item != null)
+                func.accept(item);
+        }
     }
 
+    @Deprecated
     public void forEachPair(BiConsumer<SlotEquip, FullItemData> func) {
-        if (head != null) func.accept(SlotEquip.Head, head);
-        if (neck != null) func.accept(SlotEquip.Neck, neck);
-        if (shoulder != null) func.accept(SlotEquip.Shoulder, shoulder);
-        if (back != null) func.accept(SlotEquip.Back, back);
-        if (chest != null) func.accept(SlotEquip.Chest, chest);
-        if (wrist != null) func.accept(SlotEquip.Wrist, wrist);
-        if (hand != null) func.accept(SlotEquip.Hand, hand);
-        if (belt != null) func.accept(SlotEquip.Belt, belt);
-        if (leg != null) func.accept(SlotEquip.Leg, leg);
-        if (foot != null) func.accept(SlotEquip.Foot, foot);
-        if (ring1 != null) func.accept(SlotEquip.Ring1, ring1);
-        if (ring2 != null) func.accept(SlotEquip.Ring2, ring2);
-        if (trinket1 != null) func.accept(SlotEquip.Trinket1, trinket1);
-        if (trinket2 != null) func.accept(SlotEquip.Trinket2, trinket2);
-        if (weapon != null) func.accept(SlotEquip.Weapon, weapon);
-        if (offhand != null) func.accept(SlotEquip.Offhand, offhand);
+        SlotEquip[] enumValues = SlotEquip.values();
+        for (int i = 0; i < SLOT_COUNT; ++i) {
+            FullItemData item = array[i];
+            if (item != null) {
+                SlotEquip slot = enumValues[i];
+                func.accept(slot, item);
+            }
+        }
     }
 
     public FullItemData getHead() {
-        return head;
+        return array[Head_Ordinal];
     }
 
     public FullItemData getNeck() {
-        return neck;
+        return array[Neck_Ordinal];
     }
 
     public FullItemData getShoulder() {
-        return shoulder;
+        return array[Shoulder_Ordinal];
     }
 
     public FullItemData getBack() {
-        return back;
+        return array[Back_Ordinal];
     }
 
     public FullItemData getChest() {
-        return chest;
+        return array[Chest_Ordinal];
     }
 
     public FullItemData getWrist() {
-        return wrist;
+        return array[Wrist_Ordinal];
     }
 
     public FullItemData getHand() {
-        return hand;
+        return array[Hand_Ordinal];
     }
 
     public FullItemData getBelt() {
-        return belt;
+        return array[Belt_Ordinal];
     }
 
     public FullItemData getLeg() {
-        return leg;
+        return array[Leg_Ordinal];
     }
 
     public FullItemData getFoot() {
-        return foot;
+        return array[Foot_Ordinal];
     }
 
     public FullItemData getRing1() {
-        return ring1;
+        return array[Ring1_Ordinal];
     }
 
     public FullItemData getRing2() {
-        return ring2;
+        return array[Ring2_Ordinal];
     }
 
     public FullItemData getTrinket1() {
-        return trinket1;
+        return array[Trinket1_Ordinal];
     }
 
     public FullItemData getTrinket2() {
-        return trinket2;
+        return array[Trinket2_Ordinal];
     }
 
     public FullItemData getWeapon() {
-        return weapon;
+        return array[Weapon_Ordinal];
     }
 
     public FullItemData getOffhand() {
-        return offhand;
+        return array[Offhand_Ordinal];
     }
 
     @Override
@@ -264,32 +153,45 @@ public final class EquipMap /*implements IEquipMap */ {
         return equalsTyped((EquipMap) o);
     }
 
-    public boolean equalsTyped(EquipMap o) {
-        return FullItemData.equalsNullSafe(head, o.head) && FullItemData.equalsNullSafe(neck, o.neck) && FullItemData.equalsNullSafe(shoulder, o.shoulder)
-                && FullItemData.equalsNullSafe(back, o.back) && FullItemData.equalsNullSafe(chest, o.chest) && FullItemData.equalsNullSafe(wrist, o.wrist)
-                && FullItemData.equalsNullSafe(hand, o.hand) && FullItemData.equalsNullSafe(belt, o.belt) && FullItemData.equalsNullSafe(leg, o.leg) && FullItemData.equalsNullSafe(foot, o.foot)
-                && FullItemData.equalsNullSafe(ring1, o.ring1) && FullItemData.equalsNullSafe(ring2, o.ring2)
-                && FullItemData.equalsNullSafe(trinket1, o.trinket1) && FullItemData.equalsNullSafe(trinket2, o.trinket2)
-                && FullItemData.equalsNullSafe(weapon, o.weapon) && FullItemData.equalsNullSafe(offhand, o.offhand);
+    public boolean equalsTyped(EquipMap other) {
+        for (int i = 0; i < SLOT_COUNT; ++i) {
+            if (!FullItemData.equalsNullSafe(this.array[i], other.array[i]))
+                return false;
+        }
+        return true;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean equalsTypedSwappable(EquipMap o) {
-        return FullItemData.equalsNullSafe(head, o.head) && FullItemData.equalsNullSafe(neck, o.neck) && FullItemData.equalsNullSafe(shoulder, o.shoulder)
-                && FullItemData.equalsNullSafe(back, o.back) && FullItemData.equalsNullSafe(chest, o.chest) && FullItemData.equalsNullSafe(wrist, o.wrist)
-                && FullItemData.equalsNullSafe(hand, o.hand) && FullItemData.equalsNullSafe(belt, o.belt) && FullItemData.equalsNullSafe(leg, o.leg) && FullItemData.equalsNullSafe(foot, o.foot)
-                && ((FullItemData.equalsNullSafe(ring1, o.ring1) && FullItemData.equalsNullSafe(ring2, o.ring2))
-                    || (FullItemData.equalsNullSafe(ring1, o.ring2) && FullItemData.equalsNullSafe(ring2, o.ring1)))
-                && ((FullItemData.equalsNullSafe(trinket1, o.trinket1) && FullItemData.equalsNullSafe(trinket2, o.trinket2))
-                    || (FullItemData.equalsNullSafe(trinket1, o.trinket2) && FullItemData.equalsNullSafe(trinket2, o.trinket1)))
-                && FullItemData.equalsNullSafe(weapon, o.weapon) && FullItemData.equalsNullSafe(offhand, o.offhand);
+    public boolean equalsTypedSwappable(EquipMap other) {
+        for (int i = Head_Ordinal; i < Ring1_Ordinal; ++i) {
+            if (!FullItemData.equalsNullSafe(this.array[i], other.array[i]))
+                return false;
+        }
+
+        FullItemData ring1 = array[SlotEquip.Ring1_Ordinal], ring1o = other.array[SlotEquip.Ring1_Ordinal];
+        FullItemData ring2 = array[SlotEquip.Ring2_Ordinal], ring2o = other.array[SlotEquip.Ring2_Ordinal];
+        if (!(FullItemData.equalsNullSafe(ring1, ring1o) && FullItemData.equalsNullSafe(ring2, ring2o))
+                && !(FullItemData.equalsNullSafe(ring1, ring2o) && FullItemData.equalsNullSafe(ring2, ring1o))) {
+            return false;
+        }
+
+        FullItemData trinket1 = array[SlotEquip.Trinket1_Ordinal], trinket1o = other.array[SlotEquip.Trinket1_Ordinal];
+        FullItemData trinket2 = array[SlotEquip.Trinket2_Ordinal], trinket2o = other.array[SlotEquip.Trinket2_Ordinal];
+        if (!(FullItemData.equalsNullSafe(trinket1, trinket1o) && FullItemData.equalsNullSafe(trinket2, trinket2o))
+                && !(FullItemData.equalsNullSafe(trinket1, trinket2o) && FullItemData.equalsNullSafe(trinket2, trinket1o))) {
+            return false;
+        }
+
+        return FullItemData.equalsNullSafe(array[SlotEquip.Weapon_Ordinal], other.array[SlotEquip.Weapon_Ordinal]) 
+                && FullItemData.equalsNullSafe(array[SlotEquip.Offhand_Ordinal], other.array[SlotEquip.Offhand_Ordinal]);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(head, neck, shoulder, back, chest, wrist, hand, belt, leg, foot, ring1, ring2, trinket1, trinket2, weapon, offhand);
+        return Arrays.hashCode(array);
     }
 
+    @Deprecated
     public Stream<Tuple.Tuple2<SlotEquip, FullItemData>> entryStream() {
         return StreamSupport.stream(new ItemsSpliterator(), false);
     }
@@ -301,8 +203,9 @@ public final class EquipMap /*implements IEquipMap */ {
         @Override
         public boolean tryAdvance(Consumer<? super Tuple.Tuple2<SlotEquip, FullItemData>> action) {
             while (index < slotArray.length) {
-                SlotEquip slot = slotArray[index++];
-                FullItemData value = EquipMap.this.get(slot);
+                SlotEquip slot = slotArray[index];
+                FullItemData value = array[index];
+                index++;
                 if (value != null) {
                     action.accept(Tuple.create(slot, value));
                     return true;

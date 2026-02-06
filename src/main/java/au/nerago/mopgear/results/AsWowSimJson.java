@@ -67,6 +67,7 @@ public class AsWowSimJson {
         return object;
     }
 
+    @SuppressWarnings("deprecation")
     public static void writeFullToOut(EquipMap map, ModelCombined model) {
         Path gearFile;
         if (model.spec() == SpecType.PaladinRet) {

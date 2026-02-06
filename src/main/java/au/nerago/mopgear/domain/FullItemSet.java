@@ -23,12 +23,14 @@ public record FullItemSet(StatBlock totalForRating, StatBlock totalForCaps, Equi
         return new FullItemSet(rating, caps, items);
     }
 
+    @SuppressWarnings("deprecation")
     public void outputSet(ModelCombined model) {
         OutputText.println(totalForRating.toStringExtended() + " " + model.calcRating(this));
         items.forEachValue(it -> OutputText.println(it + " " + model.calcRating(it)));
         OutputText.printf("set bonus %1.2f\n", (double) model.setBonus().calc(this) / (double) SetBonus.DENOMIATOR);
     }
 
+    @SuppressWarnings("deprecation")
     public void outputSetDetailed(ModelCombined model) {
         OutputText.println("SET RATED " + totalForRating.toStringExtended() + " " + model.calcRating(this));
         OutputText.println("SET CONSTANT " + totalForCaps.toStringExtended());
@@ -57,26 +59,27 @@ public record FullItemSet(StatBlock totalForRating, StatBlock totalForCaps, Equi
         OutputText.printf("set bonus %1.2f\n", (double) model.setBonus().calc(this) / (double) SetBonus.DENOMIATOR);
     }
 
+    @SuppressWarnings("deprecation")
     public void outputSetLight() {
         items.forEachValue(it -> OutputText.printf("%s [%d]\n", it.fullName(), it.ref().itemLevel()));
         OutputText.println();
         items.forEachValue(it -> OutputText.printf("%s\n", it.shared.name()));
     }
 
-    public boolean validate() {
-        FullItemData weapon = items.getWeapon();
-        if (weapon == null)
-            throw new IllegalStateException("no weapon in set");
-        if (weapon.slot() == SlotItem.Weapon2H && items.getOffhand() != null)
-            throw new IllegalStateException("weapon 2H with unexpected offhand");
-        if (weapon.slot() == SlotItem.Weapon1H && items.getOffhand() == null)
-            throw new IllegalStateException("weapon 1H with missing offhand");
-
-        FullItemData t1 = items.getTrinket1(), t2 = items.getTrinket2();
-        FullItemData r1 = items.getRing1(), r2 = items.getRing2();
-        return (t1 == null || t2 == null || t1.itemId() != t2.itemId()) &&
-                (r1 == null || r2 == null || r1.itemId() != r2.itemId());
-    }
+//    public boolean validate() {
+//        FullItemData weapon = items.getWeapon();
+//        if (weapon == null)
+//            throw new IllegalStateException("no weapon in set");
+//        if (weapon.slot() == SlotItem.Weapon2H && items.getOffhand() != null)
+//            throw new IllegalStateException("weapon 2H with unexpected offhand");
+//        if (weapon.slot() == SlotItem.Weapon1H && items.getOffhand() == null)
+//            throw new IllegalStateException("weapon 1H with missing offhand");
+//
+//        FullItemData t1 = items.getTrinket1(), t2 = items.getTrinket2();
+//        FullItemData r1 = items.getRing1(), r2 = items.getRing2();
+//        return (t1 == null || t2 == null || t1.itemId() != t2.itemId()) &&
+//                (r1 == null || r2 == null || r1.itemId() != r2.itemId());
+//    }
 
     @Override
     public @NotNull String toString() {
