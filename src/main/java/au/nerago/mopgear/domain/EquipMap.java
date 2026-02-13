@@ -1,8 +1,10 @@
 package au.nerago.mopgear.domain;
 
+import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -194,6 +196,10 @@ public final class EquipMap {
     @Deprecated
     public Stream<Tuple.Tuple2<SlotEquip, FullItemData>> entryStream() {
         return StreamSupport.stream(new ItemsSpliterator(), false);
+    }
+
+    public Stream<FullItemData> itemStream() {
+        return Arrays.stream(array).filter(Objects::nonNull);
     }
 
     private class ItemsSpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, FullItemData>> {

@@ -152,6 +152,7 @@ public class Tasks {
         JobInput job = new JobInput(Final, 1, true);
         job.printRecorder.outputImmediate = true;
         job.hackAllow = true;
+        job.forceMethod = JobInput.SolveMethod.SkipIndex;
         job.model = model;
         job.setItemOptions(itemOptions);
         job.startTime = startTime;

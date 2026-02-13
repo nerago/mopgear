@@ -54,7 +54,7 @@ public class SimOutputReader {
             OutputText.printf("DPS\t%.2f\n", dps);
             OutputText.printf("TPS\t%.2f\n", tps);
             OutputText.printf("DTPS\t%.2f\n", dtps);
-            OutputText.printf("HPS\t,%.2f\n", hps);
+            OutputText.printf("HPS\t%.2f\n", hps);
             OutputText.printf("TMI\t%.2f\n", tmi);
             OutputText.printf("DEATH\t%.2f\n", death * 100);
         }

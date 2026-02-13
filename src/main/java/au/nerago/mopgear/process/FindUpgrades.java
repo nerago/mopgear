@@ -266,7 +266,7 @@ public class FindUpgrades {
 
     private JobInput buildUpgradeJob(ModelCombined model, EquipOptionsMap items, FullItemData extraItem, StatBlock adjustment, SlotEquip slot, double baseRating, int cost) {
         JobInput job = new JobInput(SubSolveItem, runSizeMultiply, false);
-        job.singleThread = true;
+//        job.singleThread = true;
 
         extraItem = ItemLoadUtil.defaultEnchants(extraItem, model, true, false);
         job.println("OFFER " + extraItem.toStringExtended());

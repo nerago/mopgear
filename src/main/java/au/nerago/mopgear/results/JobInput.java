@@ -24,7 +24,7 @@ public class JobInput {
     public boolean hackAllow;
     public SolveMethod forceMethod;
     public final boolean phasedAcceptable;
-    public boolean singleThread;
+//    public boolean singleThread;
 
     public FullItemData extraItem;
     public int cost;

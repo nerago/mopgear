@@ -42,8 +42,8 @@ public class SolverCapPhased {
         return estimate;
     }
 
-    public Optional<SolvableItemSet> runSolver(boolean parallel, Predicate<SolvableItemSet> specialFilter, boolean indexed, boolean topOnly, Integer generateComboCount, Integer topCombosFilterCount, Instant startTime) {
-        StreamNeedClose<SkinnyItemSet> skinnyCombos = makeSkinnyCombos(parallel, indexed, generateComboCount, startTime);
+    public Optional<SolvableItemSet> runSolver(Predicate<SolvableItemSet> specialFilter, boolean indexed, boolean topOnly, Integer generateComboCount, Integer topCombosFilterCount, Instant startTime) {
+        StreamNeedClose<SkinnyItemSet> skinnyCombos = makeSkinnyCombos(indexed, generateComboCount, startTime);
 
         if (topOnly) {
             skinnyCombos = filterBestCapsOnly(skinnyCombos, topCombosFilterCount);
@@ -55,19 +55,18 @@ public class SolverCapPhased {
         StreamNeedClose<SolvableItemSet> finalSets = model.filterSets(partialSets, true);
         if (specialFilter != null)
             finalSets = finalSets.filter(specialFilter);
-        if (parallel)
-            finalSets = finalSets.parallel();
+        finalSets = finalSets.parallel();
         return finalSets.collect(new TopCollector1<>(model::calcRating));
     }
 
-    private StreamNeedClose<SkinnyItemSet> makeSkinnyCombos(boolean parallel, boolean indexed, Integer generateComboCount, Instant startTime) {
+    private StreamNeedClose<SkinnyItemSet> makeSkinnyCombos(boolean indexed, Integer generateComboCount, Instant startTime) {
         StreamNeedClose<SkinnyItemSet> initialSets;
         if (indexed) {
             BigInteger targetCombos = BigInteger.valueOf(generateComboCount);
-            Stream<SkinnyItemSet> generatedSets = generateSkinnyComboStreamIndexed(parallel, targetCombos);
+            Stream<SkinnyItemSet> generatedSets = generateSkinnyComboStreamIndexed(targetCombos);
             initialSets = BigStreamUtil.countProgress(generateComboCount, startTime, generatedSets);
         } else {
-            Stream<SkinnyItemSet> generatedSets = generateSkinnyComboStreamFull(parallel);
+            Stream<SkinnyItemSet> generatedSets = generateSkinnyComboStreamFull();
             initialSets = BigStreamUtil.countProgress(estimate.doubleValue(), startTime, generatedSets);
         }
 
@@ -125,33 +124,31 @@ public class SolverCapPhased {
         return optionsList;
     }
 
-    protected Stream<SkinnyItemSet> generateSkinnyComboStreamFull(boolean parallel) {
+    protected Stream<SkinnyItemSet> generateSkinnyComboStreamFull() {
         Stream<SkinnyItemSet> stream = null;
 
         // TODO sort by biggest cap values so filter out faster
 
         for (SkinnyItem[] slotOptions : skinnyOptions) {
             if (stream == null) {
-                stream = newCombinationStream(slotOptions, parallel);
+                stream = newCombinationStream(slotOptions);
             } else {
                 stream = addSlotToCombination(stream, slotOptions);
             }
             stream = requirements.filterSetsMaxSkinny(stream);
         }
 
-        return stream;
+        assert stream != null;
+        return stream.parallel();
     }
 
-    private Stream<SkinnyItemSet> generateSkinnyComboStreamIndexed(boolean parallel, BigInteger targetCombos) {
+    private Stream<SkinnyItemSet> generateSkinnyComboStreamIndexed(BigInteger targetCombos) {
         BigInteger skip = BigInteger.ONE;
         if (estimate.compareTo(targetCombos) > 0) {
             skip = Primes.roundToPrime(estimate.divide(targetCombos));
         }
         printRecorder.println("generateSkinnyComboStream skip=" + skip + " trying " + estimate.divide(skip));
         Stream<BigInteger> numberStream = BigStreamUtil.generateDumbStream(estimate, skip);
-        if (parallel)
-            //noinspection DataFlowIssue
-            numberStream = numberStream.parallel();
         return numberStream.map(this::makeSkinnyFromIndex);
     }
 
@@ -163,13 +160,13 @@ public class SolverCapPhased {
         });
     }
 
-    private Stream<SkinnyItemSet> newCombinationStream(SkinnyItem[] slotOptions, boolean parallel) {
+    private Stream<SkinnyItemSet> newCombinationStream(SkinnyItem[] slotOptions) {
         final SkinnyItemSet[] initialSets = new SkinnyItemSet[slotOptions.length];
         for (int i = 0; i < slotOptions.length; ++i) {
             SkinnyItem item = slotOptions[i];
             initialSets[i] = SkinnyItemSet.single(item);
         }
-        return parallel ? ArrayUtil.arrayStream(initialSets) : Arrays.stream(initialSets);
+        return ArrayUtil.arrayStream(initialSets);
     }
 
     private SkinnyItemSet makeSkinnyFromIndex(BigInteger mainIndex) {

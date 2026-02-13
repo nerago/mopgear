@@ -2,6 +2,7 @@ package au.nerago.mopgear.util;
 
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -25,6 +26,10 @@ public class StreamNeedClose<T> implements AutoCloseable {
 
     public <R> StreamNeedClose<R> map(Function<? super T, ? extends R> mapper) {
         return new StreamNeedClose<>(stream.map(mapper));
+    }
+
+    public StreamNeedClose<T> mapMulti(BiConsumer<? super T, ? super Consumer<T>> mapper) {
+        return new StreamNeedClose<>(stream.mapMulti(mapper));
     }
 
     public StreamNeedClose<T> filter(Predicate<T> filter) {
@@ -52,5 +57,4 @@ public class StreamNeedClose<T> implements AutoCloseable {
     public void close() {
         stream.close();
     }
-
 }

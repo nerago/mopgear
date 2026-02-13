@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -428,7 +429,7 @@ public class FindMultiSpec {
                 continue;
             }
 
-            Optional<FullItemData> fromOtherSet = allResultSets.stream().flatMap(s -> s.items().entryStream().map(Tuple.Tuple2::b)).filter(it -> it.ref().equalsTyped(ref)).findAny();
+            Optional<FullItemData> fromOtherSet = allResultSets.stream().flatMap(s -> s.items().itemStream()).filter(it -> it.ref().equalsTyped(ref)).findAny();
             if (fromOtherSet.isPresent()) {
                 result.add(fromOtherSet.get());
                 continue;
@@ -586,34 +587,34 @@ public class FindMultiSpec {
 
     private class BestSelection {
         public Collection<ProposedResults> solveBestSelection(int targetComboCount, int select) {
+            Collection<ProposedResults> proposalCollection;
+
+            OutputText.println("RUNNING");
             try (StreamNeedClose<ProposedResults> resultStream = new Prepare().makeCandidateStream(targetComboCount)) {
-                OutputText.println("RUNNING");
-
-                Collection<ProposedResults> collection = resultStream.collect(new TopCollectorN<>(select, s -> multiRating(s.resultJobs, specs)));
-                collection = proposedFinal(collection);
-                specs.forEach(spec -> {
-                    OutputText.println("SPEC USED + " + spec.label);
-                    spec.reportExtrasUsed();
-                });
-                return collection;
+                proposalCollection = resultStream.collect(new TopCollectorN<>(select, s -> multiRating(s.resultJobs, specs)));
             }
+
+            OutputText.println("FINDING REVISED PROPOSALS");
+            try (StreamNeedClose<ProposedResults> updatedStream = BigStreamUtil.countProgress(proposalCollection.size(), Instant.now(),
+                    proposalCollection.stream())) {
+                proposalCollection = updatedStream.mapMulti(this::proposedCheckRevised)
+                                                  .collect(Collectors.toSet());
+            }
+
+            specs.forEach(spec -> {
+                OutputText.println("SPEC USED + " + spec.label);
+                spec.reportExtrasUsed();
+            });
+            return proposalCollection;
         }
 
-        private Collection<ProposedResults> proposedFinal(Collection<ProposedResults> collection) {
-            Collection<ProposedResults> finalCollection = new HashSet<>();
-            for (ProposedResults proposed : collection) {
-                proposedCheckRevised(proposed, finalCollection);
-            }
-            return finalCollection;
-        }
-
-        private void proposedCheckRevised(ProposedResults proposed, Collection<ProposedResults> finalCollection) {
+        private void proposedCheckRevised(ProposedResults proposed, Consumer<ProposedResults> downstream) {
             List<JobOutput> specJobs = proposed.resultJobs;
             List<FullItemSet> resultSets = specJobs.stream().map(x -> x.getFinalResultSet().orElseThrow()).toList();
             outputResultSetHeader(proposed.resultId, specs, specJobs);
 
             OutputText.println(">>>&&& " + proposed.resultId);
-            finalCollection.add(proposed);
+            downstream.accept(proposed);
 
             Map<ItemRef, FullItemData> commonFinal = filterAndListFinalCommon(proposed.chosenMap, specJobs);
             outputCommonForPasteAndReuse(commonFinal);
@@ -629,9 +630,32 @@ public class FindMultiSpec {
             }
 
             BasicPermute.process(outputOptions)
+                    .filter(this::checkNoConflicts)
                     .map(choices -> new ProposedResults(UUID.randomUUID(), choices, commonFinal))
                     .peek(prop -> OutputText.println(">&>&>& " + prop.resultId))
-                    .forEach(finalCollection::add);
+                    .forEach(downstream);
+        }
+
+        private boolean checkNoConflicts(List<JobOutput> jobOutputs) {
+            List<FullItemSet> setList = jobOutputs.stream().map(j -> j.getFinalResultSet().orElseThrow()).toList();
+            for (int a = 0; a < setList.size(); ++a) {
+                for (int b = a + 1; b < setList.size(); ++b) {
+                    if (hasConflict(setList.get(a), setList.get(b))) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private boolean hasConflict(FullItemSet a, FullItemSet b) {
+            Map<Integer, FullItemData> firstById = a.items().itemStream()
+                    .collect(Collectors.toMap(FullItemData::itemId, it -> it));
+
+            return b.items().itemStream().anyMatch(secondVersion -> {
+                FullItemData firstVersion = firstById.get(secondVersion.itemId());
+                return firstVersion != null && !FullItemData.isIdenticalItem(firstVersion, secondVersion);
+            });
         }
 
         private List<JobOutput> buildDerivedFinalOptions(JobOutput draftJob, SpecDetails spec, Map<ItemRef, FullItemData> commonFinal, List<FullItemSet> resultSets) {

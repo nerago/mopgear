@@ -73,7 +73,7 @@ public class Solver {
             case Random -> {
                 long runSize = DEFAULT_RANDOM_RUN_SIZE * runSizeMultiply;
                 job.printf("SOLVE random %d (OBSOLETE)\n", runSize);
-                output.resultSet = SolverRandom.runSolver(model, itemOptions, adjustment, startTime, runSize, !job.singleThread, job.specialFilter);
+                output.resultSet = SolverRandom.runSolver(model, itemOptions, adjustment, startTime, runSize, job.specialFilter);
             }
             case Full -> {
                 job.println("SOLVE full search");
@@ -82,20 +82,20 @@ public class Solver {
             case PhasedFull -> {
                 job.println("SOLVE phased full");
                 assert phased != null;
-                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, false, false, null, null, startTime);
+                output.resultSet = phased.runSolver(job.specialFilter, false, false, null, null, startTime);
             }
             case PhasedTop -> {
                 assert phased != null;
                 int topCombos = Math.toIntExact(TOP_HIT_COMBO_FILTER * runSizeMultiply);
                 job.printf("SOLVE phased top only %d\n", topCombos);
-                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, false, true, null, topCombos, startTime);
+                output.resultSet = phased.runSolver(job.specialFilter, false, true, null, topCombos, startTime);
             }
             case PhasedIndexedTop -> {
                 assert phased != null;
                 int targetCombos = Math.toIntExact(PHASED_COMBOS_GENERATE * runSizeMultiply);
                 int topCombos = Math.toIntExact(TOP_HIT_COMBO_FILTER * job.runSizeAdditionalMultiply);
                 job.printf("SOLVE phased top only %d -> %d\n", targetCombos, topCombos);
-                output.resultSet = phased.runSolver(!job.singleThread, job.specialFilter, true, true, targetCombos, topCombos, startTime);
+                output.resultSet = phased.runSolver(job.specialFilter, true, true, targetCombos, topCombos, startTime);
             }
         }
 

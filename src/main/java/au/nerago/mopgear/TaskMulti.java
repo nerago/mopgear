@@ -43,18 +43,18 @@ public class TaskMulti {
 
                         87015, // heroic clawfeet
                         86979, // heroic impaling treads
-//                        87024, // null greathelm
+                        87024, // null greathelm
                         86955, // heroic overwhelm assault belt
                         94726, // cloudbreaker belt
 
                         95535, // normal lightning legs
-                        94773, // centripetal shoulders normal
+//                        94773, // centripetal shoulders normal
                         96468, // talonrender chest heroic
-                        96533, // rein-binders fists heroic
+//                        96533, // rein-binders fists heroic
 
 //                        85340, // ret tier14 legs
 //                        87101, // ret tier14 head [would need to regem, AVOID]
-//                        85339, // ret tier14 shoulder
+                        85339, // ret tier14 shoulder
 //                        85343, // ret tier14 chest
                         87100, // ret tier14 hands
 
@@ -66,6 +66,7 @@ public class TaskMulti {
 
                         95142, // striker's battletags
                         95205, // terra-cotta neck
+//                        94776, // primal turtle amulet
 
 //                        87145, // defiled earth
 //                        89934, // soul bracer
@@ -94,39 +95,29 @@ public class TaskMulti {
                                 87024, // null greathelm
                                 94942, // hydra bloodcloak
 
-                                87026, // heroic peacock cloak
+//                                87026, // heroic peacock cloak
                                 86955, // heroic overwhelm assault belt
                                 95535, // normal lightning legs
                                 94773, // centripetal shoulders normal
                                 96468, // talonrender chest heroic
                                 96533, // rein-binders fists heroic
 
-//                                85340, // ret tier14 legs
-//                                87101, // ret tier14 head (has tank gem currently)
-//                                85339, // ret tier14 shoulder
-//                                85343, // ret tier14 chest
-//                                87100, // ret tier14 hands
-
 //                                95910, // ret tier15 chest celestial
-                                95911, // ret tier15 gloves celestial
-//                                95912, // ret tier15 celestial (don't have yet) Lightning Emperor's Helmet
-//                                95913, // ret tier15 celestial (don't have yet)
+//                                95911, // ret tier15 gloves celestial
 //                                95914, // ret tier15 shoulder celestial
 
-//                                95291, // prot tier15 hand normal
-//                                95920, // prot tier15 chest celestial
-//                                95292, // prot tier15 head normal
 //                                96667, // prot tier15 leg heroic
-                                96668, // prot tier15 shoulder heroic
+//                                96668, // prot tier15 shoulder heroic
 
-                                95142, // striker's battletags
+//                                95142, // striker's battletags
                                 95205, // terra-cotta neck
-                                87036, // soulgrasp heroic
+//                                87036, // soulgrasp heroic
+                                94776, // primal turtle amulet
 
                                 96182, // ultimate prot of the emperor thunder
 
 //                                87145, // defiled earth
-                                89934, // soul bracer
+//                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 96376, // worldbreaker weapon
@@ -145,6 +136,7 @@ public class TaskMulti {
                         false,
                         new int[]{
                                 86979, // heroic impaling treads
+                                87015, // heroic clawfeet
 
                                 86957, // heroic bladed tempest ring
 //                                86946, // ruby signet heroic
@@ -154,17 +146,14 @@ public class TaskMulti {
                                 94726, // cloudbreaker belt
                                 86955, // heroic overwhelm assault belt
 
-//                                87026, // heroic peacock cloak
-//                                86325, // daybreak
+                                87026, // heroic peacock cloak
+                                86325, // daybreak
                                 94942, // hydra bloodcloak
 
                                 95535, // normal lightning legs
-//                                94773, // centripetal shoulders normal
+                                94773, // centripetal shoulders normal
                                 96468, // talonrender chest heroic
                                 96533, // rein-binders fists heroic
-
-//                                87101, // ret tier14 head
-//                                87100, // ret tier14 hands
 
                                 95291, // prot tier15 hand normal
                                 95920, // prot tier15 chest celestial
@@ -173,13 +162,14 @@ public class TaskMulti {
                                 96668, // prot tier15 shoulder heroic
 
                                 95142, // striker's battletags
-//                                95205, // terra-cotta neck
+                                95205, // terra-cotta neck
                                 95178, // lootraptor amulet
+                                94776, // primal turtle amulet
 
                                 96182, // ultimate prot of the emperor thunder
 
 //                                87145, // defiled earth
-//                                89934, // soul bracer
+                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 96376, // worldbreaker weapon
@@ -207,7 +197,7 @@ public class TaskMulti {
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(1000);
-//        multi.suggestCulls(10000, 64);
+//        multi.suggestCulls(20000, 64);
 //        multi.solve(10000);
 //        multi.solve(50000);
 //        multi.solve(120000);
@@ -216,8 +206,8 @@ public class TaskMulti {
 //        multi.solve(1490000);
 //        multi.solve(4000000);
 
-//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(2000, 10);
-        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(250000, 16);
+//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(2000, 4);
+        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(350000, 30);
         new FindMultiSpecSim(multi).process(select);
     }
 }

@@ -13,46 +13,62 @@ import java.util.function.ToLongFunction;
 import static au.nerago.mopgear.domain.StatType.*;
 
 public class GemData {
-    private static final Map<Integer, StatBlock> standardGems = buildGemsStandard();
-    private static final Map<Integer, StatBlock> engineerGems = buildGemsEngineer();
-    private static final Map<Integer, StatBlock> knownGems = buildGems();
-    private static final Map<Integer, StatBlock> knownEnchants = buildEnchant();
-    private static final Map<Integer, StatBlock> knownSocketBonus = buildSocketBonus();
-    private static final Map<Integer, StatBlock> allKnown = ArrayUtil.combineMaps(knownGems, knownEnchants);
+    public static final Map<Integer, StatBlock> standardGems = buildGemsStandard();
+    public static final Map<Integer, StatBlock> engineerGems = buildGemsEngineer();
+    public static final Map<Integer, StatBlock> knownGems = buildGems();
+    public static final Map<Integer, StatBlock> knownEnchants = buildEnchant();
+    public static final Map<Integer, StatBlock> knownSocketBonus = buildSocketBonus();
+    public static final Map<Integer, StatBlock> allKnown = ArrayUtil.combineMaps(knownGems, knownEnchants);
+
+    private static void addGem0(Map<Integer, StatBlock> map, int id) {
+        map.put(id, StatBlock.empty);
+    }
+
+    private static void addGem1(Map<Integer, StatBlock> map, int id, StatType stat, int value) {
+        map.put(id, StatBlock.of(stat, value));
+    }
+
+    private static void addGem2(Map<Integer, StatBlock> map, int id, StatType statA, int valueA, StatType statB, int valueB) {
+        map.put(id, StatBlock.of(statA, valueA, statB, valueB));
+    }
+
+    private static void addGemBlock(Map<Integer, StatBlock> map, int id, StatBlock block) {
+        map.put(id, block);
+    }
 
     private static Map<Integer, StatBlock> buildSocketBonus() {
         Map<Integer, StatBlock> map = new HashMap<>();
-        map.put(4860, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4829, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4838, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 60));
-        map.put(4853, new StatBlock(120, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4828, new StatBlock(120, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4868, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4832, new StatBlock(0, 90, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4839, new StatBlock(0, 0, 0, 0, 0, 0, 0, 60, 0, 0));
-        map.put(4844, new StatBlock(0, 0, 0, 0, 0, 0, 0, 120, 0, 0));
-        map.put(4851, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4833, new StatBlock(0, 0, 0, 60, 0, 0, 0, 0, 0, 0));
-        map.put(4855, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));
-        map.put(4845, new StatBlock(0, 0, 0, 0, 0, 0, 120, 0, 0, 0));
-        map.put(4840, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 60, 0));
-        map.put(4830, new StatBlock(60, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4827, new StatBlock(60, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4835, new StatBlock(0, 0, 0, 0, 60, 0, 0, 0, 0, 0));
-        map.put(4836, new StatBlock(0, 0, 0, 0, 0, 60, 0, 0, 0, 0));
-        map.put(4867, new StatBlock(0, 270, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4846, new StatBlock(0, 0, 0, 0, 0, 120, 0, 0, 0, 0));
-        map.put(4854, new StatBlock(0, 180, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4831, new StatBlock(80, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4848, new StatBlock(120, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4858, new StatBlock(0, 0, 0, 0, 0, 180, 0, 0, 0, 0));
-        map.put(4852, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 120));
-        map.put(4842, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4863, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4834, new StatBlock(0, 0, 60, 0, 0, 0, 0, 0, 0, 0));
-        map.put(4850, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 120, 0));
-        map.put(4843, new StatBlock(0, 0, 0, 120, 0, 0, 0, 0, 0, 0));
-        map.put(4837, new StatBlock(0, 0, 0, 0, 0, 0, 60, 0, 0, 0));
+        addGem1(map, 4827, Primary, 60);
+        addGem1(map, 4828, Primary, 120);
+        addGem1(map, 4829, Primary, 180);
+        addGem1(map, 4830, Primary, 60);
+        addGem1(map, 4831, Primary, 80);
+        addGem1(map, 4832, Stam, 90);
+        addGem1(map, 4833, Crit, 60);
+        addGem1(map, 4834, Mastery, 60);
+        addGem1(map, 4835, Hit, 60);
+        addGem1(map, 4836, Haste, 60);
+        addGem1(map, 4837, Expertise, 60);
+        addGem1(map, 4838, Spirit, 60);
+        addGem1(map, 4839, Dodge, 60);
+        addGem1(map, 4840, Parry, 60);
+        addGem0(map, 4842);
+        addGem1(map, 4843, Crit, 120);
+        addGem1(map, 4844, Dodge, 120);
+        addGem1(map, 4845, Expertise, 120);
+        addGem1(map, 4846, Haste, 120);
+        addGem1(map, 4848, Primary, 120);
+        addGem1(map, 4850, Parry, 120);
+        addGem0(map, 4851);
+        addGem1(map, 4852, Spirit, 120);
+        addGem1(map, 4853, Primary, 120);
+        addGem1(map, 4854, Stam, 180);
+        addGem1(map, 4855, Crit, 180);
+        addGem1(map, 4858, Haste, 180);
+        addGem1(map, 4860, Primary, 180);
+        addGem0(map, 4863);
+        addGem1(map, 4867, Stam, 270);
+        addGem1(map, 4868, Primary, 180);
         return map;
     }
 
@@ -78,50 +94,49 @@ public class GemData {
     }
 
     private static void gemsStandard(Map<Integer, StatBlock> map) {
-        map.put(76628, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(76694, new StatBlock(160, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(76618, new StatBlock(80, 0, 0, 0, 160, 0, 0, 0, 0, 0));
-        map.put(76682, new StatBlock(80, 0, 0, 0, 160, 0, 0, 0, 0, 0));
-        map.put(76669, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
-        map.put(76603, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
-        map.put(76700, new StatBlock(0, 0, 320, 0, 0, 0, 0, 0, 0, 0));
-        map.put(76697, new StatBlock(0, 0, 0, 320, 0, 0, 0, 0, 0, 0));
-        map.put(76570, new StatBlock(0, 0, 0, 0, 320, 0, 0, 0, 0, 0));
-        map.put(76636, new StatBlock(0, 0, 0, 0, 320, 0, 0, 0, 0, 0));
-        map.put(76642, new StatBlock(0, 0, 0, 0, 160, 160, 0, 0, 0, 0));
-        map.put(76576, new StatBlock(0, 0, 0, 0, 160, 160, 0, 0, 0, 0));
-        map.put(76615, new StatBlock(0, 0, 0, 0, 160, 0, 160, 0, 0, 0));
-        map.put(76681, new StatBlock(0, 0, 0, 0, 160, 0, 160, 0, 0, 0));
-        map.put(76699, new StatBlock(0, 0, 0, 0, 0, 320, 0, 0, 0, 0));
-        map.put(76633, new StatBlock(0, 0, 0, 0, 0, 320, 0, 0, 0, 0));
-        map.put(76667, new StatBlock(0, 0, 0, 0, 0, 160, 160, 0, 0, 0));
-        map.put(76601, new StatBlock(0, 0, 0, 0, 0, 160, 160, 0, 0, 0));
-        map.put(76585, new StatBlock(0, 0, 0, 0, 0, 160, 0, 0, 0, 160));
-        map.put(76627, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
-        map.put(76693, new StatBlock(0, 0, 0, 0, 0, 0, 320, 0, 0, 0));
-        map.put(76593, new StatBlock(0, 0, 0, 160, 0, 0, 160, 0, 0, 0));
-        map.put(76606, new StatBlock(80, 0, 160, 0, 0, 0, 0, 0, 0, 0));
-        map.put(76668, new StatBlock(80, 0, 0, 0, 0, 160, 0, 0, 0, 0));
-        map.put(76537, new StatBlock(60, 0, 0, 0, 0, 120, 0, 0, 0, 0));
-        map.put(76686, new StatBlock(80, 0, 0, 0, 0, 0, 0, 0, 0, 160));
-        map.put(76588, StatBlock.of(Haste, 160, Stam, 120));
-        map.put(76654, StatBlock.of(Haste, 160, Stam, 120));
+        addGem2(map, 76537, Primary, 60, Haste, 120);
+        addGem1(map, 76570, Hit, 320);
+        addGem2(map, 76576, Hit, 160, Haste, 160);
+        addGem2(map, 76585, Haste, 160, Spirit, 160);
+        addGem2(map, 76588, Stam, 120, Haste, 160);
+        addGem2(map, 76593, Crit, 160, Expertise, 160);
+        addGem2(map, 76601, Haste, 160, Expertise, 160);
+        addGem2(map, 76603, Primary, 80, Haste, 160);
+        addGem2(map, 76606, Primary, 80, Mastery, 160);
+        addGem2(map, 76615, Hit, 160, Expertise, 160);
+        addGem2(map, 76618, Primary, 80, Hit, 160);
+        addGem1(map, 76627, Expertise, 320);
+        addGem1(map, 76628, Primary, 160);
+        addGem1(map, 76633, Haste, 320);
+        addGem1(map, 76636, Hit, 320);
+        addGem2(map, 76642, Hit, 160, Haste, 160);
+        addGem2(map, 76654, Stam, 120, Haste, 160);
+        addGem2(map, 76667, Haste, 160, Expertise, 160);
+        addGem2(map, 76668, Primary, 80, Haste, 160);
+        addGem2(map, 76669, Primary, 80, Haste, 160);
+        addGem2(map, 76681, Hit, 160, Expertise, 160);
+        addGem2(map, 76682, Primary, 80, Hit, 160);
+        addGem2(map, 76686, Primary, 80, Spirit, 160);
+        addGem1(map, 76693, Expertise, 320);
+        addGem1(map, 76694, Primary, 160);
+        addGem1(map, 76697, Crit, 320);
+        addGem1(map, 76699, Haste, 320);
+        addGem1(map, 76700, Mastery, 320);
     }
 
     private static void gemsEngineering(Map<Integer, StatBlock> map) {
-        map.put(77547, new StatBlock(0, 0, 600, 0, 0, 0, 0, 0, 0, 0));
-        map.put(77541, new StatBlock(0, 0, 0, 600, 0, 0, 0, 0, 0, 0));
-        map.put(77545, new StatBlock(0, 0, 0, 0, 600, 0, 0, 0, 0, 0));
-        map.put(77542, new StatBlock(0, 0, 0, 0, 0, 600, 0, 0, 0, 0));
-        map.put(77543, new StatBlock(0, 0, 0, 0, 0, 0, 600, 0, 0, 0));
-        map.put(77546, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 600));
+        addGem1(map, 77541, Crit, 600);
+        addGem1(map, 77542, Haste, 600);
+        addGem1(map, 77543, Expertise, 600);
+        addGem1(map, 77545, Hit, 600);
+        addGem1(map, 77546, Spirit, 600);
+        addGem1(map, 77547, Mastery, 600);
     }
 
     private static void gemsMeta(Map<Integer, StatBlock> map) {
-        map.put(68778, new StatBlock(54, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(76886, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(76885, new StatBlock(216, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-        map.put(76895, new StatBlock(0, 324, 0, 0, 0, 0, 0, 0, 0, 0)); // tank meta, stam
+        addGem1(map,76885,Primary,216);
+        addGem1(map,76886,Primary,216);
+        addGem1(map,76895,Stam,324);
         map.put(95344, StatBlock.of(Stam, 324));
         map.put(95346, StatBlock.of(Crit, 324));
     }
@@ -132,38 +147,38 @@ public class GemData {
 
     private static Map<Integer, StatBlock> buildEnchant() {
         Map<Integer, StatBlock> map = new HashMap<>();
-        map.put(4419, new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 80)); // chest stats
-        map.put(4411, new StatBlock(0, 0, 170, 0, 0, 0, 0, 0, 0, 0)); // bracer
-        map.put(4432, new StatBlock(170, 0, 0, 0, 0, 0, 0, 0, 0, 0)); // glove
-        map.put(4426, new StatBlock(0, 0, 0, 0, 0, 175, 0, 0, 0, 0)); // foot
-        map.put(4099, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)); // weap
-        map.put(4441, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)); // weap
-        map.put(5001, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)); // shield spike
-        map.put(4412, new StatBlock(0, 0, 0, 0, 0, 0, 0, 170, 0, 0)); // bracer
-        map.put(4427, new StatBlock(0, 0, 0, 0, 175, 0, 0, 0, 0, 0)); // foot
-        map.put(4431, new StatBlock(0, 0, 0, 0, 0, 0, 170, 0, 0, 0)); // hand
-        map.put(4805, new StatBlock(0, 300, 0, 0, 0, 0, 0, 100, 0, 0));
-        map.put(4422, new StatBlock(0, 200, 0, 0, 0, 0, 0, 0, 0, 0)); // back stam
-        map.put(4824, new StatBlock(0, 430, 0, 0, 0, 0, 0, 165, 0, 0)); // leg  tank
-        map.put(4803, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0)); // dps shoulder
-        map.put(4806, new StatBlock(200, 0, 0, 100, 0, 0, 0, 0, 0, 0)); // caster shoulder
-        map.put(4443, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)); // weapon
-        map.put(4420, new StatBlock(0, 300, 0, 0, 0, 0, 0, 0, 0, 0)); // chest stam
-        map.put(4421, new StatBlock(0, 0, 0, 0, 180, 0, 0, 0, 0, 0));// cloak hit
-        map.put(4993, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 170, 0));// shield
-        map.put(4823, new StatBlock(285, 0, 0, 165, 0, 0, 0, 0, 0, 0));// leg dps
-        map.put(4429, new StatBlock(0, 0, 140, 0, 0, 0, 0, 0, 0, 0));// panda feet
-        map.put(4909, new StatBlock(120, 0, 0, 80, 0, 0, 0, 0, 0, 0));// int shoulder
-        map.put(4423, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int back
-        map.put(4430, new StatBlock(0, 0, 0, 0, 0, 170, 0, 0, 0, 0));// hand
-        map.put(4414, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int bracer
-        map.put(4415, new StatBlock(180, 0, 0, 0, 0, 0, 0, 0, 0, 0));// str bracer
-        map.put(4892, new StatBlock(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));// lightweave
-        map.put(4826, new StatBlock(285, 0, 0, 0, 0, 0, 0, 0, 0, 165));// int leg
-        map.put(4434, new StatBlock(165, 0, 0, 0, 0, 0, 0, 0, 0, 0));// int offhand
-        map.put(4424, new StatBlock(0, 0, 0, 180, 0, 0, 0, 0, 0, 0));// cloak crit
-        map.put(4433, StatBlock.of(StatType.Mastery, 170));
-        map.put(4444, StatBlock.empty); // dancing steel
+        addGem0(map, 4099);
+        addGem1(map, 4411, Mastery, 170);
+        addGem1(map, 4412, Dodge, 170);
+        addGem1(map, 4414, Primary, 180);
+        addGem1(map, 4415, Primary, 180);
+        addGemBlock(map, 4419, new StatBlock(80, 80, 0, 0, 0, 0, 0, 0, 0, 80));
+        addGem1(map, 4420, Stam, 300);
+        addGem1(map, 4421, Hit, 180);
+        addGem1(map, 4422, Stam, 200);
+        addGem1(map, 4423, Primary, 180);
+        addGem1(map, 4424, Crit, 180);
+        addGem1(map, 4426, Haste, 175);
+        addGem1(map, 4427, Hit, 175);
+        addGem1(map, 4429, Mastery, 140);
+        addGem1(map, 4430, Haste, 170);
+        addGem1(map, 4431, Expertise, 170);
+        addGem1(map, 4432, Primary, 170);
+        addGem1(map, 4433, Mastery, 170);
+        addGem1(map, 4434, Primary, 165);
+        addGem0(map, 4441);
+        addGem0(map, 4443);
+        addGem0(map, 4444);
+        addGem2(map, 4803, Primary, 200, Crit, 100);
+        addGem2(map, 4805, Stam, 300, Dodge, 100);
+        addGem2(map, 4806, Primary, 200, Crit, 100);
+        addGem2(map, 4823, Primary, 285, Crit, 165);
+        addGem2(map, 4824, Stam, 430, Dodge, 165);
+        addGem2(map, 4826, Primary, 285, Spirit, 165);
+        addGem0(map, 4892);
+        addGem2(map, 4909, Primary, 120, Crit, 80);
+        addGem1(map, 4993, Parry, 170);
+        addGem0(map, 5001);
         return map;
     }
 

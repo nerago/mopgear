@@ -9,13 +9,14 @@ import java.util.stream.Stream;
 public class StatRequirementsHitExpertise implements StatRequirements, StatRequirements.StatRequirementsWithHitExpertise {
     private final int hitMin, hitMax;
     private final int expertiseMin, expertiseMax;
-    private boolean minimiseExpertise;
+    private final boolean minimiseExpertise;
 
     public StatRequirementsHitExpertise(int hitMin, int hitMax, int expertiseMin, int expertiseMax, boolean minimiseExpertise) {
         this.hitMin = hitMin;
         this.hitMax = hitMax;
         this.expertiseMin = expertiseMin;
         this.expertiseMax = expertiseMax;
+        this.minimiseExpertise = minimiseExpertise;
     }
 
     public static StatRequirements ret() {

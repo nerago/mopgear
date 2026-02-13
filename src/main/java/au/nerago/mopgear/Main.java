@@ -66,7 +66,7 @@ public class Main {
 //        everyoneBis();
 
 //        determineRatingMultipliers();
-//        TaskMulti.paladinMultiSpecSolve();
+        TaskMulti.paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        variableRatingProt(startTime);
@@ -75,7 +75,7 @@ public class Main {
 //        allUpgradesProt(startTime);
 
 //        reforgeRet(startTime);
-            reforgeProt(startTime);
+//            reforgeProt(startTime);
 
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
@@ -249,99 +249,107 @@ public class Main {
 //        reforgeProcessPlusMany(items, model, startTime, new CostedItem[]{new CostedItem(87110, 0), new CostedItem(87100, 0), new CostedItem(86661, 0)});
 
 
-        reforgeProcessPlusMany(items, model, startTime, new int[]{
-                87026, // heroic peacock cloak
+//        reforgeProcessPlusMany(items, model, startTime, new int[]{
+//                87026, // heroic peacock cloak
+//
+//                86979, // heroic impaling treads
+//                87015, // heroic clawfeet
+//
+//                95142, // striker's battletags
+//                95205, // terra-cotta neck
+//                87036, // soulgrasp heroic
+//
+////                86957, // heroic bladed tempest ring
+////                95140, // shado assault band
+////                86946, // ruby signet heroic
+////                95513, // scaled tyrant normal
+//
+//                }, 2, false, null, false, commonItems);
 
-                86979, // heroic impaling treads
-                87015, // heroic clawfeet
+//        public static void reforgeProcessPlusMany(EquipOptionsMap items, ModelCombined model, Instant startTime, int[] extraItems, int upgradeLevel, boolean alternateEnchants, Predicate<SolvableItemSet> specialFilter, boolean phasedAcceptable, Map<Integer, List<ReforgeRecipe>> commonFixedItems) {
+                reforgeProcessPlusMany(items, model, startTime, new int[]{
+                        86957, // heroic bladed tempest
+                        85343, // normal ret chest
 
-                95142, // striker's battletags
-                95205, // terra-cotta neck
-                87036, // soulgrasp heroic
+                        87015, // heroic clawfeet
+                        86979, // heroic impaling treads
+                        87071, // yang-xi heroic
+                        87145, // defiled earth
+                        85340, // normal ret legs
+                        87101, // heroic ret head
+                        86946, // ruby signet heroic
+                        94726, // cloudbreaker belt
 
-//                86957, // heroic bladed tempest ring
-//                95140, // shado assault band
-//                86946, // ruby signet heroic
-//                95513, // scaled tyrant normal
+                        87026, // heroic peacock cloak
+                        86955, // heroic overwhelm assault belt
+                        95535, // normal lightning legs
 
-                }, 2, false, null, false, commonItems);
+                        87050, // steelskin heroic
+                        95768, // greatshield gloaming celestial
+                        95652, // Puncture-Proof Greathelm head
+                        95687, // celestial beakbreaker cloak
 
+                        95142, // striker's battletags
+                        95205, // terra-cotta neck
+                        87036, // soulgrasp heroic
 
-//                reforgeProcessPlusMany(items, model, startTime, new int[]{
-//                                86979, // heroic impaling treads
-//                                86957, // heroic bladed tempest
-//                                85343, // normal ret chest
-//
-//                                87015, // heroic clawfeet
-//                                86979, // heroic impaling treads
-//                                87071, // yang-xi heroic
-//                                87145, // defiled earth
-//                                85340, // normal ret legs
-//                                87101, // heroic ret head
-//                                86946, // ruby signet heroic
-//                                94726, // cloudbreaker belt
-//
-//                                87026, // heroic peacock cloak
-//                                86955, // heroic overwhelm assault belt
-//                                95535, // normal lightning legs
-//
-//                                87050, // steelskin heroic
-//                                95768, // greatshield gloaming celestial
-//                                95652, // Puncture-Proof Greathelm head
-//                                95687, // celestial beakbreaker cloak
-//
-//                                95142, // striker's battletags
-//                                95205, // terra-cotta neck
-//                                87036, // soulgrasp heroic
-//
-//                        95513, // scaled tyrant normal
-//
-//                        86979, // heroic impaling treads
-//                        87024, // null greathelm
-//
-//                        94726, // cloudbreaker belt
-//                        86955, // heroic overwhelm assault belt
-//
-//                        87026, // heroic peacock cloak
-//                        86325, // daybreak
-//
-//                        95535, // normal lightning legs
-//
-//                                85340, // ret tier14 legs
-//                                87101, // ret tier14 head
-//                                85339, // ret tier14 shoulder
-//                                85343, // ret tier14 chest
-//                                87100, // ret tier14 hands
-//
-//                                95914, // ret tier15 shoulder celestial
-//                                95910, // ret tier15 chest celestial
-//                                95911, // ret tier15 gloves celestial
-//
-//                        95291, // prot tier15 hand normal
-//                        95920, // prot tier15 chest celestial (don't have yet)
-//                        95292, // prot tier15 head normal
-//                        96667, // prot tier15 leg heroic
-//                        95924, // prot tier15 shoulder celestial
-//
-//                        95142, // striker's battletags
-//                        95205, // terra-cotta neck
-//
-//                        96182, // ultimate prot of the emperor thunder
-//
-//                                94773, // centripetal shoulders normal
-//                                95140, // shado assault band
-//
-//                                87145, // defiled earth
-//                                89934, // soul bracer
-//                        94820, // caustic spike bracers
-//
-////                        87063, // vial of dragon's blood
-//                        95178, // Lootraptor's Amulet
-//                        96468, // talonrender chest
-//
-//                        95976, // celestial belt zand bucklebreaker
-//
-//                        }, 2, false, null);
+                        86979, // heroic impaling treads
+                        87024, // null greathelm
+
+                        94726, // cloudbreaker belt
+                        86955, // heroic overwhelm assault belt
+
+                        87026, // heroic peacock cloak
+                        86325, // daybreak
+                        94942, // hydra bloodcloak
+
+                        95535, // normal lightning legs
+
+                        85340, // ret tier14 legs
+                        87101, // ret tier14 head
+                        85339, // ret tier14 shoulder
+                        85343, // ret tier14 chest
+                        87100, // ret tier14 hands
+
+                        95914, // ret tier15 shoulder celestial
+                        95910, // ret tier15 chest celestial
+                        95911, // ret tier15 gloves celestial
+
+                        95291, // prot tier15 hand normal
+                        95920, // prot tier15 chest celestial (don't have yet)
+                        95292, // prot tier15 head normal
+                        96667, // prot tier15 leg heroic
+                        95924, // prot tier15 shoulder celestial
+
+                        95142, // striker's battletags
+                        95205, // terra-cotta neck
+                        95178, // lootraptor amulet
+                        94776, // primal turtle amulet
+
+                        96182, // ultimate prot of the emperor thunder
+
+                        94773, // centripetal shoulders normal
+                        96468, // talonrender chest heroic
+                        96533, // rein-binders fists heroic
+
+                        95140, // shado assault band
+                        95513, // scaled tyrant normal
+
+                        95291, // prot tier15 hand normal
+                        95920, // prot tier15 chest celestial
+                        95292, // prot tier15 head normal
+                        96667, // prot tier15 leg heroic
+                        96668, // prot tier15 shoulder heroic
+
+                        96182, // ultimate prot of the emperor thunder
+
+                        87145, // defiled earth
+                        89934, // soul bracer
+                        94820, // caustic spike bracers
+
+                        96376, // worldbreaker weapon
+
+                        }, 2, false, null, false, commonItems);
 
 
 
@@ -424,13 +432,13 @@ public class Main {
         EquipOptionsMap itemsMitigation = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, modelMitigation, null, PrintRecorder.swallow());
         EquipOptionsMap itemsDps = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, modelDps, null, PrintRecorder.swallow());
 
-//        CostedItem[] upgradeNormal = throneProtLootMinusRaden(Difficulty.Normal);
-//        CostedItem[] upgradeHeroic = throneProtLootMinusRaden(Difficulty.Heroic);
+        CostedItem[] upgradeNormal = throneProtLootMinusRaden(Difficulty.Normal);
+        CostedItem[] upgradeHeroic = throneProtLootMinusRaden(Difficulty.Heroic);
 
-        CostedItem[] upgradeNormal = new CostedItem[0];
-        CostedItem[] upgradeHeroic = new CostedItem[] {new CostedItem(96476, 0)};
+//        CostedItem[] upgradeNormal = new CostedItem[0];
+//        CostedItem[] upgradeHeroic = new CostedItem[] {new CostedItem(96476, 0)};
 
-        int multiply = 75; // 25
+        int multiply = 50; // 25 75
 
         OutputText.println("[[[[[[[[[[[[[[[[[[[[ PALLY PROT DPS normal UPGRADES ]]]]]]]]]]]]]]]]]]]]");
         List<UpgradeResultItem> outNormalDps = findUpgrade(itemsDps, upgradeNormal, modelDps, false, null, 2, multiply);
@@ -590,20 +598,21 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 06/02/2026
-        map.put(86979, List.of(new ReforgeRecipe(Hit, Expertise))); // Foot Impaling Treads
+        // 13/02/2026
+        map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
         map.put(96182, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Ultimate Protection of the Emperor
-        map.put(95535, List.of(new ReforgeRecipe(Haste, Expertise))); // Leg Legplates of the Lightning Throne
+        map.put(95535, List.of(new ReforgeRecipe(null, null))); // Leg Legplates of the Lightning Throne
         map.put(94526, List.of(new ReforgeRecipe(null, null))); // Trinket Spark of Zandalar
-        map.put(95140, List.of(new ReforgeRecipe(null, null))); // Ring Band of the Shado-Pan Assault
         map.put(94519, List.of(new ReforgeRecipe(Crit, Haste))); // Trinket Primordius' Talisman of Rage
-        map.put(87024, List.of(new ReforgeRecipe(Crit, Expertise))); // Head Nullification Greathelm
-        map.put(95513, List.of(new ReforgeRecipe(Hit, Expertise))); // Ring Band of the Scaled Tyrant
+        map.put(87024, List.of(new ReforgeRecipe(Haste, Expertise))); // Head Nullification Greathelm
+        map.put(95513, List.of(new ReforgeRecipe(Hit, Crit))); // Ring Band of the Scaled Tyrant
         map.put(96468, List.of(new ReforgeRecipe(Hit, Haste))); // Chest Talonrender Chestplate
-        map.put(94726, List.of(new ReforgeRecipe(Mastery, Hit))); // Belt Cloudbreaker Greatbelt
+        map.put(94726, List.of(new ReforgeRecipe(Mastery, Crit))); // Belt Cloudbreaker Greatbelt
         map.put(94820, List.of(new ReforgeRecipe(Crit, Haste))); // Wrist Caustic Spike Bracers
-        map.put(94942, List.of(new ReforgeRecipe(Expertise, Haste))); // Back Hydra-Scale Bloodcloak
-        map.put(96376, List.of(new ReforgeRecipe(Expertise, Haste))); // Weapon1H Worldbreaker's Stormscythe
+        map.put(86957, List.of(new ReforgeRecipe(Expertise, Hit))); // Ring Ring of the Bladed Tempest
+        map.put(94942, List.of(new ReforgeRecipe(Crit, Haste))); // Back Hydra-Scale Bloodcloak
+        map.put(96376, List.of(new ReforgeRecipe(Hit, Crit))); // Weapon1H Worldbreaker's Stormscythe
+        map.put(96533, List.of(new ReforgeRecipe(Haste, Expertise))); // Hand Rein-Binder's Fists
         return map;
     }
 

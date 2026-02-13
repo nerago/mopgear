@@ -178,13 +178,15 @@ public class BigStreamUtil {
     }
 
     public static Stream<BigInteger> generateDumbStream(BigInteger max, BigInteger skip) {
-        long start = ThreadLocalRandom.current().nextLong(0, skip.longValueExact());
+        long start = 0;
+//        long start = ThreadLocalRandom.current().nextLong(0, skip.longValueExact());
 //        return Stream.iterate(BigInteger.valueOf(start), x -> x.compareTo(max) < 0, x -> x.add(skip));
         return StreamSupport.stream(new SpliteratorIterateBigInteger(BigInteger.valueOf(start), max, skip), true);
     }
 
     public static LongStream generateDumbStream(long max, long skip) {
-        long start = ThreadLocalRandom.current().nextLong(0, skip);
+        long start = 0;
+//        long start = ThreadLocalRandom.current().nextLong(0, skip);
 //        return Stream.iterate(start, x -> x < max, x -> x + skip);
         return StreamSupport.longStream(new SpliteratorIterateLong(start, max, skip), true);
     }

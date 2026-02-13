@@ -16,7 +16,7 @@ public class GemChoice {
     private static final GemInfo HASTE_INFO = new GemInfo(76699, StatBlock.of(Haste, 320));
     public static final GemInfo HASTE_EXP_INFO = new GemInfo(76667, StatBlock.of(StatType.Haste, 160, StatType.Expertise, 160));
     public static final GemInfo HASTE_STAM_INFO = new GemInfo(76588, StatBlock.of(StatType.Haste, 160, StatType.Stam, 120));
-    public static final GemInfo HASTE_HIT_INFO = new GemInfo(76588, StatBlock.of(StatType.Haste, 160, StatType.Hit, 160));
+    public static final GemInfo HASTE_HIT_INFO = new GemInfo(76576, StatBlock.of(StatType.Haste, 160, StatType.Hit, 160));
     public static final GemInfo HASTE_ENG_INFO = new GemInfo(77542, StatBlock.of(StatType.Haste, 600));
     private final GemInfo alternateBestGem;
     protected final EnumMap<SocketType, GemInfo> chosen;

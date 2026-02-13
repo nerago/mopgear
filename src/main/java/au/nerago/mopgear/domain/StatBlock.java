@@ -3,7 +3,9 @@ package au.nerago.mopgear.domain;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("ClassCanBeRecord")
 public final class StatBlock {
@@ -220,13 +222,27 @@ public final class StatBlock {
     }
 
     public boolean hasSingleStat() {
+        return nonZeroCount() == 1;
+    }
+
+    public int nonZeroCount() {
         int count = 0;
         for (int i = 0; i < VALUES_SIZE; ++i) {
             if (values[i] != 0) {
                 count++;
             }
         }
-        return count == 1;
+        return count;
+    }
+
+    public List<StatType> nonZeroStats() {
+        List<StatType> stat = new ArrayList<>();
+        for (int i = 0; i < VALUES_SIZE; ++i) {
+            if (values[i] != 0) {
+                stat.add(StatType.values()[i]);
+            }
+        }
+        return stat;
     }
 
     public boolean equalsStats(StatBlock stats) {
