@@ -146,7 +146,6 @@ public class FindMultiSpec {
             StreamNeedClose<ProposedResults> resultStream = commonStream
                     .map(r -> subSolveEach(r, specs))
                     .filter(Objects::nonNull)
-                    .filter(s -> checkGood(s.resultJobs, specs))
                     .unordered()
                     .parallel();
 
@@ -288,9 +287,20 @@ public class FindMultiSpec {
             List<JobOutput> results = new ArrayList<>();
             for (SpecDetails spec : specList) {
                 JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonChoices);
+                
                 if (job.resultSet.isEmpty()) {
+                    job.println("UNEXPECTED SOLVE FAILURE FOR " + spec.label + " WITH\n"
+                        + commonChoices.values().stream().map(x -> "\t" + x.toString()).collect(Collectors.joining("\n")));
                     return null;
                 }
+
+                if (spec.worstCommonPenalty != 0) {
+                    long jobRating = job.resultRating;
+                    double penalty = jobRating / spec.optimalRating * 100.0;
+                    if (penalty < spec.worstCommonPenalty)
+                        return null;
+                }
+
                 results.add(job);
             }
             return new ProposedResults(UUID.randomUUID(), results, commonChoices);
@@ -385,24 +395,6 @@ public class FindMultiSpec {
                     }
                 }
         );
-    }
-
-    private boolean checkGood(List<JobOutput> resultJobs, List<SpecDetails> specList) {
-        for (int i = 0; i < resultJobs.size(); ++i) {
-            JobOutput job = resultJobs.get(i);
-            SpecDetails spec = specList.get(i);
-            long jobRating = job.resultRating;
-
-            if (job.resultSet.isEmpty())
-                return false;
-
-            if (spec.worstCommonPenalty != 0) {
-                double penalty = jobRating / spec.optimalRating * 100.0;
-                if (penalty < spec.worstCommonPenalty)
-                    return false;
-            }
-        }
-        return true;
     }
 
     private long multiRating(List<JobOutput> resultJobs, List<SpecDetails> specList) {
@@ -629,11 +621,14 @@ public class FindMultiSpec {
                 outputOptions.add(buildDerivedFinalOptions(draftJob, spec, commonFinal, resultSets));
             }
 
-            BasicPermute.process(outputOptions)
+            List<ProposedResults> validMixedSolutions = BasicPermute.process(outputOptions)
                     .filter(this::checkNoConflicts)
                     .map(choices -> new ProposedResults(UUID.randomUUID(), choices, commonFinal))
                     .peek(prop -> OutputText.println(">&>&>& " + prop.resultId))
-                    .forEach(downstream);
+                    .toList();
+            if (validMixedSolutions.isEmpty())
+                throw new IllegalStateException("shouldn't be able to eliminate all");
+            validMixedSolutions.forEach(downstream);
         }
 
         private boolean checkNoConflicts(List<JobOutput> jobOutputs) {

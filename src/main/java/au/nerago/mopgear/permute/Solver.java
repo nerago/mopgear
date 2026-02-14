@@ -3,6 +3,7 @@ package au.nerago.mopgear.permute;
 import au.nerago.mopgear.domain.SolvableEquipOptionsMap;
 import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.model.ModelCombined;
+import au.nerago.mopgear.process.FallbackCappedSetReport;
 import au.nerago.mopgear.process.Tweaker;
 import au.nerago.mopgear.results.JobInput;
 import au.nerago.mopgear.results.JobOutput;
@@ -102,6 +103,10 @@ public class Solver {
 //        if (output.resultSet.isEmpty() && job.hackAllow) {
 //            output.resultSet = FallbackCappedSetBuilder.fallbackLimits(model, itemOptions, adjustment, output);
 //        }
+
+        if (output.resultSet.isEmpty()) {
+            FallbackCappedSetReport.reportIfSetShouldExist(model, itemOptions, adjustment, output);
+        }
 
         output.resultSet = output.resultSet.map(set -> Tweaker.tweak(set, model, itemOptions, job.specialFilter));
 

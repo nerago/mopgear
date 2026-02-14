@@ -16,8 +16,8 @@ public class TaskMulti {
     public static void paladinMultiSpecSolve() {
         FindMultiSpec multi = new FindMultiSpec(1);
 
-        multi.addFixedForge(94519, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
-        multi.addFixedForge(94526, ReforgeRecipe.empty()); // zandalar trinket
+//        multi.addFixedForge(94519, new ReforgeRecipe(Crit, Haste)); // Primordius trinket
+//        multi.addFixedForge(94526, ReforgeRecipe.empty()); // zandalar trinket
 //        multi.addFixedForge(87050, new ReforgeRecipe(Parry, Haste)); // Offhand Steelskin, Qiang's Impervious Shield
 //        multi.addFixedForge(87026, new ReforgeRecipe(Expertise, Haste)); // Back Cloak of Peacock Feathers
 //        multi.addFixedForge(86957, new ReforgeRecipe(null, null)); // Ring Ring of the Bladed Tempest
@@ -95,7 +95,7 @@ public class TaskMulti {
                                 87024, // null greathelm
                                 94942, // hydra bloodcloak
 
-//                                87026, // heroic peacock cloak
+                                87026, // heroic peacock cloak
                                 86955, // heroic overwhelm assault belt
                                 95535, // normal lightning legs
                                 94773, // centripetal shoulders normal
@@ -109,15 +109,15 @@ public class TaskMulti {
 //                                96667, // prot tier15 leg heroic
 //                                96668, // prot tier15 shoulder heroic
 
-//                                95142, // striker's battletags
+                                95142, // striker's battletags
                                 95205, // terra-cotta neck
 //                                87036, // soulgrasp heroic
                                 94776, // primal turtle amulet
 
                                 96182, // ultimate prot of the emperor thunder
 
-//                                87145, // defiled earth
-//                                89934, // soul bracer
+                                87145, // defiled earth
+                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 96376, // worldbreaker weapon
@@ -206,8 +206,8 @@ public class TaskMulti {
 //        multi.solve(1490000);
 //        multi.solve(4000000);
 
-//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(2000, 4);
-        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(350000, 30);
+        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(2000, 4);
+//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(350000, 30);
         new FindMultiSpecSim(multi).process(select);
     }
 }

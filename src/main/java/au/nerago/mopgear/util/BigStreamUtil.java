@@ -188,6 +188,7 @@ public class BigStreamUtil {
         long start = 0;
 //        long start = ThreadLocalRandom.current().nextLong(0, skip);
 //        return Stream.iterate(start, x -> x < max, x -> x + skip);
+        // TODO suspicious of these new classes
         return StreamSupport.longStream(new SpliteratorIterateLong(start, max, skip), true);
     }
 }
