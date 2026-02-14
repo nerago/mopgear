@@ -27,7 +27,12 @@ public class JobOutput {
         input.printRecorder.printf(format, args);
     }
 
+    private Optional<FullItemSet> finalResultSet;
+    @SuppressWarnings("OptionalAssignedToNull")
     public Optional<FullItemSet> getFinalResultSet() {
-        return resultSet.map(set -> FullItemSet.ofSolvable(set, ItemMapUtil.mapperToFullItems(input.fullItemOptions)));
+        if (finalResultSet == null) {
+            finalResultSet = resultSet.map(set -> FullItemSet.ofSolvable(set, ItemMapUtil.mapperToFullItems(input.fullItemOptions)));
+        }
+        return finalResultSet;
     }
 }

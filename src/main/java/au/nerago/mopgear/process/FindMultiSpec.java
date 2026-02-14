@@ -13,6 +13,7 @@ import au.nerago.mopgear.permute.Solver;
 import au.nerago.mopgear.results.*;
 import au.nerago.mopgear.util.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.nio.file.Path;
@@ -56,8 +57,8 @@ public class FindMultiSpec {
         this.multiSetFilter = multiSetFilter;
     }
 
-    public SpecDetailsInterface addSpec(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
-        SpecDetails spec = new SpecDetails(label, gearFile, model, ratingTargetPercent, phasedAcceptable, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
+    public SpecDetailsInterface addSpec(String label, boolean firstPass, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+        SpecDetails spec = new SpecDetails(label, firstPass, gearFile, model, ratingTargetPercent, phasedAcceptable, extraItems, extraItemsUpgradeLevel, upgradeCurrentItems);
         specs.add(spec);
         return spec;
     }
@@ -194,18 +195,20 @@ public class FindMultiSpec {
             return result.stream();
         }
 
-        private Map<ItemRef, List<FullItemData>> commonInMultiSet(List<SpecDetails> mapArray) {
+        private Map<ItemRef, List<FullItemData>> commonInMultiSet(List<SpecDetails> specArray) {
             Map<ItemRef, List<FullItemData>> commonOptions = new HashMap<>();
             Map<ItemRef, Set<String>> seenIn = new HashMap<>();
 
             // initially group items by id/upgrade, filtering common forges for each
-            for (SpecDetails spec : mapArray) {
-                spec.itemOptions.itemStream()
-                        .collect(Collectors.groupingBy(FullItemData::ref))
-                        .forEach((ref, forges) -> {
-                            seenIn.computeIfAbsent(ref, r -> new HashSet<>()).add(spec.label);
-                            commonOptions.compute(ref, (r, prior) -> commonForges(prior, forges));
-                        });
+            for (SpecDetails spec : specArray) {
+                if (spec.firstPass) {
+                    spec.itemOptions.itemStream()
+                            .collect(Collectors.groupingBy(FullItemData::ref))
+                            .forEach((ref, forges) -> {
+                                seenIn.computeIfAbsent(ref, r -> new HashSet<>()).add(spec.label);
+                                commonOptions.compute(ref, (r, prior) -> commonForges(prior, forges));
+                            });
+                }
             }
 
             // apply fixed forges run setting. should the input be ref or id based?
@@ -234,7 +237,7 @@ public class FindMultiSpec {
 
                 // check for empty lists
                 if (lst.isEmpty()) {
-                    Optional<FullItemData> any = mapArray.stream().flatMap(x -> x.itemOptions.itemStream())
+                    Optional<FullItemData> any = specArray.stream().flatMap(x -> x.itemOptions.itemStream())
                             .filter(item -> ref.equalsTyped(item.ref())).findFirst();
                     throw new IllegalArgumentException("No common forge for " + ref + " " + any);
                 }
@@ -286,24 +289,66 @@ public class FindMultiSpec {
         private ProposedResults subSolveEach(Map<ItemRef, FullItemData> commonChoices, List<SpecDetails> specList) {
             List<JobOutput> results = new ArrayList<>();
             for (SpecDetails spec : specList) {
-                JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonChoices);
-                
-                if (job.resultSet.isEmpty()) {
-                    job.println("UNEXPECTED SOLVE FAILURE FOR " + spec.label + " WITH\n"
-                        + commonChoices.values().stream().map(x -> "\t" + x.toString()).collect(Collectors.joining("\n")));
-                    return null;
+                if (spec.firstPass) {
+                    JobOutput job = firstPassSpecSolve(commonChoices, spec);
+                    if (job == null) return null;
+                    results.add(job);
+                } else {
+                    results.add(null);
                 }
-
-                if (spec.worstCommonPenalty != 0) {
-                    long jobRating = job.resultRating;
-                    double penalty = jobRating / spec.optimalRating * 100.0;
-                    if (penalty < spec.worstCommonPenalty)
-                        return null;
+            }
+            for (int i = 0; i < specList.size(); ++i) {
+                SpecDetails spec = specList.get(i);
+                if (!spec.firstPass) {
+                    JobOutput job = secondPassSpecSolve(commonChoices, spec, results);
+                    if (job == null) return null;
+                    results.set(i, job);
                 }
-
-                results.add(job);
             }
             return new ProposedResults(UUID.randomUUID(), results, commonChoices);
+        }
+
+        private @Nullable JobOutput firstPassSpecSolve(Map<ItemRef, FullItemData> commonChoices, SpecDetails spec) {
+            JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, commonChoices);
+
+            if (job.resultSet.isEmpty()) {
+                job.println("UNEXPECTED SOLVE FAILURE FOR " + spec.label + " WITH\n"
+                        + commonChoices.values().stream().map(x -> "\t" + x.toString()).collect(Collectors.joining("\n")));
+                job.input.printRecorder.outputNow();
+                return null;
+            }
+
+            if (spec.worstCommonPenalty != 0) {
+                long jobRating = job.resultRating;
+                double penalty = jobRating / spec.optimalRating * 100.0;
+                if (penalty < spec.worstCommonPenalty)
+                    return null;
+            }
+
+            return job;
+        }
+
+        private JobOutput secondPassSpecSolve(Map<ItemRef, FullItemData> commonChoices, SpecDetails spec, List<JobOutput> firstPassResults) {
+            // TODO should we use overall common map, or only derived portion
+            // performance argues for just using all of it
+            HashMap<ItemRef, FullItemData> derivedCommon = new HashMap<>(commonChoices);
+            firstPassResults.stream()
+                    .filter(Objects::nonNull)
+                    .flatMap(job -> job.getFinalResultSet().orElseThrow().items().itemStream())
+                    .forEach(item -> derivedCommon.put(item.ref(), item));
+
+            JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, derivedCommon);
+
+            if (job.resultSet.isEmpty()) {
+                throw new RuntimeException("UNEXPECTED SECOND PASS FAILURE FOR " + spec.label + " WITH\n"
+                        + commonChoices.values().stream().map(x -> "\t" + x.toString()).collect(Collectors.joining("\n")));
+            }
+
+            if (spec.worstCommonPenalty != 0) {
+                throw new RuntimeException("second pass job should not have a worst penalty check");
+            }
+
+            return job;
         }
 
         private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap) {
@@ -781,6 +826,7 @@ public class FindMultiSpec {
         final Path gearFile;
         final ModelCombined model;
         final double ratingTargetPercent;
+        final boolean firstPass;
         int ratingMultiply;
         final boolean phasedAcceptable;
         final int[] extraItems;
@@ -797,8 +843,9 @@ public class FindMultiSpec {
         EquipOptionsMap itemOptions;
         final Map<Integer, AtomicInteger> itemsSeenInSolutions = new HashMap<>();
 
-        private SpecDetails(String label, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
+        private SpecDetails(String label, boolean firstPass, Path gearFile, ModelCombined model, double ratingTargetPercent, boolean phasedAcceptable, int[] extraItems, int extraItemsUpgradeLevel, boolean upgradeCurrentItems) {
             this.label = label;
+            this.firstPass = firstPass;
             this.gearFile = gearFile;
             this.model = model;
             this.ratingTargetPercent = ratingTargetPercent;

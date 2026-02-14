@@ -490,6 +490,7 @@ public class Tasks {
 
         multi.addSpec(
                 "BOOM",
+                true,
                 DataLocation.gearBoomFile,
                 StandardModels.modelFor(SpecType.DruidBoom),
                 0.5,
@@ -506,6 +507,7 @@ public class Tasks {
 
         multi.addSpec(
                 "TREE",
+                true,
                 DataLocation.gearTreeFile,
                 StandardModels.modelFor(SpecType.DruidTree),
                 0.5,
