@@ -103,8 +103,6 @@ public class FindMultiSpec {
         }
 
         private StreamNeedClose<Map<ItemRef, FullItemData>> makeCommonStream(long targetComboCount, Map<ItemRef, List<FullItemData>> commonMap) {
-            // TODO keep track of good indexes and search near
-
             Stream<Map<ItemRef, FullItemData>> commonStream;
             long estimateRun;
             BigInteger commonCombosBig = BigStreamUtil.estimateSets(commonMap);
@@ -314,7 +312,8 @@ public class FindMultiSpec {
             if (job.resultSet.isEmpty()) {
                 job.println("UNEXPECTED SOLVE FAILURE FOR " + spec.label + " WITH\n"
                         + commonChoices.values().stream().map(x -> "\t" + x.toString()).collect(Collectors.joining("\n")));
-                job.input.printRecorder.outputNow();
+//                job.input.printRecorder.outputNow();
+                OutputText.println("UNEXPECTED SOLVE FAILURE FOR " + spec.label);
                 return null;
             }
 
@@ -340,8 +339,10 @@ public class FindMultiSpec {
             JobOutput job = subSolvePart(spec.itemOptions, spec.model, spec.phasedAcceptable, derivedCommon);
 
             if (job.resultSet.isEmpty()) {
-                throw new RuntimeException("UNEXPECTED SECOND PASS FAILURE FOR " + spec.label + " WITH\n"
+                job.println("UNEXPECTED SECOND PASS FAILURE FOR " + spec.label + " WITH\n"
                         + commonChoices.values().stream().map(x -> "\t" + x.toString()).collect(Collectors.joining("\n")));
+                OutputText.println("UNEXPECTED SECOND PASS FAILURE FOR " + spec.label);
+                return null;
             }
 
             if (spec.worstCommonPenalty != 0) {
@@ -510,7 +511,7 @@ public class FindMultiSpec {
         return chosenMap;
     }
 
-    private double processRevisedSet(String label, JobOutput revisedJob, SpecDetails spec, FullItemSet draftFullSet, double draftSpecRating) {
+    private double processRevisedSet(String label, JobOutput revisedJob, SpecDetails spec, FullItemSet draftFullSet, double draftSpecRating, boolean alwaysListSet) {
         FullItemSet revisedSet = null;
         double revisedSpecRating = 0;
         if (revisedJob.resultSet.isPresent()) {
@@ -519,8 +520,9 @@ public class FindMultiSpec {
             spec.recordSolutionSeen(revisedSet);
         }
 
-        if (revisedSet != null && revisedSpecRating > draftSpecRating) {
-            OutputText.printf("%s %,d\n", label, (long) revisedSpecRating);
+        if (revisedSet != null && (revisedSpecRating > draftSpecRating || alwaysListSet)) {
+            double percentImproved = (revisedSpecRating - draftSpecRating) / draftSpecRating * 100;
+            OutputText.printf("%s rating=%,d improvement=%.2f\n", label, (long) revisedSpecRating, percentImproved);
             revisedJob.input.printRecorder.outputNow();
             revisedSet.outputSetDetailedComparing(spec.model, draftFullSet);
             AsWowSimJson.writeFullToOut(revisedSet.items(), spec.model);
@@ -605,11 +607,11 @@ public class FindMultiSpec {
 
                     EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
                     JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, Final);
-                    double revisedSpecRating = processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
+                    double revisedSpecRating = processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating, false);
 
                     EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
                     JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, Final);
-                    double reenchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
+                    double reenchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating, false);
 
                     double specRating = Math.max(draftSpecRating, Math.max(revisedSpecRating, reenchantSpecRating));
                     OutputText.printf("COMMON ITEM PENALTY PERCENT %1.3f\n", specRating / spec.optimalRating * 100.0);
@@ -710,7 +712,7 @@ public class FindMultiSpec {
             if (revisedJob.resultSet.isPresent()) {
                 EquipMap revisedItems = revisedJob.getFinalResultSet().orElseThrow().items();
                 if (!draftSet.items().equalsTypedSwappable(revisedItems)) {
-                    processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating);
+                    processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating, true);
                     outputOptions.add(revisedJob);
                 } else {
                     OutputText.println("REVISED unchanged");
@@ -724,7 +726,7 @@ public class FindMultiSpec {
             if (reenchantJob.resultSet.isPresent()) {
                 EquipMap reenchantItems = reenchantJob.getFinalResultSet().orElseThrow().items();
                 if (!draftSet.items().equalsTypedSwappable(reenchantItems) && !reenchantItems.equalsTypedSwappable(reenchantItems)) {
-                    processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating);
+                    processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating, true);
                     outputOptions.add(reenchantJob);
                 } else {
                     OutputText.println("RE-ENCHANT unchanged");

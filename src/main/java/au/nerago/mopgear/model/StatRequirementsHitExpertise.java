@@ -46,7 +46,7 @@ public class StatRequirementsHitExpertise implements StatRequirements, StatRequi
 
     public static StatRequirements protFlexibleParry() {
         return new StatRequirementsHitExpertise(
-                StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_MELEE + StatRequirements.DEFAULT_CAP_ALLOW_EXCEED * 2,
+                StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_MELEE + 1000,
                 StatRequirements.TARGET_RATING_MELEE, StatRequirements.TARGET_RATING_TANK,
                 false);
     }
