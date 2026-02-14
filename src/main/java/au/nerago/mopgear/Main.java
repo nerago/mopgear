@@ -727,9 +727,9 @@ public class Main {
         ModelCombined modelProt = StandardModels.modelFor(SpecType.PaladinProtMitigation);
 
         OutputText.println("RET GEAR CURRENT");
-        List<FullItemData> retItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearRetFile), modelRet.enchants(), PrintRecorder.withAutoOutput());
+        List<FullItemData> retItems = ItemLoadUtil.loadItemsFromGearFile(InputGearParser.readInput(DataLocation.gearRetFile), modelRet.enchants(), PrintRecorder.withAutoOutput());
         OutputText.println("PROT GEAR CURRENT");
-        List<FullItemData> protItems = ItemLoadUtil.loadItems(InputGearParser.readInput(DataLocation.gearProtDpsFile), modelProt.enchants(), PrintRecorder.withAutoOutput());
+        List<FullItemData> protItems = ItemLoadUtil.loadItemsFromGearFile(InputGearParser.readInput(DataLocation.gearProtDpsFile), modelProt.enchants(), PrintRecorder.withAutoOutput());
 
         Map<SlotEquip, ReforgeRecipe> reforgeRet = new EnumMap<>(SlotEquip.class);
         reforgeRet.put(SlotEquip.Head, new ReforgeRecipe(null, null));

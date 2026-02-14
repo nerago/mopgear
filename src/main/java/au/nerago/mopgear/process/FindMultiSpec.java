@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static au.nerago.mopgear.ItemLoadUtil.loadItems;
+import static au.nerago.mopgear.ItemLoadUtil.loadItemsFromBagsFile;
 import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
@@ -974,10 +974,15 @@ public class FindMultiSpec {
                 addToSlot(otherCopies);
                 return true;
             } else {
-                Optional<FullItemData> baseItem = loadItems(bagsGear, model.enchants(), PrintRecorder.swallow()).stream()
+                Optional<FullItemData> baseItem = loadItemsFromBagsFile(bagsGear, model.enchants(), PrintRecorder.swallow(), extraItemsUpgradeLevel).stream()
                         .filter(item -> item.itemId() == itemId)
                         .findAny();
                 if (baseItem.isPresent()) {
+                    // TODO bags file doesn't have upgrade steps so check again
+                    if (baseItem.get().ref().upgradeLevel() == 0 && ItemLoadUtil.loadItemBasic(baseItem.get().itemId(), 2, PrintRecorder.swallow()).ref().upgradeLevel() == 2) {
+                        throw new RuntimeException("offering extra item from bags that isn't upgraded: " + baseItem.get().toStringExtended());
+                    }
+
                     loadAndGenerate(baseItem.get());
                     return true;
                 }

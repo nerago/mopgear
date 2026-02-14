@@ -44,7 +44,7 @@ public class ItemLoadUtil {
 
     public static EquipOptionsMap readAndLoad(Path file, ReforgeRules reforge, DefaultEnchants enchants, Map<Integer, List<ReforgeRecipe>> presetForge, PrintRecorder printer) {
         List<EquippedItem> itemIds = InputGearParser.readInput(file);
-        List<FullItemData> items = loadItems(itemIds, enchants, printer);
+        List<FullItemData> items = loadItemsFromGearFile(itemIds, enchants, printer);
         EquipOptionsMap result = presetForge != null
                 ? ItemMapUtil.limitedItemsReforgedToMap(reforge, items, presetForge)
                 : ItemMapUtil.standardItemsReforgedToMap(reforge, items);
@@ -90,9 +90,20 @@ public class ItemLoadUtil {
         itemCache.cacheSave();
     }
 
-    public static List<FullItemData> loadItems(List<EquippedItem> itemIds, DefaultEnchants enchants, PrintRecorder printer) {
+    public static List<FullItemData> loadItemsFromGearFile(List<EquippedItem> itemIds, DefaultEnchants enchants, PrintRecorder printer) {
         List<FullItemData> items = new ArrayList<>();
         for (EquippedItem equippedItem : itemIds) {
+            FullItemData item = loadItem(equippedItem, enchants, printer);
+            items.add(item);
+        }
+        return items;
+    }
+
+    public static List<FullItemData> loadItemsFromBagsFile(List<EquippedItem> itemIds, DefaultEnchants enchants, PrintRecorder printer, int upgradeLevel) {
+        // TODO bags file doesn't have upgrade steps
+        List<FullItemData> items = new ArrayList<>();
+        for (EquippedItem equippedItem : itemIds) {
+            equippedItem = equippedItem.changeUpgradeLevel(upgradeLevel);
             FullItemData item = loadItem(equippedItem, enchants, printer);
             items.add(item);
         }

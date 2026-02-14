@@ -20,4 +20,8 @@ public record EquippedItem(int itemId, int[] gems, Integer enchant, int upgradeS
     public int hashCode() {
         return Objects.hash(itemId, Arrays.hashCode(gems), enchant, upgradeStep, reforging, randomSuffix);
     }
+
+    public EquippedItem changeUpgradeLevel(int changeUpgradeLevel) {
+        return new EquippedItem(itemId, gems, enchant, changeUpgradeLevel, reforging, randomSuffix);
+    }
 }

@@ -1,9 +1,11 @@
 package au.nerago.mopgear.domain;
 
+import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.Tuple;
 import org.jetbrains.annotations.Contract;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -182,7 +184,8 @@ public final class SolvableEquipMap {
 
     @Deprecated
     public Stream<SolvableItem> itemStream() {
-        return StreamSupport.stream(new ItemSpliterator(), true);
+        return ArrayUtil.arrayStream(array).filter(Objects::nonNull);
+//        return StreamSupport.stream(new ItemSpliterator(), true);
     }
 
     private class EntrySpliterator implements Spliterator<Tuple.Tuple2<SlotEquip, SolvableItem>> {
