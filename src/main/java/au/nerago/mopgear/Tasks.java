@@ -10,12 +10,15 @@ import au.nerago.mopgear.util.ArrayUtil;
 import au.nerago.mopgear.util.BestHolder;
 import au.nerago.mopgear.util.RankedGroupsCollection;
 import au.nerago.mopgear.util.Tuple;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.*;
@@ -618,20 +621,21 @@ public class Tasks {
         };
     }
 
-    public static void optimalForVariedRating(EquipOptionsMap items, List<EquippedItem> extraItems) {
+    public static void optimalForVariedRating(EquipOptionsMap items, List<EquippedItem> extraItems, SpecType specType) {
         IntFunction<StatRatingsWeights> modelGenerator = determineRatingMultipliersVariable();
         for (int percentMiti = 0; percentMiti <= 100; percentMiti += 5) {
             OutputText.printf("WEIGHTED SET %d\n", percentMiti);
             StatRatingsWeights weights = modelGenerator.apply(percentMiti);
+            ModelCombined model = StandardModels.pallyProtVariableModel(weights, specType == SpecType.PaladinProtMitigation);
 //            ModelCombined model = StandardModels.pallyProtVariableModel(weights, percentMiti > 50);
-            ModelCombined model = StandardModels.pallyProtVariableModel(weights, false);
+//            ModelCombined model = StandardModels.pallyProtVariableModel(weights, false);
             JobOutput result = reforgeProcessPlusManyQuiet(items, model, extraItems, Final, 1);
 //            JobOutput result = reforgeProcessPlusManyQuiet(items, model, extraItems, Medium, 1);
 //            result.input.printRecorder.outputNow();
             FullItemSet resultSet = result.getFinalResultSet().orElseThrow();
             resultSet.outputSetDetailed(model);
             AsWowSimJson.writeFullToOut(resultSet.items(), model);
-            SimInputModify.makeWithGear(SpecType.PaladinProtMitigation, resultSet.items(), "PERCENT-" + percentMiti);
+            SimInputModify.makeWithGear(specType, resultSet.items(), "PERCENT-" + percentMiti);
         }
 
         // TODO bonus set forced variants
@@ -785,11 +789,10 @@ public class Tasks {
     }
 
     public static void generateRatingDataFromSims() {
-        //        SimOutputReader.main();
-        //
         try {
             SpecType spec = SpecType.PaladinProtMitigation;
-            SimCliExecute.run(SimInputModify.inputFileFor(spec), SimInputModify.BASELINE_FILE);
+//            SpecType spec = SpecType.PaladinProtDps;
+            SimCliExecute.run(SimInputModify.basic(spec), SimInputModify.BASELINE_FILE);
             SimOutputReader.readInput(SimInputModify.BASELINE_FILE);
 
             int add = 800;
@@ -812,15 +815,13 @@ public class Tasks {
         Pattern pattern = Pattern.compile("\\D*(\\d+)\\D*");
         ToIntFunction<String> extractNum = str -> { Matcher m = pattern.matcher(str); return m.matches() ? Integer.parseInt(m.group(1)) : -1; };
 
+        // TODO handle exact duplicate files
+
+        Map<String, SimOutputReader.SimResultStats> duplicateInputCache = new HashMap<>();
         try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(SimInputModify.basePath, "in-PERCENT-*.json")) {
             List<Tuple.Tuple2<Path, SimOutputReader.SimResultStats>> statList = StreamSupport.stream(dirStream.spliterator(), false)
                     .sorted(Comparator.comparingInt(x -> extractNum.applyAsInt(x.getFileName().toString())))
-                    .map(inFile -> {
-                        Path outFile = inFile.resolveSibling(inFile.getFileName() + ".out");
-                        OutputText.println(inFile.toString());
-                        SimCliExecute.run(inFile, outFile);
-                        return Tuple.create(inFile, SimOutputReader.readInput(outFile));
-                    })
+                    .map(inFile -> runOnePrebuilt(inFile, duplicateInputCache))
                     .toList();
 
             OutputText.println(statList.stream().map(s -> s.a().getFileName().toString()).collect(Collectors.joining(",")));
@@ -831,5 +832,31 @@ public class Tasks {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private static Tuple.@NotNull Tuple2<Path, SimOutputReader.SimResultStats> runOnePrebuilt(Path inFile, Map<String, SimOutputReader.SimResultStats> duplicateInputCache) {
+        OutputText.println(inFile.toString());
+        String hash = hashFile(inFile);
+        if (duplicateInputCache.containsKey(hash)) {
+            OutputText.println("!!! exact duplicate sim file !!!");
+            return Tuple.create(inFile, duplicateInputCache.get(hash));
+        } else {
+            Path outFile = inFile.resolveSibling(inFile.getFileName() + ".out");
+            SimCliExecute.run(inFile, outFile);
+            SimOutputReader.SimResultStats result = SimOutputReader.readInput(outFile);
+            duplicateInputCache.put(hash, result);
+            return Tuple.create(inFile, result);
+        }
+    }
+
+    private static String hashFile(Path inFile) {
+        try {
+            byte[] bytes = Files.readAllBytes(inFile);
+            MessageDigest hashAlgo = MessageDigest.getInstance("SHA-1");
+            byte[] digest = hashAlgo.digest(bytes);
+            return Base64.getEncoder().encodeToString(digest);
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

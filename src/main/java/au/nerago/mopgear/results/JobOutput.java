@@ -14,6 +14,7 @@ public class JobOutput {
     public Optional<SolvableItemSet> resultSet;
     public long resultRating;
     public int hackCount;
+    public String failureSummary;
 
     public JobOutput(JobInput input) {
         this.input = input;

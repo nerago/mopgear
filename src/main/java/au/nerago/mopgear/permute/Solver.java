@@ -105,7 +105,7 @@ public class Solver {
 //        }
 
         if (output.resultSet.isEmpty()) {
-            FallbackCappedSetReport.reportIfSetShouldExist(model, itemOptions, adjustment, output);
+            output.failureSummary = FallbackCappedSetReport.reportIfSetShouldExist(model, itemOptions, adjustment, output);
         }
 
         output.resultSet = output.resultSet.map(set -> Tweaker.tweak(set, model, itemOptions, job.specialFilter));

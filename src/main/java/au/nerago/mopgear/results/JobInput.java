@@ -26,6 +26,7 @@ public class JobInput {
     public final boolean phasedAcceptable;
 //    public boolean singleThread;
 
+    public SlotEquip extraItemSlot;
     public FullItemData extraItem;
     public int cost;
     public Predicate<SolvableItemSet> specialFilter;

@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class FallbackCappedSetReport {
-    public static void reportIfSetShouldExist(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, JobOutput job) {
+    public static String reportIfSetShouldExist(ModelCombined model, SolvableEquipOptionsMap itemOptions, StatBlock adjustment, JobOutput job) {
         job.println("NO SET FOUND USING NORMAL PROCESS");
 
         @Nullable StatRequirements.StatRequirementsWithHitExpertise requirements =
@@ -24,8 +24,11 @@ public class FallbackCappedSetReport {
         List<SolvableItemSet> proposedList = setsAtLimits(itemOptions, adjustment, requirements);
         if (areAnyOfTheseAcceptable(model, job, proposedList)) {
             job.println("FALLBACK SET FOUND USING MIN/MAX ONLY");
+            return "FALLBACK AVAILABLE";
         } else if (requirements != null) {
-            discoverCommonProblems(job, proposedList, model, requirements, model.statRatings());
+            return discoverCommonProblems(job, proposedList, model, requirements, model.statRatings());
+        } else {
+            return "UNKNOWN";
         }
     }
 
@@ -89,7 +92,7 @@ public class FallbackCappedSetReport {
         return false;
     }
 
-    private static void discoverCommonProblems(JobOutput job, List<SolvableItemSet> proposedList, ModelCombined model, @NotNull StatRequirements.StatRequirementsWithHitExpertise requirements, StatRatings ratings) {
+    private static String discoverCommonProblems(JobOutput job, List<SolvableItemSet> proposedList, ModelCombined model, @NotNull StatRequirements.StatRequirementsWithHitExpertise requirements, StatRatings ratings) {
         HashSet<ProblemType> commonProblems = new HashSet<>();
 
         for (SolvableItemSet set : proposedList) {
@@ -102,7 +105,9 @@ public class FallbackCappedSetReport {
         if (commonProblems.isEmpty()) {
             throw new RuntimeException("NO SOLUTION FOR UNKNOWN REASON");
         } else {
-            job.println("NO SOLUTION PROBLEMS = " + commonProblems.stream().map(Objects::toString).collect(Collectors.joining(", ")));
+            String problemSummary = commonProblems.stream().map(Objects::toString).collect(Collectors.joining(", "));
+            job.println("NO SOLUTION PROBLEMS = " + problemSummary);
+            return problemSummary;
         }
     }
 }

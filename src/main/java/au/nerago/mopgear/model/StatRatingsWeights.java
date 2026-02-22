@@ -84,9 +84,9 @@ public class StatRatingsWeights extends StatRatings {
     }
 
     private static StatBlock addNum(StatBlock block, StatType type, String text) {
-        float givenValue = Float.parseFloat(text);
+        double givenValue = Double.parseDouble(text);
         if (givenValue > 0) {
-            int intValue = Math.round(givenValue * 1000f);
+            int intValue = Math.toIntExact(Math.round(givenValue * 1000f));
             return block.withChange(type, intValue);
         } else {
             return block;

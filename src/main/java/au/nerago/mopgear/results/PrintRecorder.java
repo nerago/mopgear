@@ -31,8 +31,10 @@ public class PrintRecorder {
     }
 
     public void outputNow() {
-        for (String str : prints) {
-            outputLine(str);
+        synchronized (OutputText.class) {
+            for (String str : prints) {
+                outputLine(str);
+            }
         }
     }
 

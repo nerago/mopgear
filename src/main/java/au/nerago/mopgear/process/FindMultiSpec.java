@@ -313,7 +313,7 @@ public class FindMultiSpec {
                 job.println("UNEXPECTED SOLVE FAILURE FOR " + spec.label + " WITH\n"
                         + commonChoices.values().stream().map(x -> "\t" + x.toString()).collect(Collectors.joining("\n")));
 //                job.input.printRecorder.outputNow();
-                OutputText.println("UNEXPECTED SOLVE FAILURE FOR " + spec.label);
+                OutputText.println("UNEXPECTED SOLVE FAILURE FOR " + spec.label + " = " + job.failureSummary);
                 return null;
             }
 
@@ -341,7 +341,7 @@ public class FindMultiSpec {
             if (job.resultSet.isEmpty()) {
                 job.println("UNEXPECTED SECOND PASS FAILURE FOR " + spec.label + " WITH\n"
                         + commonChoices.values().stream().map(x -> "\t" + x.toString()).collect(Collectors.joining("\n")));
-                OutputText.println("UNEXPECTED SECOND PASS FAILURE FOR " + spec.label);
+                OutputText.println("UNEXPECTED SECOND PASS FAILURE FOR " + spec.label + " = " + job.failureSummary);
                 return null;
             }
 

@@ -62,6 +62,7 @@ public class AsWowSimJson {
             object.add("random_suffix", new JsonPrimitive(item.randomSuffix));
         }
 
+        // TODO tinker do bother please
         // NOTE tinker don't bother, just synapse springs of interest
 
         return object;

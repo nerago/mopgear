@@ -67,10 +67,10 @@ public class TaskMulti {
 
                         95142, // striker's battletags
                         95205, // terra-cotta neck
-//                        94776, // primal turtle amulet
+                        94776, // primal turtle amulet
 
-//                        87145, // defiled earth
-//                        89934, // soul bracer
+                        87145, // defiled earth
+                        89934, // soul bracer
                         94820, // caustic spike bracers
                 },
                 extraUpgrade,

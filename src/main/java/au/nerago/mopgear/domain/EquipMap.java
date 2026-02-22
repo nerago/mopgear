@@ -72,6 +72,12 @@ public final class EquipMap {
         }
     }
 
+    public void forEachValueIncludeNulls(Consumer<FullItemData> func) {
+        for (FullItemData item : array) {
+            func.accept(item);
+        }
+    }
+
     @Deprecated
     public void forEachPair(BiConsumer<SlotEquip, FullItemData> func) {
         SlotEquip[] enumValues = SlotEquip.values();
