@@ -11,6 +11,7 @@ import au.nerago.mopgear.util.BigStreamUtil;
 
 import java.math.BigInteger;
 import java.time.Instant;
+import java.util.Optional;
 
 import static au.nerago.mopgear.results.JobInput.SolveMethod.*;
 
@@ -104,13 +105,13 @@ public class Solver {
 //            output.resultSet = FallbackCappedSetBuilder.fallbackLimits(model, itemOptions, adjustment, output);
 //        }
 
-        if (output.resultSet.isEmpty()) {
+        if (output.resultSet.isPresent()) {
+            output.resultSet = Optional.of(Tweaker.tweak(output.resultSet.get(), model, itemOptions, job.specialFilter));
+            output.resultRating = model.calcRating(output.resultSet.get());
+        } else {
             output.failureSummary = FallbackCappedSetReport.reportIfSetShouldExist(model, itemOptions, adjustment, output);
         }
 
-        output.resultSet = output.resultSet.map(set -> Tweaker.tweak(set, model, itemOptions, job.specialFilter));
-
-        output.resultSet.ifPresent(itemSet -> output.resultRating = model.calcRating(itemSet));
         return output;
     }
 }

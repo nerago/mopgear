@@ -94,8 +94,11 @@ public class SimInputModify {
         JsonArray itemArray = player.getAsJsonObject("equipment").getAsJsonArray("items");
         while (!itemArray.isEmpty())
             itemArray.remove(0);
-        map.forEachValueIncludeNulls(item ->
-            itemArray.add(item != null ? makeItemObject(item) : null)
+        map.forEachValueIncludeNulls(item -> {
+                if (item != null) {
+                    itemArray.add(makeItemObject(item));
+                }
+            }
         );
     }
 }

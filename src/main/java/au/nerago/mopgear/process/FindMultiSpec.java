@@ -709,13 +709,14 @@ public class FindMultiSpec {
 
             EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
             JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, Final);
+            EquipMap revisedItems = null;
             if (revisedJob.resultSet.isPresent()) {
-                EquipMap revisedItems = revisedJob.getFinalResultSet().orElseThrow().items();
-                if (!draftSet.items().equalsTypedSwappable(revisedItems)) {
+                revisedItems = revisedJob.getFinalResultSet().orElseThrow().items();
+                if (draftSet.items().equalsTypedSwappable(revisedItems)) {
+                    OutputText.println("REVISED unchanged");
+                } else {
                     processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating, true);
                     outputOptions.add(revisedJob);
-                } else {
-                    OutputText.println("REVISED unchanged");
                 }
             } else {
                 OutputText.println("REVISED missing");
@@ -725,11 +726,11 @@ public class FindMultiSpec {
             JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, Final);
             if (reenchantJob.resultSet.isPresent()) {
                 EquipMap reenchantItems = reenchantJob.getFinalResultSet().orElseThrow().items();
-                if (!draftSet.items().equalsTypedSwappable(reenchantItems) && !reenchantItems.equalsTypedSwappable(reenchantItems)) {
+                if (draftSet.items().equalsTypedSwappable(reenchantItems) || (revisedItems != null && revisedItems.equalsTypedSwappable(reenchantItems))) {
+                    OutputText.println("RE-ENCHANT unchanged");
+                } else {
                     processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating, true);
                     outputOptions.add(reenchantJob);
-                } else {
-                    OutputText.println("RE-ENCHANT unchanged");
                 }
             } else {
                 OutputText.println("RE-ENCHANT missing");
@@ -1053,10 +1054,12 @@ public class FindMultiSpec {
         }
 
         public void recordSolutionSeen(FullItemSet set) {
-            set.items().forEachValue(item -> {
-                int itemId = item.itemId();
-                itemsSeenInSolutions.computeIfAbsent(itemId, x -> new AtomicInteger()).incrementAndGet();
-            });
+            synchronized (itemsSeenInSolutions) {
+                set.items().forEachValue(item -> {
+                    int itemId = item.itemId();
+                    itemsSeenInSolutions.computeIfAbsent(itemId, x -> new AtomicInteger()).incrementAndGet();
+                });
+            }
         }
 
         public void reportExtrasUsed() {

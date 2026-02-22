@@ -14,10 +14,7 @@ import au.nerago.mopgear.util.Tuple;
 
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,16 +30,15 @@ public class FindMultiSpecSim {
         List<SimulateTask> tasks = proposedOptions.stream()
                 .flatMap(prop ->
                         prop.resultJobs().stream().map(job ->
-                                        Tuple.create(job.getFinalResultSet().orElseThrow().items(), job.input.model.spec())
-                                )
-                                .distinct()
-                                .map(tup -> new SimulateTask(tup.a(), tup.b())))
+                            new SimulateTask(job.getFinalResultSet().orElseThrow().items(), job.input.model.spec())
+                        ))
+                .distinct()
                 .toList();
 
         OutputText.printf("SimulateTasks %d\n", tasks.size());
 
         try (StreamNeedClose<SimulateTask> simStream = BigStreamUtil.countProgress(tasks.size(), Instant.now(), tasks.stream().peek(SimulateTask::runSimulate))) {
-            simStream.collect(Collectors.toSet());
+            simStream.forEach(_ -> {});
         }
 
         List<SimulatedResults> results = proposedOptions.stream().map(prop ->
@@ -51,7 +47,7 @@ public class FindMultiSpecSim {
                         prop.resultJobs().stream()
                                 .map(job -> {
                                     EquipMap targetItems = job.getFinalResultSet().orElseThrow().items();
-                                    Optional<SimulateTask> matchedTask = tasks.stream().filter(task -> task.equip.equalsTyped(targetItems)).findFirst();
+                                    Optional<SimulateTask> matchedTask = tasks.stream().filter(task -> task.equalsParts(targetItems, job.input.model.spec())).findFirst();
                                     return matchedTask.orElseThrow();
                                 })
                                 .toList()
@@ -84,22 +80,36 @@ public class FindMultiSpecSim {
     }
 
     private static class SimulateTask {
-        private final UUID taskId;
         private final EquipMap equip;
         private final SpecType spec;
         private SimOutputReader.SimResultStats resultStats;
 
         public SimulateTask(EquipMap equip, SpecType spec) {
-            this.taskId = UUID.randomUUID();
             this.equip = equip;
             this.spec = spec;
         }
 
         public void runSimulate() {
+            UUID taskId = UUID.randomUUID();
             Path inputFile = SimInputModify.makeWithGear(spec, equip, taskId.toString());
             Path outputFile = inputFile.resolveSibling(inputFile.getFileName() + ".out");
             SimCliExecute.run(inputFile, outputFile);
             resultStats = SimOutputReader.readInput(outputFile);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof SimulateTask that)) return false;
+            return equip.equalsTypedSwappable(that.equip) && spec == that.spec;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(equip, spec);
+        }
+
+        public boolean equalsParts(EquipMap targetItems, SpecType spec) {
+            return equip.equalsTypedSwappable(targetItems) && spec == this.spec;
         }
     }
 }

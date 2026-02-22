@@ -14,7 +14,12 @@ public class SimCliExecute {
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.command(EXEC, "sim", "--infile", inFile.toString(), "--outfile", outFile.toString());
             Process process = processBuilder.start();
-            process.waitFor();
+            processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new RuntimeException("sim exit code " + exitCode);
+            }
         } catch (IOException | InterruptedException ex) {
             throw new RuntimeException(ex);
         }
