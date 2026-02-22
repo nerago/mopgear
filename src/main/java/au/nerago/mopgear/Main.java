@@ -55,8 +55,10 @@ public class Main {
 
     private void launchpad(Instant startTime) {
 //        generateRatingDataFromSims();
-        variableRatingProt(startTime);
-        runPrebuiltSimFiles();
+//        variableRatingProt(startTime);
+//        runPrebuiltSimFiles();
+//        determineRatingMultipliers();
+//        determineRatingMultipliersDps();
 
 //        WowSimDB.discoverSetBonuses();
 //        Tasks.dumpTier2Gear();
@@ -66,8 +68,7 @@ public class Main {
 
 //        everyoneBis();
 
-//        determineRatingMultipliers();
-//        TaskMulti.paladinMultiSpecSolve();
+        TaskMulti.paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        allUpgradesProt(startTime);

@@ -536,7 +536,8 @@ public class Tasks {
         StatRatingsWeights retRet = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinRet));
 
 //        EquipOptionsMap itemsRet = ItemLoadUtil.readAndLoad(DataLocation.gearRetFile, ReforgeRules.melee(), new DefaultEnchants(SpecType.PaladinRet, true), null, PrintRecorder.withAutoOutput());
-        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, PrintRecorder.withAutoOutput());
+//        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, PrintRecorder.withAutoOutput());
+        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtMitigation, true), null, PrintRecorder.withAutoOutput());
 
         double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtMitigation);
         double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtDps);
@@ -549,7 +550,7 @@ public class Tasks {
 //        OutputText.printf("RET        %,d\n", (long)rateRet);
         OutputText.println();
 
-        int defPercentMit = 80, defPercentDps = 100 - defPercentMit;
+        int defPercentMit = 60, defPercentDps = 100 - defPercentMit;
         OutputText.printf("defenceProtModel %d%% mitigation, %d%% dps\n", defPercentMit , defPercentDps);
         long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation * 10);
         long defMultiplyB = Math.round(targetCombined * (defPercentDps / 100.0) / rateTankDps * 10);
@@ -560,9 +561,12 @@ public class Tasks {
                 defMultiplyB * rateTankDps / defTotal);
         StatRatingsWeights defMix = StatRatingsWeights.mix(tankMitigation, (int) defMultiplyA, tankDps, (int) defMultiplyB);
         StatType defBestStat = defMix.bestNonHit();
-        OutputText.printf("BEST STAT %s\n\n", defBestStat);
+        OutputText.printf("BEST STAT %s\n", defBestStat);
+        OutputText.printf("ORDER %s\n", defMix.statOrder());
+        OutputText.println(defMix.getWeight().toString());
+        OutputText.println();
 
-        int dmgPercentMit = 10, dmgPercentDps = 100 - dmgPercentMit;
+        int dmgPercentMit = 35, dmgPercentDps = 100 - dmgPercentMit;
         OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
         long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation * 10);
         long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps * 10);
@@ -573,7 +577,10 @@ public class Tasks {
                 dmgMultiplyB * rateTankDps / dmgTotal);
         StatRatingsWeights dmgMix = StatRatingsWeights.mix(tankMitigation, (int) dmgMultiplyA, tankDps, (int) dmgMultiplyB);
         StatType dmgBestStat = dmgMix.bestNonHit();
-        OutputText.printf("BEST STAT %s\n\n", dmgBestStat);
+        OutputText.printf("BEST STAT %s\n", dmgBestStat);
+        OutputText.printf("ORDER %s\n", dmgMix.statOrder());
+        OutputText.println(dmgMix.getWeight().toString());
+        OutputText.println();
 
 //        double multiTargetCombined = 1000000000000L;
 //        int multiRet = 5, multiDmg = 70, multiDef = 25;
@@ -587,6 +594,79 @@ public class Tasks {
 //                multiA * rateRet / multiTotal,
 //                multiB * dmgTotal / multiTotal,
 //                multiC * defTotal / multiTotal);
+    }
+
+    public static void determineRatingMultipliersMitigation() {
+        StatRatingsWeights tankMitigation = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
+        StatRatingsWeights tankDps = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtDps), false, true, false);
+        StatRatingsWeights retRet = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinRet));
+
+//        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, PrintRecorder.withAutoOutput());
+        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtMitigation, true), null, PrintRecorder.withAutoOutput());
+
+        double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtMitigation);
+        double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtDps);
+
+        double targetCombined = 1000000000;
+
+        OutputText.printf("MITIGATION %,d\n", (long) rateMitigation);
+        OutputText.printf("TANK_DPS   %,d\n", (long) rateTankDps);
+        OutputText.println();
+
+        for (int defPercentMit = 30; defPercentMit <= 70; defPercentMit += 5) {
+            int defPercentDps = 100 - defPercentMit;
+            OutputText.printf("defenceProtModel %d%% mitigation, %d%% dps\n", defPercentMit, defPercentDps);
+            long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation * 10);
+            long defMultiplyB = Math.round(targetCombined * (defPercentDps / 100.0) / rateTankDps * 10);
+            OutputText.printf("USE mitigation %d dps %d\n", defMultiplyA, defMultiplyB);
+            double defTotal = defMultiplyA * rateMitigation + defMultiplyB * rateTankDps;
+            OutputText.printf("EFFECTIVE %.2f %.2f\n",
+                    defMultiplyA * rateMitigation / defTotal,
+                    defMultiplyB * rateTankDps / defTotal);
+            StatRatingsWeights defMix = StatRatingsWeights.mix(tankMitigation, (int) defMultiplyA, tankDps, (int) defMultiplyB);
+            StatType defBestStat = defMix.bestNonHit();
+            OutputText.printf("BEST STAT %s\n", defBestStat);
+            OutputText.printf("ORDER %s\n", defMix.statOrder());
+            OutputText.println(defMix.getWeight().toString());
+            OutputText.println();
+        }
+    }
+
+
+    public static void determineRatingMultipliersDps() {
+        StatRatingsWeights tankMitigation = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
+        StatRatingsWeights tankDps = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtDps), false, true, false);
+        StatRatingsWeights retRet = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinRet));
+
+        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, PrintRecorder.withAutoOutput());
+//        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtMitigation, true), null, PrintRecorder.withAutoOutput());
+
+        double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtMitigation);
+        double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtDps);
+
+        double targetCombined = 1000000000;
+
+        OutputText.printf("MITIGATION %,d\n", (long) rateMitigation);
+        OutputText.printf("TANK_DPS   %,d\n", (long) rateTankDps);
+        OutputText.println();
+
+        for (int dmgPercentMit = 15; dmgPercentMit <= 45; dmgPercentMit += 5) {
+            int dmgPercentDps = 100 - dmgPercentMit;
+            OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
+            long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation * 10);
+            long dmgMultiplyB = Math.round(targetCombined * (dmgPercentDps / 100.0) / rateTankDps * 10);
+            OutputText.printf("USE mitigation %d dps %d\n", dmgMultiplyA, dmgMultiplyB);
+            double dmgTotal = dmgMultiplyA * rateMitigation + dmgMultiplyB * rateTankDps;
+            OutputText.printf("EFFECTIVE %.2f %.2f\n",
+                    dmgMultiplyA * rateMitigation / dmgTotal,
+                    dmgMultiplyB * rateTankDps / dmgTotal);
+            StatRatingsWeights dmgMix = StatRatingsWeights.mix(tankMitigation, (int) dmgMultiplyA, tankDps, (int) dmgMultiplyB);
+            StatType dmgBestStat = dmgMix.bestNonHit();
+            OutputText.printf("BEST STAT %s\n", dmgBestStat);
+            OutputText.printf("ORDER %s\n", dmgMix.statOrder());
+            OutputText.println(dmgMix.getWeight().toString());
+            OutputText.println();
+        }
     }
 
     private static long determineRatingMultipliersOne(StatRatingsWeights weights, EquipOptionsMap items, StatRequirements req, SpecType spec) {
@@ -814,8 +894,6 @@ public class Tasks {
     public static void runPrebuiltSimFiles() {
         Pattern pattern = Pattern.compile("\\D*(\\d+)\\D*");
         ToIntFunction<String> extractNum = str -> { Matcher m = pattern.matcher(str); return m.matches() ? Integer.parseInt(m.group(1)) : -1; };
-
-        // TODO handle exact duplicate files
 
         Map<String, SimOutputReader.SimResultStats> duplicateInputCache = new HashMap<>();
         try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(SimInputModify.basePath, "in-PERCENT-*.json")) {

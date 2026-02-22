@@ -60,7 +60,7 @@ public class StandardModels {
     public static ModelCombined pallyProtMitigationModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 121, statDps, 41);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 90, statDps, 91);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
@@ -85,7 +85,7 @@ public class StandardModels {
     public static ModelCombined pallyProtDpsModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 15, statDps, 185);
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 79, statDps, 120);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {

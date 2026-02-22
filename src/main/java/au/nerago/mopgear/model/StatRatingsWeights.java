@@ -103,4 +103,7 @@ public class StatRatingsWeights extends StatRatings {
         return (long) value * (long) weight.get(stat);
     }
 
+    public StatBlock getWeight() {
+        return weight;
+    }
 }
