@@ -2,6 +2,7 @@ package au.nerago.mopgear.io;
 
 import au.nerago.mopgear.domain.EquipMap;
 import au.nerago.mopgear.domain.SpecType;
+import au.nerago.mopgear.domain.StatBlock;
 import au.nerago.mopgear.domain.StatType;
 import com.google.gson.*;
 import com.google.gson.internal.Streams;
@@ -25,6 +26,9 @@ public class SimInputModify {
     public static Path outName(StatType statType) {
         return basePath.resolve("out-" + statType + ".json");
     }
+    public static Path outName(String tag) {
+        return basePath.resolve("out-" + tag + ".json");
+    }
 
     public static Path inputFileFor(SpecType spec) {
         switch (spec) {
@@ -41,30 +45,30 @@ public class SimInputModify {
         }
     }
 
-    public static Path makeWithBonusStat(SpecType spec, StatType statType, int add) {
+    public static Path makeWithBonusStat(SpecType spec, StatType statType, int add, SimSpeed simSpeed) {
         Path outFile = basePath.resolve("in-" + statType + ".json");
-        modifyFiles(inputFileFor(spec), outFile, root -> modifyJsonBonusStat(root, statType, add));
+        modifyFiles(simSpeed, inputFileFor(spec), outFile, root -> modifyJsonBonusStat(root, statType, add));
         return outFile;
     }
 
-    public static Path makeWithGear(SpecType spec, EquipMap map, String tag) {
+    public static Path makeWithGear(SpecType spec, EquipMap map, String tag, SimSpeed simSpeed) {
         Path outFile = basePath.resolve("in-" + tag + ".json");
-        modifyFiles(inputFileFor(spec), outFile, root -> modifyJsonItems(root, map));
+        modifyFiles(simSpeed, inputFileFor(spec), outFile, root -> modifyJsonItems(root, map));
         return outFile;
     }
 
-    public static Path basic(SpecType spec) {
+    public static Path basic(SpecType spec, SimSpeed simSpeed) {
         Path outFile = basePath.resolve("in-basic.json");
-        modifyFiles(inputFileFor(spec), outFile, _ -> {});
+        modifyFiles(simSpeed, inputFileFor(spec), outFile, _ -> {});
         return outFile;
     }
 
-    private static void modifyFiles(Path inFile, Path outFile, Consumer<JsonObject> modifyJson) {
+    private static void modifyFiles(SimSpeed simSpeed, Path inFile, Path outFile, Consumer<JsonObject> modifyJson) {
         try (BufferedReader reader = Files.newBufferedReader(inFile); BufferedWriter writer = Files.newBufferedWriter(outFile)) {
             JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
 
             modifyJson.accept(root);
-            changeIterations(root);
+            changeIterations(root, simSpeed);
 
             try (JsonWriter jsonWriter = new JsonWriter(writer)) {
                 jsonWriter.setFormattingStyle(FormattingStyle.PRETTY);
@@ -75,10 +79,20 @@ public class SimInputModify {
         }
     }
 
-    private static void changeIterations(JsonObject root) {
+    public enum SimSpeed {
+        QuickDirty,
+        Medium,
+        SlowAccurate
+    }
+
+    private static void changeIterations(JsonObject root, SimSpeed simSpeed) {
         JsonObject opts = root.getAsJsonObject("simOptions");
-//        opts.addProperty("iterations", 500);
-        opts.addProperty("iterations", 500000);
+        int iterations = switch (simSpeed) {
+            case QuickDirty -> 20000;
+            case Medium -> 100000;
+            case SlowAccurate -> 500000;
+        };
+        opts.addProperty("iterations", iterations);
     }
 
     private static void modifyJsonBonusStat(JsonObject root, StatType statType, int add) {
@@ -86,6 +100,16 @@ public class SimInputModify {
         JsonObject player = party.getAsJsonArray("players").get(0).getAsJsonObject();
         JsonArray stats = player.getAsJsonObject("bonusStats").getAsJsonArray("stats");
         stats.set(statType.simIndex, new JsonPrimitive(add));
+    }
+
+    private static void modifyJsonBonusStat(JsonObject root, StatBlock block) {
+        JsonObject party = root.getAsJsonObject("raid").getAsJsonArray("parties").get(0).getAsJsonObject();
+        JsonObject player = party.getAsJsonArray("players").get(0).getAsJsonObject();
+        JsonArray stats = player.getAsJsonObject("bonusStats").getAsJsonArray("stats");
+        for (StatType statType : StatType.values()) {
+            int value = block.get(statType);
+            stats.set(statType.simIndex, new JsonPrimitive(value));
+        }
     }
 
     private static void modifyJsonItems(JsonObject root, EquipMap map) {

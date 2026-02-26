@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 public class SimOutputReader {
-    public static SimResultStats readInput(Path file) {
+    public static SimResultStats readInput(Path file, boolean labelNumbers) {
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
             JsonObject party = root.getAsJsonObject("raidMetrics").getAsJsonArray("parties").get(0).getAsJsonObject();
@@ -25,13 +25,22 @@ public class SimOutputReader {
             double hps = player.getAsJsonObject("hps").getAsJsonPrimitive("avg").getAsDouble();
             double death = player.getAsJsonPrimitive("chanceOfDeath").getAsDouble();
 
-            OutputText.printf("DPS  %.2f\n", dps);
-            OutputText.printf("TPS  %.2f\n", tps);
-            OutputText.printf("DTPS %.2f\n", dtps);
-            OutputText.printf("HPS  %.2f\n", hps);
-            OutputText.printf("TMI  %.2f\n", tmi);
-            OutputText.printf("DEA  %.2f\n", death * 100);
-            OutputText.println();
+            if (labelNumbers) {
+                OutputText.printf("DPS  %.2f\n", dps);
+                OutputText.printf("TPS  %.2f\n", tps);
+                OutputText.printf("DTPS %.2f\n", dtps);
+                OutputText.printf("HPS  %.2f\n", hps);
+                OutputText.printf("TMI  %.2f\n", tmi);
+                OutputText.printf("DEA  %.2f\n", death * 100);
+                OutputText.println();
+            } else {
+                OutputText.printf("%.2f\n", dps);
+                OutputText.printf("%.2f\n", tps);
+                OutputText.printf("%.2f\n", dtps);
+                OutputText.printf("%.2f\n", hps);
+                OutputText.printf("%.2f\n", tmi);
+                OutputText.printf("%.2f\n", death * 100);
+            }
 
             return new SimResultStats(dps, tps, dtps, hps, tmi, death, file);
         } catch (IOException ex) {

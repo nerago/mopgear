@@ -4,10 +4,7 @@ import au.nerago.mopgear.domain.*;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -281,6 +278,14 @@ public class ArrayUtil {
         Map<K, V> result = new HashMap<>();
         result.putAll(mapOne);
         result.putAll(mapTwo);
+        return result;
+    }
+
+    public static <T> List<T> makeListFromFunc(int threadCount, Supplier<T> supplier) {
+        ArrayList<T> result = new ArrayList<>(threadCount);
+        for (int i = 0; i < threadCount; ++i) {
+            result.add(supplier.get());
+        }
         return result;
     }
 }

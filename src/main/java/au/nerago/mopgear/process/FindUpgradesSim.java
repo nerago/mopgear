@@ -134,10 +134,10 @@ public class FindUpgradesSim {
 
     private static SimOutputReader.@NotNull SimResultStats runOneSim(SpecType spec, FullItemSet itemSet) {
         UUID taskId = UUID.randomUUID();
-        Path inputFile = SimInputModify.makeWithGear(spec, itemSet.items(), taskId.toString());
+        Path inputFile = SimInputModify.makeWithGear(spec, itemSet.items(), taskId.toString(), SimInputModify.SimSpeed.SlowAccurate);
         Path outputFile = inputFile.resolveSibling(inputFile.getFileName() + ".out");
         SimCliExecute.run(inputFile, outputFile);
-        return SimOutputReader.readInput(outputFile);
+        return SimOutputReader.readInput(outputFile, true);
     }
 
     private static void reportItem(UpgradeResultItem resultItem) {

@@ -35,7 +35,7 @@ public class TaskMulti {
                 0.02,
                 false,
                 new int[]{
-//                        87026, // heroic peacock cloak
+                        87026, // heroic peacock cloak
                         94942, // hydra bloodcloak
 
                         95140, // shado assault band
@@ -53,24 +53,24 @@ public class TaskMulti {
                         96468, // talonrender chest heroic
                         96533, // rein-binders fists heroic
 
-//                        85340, // ret tier14 legs
+                        85340, // ret tier14 legs
 //                        87101, // ret tier14 head [would need to regem, AVOID]
                         85339, // ret tier14 shoulder
-//                        85343, // ret tier14 chest
+                        85343, // ret tier14 chest
                         87100, // ret tier14 hands
 
-//                        95910, // ret tier15 chest celestial
-//                        95911, // ret tier15 gloves celestial
+                        95910, // ret tier15 chest celestial
+                        95911, // ret tier15 gloves celestial
 //                        95912, // ret tier15 celestial (don't have yet)
 //                        95913, // ret tier15 celestial (don't have yet)
-//                        95914, // ret tier15 shoulder celestial
+                        95914, // ret tier15 shoulder celestial
 
                         95142, // striker's battletags
                         95205, // terra-cotta neck
-//                        94776, // primal turtle amulet
+                        94776, // primal turtle amulet
 
-//                        87145, // defiled earth
-//                        89934, // soul bracer
+                        87145, // defiled earth
+                        89934, // soul bracer
                         94820, // caustic spike bracers
                 },
                 extraUpgrade,
@@ -108,17 +108,17 @@ public class TaskMulti {
                                 95911, // ret tier15 gloves celestial
                                 95914, // ret tier15 shoulder celestial
 
-                                96667, // prot tier15 leg heroic
+//                                96667, // prot tier15 leg heroic
 //                                96668, // prot tier15 shoulder heroic
 
-//                                95142, // striker's battletags
+                                95142, // striker's battletags
                                 95205, // terra-cotta neck
                                 87036, // soulgrasp heroic
                                 94776, // primal turtle amulet
 
                                 96182, // ultimate prot of the emperor thunder
 
-                                87145, // defiled earth
+//                                87145, // defiled earth
                                 89934, // soul bracer
                                 94820, // caustic spike bracers
 
@@ -154,7 +154,7 @@ public class TaskMulti {
                                 94942, // hydra bloodcloak
 
                                 95535, // normal lightning legs
-                                94773, // centripetal shoulders normal
+//                                94773, // centripetal shoulders normal
                                 96468, // talonrender chest heroic
                                 96533, // rein-binders fists heroic
 
@@ -166,13 +166,13 @@ public class TaskMulti {
 
                                 95142, // striker's battletags
                                 95205, // terra-cotta neck
-//                                95178, // lootraptor amulet
-                                94776, // primal turtle amulet
+                                95178, // lootraptor amulet
+//                                94776, // primal turtle amulet
 
                                 96182, // ultimate prot of the emperor thunder
 
-//                                87145, // defiled earth
-//                                89934, // soul bracer
+                                87145, // defiled earth
+                                89934, // soul bracer
                                 94820, // caustic spike bracers
 
                                 96376, // worldbreaker weapon
@@ -200,7 +200,7 @@ public class TaskMulti {
 //        multi.overrideEnchant(86905, StatBlock.of(StatType.Primary, 500));
 
 //        multi.solve(1000);
-//        multi.suggestCulls(20000, 64);
+//        multi.suggestCulls(10000, 50);
 //        multi.solve(10000);
 //        multi.solve(50000);
 //        multi.solve(120000);
@@ -209,9 +209,10 @@ public class TaskMulti {
 //        multi.solve(1490000);
 //        multi.solve(4000000);
 
-        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(1000, 2);
-//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(140000, 22);
-//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(250000, 30);
+//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(1000, 2);
+//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(60000, 14);
+//        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(140000, 24);
+        Collection<FindMultiSpec.ProposedResults> select = multi.solveBestSelection(250000, 30);
         new FindMultiSpecSim(multi).process(select);
     }
 }

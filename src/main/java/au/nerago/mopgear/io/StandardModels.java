@@ -54,19 +54,20 @@ public class StandardModels {
         }
     }
 
-    private static final boolean useHasteMinimums = false;
-    private static final StatBlock hasteGem = StatBlock.of(Haste, 320);
+    private static final boolean useHasteMinimums = true;
 
     public static ModelCombined pallyProtMitigationModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 90, statDps, 91);
+
+        // ORDER [Hit, Spirit, Parry, Dodge, Crit, Expertise, Stam, Primary, Haste, Mastery]
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 95, statDps, 34);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
             StatRequirements hitRequire = StatRequirementsHitExpertise.protFlexibleParry();
-            StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7000);
-            combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
+            StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 11100, 13500); // picked from sheet "prot haste_miti fine" where misses discontinuity
+            combinedRequire = new StatRequirementsCombinedSkinnyOnlyFirst(hitRequire, hasteRequire);
         } else {
             combinedRequire = StatRequirementsHitExpertise.protFlexibleParry();
         }
@@ -85,13 +86,15 @@ public class StandardModels {
     public static ModelCombined pallyProtDpsModel() {
         StatRatingsWeights statMitigation = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
         StatRatingsWeights statDps = new StatRatingsWeights(specToWeightFile(SpecType.PaladinProtDps), false, true, false);
-        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 79, statDps, 120);
+
+        // ORDER [Hit, Spirit, Dodge, Parry, Stam, Mastery, Expertise, Primary, Crit, Haste]
+        StatRatings statMix = StatRatingsWeights.mix(statMitigation, 32, statDps, 146);
 
         StatRequirements combinedRequire;
         if (useHasteMinimums) {
             StatRequirements hitRequire = StatRequirementsHitExpertise.protFlexibleParry();
-            StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 8000);
-            combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
+            StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 12000, 14200); // picked from sheet "prot haste_dps fine" where misses discontinuity
+            combinedRequire = new StatRequirementsCombinedSkinnyOnlyFirst(hitRequire, hasteRequire);
         } else {
             combinedRequire = StatRequirementsHitExpertise.protFlexibleParry();
         }
@@ -123,13 +126,13 @@ public class StandardModels {
         StatRatingsWeights statRatings = new StatRatingsWeights(specToWeightFile(SpecType.PaladinRet));
 
         StatRequirements combinedRequire;
-        if (useHasteMinimums) {
-            StatRequirements hitRequire = StatRequirementsHitExpertise.retWideCapRange();
-            StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7000);
-            combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
-        } else {
+//        if (useHasteMinimums) {
+//            StatRequirements hitRequire = StatRequirementsHitExpertise.retWideCapRange();
+//            StatRequirements hasteRequire = new StatRequirementsGenericOne(Haste, 7000);
+//            combinedRequire = new StatRequirementsCombined(hitRequire, hasteRequire);
+//        } else {
             combinedRequire = StatRequirementsHitExpertise.retWideCapRange();
-        }
+//        }
 
         DefaultEnchants enchants = new DefaultEnchants(SpecType.PaladinRet, true);
         GemChoice gemChoice = new GemChoice(statRatings, AllowedMeta.Melee, null);

@@ -599,9 +599,7 @@ public class Tasks {
     public static void determineRatingMultipliersMitigation() {
         StatRatingsWeights tankMitigation = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights tankDps = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtDps), false, true, false);
-        StatRatingsWeights retRet = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinRet));
 
-//        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, PrintRecorder.withAutoOutput());
         EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtMitigation, true), null, PrintRecorder.withAutoOutput());
 
         double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtMitigation);
@@ -613,7 +611,7 @@ public class Tasks {
         OutputText.printf("TANK_DPS   %,d\n", (long) rateTankDps);
         OutputText.println();
 
-        for (int defPercentMit = 30; defPercentMit <= 70; defPercentMit += 5) {
+        for (int defPercentMit = 55; defPercentMit <= 100; defPercentMit += 5) {
             int defPercentDps = 100 - defPercentMit;
             OutputText.printf("defenceProtModel %d%% mitigation, %d%% dps\n", defPercentMit, defPercentDps);
             long defMultiplyA = Math.round(targetCombined * (defPercentMit / 100.0) / rateMitigation * 10);
@@ -636,10 +634,8 @@ public class Tasks {
     public static void determineRatingMultipliersDps() {
         StatRatingsWeights tankMitigation = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtMitigation), false, true, false);
         StatRatingsWeights tankDps = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinProtDps), false, true, false);
-        StatRatingsWeights retRet = new StatRatingsWeights(StandardModels.specToWeightFile(SpecType.PaladinRet));
 
         EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDpsFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtDps, true), null, PrintRecorder.withAutoOutput());
-//        EquipOptionsMap itemsTank = ItemLoadUtil.readAndLoad(DataLocation.gearProtDefenceFile, ReforgeRules.tank(), new DefaultEnchants(SpecType.PaladinProtMitigation, true), null, PrintRecorder.withAutoOutput());
 
         double rateMitigation = determineRatingMultipliersOne(tankMitigation, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtMitigation);
         double rateTankDps = determineRatingMultipliersOne(tankDps, itemsTank, StatRequirementsHitExpertise.protFlexibleParry(), SpecType.PaladinProtDps);
@@ -650,7 +646,7 @@ public class Tasks {
         OutputText.printf("TANK_DPS   %,d\n", (long) rateTankDps);
         OutputText.println();
 
-        for (int dmgPercentMit = 15; dmgPercentMit <= 45; dmgPercentMit += 5) {
+        for (int dmgPercentMit = 0; dmgPercentMit <= 50; dmgPercentMit += 5) {
             int dmgPercentDps = 100 - dmgPercentMit;
             OutputText.printf("damageProtModel %d%% mitigation, %d%% dps\n", dmgPercentMit , dmgPercentDps);
             long dmgMultiplyA = Math.round(targetCombined * (dmgPercentMit / 100.0) / rateMitigation * 10);
@@ -715,7 +711,7 @@ public class Tasks {
             FullItemSet resultSet = result.getFinalResultSet().orElseThrow();
             resultSet.outputSetDetailed(model);
             AsWowSimJson.writeFullToOut(resultSet.items(), model);
-            SimInputModify.makeWithGear(specType, resultSet.items(), "PERCENT-" + percentMiti);
+            SimInputModify.makeWithGear(specType, resultSet.items(), "PERCENT-" + percentMiti, SimInputModify.SimSpeed.Medium);
         }
 
         // TODO bonus set forced variants
@@ -870,21 +866,56 @@ public class Tasks {
 
     public static void generateRatingDataFromSims() {
         try {
-            SpecType spec = SpecType.PaladinProtMitigation;
-//            SpecType spec = SpecType.PaladinProtDps;
-            SimCliExecute.run(SimInputModify.basic(spec), SimInputModify.BASELINE_FILE);
-            SimOutputReader.readInput(SimInputModify.BASELINE_FILE);
+            SimInputModify.SimSpeed speed = SimInputModify.SimSpeed.SlowAccurate;
+//            SpecType spec = SpecType.PaladinProtMitigation;
+            SpecType spec = SpecType.PaladinProtDps;
 
-            int add = 800;
+            SimCliExecute.run(SimInputModify.basic(spec, speed), SimInputModify.BASELINE_FILE);
+            SimOutputReader.readInput(SimInputModify.BASELINE_FILE, true);
+
+            int add = 600;
             StatType[] statsCheck = new StatType[]{Primary, Stam, Crit, Haste, Expertise, Mastery, Dodge, Parry};
             for (StatType stat : statsCheck) {
-                Path inFile = SimInputModify.makeWithBonusStat(spec, stat, add);
+                Path inFile = SimInputModify.makeWithBonusStat(spec, stat, add, speed);
                 Path outFile = SimInputModify.outName(stat);
 
                 SimCliExecute.run(inFile, outFile);
 
                 System.out.println(stat);
-                SimOutputReader.readInput(outFile);
+                SimOutputReader.readInput(outFile, false);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static void generateRatingBreakpointFromSims() {
+        try {
+            SpecType spec = SpecType.PaladinProtMitigation;
+//            SpecType spec = SpecType.PaladinProtDps;
+            int knownFileHaste = 13578;
+//            int knownFileHaste = 12800;
+            SimInputModify.SimSpeed speed = SimInputModify.SimSpeed.QuickDirty;
+
+            Map<Integer, SimOutputReader.SimResultStats> results = new TreeMap<>();
+//            for (int haste = 2000; haste <= 24000; haste += 200) {
+            for (int haste = 11000; haste <= 16000; haste += 50) { // dps fine
+//            for (int haste = 10000; haste <= 15000; haste += 50) { // miti fine
+                OutputText.println("HASTE");
+                OutputText.printf("%d\n", haste);
+
+                Path inFile = SimInputModify.makeWithBonusStat(spec, Haste, haste - knownFileHaste, speed);
+                Path outFile = SimInputModify.outName("haste" + haste);
+
+                SimCliExecute.run(inFile, outFile);
+
+                SimOutputReader.SimResultStats stats = SimOutputReader.readInput(outFile, false);
+                results.put(haste, stats);
+            }
+
+            OutputText.println(results.keySet().stream().map(Object::toString).collect(Collectors.joining(",")));
+            for (ToDoubleFunction<SimOutputReader.SimResultStats> stat : SimOutputReader.SimResultStats.eachStat()) {
+                OutputText.println(results.values().stream().map(s -> String.valueOf(stat.applyAsDouble(s))).collect(Collectors.joining(",")));
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -921,7 +952,7 @@ public class Tasks {
         } else {
             Path outFile = inFile.resolveSibling(inFile.getFileName() + ".out");
             SimCliExecute.run(inFile, outFile);
-            SimOutputReader.SimResultStats result = SimOutputReader.readInput(outFile);
+            SimOutputReader.SimResultStats result = SimOutputReader.readInput(outFile, true);
             duplicateInputCache.put(hash, result);
             return Tuple.create(inFile, result);
         }

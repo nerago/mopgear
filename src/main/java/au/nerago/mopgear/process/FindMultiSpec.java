@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static au.nerago.mopgear.ItemLoadUtil.loadItemsFromBagsFile;
-import static au.nerago.mopgear.results.JobInput.RunSizeCategory.*;
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unused"})
 public class FindMultiSpec {
@@ -250,7 +249,7 @@ public class FindMultiSpec {
         }
 
         private void baselineOptimal(SpecDetails spec) {
-            JobInput job = new JobInput(Medium, individualRunSizeMultiply, spec.phasedAcceptable);
+            JobInput job = new JobInput(JobInput.RunSizeCategory.Medium, individualRunSizeMultiply, spec.phasedAcceptable);
             job.model = spec.model;
             job.setItemOptions(spec.itemOptions);
             job.hackAllow = hackAllow;
@@ -355,7 +354,7 @@ public class FindMultiSpec {
         private JobOutput subSolvePart(EquipOptionsMap fullItemMap, ModelCombined model, boolean phasedAcceptable, Map<ItemRef, FullItemData> chosenMap) {
             EquipOptionsMap submitMap = buildJobWithSpecifiedItemsFixed(chosenMap, fullItemMap.shallowClone());
 
-            JobInput job = new JobInput(SubSolveItem, individualRunSizeMultiply, phasedAcceptable);
+            JobInput job = new JobInput(JobInput.RunSizeCategory.SubSolveItem, individualRunSizeMultiply, phasedAcceptable);
 //        job.printRecorder.outputImmediate = true;
             job.model = model;
             job.setItemOptions(submitMap);
@@ -606,11 +605,11 @@ public class FindMultiSpec {
                     double draftSpecRating = draftJobOutput(spec, draftJob);
 
                     EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-                    JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, Final);
+                    JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, JobInput.RunSizeCategory.Final);
                     double revisedSpecRating = processRevisedSet("REVISED", revisedJob, spec, draftSet, draftSpecRating, false);
 
                     EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
-                    JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, Final);
+                    JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, JobInput.RunSizeCategory.Final);
                     double reenchantSpecRating = processRevisedSet("RE-ENCHANT", reenchantJob, spec, draftSet, draftSpecRating, false);
 
                     double specRating = Math.max(draftSpecRating, Math.max(revisedSpecRating, reenchantSpecRating));
@@ -708,7 +707,7 @@ public class FindMultiSpec {
             outputOptions.add(draftJob);
 
             EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, Final);
+            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, JobInput.RunSizeCategory.Medium);
             EquipMap revisedItems = null;
             if (revisedJob.resultSet.isPresent()) {
                 revisedItems = revisedJob.getFinalResultSet().orElseThrow().items();
@@ -723,7 +722,7 @@ public class FindMultiSpec {
             }
 
             EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, resultSets);
-            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, Final);
+            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, JobInput.RunSizeCategory.Medium);
             if (reenchantJob.resultSet.isPresent()) {
                 EquipMap reenchantItems = reenchantJob.getFinalResultSet().orElseThrow().items();
                 if (draftSet.items().equalsTypedSwappable(reenchantItems) || (revisedItems != null && revisedItems.equalsTypedSwappable(reenchantItems))) {
@@ -786,7 +785,7 @@ public class FindMultiSpec {
             spec.recordSolutionSeen(draftSet);
 
             EquipOptionsMap revisedItemMap = buildJobWithSpecifiedItemsFixed(commonFinal, spec.itemOptions.deepClone());
-            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, SubSolveItem);
+            JobOutput revisedJob = solveRevisedSet(revisedItemMap, spec, spec.phasedAcceptable, JobInput.RunSizeCategory.SubSolveItem);
             if (revisedJob.resultSet.isPresent()) {
                 FullItemSet revisedSet = revisedJob.getFinalResultSet().orElseThrow();
                 if (!draftSet.items().equalsTypedSwappable(revisedSet.items())) {
@@ -795,7 +794,7 @@ public class FindMultiSpec {
             }
 
             EquipOptionsMap reenchantItemOptions = makeReenchantOptions(spec.itemOptions.deepClone(), spec.model, commonFinal, allResultSets);
-            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, SubSolveItem);
+            JobOutput reenchantJob = solveRevisedSet(reenchantItemOptions, spec, true, JobInput.RunSizeCategory.SubSolveItem);
             if (reenchantJob.resultSet.isPresent()) {
                 FullItemSet reenchantSet = reenchantJob.getFinalResultSet().orElseThrow();
                 if (!draftSet.items().equalsTypedSwappable(reenchantSet.items())) {

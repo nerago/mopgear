@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -24,19 +23,51 @@ public class BigStreamUtil {
             return new StreamNeedClose<>(inputStream);
 
         Timer timer = new Timer(true);
-        ProgressTask<T> task = new ProgressTask<>(estimate, startTime);
+        ProgressCounterTask<T> task = new ProgressCounterTask<>(estimate, startTime);
         timer.scheduleAtFixedRate(task, TIME_RATE, TIME_RATE);
         return new StreamNeedClose<>(task.monitorStream(inputStream));
     }
 
-    private static class ProgressTask<T> extends TimerTask {
+    public static Runnable watchProgress(long estimate, Instant startTime, List<LongHolder> counters) {
+        if (startTime != null) {
+            Timer timer = new Timer(true);
+            ProgressWatchTask task = new ProgressWatchTask(estimate, startTime, counters);
+            timer.scheduleAtFixedRate(task, TIME_RATE, TIME_RATE);
+            return timer::cancel;
+        } else {
+            return () -> {};
+        }
+    }
+
+    private static class ProgressWatchTask extends TimerTask {
+        private final double percentMultiply;
+        private final Instant startTime;
+        private final List<LongHolder> counters;
+
+        public ProgressWatchTask(long estimate, Instant startTime, List<LongHolder> counters) {
+            this.percentMultiply = 100.0 / estimate;
+            this.startTime = startTime;
+            this.counters = counters;
+        }
+
+        @Override
+        public void run() {
+            long curr = 0;
+            for (LongHolder hold : counters) {
+                curr += hold.value;
+            }
+            reportProgress(curr, percentMultiply, startTime);
+        }
+    }
+
+    private static class ProgressCounterTask<T> extends TimerTask {
 //        private final ThreadCounters counters = new ThreadCounters();
 //        private final GathererPeekAndCount<T> gatherCount = new GathererPeekAndCount<>();
         private final AtomicLong atomicCount = new AtomicLong();
         private final double percentMultiply;
         private final Instant startTime;
 
-        public ProgressTask(double estimate, Instant startTime) {
+        public ProgressCounterTask(double estimate, Instant startTime) {
             this.percentMultiply = 100.0 / estimate;
             this.startTime = startTime;
         }
@@ -52,8 +83,8 @@ public class BigStreamUtil {
         public Stream<T> monitorStream(Stream<T> inputStream) {
             // TODO some kinda accumulate op passing state?
 
-            Gatherer.Integrator<Void, T, T> integrator = (_, element, downstream) -> downstream.push(element);
-            Gatherer<T, Void, T> gather2 = Gatherer.of(integrator);
+//            Gatherer.Integrator<Void, T, T> integrator = (_, element, downstream) -> downstream.push(element);
+//            Gatherer<T, Void, T> gather2 = Gatherer.of(integrator);
 
 //            Gatherers.fold()
 

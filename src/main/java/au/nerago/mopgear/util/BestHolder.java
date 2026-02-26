@@ -1,5 +1,7 @@
 package au.nerago.mopgear.util;
 
+import java.util.Optional;
+
 public class BestHolder<T> {
     private T bestObject;
     private long bestRating;
@@ -18,6 +20,10 @@ public class BestHolder<T> {
         return bestObject;
     }
 
+    public Optional<T> getOptional() {
+        return Optional.ofNullable(bestObject);
+    }
+
     public T orElseThrow() {
         if (bestObject == null)
             throw new IllegalStateException("missing best");
@@ -34,5 +40,9 @@ public class BestHolder<T> {
             bestObject = object;
             bestRating = rating;
         }
+    }
+
+    public void combine(BestHolder<T> other) {
+        add(other.bestObject, other.bestRating);
     }
 }

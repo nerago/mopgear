@@ -10,7 +10,6 @@ import au.nerago.mopgear.results.AsWowSimJson;
 import au.nerago.mopgear.results.OutputText;
 import au.nerago.mopgear.util.BigStreamUtil;
 import au.nerago.mopgear.util.StreamNeedClose;
-import au.nerago.mopgear.util.Tuple;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -91,10 +90,10 @@ public class FindMultiSpecSim {
 
         public void runSimulate() {
             UUID taskId = UUID.randomUUID();
-            Path inputFile = SimInputModify.makeWithGear(spec, equip, taskId.toString());
+            Path inputFile = SimInputModify.makeWithGear(spec, equip, taskId.toString(), SimInputModify.SimSpeed.SlowAccurate);
             Path outputFile = inputFile.resolveSibling(inputFile.getFileName() + ".out");
             SimCliExecute.run(inputFile, outputFile);
-            resultStats = SimOutputReader.readInput(outputFile);
+            resultStats = SimOutputReader.readInput(outputFile, true);
         }
 
         @Override

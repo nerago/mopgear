@@ -56,8 +56,7 @@ public class Main {
     private void launchpad(Instant startTime) {
 //        generateRatingDataFromSims();
 //        variableRatingProt(startTime);
-//        runPrebuiltSimFiles();
-//        determineRatingMultipliers();
+//        determineRatingMultipliersMitigation();
 //        determineRatingMultipliersDps();
 
 //        WowSimDB.discoverSetBonuses();
@@ -68,13 +67,14 @@ public class Main {
 
 //        everyoneBis();
 
-        TaskMulti.paladinMultiSpecSolve();
+//        TaskMulti.paladinMultiSpecSolve();
 //        druidMultiSpecSolve();
 
 //        allUpgradesProt(startTime);
+//        generateRatingBreakpointFromSims();
 
 //        reforgeRet(startTime);
-//            reforgeProt(startTime);
+            reforgeProt(startTime);
 
 //            reforgeBoom(startTime);
 //        reforgeTree(startTime);
@@ -206,8 +206,8 @@ public class Main {
         ModelCombined model = StandardModels.pallyProtMitigationModel();
         Path file = DataLocation.gearProtDefenceFile;
 
-//        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
-        Map<Integer, List<ReforgeRecipe>> commonItems = null;
+        Map<Integer, List<ReforgeRecipe>> commonItems = commonFixedItems();
+//        Map<Integer, List<ReforgeRecipe>> commonItems = null;
 
         EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, model, commonItems, PrintRecorder.withAutoOutput());
 
@@ -477,12 +477,12 @@ public class Main {
     }
 
     private void variableRatingProt(Instant startTime) {
-        SpecType specType = SpecType.PaladinProtDps;
-        Path file = DataLocation.gearProtDpsFile;
-        EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, StandardModels.pallyProtDpsModel(), null, PrintRecorder.withAutoOutput());
-//        SpecType specType = SpecType.PaladinProtMitigation;
-//        Path file = DataLocation.gearProtDefenceFile;
-//        EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, StandardModels.pallyProtMitigationModel(), null, PrintRecorder.withAutoOutput());
+//        SpecType specType = SpecType.PaladinProtDps;
+//        Path file = DataLocation.gearProtDpsFile;
+//        EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, StandardModels.pallyProtDpsModel(), null, PrintRecorder.withAutoOutput());
+        SpecType specType = SpecType.PaladinProtMitigation;
+        Path file = DataLocation.gearProtDefenceFile;
+        EquipOptionsMap items = ItemLoadUtil.readAndLoad(file, StandardModels.pallyProtMitigationModel(), null, PrintRecorder.withAutoOutput());
 
         int[] extraItems = new int[]{
                 85320, // prot tier14 legs normal w/dodge+mastery
@@ -552,6 +552,8 @@ public class Main {
                 .filter(ei -> ItemCache.instance.get(ei.itemId(), 0).slot() != SlotItem.Ring)
                 .toList();
         optimalForVariedRating(items, extraItemsAll, specType);
+
+        runPrebuiltSimFiles();
     }
 
     private void reforgeBoom(Instant startTime) {
@@ -628,17 +630,20 @@ public class Main {
 
     private static Map<Integer, List<ReforgeRecipe>> commonFixedItems() {
         Map<Integer, List<ReforgeRecipe>> map = new HashMap<>();
-        // 18/02/2026
+        // 25/02/2026
         map.put(86979, List.of(new ReforgeRecipe(null, null))); // Foot Impaling Treads
         map.put(96182, List.of(new ReforgeRecipe(Parry, Haste))); // Offhand Ultimate Protection of the Emperor
-        map.put(95140, List.of(new ReforgeRecipe(Crit, Hit))); // Ring Band of the Shado-Pan Assault
-        map.put(95513, List.of(new ReforgeRecipe(Hit, Expertise))); // Ring Band of the Scaled Tyrant
+        map.put(95535, List.of(new ReforgeRecipe(Crit, Hit))); // Leg Legplates of the Lightning Throne
+        map.put(95142, List.of(new ReforgeRecipe(null, null))); // Neck Striker's Battletags
+        map.put(95140, List.of(new ReforgeRecipe(Crit, Expertise))); // Ring Band of the Shado-Pan Assault
         map.put(96468, List.of(new ReforgeRecipe(Hit, Haste))); // Chest Talonrender Chestplate
+        map.put(95513, List.of(new ReforgeRecipe(Hit, Expertise))); // Ring Band of the Scaled Tyrant
+        map.put(96398, List.of(new ReforgeRecipe(null, null))); // Trinket Spark of Zandalar
         map.put(94726, List.of(new ReforgeRecipe(Mastery, Crit))); // Belt Cloudbreaker Greatbelt
         map.put(94820, List.of(new ReforgeRecipe(Crit, Haste))); // Wrist Caustic Spike Bracers
         map.put(94942, List.of(new ReforgeRecipe(Expertise, Hit))); // Back Hydra-Scale Bloodcloak
         map.put(96376, List.of(new ReforgeRecipe(Hit, Crit))); // Weapon1H Worldbreaker's Stormscythe
-        map.put(96533, List.of(new ReforgeRecipe(null, null))); // Hand Rein-Binder's Fists
+        map.put(96533, List.of(new ReforgeRecipe(Haste, Expertise))); // Hand Rein-Binder's Fists
         return map;
     }
 
